@@ -2,7 +2,7 @@ import { Navigate, Outlet } from "react-router";
 import { useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/user.service";
 import { useEffect, useState } from "react";
-import { Loader } from "../ui";
+import { Loader } from "@mantine/core";
 
 interface ProtectedRouteProps {
   /**
