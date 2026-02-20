@@ -1,0 +1,163 @@
+:root {
+  --btn-height: 56px;
+  --scoop: 24px;
+  --panel-width: 127px;
+  --rail-width: 89px;
+}
+
+/* ============================================
+   Travelling pill
+   White bg + border-radius set here because
+   they're intrinsic to the pill's visual identity
+   and the ::before/::after scoops depend on them.
+   ============================================ */
+
+.activePill {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 85%;
+  height: var(--btn-height);
+  background-color: #fff;
+  border-radius: var(--scoop) 0 0 var(--scoop);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition:
+    transform 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 150ms ease;
+}
+
+.activePill[data-visible] {
+  opacity: 1;
+}
+
+.activePill::before {
+  content: "";
+  position: absolute;
+  top: calc(-1 * var(--scoop));
+  right: 0;
+  width: var(--scoop);
+  height: var(--scoop);
+  background: transparent;
+  border-radius: 50%;
+  box-shadow: 10px 10px 0 #fff;
+  pointer-events: none;
+}
+
+.activePill::after {
+  content: "";
+  position: absolute;
+  bottom: calc(-1 * var(--scoop));
+  right: 0;
+  width: var(--scoop);
+  height: var(--scoop);
+  background: transparent;
+  border-radius: 50%;
+  box-shadow: 10px -10px 0 #fff;
+  pointer-events: none;
+}
+
+/* ============================================
+   Icon rail
+   overflow:visible needed so scoops bleed out
+   past the rail boundary — can't set via prop
+   ============================================ */
+
+.iconRail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ============================================
+   Icon button
+   Only the cursor — everything else is inline
+   ============================================ */
+
+.iconBtn {
+  cursor: pointer;
+  background: transparent;
+}
+
+/* ============================================
+   Sub-item panel
+   Absolute stacking + slide transition +
+   gradient border (::before) — all CSS-only
+   ============================================ */
+
+.subPanel {
+  position: absolute;
+  top: 0;
+  left: var(--rail-width);
+  height: 100%;
+  width: var(--panel-width);
+  z-index: 1;
+  transform: translateX(calc(-1 * var(--panel-width)));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 240ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 180ms ease;
+}
+
+/* Gradient border: top + right + bottom, no left */
+.subPanel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    180deg,
+    var(--mantine-color-jltOrange-5) 0%,
+    var(--mantine-color-jltAccent-7) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.subPanel[data-visible] {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ============================================
+   Sub-panel inner content blocks
+   All mounted, only active one is visible.
+   Absolute so they stack on top of each other.
+   ============================================ */
+
+.subPanelInner {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.subPanelInner[data-active] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ============================================
+   Sub-item button
+   hover color handled inline via Text c= prop
+   ============================================ */
+
+.subItem {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 6px;
+}
+
+.subItem:hover span {
+  color: var(--mantine-color-jltOrange-5) !important;
+}

@@ -4,15 +4,12 @@ import { GuestRoute } from "@/components/guards/GuestRoute";
 import { AppLayout } from "@/components/layouts/AppLayout";
 import { lazy } from "react";
 import NotFound from "./routes/NotFound";
-import { RoleGuard } from "@/components/guards/RoleGuard";
-import { ROLES } from "@/types/roles";
 import { Loader } from "@mantine/core";
-// const ToolsPage = lazy(() => import("@/features/dashboard/pages/ToolsPage"));
+
 const LoginPage = lazy(() => import("./routes/auth/LoginPage"));
 const DashboardPage = lazy(
   () => import("./routes/app/dashboard/DashboardPage"),
 );
-// const Quotations = lazy(() => import("./routes/app/qoutations/Quotations"));
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -43,31 +40,14 @@ export const router = createBrowserRouter([
             index: true,
             Component: DashboardPage,
           },
-          // {
-          //   path: "tools",
-          //   Component: ProtectedToolsPage,
-          // },
 
-          // Queries feature with nested routes (TODO)
-          // {
-          //   path: "quotations/new",
-          //   children: [
-          //     {
-          //       index: true,
-          //       Component: Quotations,
-          //     },
-          //   ],
-          // },
+          // Catch-all inside AppLayout — renders NotFound with sidebar visible
+          {
+            path: "*",
+            Component: NotFound,
+          },
         ],
       },
     ],
-  },
-
-  // ==========================================
-  // 404
-  // ==========================================
-  {
-    path: "*",
-    Component: NotFound,
   },
 ]);
