@@ -7,10 +7,12 @@ type Reassignprops = {
   selectedQuotation: any;
   reassignPersonels: any[];
   reassignSpecificDetails: any;
-  reassignStatus: string;
   setReassignStatus: (status: string) => void;
   reassignASId: number | null;
   setReassignASId: (id: number | null) => void;
+  setReassignAcceptModalOpen: (open: boolean) => void;
+  setReassignAS: (as: string) => void;
+  // onConfirm?: (status: string, asId: number) => void;
 };
 
 export default function ReassignModal({
@@ -19,12 +21,13 @@ export default function ReassignModal({
   selectedQuotation,
   reassignPersonels,
   reassignSpecificDetails,
-  reassignStatus,
   setReassignStatus,
   reassignASId,
   setReassignASId,
+  setReassignAcceptModalOpen,
+  setReassignAS,
+  // onConfirm,
 }: Reassignprops) {
-  
   const reassignOptions = reassignPersonels
     .map((person) => {
       const value = String(
@@ -47,7 +50,11 @@ export default function ReassignModal({
   return (
     <Modal
       opened={reassignModalOpen}
-      onClose={() => setReassignModalOpen(false)}
+      onClose={() => {
+        setReassignModalOpen(false);
+        setReassignASId(null);
+        setReassignAcceptModalOpen(false);
+      }}
       title="REASSIGNMENT REQUEST"
       centered
       size={600}
@@ -108,7 +115,7 @@ export default function ReassignModal({
         Additional Details
       </Text>
       <Text c="#1e3049" fz="1rem" lh={1.4} mb="1rem">
-         {reassignSpecificDetails?.additional_details ?? "-"}
+        {reassignSpecificDetails?.additional_details ?? "-"}
       </Text>
 
       <Select
@@ -117,8 +124,12 @@ export default function ReassignModal({
         radius="sm"
         placeholder="Select handler"
         data={reassignOptions}
-        // value={"hello"}
-        // onChange={setSelectedReassignAsId}
+        value={reassignASId !== null ? String(reassignASId) : null}
+        onChange={(val) => {
+          const selectedOption = reassignOptions.find((option) => option.value === val);
+          setReassignASId(val ? Number(val) : null);
+          setReassignAS(selectedOption?.label ?? "");
+        }}
         searchable
         nothingFoundMessage="No handlers found"
       />
@@ -138,10 +149,14 @@ export default function ReassignModal({
           }}
           tt="uppercase"
           onClick={() => {
-            // connect reassignment mutation here.
+            setReassignStatus("APPROVED");
             setReassignModalOpen(false);
+            setReassignAcceptModalOpen(true);
+            // if (reassignASId !== null) {
+            //   onConfirm?.(reassignStatus, reassignASId);
+            // }
           }}
-          // disabled={!selectedReassignAsId}
+          disabled={reassignASId === null}
         >
           Reassign
         </Button>

@@ -11,16 +11,17 @@ export {
   acceptQuotation,
   reassignQuotationEnums,
   reassignQuotationSpecificDetails,
-} from "./quotations/requested.api";
+  reassignQuotation,
+} from "./quotations-api/requested.api";
 
 export {
   fetchRespondedQuotations,
   type FetchRespondedQuotationsParams,
-} from "./quotations/responded.api";
+} from "./quotations-api/responded.api";
 
-export { fetchAcceptedQuotations } from "./quotations/accepted.api";
+export { fetchAcceptedQuotations } from "./quotations-api/accepted.api";
 
-export { fetchDiscardedQuotations } from "./quotations/discarded.api";
+export { fetchDiscardedQuotations } from "./quotations-api/discarded.api";
 
 export type ComposeTemplateType = "IMPORT" | "EXPORT" | "BUSINESS SOLUTION";
 

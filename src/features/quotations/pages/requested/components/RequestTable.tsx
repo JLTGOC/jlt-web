@@ -33,6 +33,7 @@ interface RequestTableProps {
   isLoading?: boolean;
   showingCount?: number;
   total?: number;
+  jobFilter?: "all" | "my-items";
   onRowClick?: (row: RequestedQuotationRow) => void;
   onAcceptClick?: (row: RequestedQuotationRow) => void;
   onReassignClick?: (row: RequestedQuotationRow) => void;
@@ -44,7 +45,6 @@ function toTitleCase(value: string) {
     .replace(/[_-]+/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
-
 
 function getServiceLabel(service: string) {
   return toTitleCase(service);
@@ -61,12 +61,15 @@ export function RequestTable({
   isLoading = false,
   showingCount,
   total,
+  jobFilter,
   onRowClick,
   onAcceptClick,
   onReassignClick,
 }: RequestTableProps) {
   const currentShowingCount = showingCount ?? rows.length;
   const currentTotal = total ?? rows.length;
+
+  console.log("khate", rows);
 
   return (
     <>
@@ -115,7 +118,7 @@ export function RequestTable({
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                   style={onRowClick ? { cursor: "pointer" } : undefined}
                 >
-                  <Table.Td style={{maxWidth: "150px"}}>
+                  <Table.Td style={{ maxWidth: "150px" }}>
                     <Stack gap={2}>
                       <Text c="#334155" fz="0.875rem" fw={700}>
                         {row.reference_number}
@@ -129,7 +132,7 @@ export function RequestTable({
                     </Stack>
                   </Table.Td>
 
-                  <Table.Td style={{maxWidth: "250px"}}>
+                  <Table.Td style={{ maxWidth: "250px" }}>
                     <Stack gap={2}>
                       <Text c="#2a4058" fz="0.875rem" fw={700}>
                         {getServiceLabel(row.service)}
@@ -187,54 +190,76 @@ export function RequestTable({
                     )}
                   </Table.Td>
 
-                  <Table.Td style={{maxWidth: "150px"}}>
+                  <Table.Td style={{ maxWidth: "150px" }}>
                     <Stack gap={4}>
-                      {row.assignment_status === "ASSIGNED" && (
+                      {jobFilter === "my-items" && (
+                        <>
+                          <Button
+                            styles={{ root: { background: "#FF8800" } }}
+                            leftSection={<RequestQuote width={20} />}
+                            onClick={(event) => {
+                              event.stopPropagation();
+
+                              if (row.assignment_status !== "ASSIGNED") {
+                                onReassignClick?.(row);
+                              }
+                            }}
+                          >
+                            Make Quotation
+                          </Button>
+                          {/* Michael */}
+                          <Button
+                            styles={{ root: { background: "#1D274E" } }}
+                            leftSection={<Autorenew width={20} />}
+                            onClick={(event) => {
+                              event.stopPropagation();
+
+                              row.assignment_status === "AVAILABLE"
+                                ? onAcceptClick?.(row)
+                                : onReassignClick?.(row);
+                            }}
+                          >
+                            Request Reassignment
+                          </Button>
+                        </>
+                      )}
+
+                      {row.assignment_status === "REASSIGNMENT REQUESTED" && (
+                        <>
                         <Button
-                          styles={{ root: { background: "#FF8800" } }}
-                          leftSection={<RequestQuote width={20} />}
+                          styles={{ root: { background: statusButtonBg(row) } }}
+                          leftSection={<Autorenew width={20} />}
                           onClick={(event) => {
                             event.stopPropagation();
-
-                            if (row.assignment_status !== "ASSIGNED") {
                             onReassignClick?.(row);
-                          }
                           }}
                         >
-                          Make Quotation
+                          Reassignment Request
+                        </Button>
+                        <Text c="#334155" fz="0.75rem" fw={400} lh={1.4}>
+                          Req. Reassignmet: 
+                        </Text>
+                        </>
+                      )}
+
+                      {row.assignment_status === "AVAILABLE" && (
+                        <Button
+                          styles={{ root: { background: statusButtonBg(row) } }}
+                          leftSection={<PanToolAlt width={20} />}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onAcceptClick?.(row)
+                          }}
+                        >
+                          Accept
                         </Button>
                       )}
 
-                      <Button
-                        styles={{ root: { background: statusButtonBg(row) } }}
-                        leftSection={
-                          row.assignment_status === "AVAILABLE" ? (
-                            <PanToolAlt width={20} />
-                          ) : row.assignment_status === "ASSIGNED" ? (
-                            <Autorenew width={20} />
-                          ) : (
-                            <CheckCircle width={20} />
-                          )
-                        }
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          
-                          row.assignment_status === "AVAILABLE" ?
-                            onAcceptClick?.(row) : onReassignClick?.(row)
-                          
-                          
-                        }}
-                      >
-                        {row.assignment_status === "AVAILABLE" ? "Accept" : "Reassignment Request"}
-                      </Button>
-
-                      
-                      {row.assignment_status === "AVAILABLE" && (
-                        <Text c="#16803d" fz="0.75rem" fw={700} lh={1.4}>
-                          {toTitleCase(row.assignment_status)}
+                      {row.assignment_status === "ASSIGNED" && (
+                        <Text c="#334155" fz="0.75rem" fw={400} lh={1.4}>
+                          Req. Accepted: 
                         </Text>
                       )}
-                      
                     </Stack>
                   </Table.Td>
 
