@@ -31,12 +31,12 @@ import {
 } from "@/features/quotations/hooks/useComposeReferenceData";
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 import { buildIssuedQuotationFormData } from "@/features/quotations/pages/compose/utils/issuedQuotationPayload";
+import { fetchQuotation } from "@/features/quotations/api/quotations.api";
 import {
   createIssuedQuotation,
   fetchIssuedQuotation,
-  fetchQuotation,
   updateIssuedQuotation,
-} from "@/features/quotations/api/quotations.api";
+} from "@/features/quotations/api/quotations-api/compose.api";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import { buildViewerStateFromIssuedQuotation } from "@/features/quotations/utils/issuedQuotationViewerState";
 import type {
@@ -649,7 +649,6 @@ export function ComposeQuotationPage() {
     <PageCard
       title={quotationTemplate.name}
       fullHeight
-      hideDivider
       bodyPx={0}
       bodyPy={0}
       action={

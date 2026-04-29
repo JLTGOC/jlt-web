@@ -41,6 +41,7 @@ interface RequestTableProps {
   onAcceptClick?: (row: RequestedQuotationRow) => void;
   onReassignClick?: (row: RequestedQuotationRow) => void;
   onReassignRequestClick?: (row: RequestedQuotationRow) => void;
+  onMakeQuotationClick?: (row: RequestedQuotationRow) => void;
 }
 
 function toTitleCase(value: string) {
@@ -73,6 +74,7 @@ export function RequestTable({
   onAcceptClick,
   onReassignClick,
   onReassignRequestClick,
+  onMakeQuotationClick,
 }: RequestTableProps) {
   const currentShowingCount = showingCount ?? rows.length;
   const currentTotal = total ?? rows.length;
@@ -206,14 +208,11 @@ export function RequestTable({
                             onClick={(event) => {
                               event.stopPropagation();
 
-                              if (row.assignment_status !== "ASSIGNED") {
-                                onReassignClick?.(row);
-                              }
+                              onMakeQuotationClick?.(row);
                             }}
                           >
                             Make Quotation
                           </Button>
-                          {/* Michael */}
                           <Button
                             styles={{ root: { background: "#1D274E" } }}
                             leftSection={<Autorenew width={20} />}

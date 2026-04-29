@@ -317,6 +317,16 @@ export function QuotationsRequested() {
                 onAcceptClick={openAcceptModal}
                 onReassignClick={openReassignModal}
                 onReassignRequestClick={openReassignRequestModal}
+                onMakeQuotationClick={(row: RequestedQuotationListItem) => {
+                  const quotationId = String(row.id);
+                  prefetchQuotationDetails(quotationId);
+                  navigate(
+                    quotationRoutes.compose({
+                      tab: "requested",
+                      quotationId,
+                    }),
+                  );
+                }}
                 onRowClick={(row: RequestedQuotationListItem) => {
                   const quotationId = String(row.id);
                   prefetchQuotationDetails(quotationId);

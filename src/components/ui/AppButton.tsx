@@ -5,7 +5,6 @@ import {
 } from "@mantine/core";
 import type { ComponentType } from "react";
 import classes from "./AppButton.module.css";
-import { ArrowRightAlt } from "@nine-thirty-five/material-symbols-react/outlined";
 
 type AppButtonVariant = "primary";
 
@@ -17,7 +16,12 @@ interface AppButtonProps extends UnstyledButtonProps {
   disabled?: boolean;
   children?: React.ReactNode;
   form?: string;
-  icon?: ComponentType<{ width?: number | string; height?: number | string }>;
+  icon?: ComponentType<
+    React.SVGProps<SVGSVGElement> & {
+      width?: number | string;
+      height?: number | string;
+    }
+  >;
 }
 
 export function AppButton({
@@ -29,7 +33,7 @@ export function AppButton({
   icon: BadgeIcon,
   ...rest
 }: AppButtonProps) {
-  const ResolvedIcon = BadgeIcon ?? ArrowRightAlt;
+  const ResolvedIcon = BadgeIcon;
 
   return (
     <UnstyledButton
@@ -37,6 +41,15 @@ export function AppButton({
       disabled={disabled || loading}
       {...rest}
     >
+      {/* icon before text */}
+      {ResolvedIcon && (
+        <ResolvedIcon
+          width="1.25rem"
+          height="1.25rem"
+          style={{ marginRight: "0.5rem" }}
+        />
+      )}
+
       <span className={classes.label}>{children}</span>
 
       {ResolvedIcon && (
