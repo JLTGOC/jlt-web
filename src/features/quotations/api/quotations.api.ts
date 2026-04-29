@@ -12,6 +12,7 @@ export {
   reassignQuotationEnums,
   reassignQuotationSpecificDetails,
   reassignQuotation,
+  reassignRequest
 } from "./quotations-api/requested.api";
 
 export {

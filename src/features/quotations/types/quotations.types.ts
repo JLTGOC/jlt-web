@@ -247,7 +247,7 @@ export type FetchRequestedQuotationsParams = {
 }
 
 export type ReassignEnumsResponse = {
-  reassign_reasons: string[];
+  reassignment_reasons: string[];
   account_specialists: { id: number; username: string, full_name: string }[];
   operations: {id: number; username: string, full_name: string }[];
 }
