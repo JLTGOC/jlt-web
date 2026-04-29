@@ -23,6 +23,7 @@ export function useQuotationTableSearch(
     debounceMs,
   );
   const [perPage, setPerPage] = useState(initialPerPage);
+  const [perPaginationPage, setPerPaginationPage] = useState(1);
   const searchQuery = immediateQuery ?? debouncedSearch.trim();
   const secondarySearchQuery =
     immediateSecondaryQuery ?? debouncedSecondarySearch.trim();
@@ -62,6 +63,8 @@ export function useQuotationTableSearch(
     secondarySearchQuery,
     perPage,
     setPerPage,
+    perPaginationPage,
+    setPerPaginationPage,
     handleSearch,
     handleSearchChange,
     handleSecondarySearch,
