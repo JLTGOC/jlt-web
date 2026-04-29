@@ -61,6 +61,10 @@ function statusButtonBg(row: RequestedQuotationRow) {
   return "#1D274E";
 }
 
+function rowBorderColor(row: RequestedQuotationRow) {
+  return row.assignment_status === "AVAILABLE" ? "#54B99B" : "#368DC4";
+}
+
 export function RequestTable({
   rows,
   isLoading = false,
@@ -124,7 +128,10 @@ export function RequestTable({
                 <Table.Tr
                   key={String(row.id)}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  style={onRowClick ? { cursor: "pointer" } : undefined}
+                  style={{
+                    cursor: onRowClick ? "pointer" : "default",
+                    boxShadow: `inset 6px 0 0 ${rowBorderColor(row)}`,
+                  }}
                 >
                   <Table.Td style={{ maxWidth: "150px" }}>
                     <Stack gap={2}>
