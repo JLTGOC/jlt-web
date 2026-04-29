@@ -4,12 +4,14 @@ type AcceptProps = {
     acceptModalOpen: boolean;
     setAcceptModalOpen: (open: boolean) => void;
     onConfirm: () => void;
+    onClose: () => void;
     isSubmitting?: boolean;
 }
 
 export default function AcceptModal({
   acceptModalOpen,
   setAcceptModalOpen,
+  onClose,
   onConfirm,
   isSubmitting = false,
 }: AcceptProps) {
@@ -17,7 +19,7 @@ export default function AcceptModal({
         <>
         <Modal
         opened={acceptModalOpen}
-        onClose={() => setAcceptModalOpen(false)}
+        onClose={onClose}
         title="ACCEPT REQUEST"
         centered
         size={600}
