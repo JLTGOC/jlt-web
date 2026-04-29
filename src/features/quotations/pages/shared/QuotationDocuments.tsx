@@ -25,7 +25,7 @@ export function QuotationDocuments() {
   const queryClient = useQueryClient();
   const quotationId = routeParams?.quotationId;
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const navigate = useNavigate(); // ✅ hook for back arrow
+  const navigate = useNavigate();
   const currentUser = useAuthStore((state) => state.user);
 
   const { data: quotation, isLoading } = useQuery({
@@ -115,7 +115,7 @@ export function QuotationDocuments() {
         </Text>
       </Group>
 
-      <PageCard title="" fullHeight hideDivider hideBackButton onBack={() => navigate(-1)}>
+      <PageCard title="" fullHeight hideBackButton onBack={() => navigate(-1)}>
         {isLoading ? (
           <Text size="0.8rem" c="dimmed">
             Loading documents...

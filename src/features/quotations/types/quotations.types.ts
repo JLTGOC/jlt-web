@@ -29,6 +29,14 @@ export interface QuotationsIndexResponse {
   pagination: QuotationsPagination;
 }
 
+export interface RespondedQuotationLogisticsService {
+  commodity: string;
+  service_type: string;
+  transport_mode: string;
+  origin: string;
+  destination: string;
+}
+
 export interface RespondedQuotationListItem {
   id: string;
   reference_number: string;
@@ -40,11 +48,14 @@ export interface RespondedQuotationListItem {
   as_full_name: string;
   assigned_at: string;
   service: string;
-  logistics_service: string;
+  logistics_service: RespondedQuotationLogisticsService | null;
+  client_type?: "NEW" | "OLD";
 }
 
 export interface RespondedQuotationsResponse {
+  counts: ClientCounts;
   quotations: RespondedQuotationListItem[];
+  my_quotations?: RespondedQuotationListItem[];
   pagination: QuotationsPagination;
 }
 
