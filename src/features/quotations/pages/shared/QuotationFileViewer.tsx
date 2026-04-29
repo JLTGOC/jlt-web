@@ -15,11 +15,11 @@ import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import { usePDFActions } from "@/features/quotations/pdf/usePDFActions";
 import { QuotationPreview } from "@/features/quotations/components/QuotationPreview";
 import { ScaledA4PreviewFrame } from "@/features/quotations/components/ScaledA4PreviewFrame";
+import { fetchQuotation } from "@/features/quotations/api/quotations.api";
 import {
   fetchIssuedQuotation,
-  fetchQuotation,
   fetchQuotationTemplate,
-} from "@/features/quotations/api/quotations.api";
+} from "@/features/quotations/api/quotations-api/compose.api";
 import { buildViewerStateFromIssuedQuotation } from "@/features/quotations/utils/issuedQuotationViewerState";
 import { mapQuotationTemplateDetailToComposeTemplate } from "@/features/quotations/utils/quotationTemplateMapper";
 import classes from "./QuotationFileViewer.module.css";
@@ -213,9 +213,22 @@ export function QuotationFileViewer() {
   return (
     <Box className={classes.root}>
       <Box className={classes.topBar}>
-        <ActionIcon variant="subtle" onClick={() => navigate(-1)}>
-          <ArrowBack width="1.25rem" height="1.25rem" />
-        </ActionIcon>
+        <Box>
+          <Group gap="xs" align="center">
+            <ActionIcon variant="subtle" onClick={() => navigate(-1)}>
+              <ArrowBack width="1.25rem" height="1.25rem" />
+            </ActionIcon>
+            <Box>
+              <Text fw={700} c="jltBlue">
+                {quotation?.reference_number ??
+                  viewerState.quotation.reference_number}
+              </Text>
+              <Text size="sm" c="jltBlue">
+                Quoted by: {issuedQuotation?.issued_by ?? "-"}
+              </Text>
+            </Box>
+          </Group>
+        </Box>
 
         <Group gap="sm">
           <ActionIcon

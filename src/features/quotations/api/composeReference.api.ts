@@ -7,7 +7,7 @@ import {
   fetchStandardTemplate,
   fetchStandardTemplates,
   type ComposeTemplateType,
-} from "@/features/quotations/api/quotations.api";
+} from "@/features/quotations/api/quotations-api/compose.api";
 import type {
   ClientInformationValue,
   GlobalBillingSettings,

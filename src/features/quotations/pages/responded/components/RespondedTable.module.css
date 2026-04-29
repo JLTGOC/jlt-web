@@ -1,0 +1,13 @@
+/* filepath: src/features/quotations/pages/responded/components/RespondedTable.module.css */
+.menuActionIcon {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.menuActionIcon:hover {
+  background-color: #e0e0e0 !important;
+}
+
+.menuActionIcon:active {
+  background-color: #d0d0d0 !important;
+}

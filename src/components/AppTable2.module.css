@@ -1,0 +1,259 @@
+.wrapper {
+  border-radius: 12px;
+  padding: 14px 18px 18px;
+  border: 1px solid #e4e6ea;
+}
+
+.clientTabs {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e5ea;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  gap: 12px;
+}
+
+.clientTab {
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  color: #546070;
+  padding: 6px 8px;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.clientTabActive {
+  color: #273e55;
+  border-bottom-color: #ef8f27;
+}
+
+.clientCount {
+  margin-left: 8px;
+  color: #8a8f99;
+  font-weight: 600;
+}
+
+.dotNew,
+.dotOld {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.dotNew {
+  background: #5fbf9a;
+}
+
+.dotOld {
+  background: #3994cf;
+}
+
+.filtersPanel {
+  background: #ffffff;
+  border: 1px solid #e2e5ea;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.searchInput {
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+
+.searchButton,
+.dateButton,
+.resetButton {
+  height: 36px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.searchButton,
+.dateButton,
+.resetButton {
+  background: #5a6d84;
+  color: #ffffff;
+  border: 0;
+  padding: 0 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resetButton {
+  background: #4f657d;
+  min-width: 80px;
+}
+
+.selectInput {
+  min-width: 160px;
+}
+
+.entryRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  color: #7a808a;
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+.entrySelect {
+  width: 68px;
+}
+
+.tableShell {
+  margin-top: 12px;
+  border: 1px solid #d7dce3;
+}
+
+.headerRow {
+  background: #17324f;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cellRequest {
+  min-width: 260px;
+}
+
+.cellDetails {
+  min-width: 360px;
+}
+
+.cellStatus {
+  min-width: 290px;
+}
+
+.cellActions {
+  width: 44px;
+  text-align: center;
+}
+
+.requestCode {
+  color: #334155;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.subText {
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.detailTitle {
+  color: #2a4058;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.routeLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.statusTag {
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  height: 28px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+
+.statusReassign {
+  background: #1d2859;
+}
+
+.statusAccepted {
+  background: linear-gradient(90deg, #3f83f8 0%, #2c6ddf 100%);
+}
+
+.statusOpen {
+  background: #0f8b2f;
+}
+
+.statusOwner {
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.statusNote {
+  color: #16803d;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.rowTintA {
+  background: #f8fafc;
+  border-left: 3px solid #b84444;
+}
+
+.rowTintB {
+  background: #f3f4f6;
+  border-left: 3px solid #d4dae2;
+}
+
+.rowTintC {
+  background: #ffffff;
+  border-left: 3px solid #d4dae2;
+}
+
+.footer {
+  margin-top: 10px;
+  color: #8a8f99;
+  font-size: 13px;
+}
+
+.tableShell table {
+  width: 100%;
+}
+
+.tableShell tbody tr:hover {
+  background: #f8fafc;
+}
+
+@media (max-width: 900px) {
+  .filters {
+    grid-template-columns: 1fr 48px;
+  }
+
+  .dateButton,
+  .resetButton,
+  .selectInput {
+    grid-column: span 2;
+  }
+
+  .entryRow {
+    flex-wrap: wrap;
+  }
+
+}

@@ -6,10 +6,8 @@ import { TemplateSelector } from "@/features/quotations/components/TemplateSelec
 import { ComposeStepLoader } from "@/features/quotations/pages/compose/components/ComposeStepLoader";
 import { useComposeQuotationTemplates } from "@/features/quotations/hooks/useComposeReferenceData";
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
-import {
-  fetchQuotation,
-  type ComposeTemplateType,
-} from "@/features/quotations/api/quotations.api";
+import { fetchQuotation } from "@/features/quotations/api/quotations.api";
+import type { ComposeTemplateType } from "@/features/quotations/api/quotations-api/compose.api";
 
 function resolveComposeTemplateType(
   serviceType?: string | null,

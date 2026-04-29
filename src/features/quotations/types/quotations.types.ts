@@ -17,6 +17,8 @@ export interface QuotationClientGroup {
 }
 
 export interface QuotationsPagination {
+  current_page: number;
+  total_pages: number;
   count: number;
   per_page: number;
   total: number;
@@ -25,6 +27,14 @@ export interface QuotationsPagination {
 export interface QuotationsIndexResponse {
   quotations: QuotationClientGroup[];
   pagination: QuotationsPagination;
+}
+
+export interface RespondedQuotationLogisticsService {
+  commodity: string;
+  service_type: string;
+  transport_mode: string;
+  origin: string;
+  destination: string;
 }
 
 export interface RespondedQuotationListItem {
@@ -38,11 +48,14 @@ export interface RespondedQuotationListItem {
   as_full_name: string;
   assigned_at: string;
   service: string;
-  logistics_service: string;
+  logistics_service: RespondedQuotationLogisticsService | null;
+  client_type?: "NEW" | "OLD";
 }
 
 export interface RespondedQuotationsResponse {
+  counts: ClientCounts;
   quotations: RespondedQuotationListItem[];
+  my_quotations?: RespondedQuotationListItem[];
   pagination: QuotationsPagination;
 }
 
@@ -67,9 +80,12 @@ export interface RequestedQuotationListItem {
   assignment_status: string | null;
   account_specialist: string | null;
   assigned_at: string | null;
+  requested_at: string | null;
   service: string;
   logistics_service: RequestedQuotationLogisticsService | null;
   regulatory_service: RequestedQuotationRegulatoryService | null;
+  reassignment_request_id: number | null;
+  reassignment_requested_at: number | null;
   conversation_id: string | null;
   prepared_by: string | null;
   issued_quotation_id: string | null;
@@ -132,14 +148,24 @@ export interface QuotationResource {
     service_level: string | null;
     message: string | null;
   } | null;
-  quotation_file:
-    | { id: number; file_name: string; file_url: string }[]
-    | "No file available.";
-  documents:
-    | { id: number; file_name: string; file_url: string }[]
-    | "No documents available.";
+  quotation_file: QuotationDocument[] | "No file available.";
+  documents: QuotationDocument[] | "No documents available.";
   remarks: string | null;
   conversation_id: string;
+  person_in_charge: string | null;
+  qtn_created_at: string | null;
+  qtn_accepted_at: string | null;
+  qtn_status: "requested" | "responded" | "accepted" | null;
+}
+
+// ─── Quotation document resource ───────────────────────────────────────────────────
+
+export interface QuotationDocument {
+  id: number;
+  file_name: string;
+  file_url: string;
+  uploadedBy: "JLTCB" | "Client";
+  uploadedDate?: string;
 }
 
 // ─── Quotation file resource ───────────────────────────────────────────────────
@@ -222,5 +248,36 @@ export const QUOTATION_STATUS = {
 export type QuotationStatus =
   (typeof QUOTATION_STATUS)[keyof typeof QUOTATION_STATUS];
 
+// ─── Status filter ─────────────────────────────────────────────────────────────
 
-  
+export type FetchRequestedQuotationsParams = {
+  search?: string;
+  as_search?: string;
+  client_type?: "NEW" | "OLD";
+  per_page?: number;
+  my_per_page?: number;
+  page?: number;
+  my_page?: number;
+  "filter[assignment_status]"?: string;
+  "filter[created_at]"?: string;
+  "filter[service]"?: string;
+}
+
+export type ReassignEnumsResponse = {
+  reassignment_reasons: string[];
+  account_specialists: { id: number; username: string, full_name: string }[];
+  operations: {id: number; username: string, full_name: string }[];
+}
+
+    export type ReassignQuotationSpecificDetailsResponse = {
+  id: number;
+  quotation_id: number;
+  job_order_id: number | null;
+  as_id: number;
+  ops_id: number | null;
+  reason: string;
+  additional_details: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+};

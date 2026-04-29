@@ -1,11 +1,19 @@
 import type { DetailRow } from "@/components/DetailGrid";
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
 
+interface DocumentRow {
+  name: string;
+  previewUrl?: string;
+  uploadedDate?: string; // formatted like "April 20, 2026"
+  uploadedBy?: string;   // formatted like "Finance 1"
+}
+
 interface QuotationDetailsRows {
-  client: DetailRow[];
   consignee: DetailRow[];
   shipment: DetailRow[];
-  inCharge: DetailRow[];
+  documentsJLTCB: DocumentRow[];
+  documentsClient: DocumentRow[];
+  history: DetailRow[];
 }
 
 function withFallback(value: string | null | undefined) {
@@ -24,72 +32,58 @@ export function buildQuotationDetailsRows(
   const volumeDimension = getVolumeDimension(quotation);
 
   return {
-    client: [
-      {
-        label: "Client Name",
-        value: withFallback(quotation.client?.full_name),
-      },
-      {
-        label: "Company Name",
-        value: withFallback(quotation.client?.company_name),
-      },
-      {
-        label: "Contact Number",
-        value: withFallback(quotation.client?.contact_number),
-      },
-      {
-        label: "Email",
-        value: withFallback(quotation.client?.email),
-      },
-    ],
     consignee: [
       { label: "Company Name", value: withFallback(quotation.company.name) },
-      {
-        label: "Company Address",
-        value: withFallback(quotation.company.address),
-      },
-      {
-        label: "Contact Person",
-        value: withFallback(quotation.company.contact_person),
-      },
-      {
-        label: "Contact Number",
-        value: withFallback(quotation.company.contact_number),
-      },
-      {
-        label: "Email Address",
-        value: withFallback(quotation.company.email),
-      },
+      { label: "Company Address", value: withFallback(quotation.company.address) },
+      { label: "Contact Person", value: withFallback(quotation.company.contact_person) },
+      { label: "Contact Number", value: withFallback(quotation.company.contact_number) },
+      { label: "Email Address", value: withFallback(quotation.company.email) },
     ],
     shipment: [
       { label: "Service Type", value: withFallback(quotation.service?.type) },
-      {
-        label: "Freight Transport Mode",
-        value: withFallback(quotation.service?.transport_mode),
-      },
-      {
-        label: "Service",
-        value: withFallback(quotation.service?.options?.join(", ")),
-      },
-      {
-        label: "Commodity",
-        value: withFallback(quotation.commodity?.commodity),
-      },
+      { label: "Freight Transport Mode", value: withFallback(quotation.service?.transport_mode) },
+      { label: "Service", value: withFallback(quotation.service?.options?.join(", ")) },
+      { label: "Commodity", value: withFallback(quotation.commodity?.commodity) },
       { label: "Volume (Dimension)", value: withFallback(volumeDimension) },
       { label: "Origin", value: withFallback(quotation.shipment?.origin) },
-      {
-        label: "Destination",
-        value: withFallback(quotation.shipment?.destination),
-      },
-      ...(quotation.remarks
-        ? [{ label: "Details", value: withFallback(quotation.remarks) }]
-        : []),
+      { label: "Destination", value: withFallback(quotation.shipment?.destination) },
+      ...(quotation.remarks ? [{ label: "Details", value: withFallback(quotation.remarks) }] : []),
     ],
-    inCharge: [
+
+    // ✅ Mock data with preview, date, and uploader
+    documentsJLTCB: [
       {
-        label: "Account Specialist",
-        value: withFallback(quotation.account_specialist),
+        name: "Invoice.pdf",
+        previewUrl: "/mock-previews/invoice.png",
+        uploadedDate: "April 20, 2026",
+        uploadedBy: "Finance 1",
       },
+      {
+        name: "PackingList.pdf",
+        previewUrl: "/mock-previews/packinglist.png",
+        uploadedDate: "April 21, 2026",
+        uploadedBy: "Operations",
+      },
+    ],
+    documentsClient: [
+      {
+        name: "PurchaseOrder.pdf",
+        previewUrl: "/mock-previews/purchaseorder.png",
+        uploadedDate: "April 22, 2026",
+        uploadedBy: "Client Admin",
+      },
+      {
+        name: "ClientID.pdf",
+        previewUrl: "/mock-previews/clientid.png",
+        uploadedDate: "April 23, 2026",
+        uploadedBy: "Client HR",
+      },
+    ],
+
+    history: [
+      { label: "2026-04-20 10:00", value: "Requested by John Doe" },
+      { label: "2026-04-21 14:30", value: "Assigned to Jane Smith" },
+      { label: "2026-04-22 09:00", value: "Accepted by Alice Johnson" },
     ],
   };
 }

@@ -1,0 +1,93 @@
+/* Existing header styles remain unchanged */
+.sectionHeader {
+  background-color: #D4DAE0;
+  color: #1D274E;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.35rem 0.75rem;
+  margin: 0;
+  line-height: 1.2;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.sectionHeader:hover,
+.sectionHeader:active,
+.sectionHeader[data-active="true"] {
+  background-color: #D4DAE0 !important;
+  color: #1D274E !important;
+}
+
+.accordionItem {
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  background: white;
+}
+
+.sectionHeaderIcon {
+  width: 30px;
+  height: 30px;
+  margin-right: 0.2rem;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.sectionHeaderContent {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ✅ Document row styling */
+.documentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Preview image */
+.documentPreview {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  margin-right: 0.75rem;
+  border-radius: 4px;
+}
+
+/* File info container */
+.documentInfo {
+  flex: 1;
+}
+
+/* File title */
+.documentTitle {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+/* Subtitle (date + uploader) */
+.documentMeta {
+  color: #888;
+  font-weight: 400;
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+/* Action button (download) */
+.documentAction {
+  background-color: #4E6174;
+  border-radius: 20%;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

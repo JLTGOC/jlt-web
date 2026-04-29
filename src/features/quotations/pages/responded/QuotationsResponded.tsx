@@ -1,162 +1,149 @@
-import { useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
-import {
-  Download,
-  RequestQuote,
-  Print,
-} from "@nine-thirty-five/material-symbols-react/outlined";
-import {
-  AppTable,
-  type AppTableAction,
-  type AppTableColumn,
-} from "@/components/AppTable";
+import { Box, Stack, Flex, Pagination } from "@mantine/core";
+
 import { PageCard } from "@/components/PageCard";
 import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
-import {
-  fetchQuotation,
-  fetchRespondedQuotations,
-} from "@/features/quotations/api/quotations.api";
-import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
-import type { RespondedQuotationListItem } from "@/features/quotations/types/quotations.types";
-import { respondedQueryKeys } from "@/features/quotations/pages/responded/utils/respondedQueryKeys";
+import { fetchRespondedQuotations } from "@/features/quotations/api/quotations.api";
+import { respondedQueryKeys } from "./utils/respondedQueryKeys";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
-import {
-  handlePrintProposalFile,
-  handleDownloadProposalFile,
-} from "@/features/quotations/utils/quotationFileActions";
 
-const COLUMNS: AppTableColumn<RespondedQuotationListItem>[] = [
-  {
-    key: "no",
-    label: "NO.",
-    width: "8%",
-    render: (_row, index) => String(index + 1).padStart(2, "0"),
-  },
-  {
-    key: "reference_number",
-    label: "REFERENCE",
-    width: "18%",
-    render: (row) => row.reference_number,
-  },
-  {
-    key: "date",
-    label: "DATE CREATED",
-    width: "14%",
-    render: (row) => row.date,
-  },
-  {
-    key: "client_name",
-    label: "CLIENT NAME",
-    width: "24%",
-    render: (row) => row.client_name,
-  },
-  {
-    key: "service_type",
-    label: "SERVICE TYPE",
-    width: "14%",
-    render: (row) => row.service_type ?? "—",
-  },
-  {
-    key: "prepared_by",
-    label: "PREPARED BY",
-    width: "18%",
-    render: (row) => row.prepared_by ?? "—",
-  },
-];
+import { RespondedFilterClient } from "./components/RespondedFilterClient";
+import { RespondedFilterTable } from "./components/RespondedFilterTable";
+import { RespondedTable } from "./components/RespondedTable";
 
 export function QuotationsResponded() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+
   const {
     search,
     searchQuery,
     perPage,
     setPerPage,
     handleSearch,
-    handleSearchChange,
   } = useQuotationTableSearch();
 
-  const { data, isLoading } = useQuery({
-    queryKey: respondedQueryKeys.list({ searchQuery, perPage }),
+  // Filter states
+  const [jobFilter, setJobFilter] = useState<"all" | "my-items">("all");
+  const [clientFilter, setClientFilter] = useState<"ALL" | "NEW" | "OLD">("ALL");
+  const [clientSearchValue, setClientSearchValue] = useState(search);
+  const [dateFilter, setDateFilter] = useState<string>("");
+  const [serviceFilter, setServiceFilter] = useState<string>("ALL SERVICES");
+  const [personInChargeFilter, setPersonInChargeFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: respondedQueryKeys.list({
+      searchQuery,
+      clientFilter,
+      serviceFilter,
+      dateFilter,
+      personInChargeFilter,
+      perPage,
+      jobFilter,
+      currentPage,
+    }),
     queryFn: () =>
       fetchRespondedQuotations({
         search: searchQuery || undefined,
+        "filter[service]": serviceFilter === "ALL SERVICES" ? undefined : serviceFilter,
+        "filter[created_at]": dateFilter || undefined,
+        "filter[as_full_name]": personInChargeFilter || undefined,
+        client_type: clientFilter === "ALL" ? undefined : clientFilter,
         perPage,
+        page: currentPage,
       }),
   });
 
   const rows = data?.quotations ?? [];
+  const myRows = data?.my_quotations ?? [];
   const total = data?.pagination.total ?? 0;
   const count = data?.pagination.count ?? rows.length;
 
-  const actions = useMemo<AppTableAction<RespondedQuotationListItem>[]>(
-    () => [
-      {
-        label: "Update Quotation",
-        icon: <RequestQuote width={16} height={16} />,
-        onClick: (row) => {
-          // Use issued_quotation_id if present, otherwise fallback to row.id
-          const issuedQuotationId = row.issued_quotation_id ?? row.id;
-          navigate(
-            quotationRoutes.compose({
-              tab: "responded",
-              clientId: undefined, // If you have clientId, pass it here
-              quotationId: row.id,
-            }),
-            { state: { editMode: true, issuedQuotationId } },
-          );
-        },
-      },
-      {
-        label: "Print",
-        icon: <Print width={16} height={16} />,
-        onClick: (row) => handlePrintProposalFile(row.id),
-      },
-      {
-        label: "Download",
-        icon: <Download width={16} height={16} />,
-        onClick: (row) => handleDownloadProposalFile(row.id),
-      },
-    ],
-    [navigate],
-  );
+  const handleReset = () => {
+    setClientSearchValue("");
+    setDateFilter("");
+    setServiceFilter("ALL SERVICES");
+    setPersonInChargeFilter("");
+    handleSearch("");
+    setCurrentPage(1);
+  };
 
-  const prefetchQuotationDetails = (quotationId: string) => {
-    void queryClient.prefetchQuery({
-      queryKey: quotationQueryKeys.quotationDetails(quotationId),
-      queryFn: () => fetchQuotation(quotationId),
-      staleTime: 30_000,
-    });
+  const handleJobSwitchChange = (value: "all" | "my-items") => {
+    setJobFilter(value);
+  };
+
+  const handleRowClick = (quotationId: string) => {
+    navigate(
+      quotationRoutes.details({
+        tab: "responded",
+        quotationId,
+      }),
+    );
   };
 
   return (
-    <PageCard title="LIST OF RESPONDED QUOTATION">
-      <AppTable
-        columns={COLUMNS}
-        data={isLoading ? [] : rows}
-        rowKey={(row) => row.id}
-        onRowHover={(row) => prefetchQuotationDetails(row.id)}
-        onRowClick={(row) => {
-          prefetchQuotationDetails(row.id);
-          navigate(
-            quotationRoutes.details({
-              tab: "responded",
-              quotationId: row.id,
-            }),
-          );
-        }}
-        actions={actions}
-        withEntryControls
-        perPage={perPage}
-        onPerPageChange={setPerPage}
-        total={total}
-        showingCount={count}
-        searchPlaceholder="SEARCH REFERENCE OR CLIENT"
-        searchValue={search}
-        onSearchChange={handleSearchChange}
-        onSearch={handleSearch}
-      />
+    <PageCard
+      title="LIST OF RESPONDED"
+      showJobSwitch
+      jobSwitchValue={jobFilter}
+      onJobSwitchChange={handleJobSwitchChange}
+    >
+      <Stack gap="xs">
+        <RespondedFilterClient
+          clientFilter={clientFilter}
+          setClientFilter={setClientFilter}
+          clientCounts={data?.counts}
+        />
+
+        <Box
+          p="xs"
+          style={{
+            borderRadius: "0.75rem",
+            border: "none",
+            backgroundColor: "transparent",
+          }}
+        >
+          <RespondedFilterTable
+            searchValue={clientSearchValue}
+            onSearchChange={setClientSearchValue}
+            onSearch={handleSearch}
+            dateValue={dateFilter}
+            onDateChange={(dateString) => setDateFilter(dateString)}
+            serviceValue={serviceFilter}
+            onServiceChange={setServiceFilter}
+            personInChargeValue={personInChargeFilter}
+            onPersonInChargeChange={setPersonInChargeFilter}
+            onReset={handleReset}
+            perPage={perPage}
+            setPerPage={setPerPage}
+            total={total}
+          />
+
+          <RespondedTable
+            rows={jobFilter === "all" ? rows : myRows}
+            isLoading={isLoading || isFetching}
+            total={total}
+            showingCount={count}
+            onRowClick={handleRowClick}
+          />
+        </Box>
+
+        <Flex justify="flex-end" align="center" mt="md">
+          {Math.ceil(total / perPage) > 1 && (
+            <Pagination
+              value={currentPage}
+              onChange={(page) => {
+                setCurrentPage(page);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              total={Math.ceil(total / perPage)}
+              size="sm"
+            />
+          )}
+        </Flex>
+      </Stack>
     </PageCard>
   );
 }

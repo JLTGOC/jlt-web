@@ -9,6 +9,7 @@ export const toolsQueryKeys = {
   standardTemplates: ["standard-templates"] as const,
   standardTemplate: (templateId?: string) =>
     ["standard-template", templateId] as const,
+  messageTemplates: ["message-templates"] as const,
   quotationFields: (serviceType: "LOGISTICS" | "REGULATORY") =>
     ["quotation-fields", serviceType] as const,
   subServices: (serviceType?: SubServiceTypeFilter) =>
