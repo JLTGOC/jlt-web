@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { AxiosError } from "axios";
 import { Button } from "@mantine/core";
 import { Add } from "@nine-thirty-five/material-symbols-react/rounded";
 import { notifications } from "@mantine/notifications";
@@ -7,18 +8,190 @@ import { AppTable, type AppTableColumn } from "@/components/AppTable";
 import { PageCard } from "@/components/PageCard";
 import {
   messageTemplatesService,
+  type CreateMessageTemplateRequest,
   type MessageTemplateResource,
+  type UpdateMessageTemplateRequest,
 } from "@/features/tools/api/message-templates.service";
+import { MessageTemplateModal } from "@/features/tools/components/MessageTemplateModal";
 import { toolsQueryKeys } from "@/features/tools/config/queryKeys";
+
+type MessageTemplateQueryData =
+  | { data?: MessageTemplateResource[] }
+  | undefined;
+
+type FormFieldErrors = Partial<Record<"template_name" | "message", string>>;
+
+interface ApiErrorBody {
+  message?: string;
+  errors?: Record<string, string[]>;
+}
+
+function parseApiErrors(error: unknown): {
+  message: string;
+  fieldErrors: FormFieldErrors;
+} {
+  const fallback = {
+    message: "Something went wrong. Please try again.",
+    fieldErrors: {},
+  };
+
+  if (!(error instanceof AxiosError)) {
+    return fallback;
+  }
+
+  const data = error.response?.data as ApiErrorBody | undefined;
+  const validationErrors = data?.errors ?? {};
+  const fieldErrors: FormFieldErrors = {
+    template_name: validationErrors.template_name?.[0],
+    message: validationErrors.message?.[0],
+  };
+
+  const errorMessage =
+    data?.message ||
+    fieldErrors.template_name ||
+    fieldErrors.message ||
+    fallback.message;
+
+  return {
+    message: errorMessage,
+    fieldErrors,
+  };
+}
 
 export default function MessagesPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [perPage, setPerPage] = useState(10);
+  const [modalOpened, setModalOpened] = useState(false);
+  const [editingTemplate, setEditingTemplate] =
+    useState<MessageTemplateResource | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FormFieldErrors>({});
 
   const { data: messageTemplatesResponse } = useQuery({
     queryKey: toolsQueryKeys.messageTemplates,
     queryFn: () => messageTemplatesService.getMessageTemplates(),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (payload: CreateMessageTemplateRequest) =>
+      messageTemplatesService.createMessageTemplate(payload),
+    onMutate: async (payload) => {
+      await queryClient.cancelQueries({
+        queryKey: toolsQueryKeys.messageTemplates,
+      });
+      const previous = queryClient.getQueryData<MessageTemplateQueryData>(
+        toolsQueryKeys.messageTemplates,
+      );
+
+      queryClient.setQueryData(
+        toolsQueryKeys.messageTemplates,
+        (current: MessageTemplateQueryData) => ({
+          ...current,
+          data: [
+            ...(current?.data ?? []),
+            {
+              id: Date.now(),
+              template_name: payload.template_name,
+              message: payload.message,
+            },
+          ],
+        }),
+      );
+
+      setFieldErrors({});
+      return { previous };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: toolsQueryKeys.messageTemplates,
+      });
+      notifications.show({
+        title: "Success",
+        message: "Message template created successfully",
+        color: "teal",
+      });
+      closeModal();
+    },
+    onError: (error, _payload, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(
+          toolsQueryKeys.messageTemplates,
+          context.previous,
+        );
+      }
+
+      const parsed = parseApiErrors(error);
+      setFieldErrors(parsed.fieldErrors);
+      notifications.show({
+        title: "Error",
+        message: parsed.message,
+        color: "red",
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: number;
+      payload: UpdateMessageTemplateRequest;
+    }) => messageTemplatesService.updateMessageTemplate(id, payload),
+    onMutate: async ({ id, payload }) => {
+      await queryClient.cancelQueries({
+        queryKey: toolsQueryKeys.messageTemplates,
+      });
+      const previous = queryClient.getQueryData<MessageTemplateQueryData>(
+        toolsQueryKeys.messageTemplates,
+      );
+
+      queryClient.setQueryData(
+        toolsQueryKeys.messageTemplates,
+        (current: MessageTemplateQueryData) => ({
+          ...current,
+          data: (current?.data ?? []).map((item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  template_name: payload.template_name ?? item.template_name,
+                  message: payload.message ?? item.message,
+                }
+              : item,
+          ),
+        }),
+      );
+
+      setFieldErrors({});
+      return { previous };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: toolsQueryKeys.messageTemplates,
+      });
+      notifications.show({
+        title: "Success",
+        message: "Message template updated successfully",
+        color: "teal",
+      });
+      closeModal();
+    },
+    onError: (error, _payload, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(
+          toolsQueryKeys.messageTemplates,
+          context.previous,
+        );
+      }
+
+      const parsed = parseApiErrors(error);
+      setFieldErrors(parsed.fieldErrors);
+      notifications.show({
+        title: "Error",
+        message: parsed.message,
+        color: "red",
+      });
+    },
   });
 
   const deleteMutation = useMutation({
@@ -98,6 +271,26 @@ export default function MessagesPage() {
     [],
   );
 
+  const isMutating = createMutation.isPending || updateMutation.isPending;
+
+  const closeModal = () => {
+    setModalOpened(false);
+    setEditingTemplate(null);
+    setFieldErrors({});
+  };
+
+  const openCreateModal = () => {
+    setEditingTemplate(null);
+    setFieldErrors({});
+    setModalOpened(true);
+  };
+
+  const openEditModal = (template: MessageTemplateResource) => {
+    setEditingTemplate(template);
+    setFieldErrors({});
+    setModalOpened(true);
+  };
+
   return (
     <PageCard
       title="List of Messages Template"
@@ -107,13 +300,8 @@ export default function MessagesPage() {
           leftSection={<Add />}
           color="jltAccent.6"
           h="2.4375rem"
-          onClick={() => {
-            notifications.show({
-              title: "Info",
-              message: "Create message template flow is not wired yet",
-              color: "blue",
-            });
-          }}
+          tt={"uppercase"}
+          onClick={openCreateModal}
         >
           Message
         </Button>
@@ -126,13 +314,7 @@ export default function MessagesPage() {
         rowKey={(row) => row.id}
         withNumbering={{ label: "No" }}
         withEdit={{
-          onClick: () => {
-            notifications.show({
-              title: "Info",
-              message: "Edit message template flow is not wired yet",
-              color: "blue",
-            });
-          },
+          onClick: openEditModal,
           tooltip: "Edit message template",
         }}
         withDelete={{
@@ -149,6 +331,31 @@ export default function MessagesPage() {
         searchPlaceholder="SEARCH MESSAGE TEMPLATE"
         searchValue={search}
         onSearchChange={setSearch}
+      />
+
+      <MessageTemplateModal
+        key={editingTemplate ? `edit-${editingTemplate.id}` : "create"}
+        opened={modalOpened}
+        mode={editingTemplate ? "edit" : "create"}
+        initialValues={
+          editingTemplate
+            ? {
+                template_name: editingTemplate.template_name,
+                message: editingTemplate.message,
+              }
+            : undefined
+        }
+        isSubmitting={isMutating}
+        fieldErrors={fieldErrors}
+        onClose={closeModal}
+        onSubmit={(values) => {
+          if (editingTemplate) {
+            updateMutation.mutate({ id: editingTemplate.id, payload: values });
+            return;
+          }
+
+          createMutation.mutate(values);
+        }}
       />
     </PageCard>
   );

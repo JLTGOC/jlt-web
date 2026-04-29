@@ -1,5 +1,6 @@
 import { Group } from "@mantine/core";
 import { AppButton } from "@/components/ui/AppButton";
+import { ArrowForward } from "@nine-thirty-five/material-symbols-react/rounded";
 
 interface ComposeStepActionsProps {
   step: number;
@@ -39,6 +40,7 @@ export function ComposeStepActions({
               form={quotationDetailsFormId}
               disabled={!isStep0Valid}
               w="10rem"
+              icon={ArrowForward}
             >
               Next
             </AppButton>
@@ -48,6 +50,7 @@ export function ComposeStepActions({
               type="submit"
               form={billingDetailsFormId}
               w="10rem"
+              icon={ArrowForward}
             >
               Next
             </AppButton>
@@ -66,6 +69,7 @@ export function ComposeStepActions({
             onClick={onStep2Next}
             disabled={!canProceedStep2}
             w="10rem"
+            icon={ArrowForward}
           >
             Next
           </AppButton>
@@ -78,6 +82,7 @@ export function ComposeStepActions({
             variant="primary"
             onClick={onOpenSendConfirm}
             disabled={isSending}
+            icon={ArrowForward}
           >
             Send
           </AppButton>

@@ -40,17 +40,6 @@
   min-width: fit;
 }
 
-/* ── Secondary ──────────────────────────────────────────────────────────────── */
-.secondary {
-  background-color: var(--mantine-color-jltAccent-7);
-  padding-inline: 1.25rem;
-  justify-content: center;
-}
-
-.secondary:hover {
-  background-color: var(--mantine-color-jltAccent-6);
-}
-
 /* ── Orange badge ───────────────────────────────────────────────────────────── */
 .orangeBadge {
   display: flex;

@@ -126,6 +126,8 @@ export const router = createBrowserRouter([
           { path: "shipments/:category", Component: Shipments },
           { path: "shipments", Component: Shipments },
 
+          // Shipment routes — most specific first
+
           // ── Tools routes ──
           { path: "tools/templates/config/billing", Component: Tools },
           { path: "tools/templates/config/details", Component: Tools },
