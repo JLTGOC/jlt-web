@@ -10,6 +10,7 @@ interface RequestedListKeyParams {
   dateFilter: string;
   perPage: number;
   jobFilter: "all" | "my-items";
+  perPaginationPage: number;
 }
 
 interface RequestedClientListKeyParams {
@@ -30,7 +31,8 @@ export const requestedQueryKeys = {
     statusFilter,
     dateFilter,
     perPage,
-    jobFilter
+    jobFilter,
+    perPaginationPage,
   }: RequestedListKeyParams) =>
     [
       ...requestedQueryKeys.requestedRoot(),
@@ -42,6 +44,7 @@ export const requestedQueryKeys = {
       dateFilter,
       perPage,
       jobFilter,
+      perPaginationPage
     ] as const,
   requestedClientList: ({
     clientId,

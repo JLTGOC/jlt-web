@@ -8,6 +8,7 @@ import {
 } from "@mantine/core";
 import shipmentLogo from "@/assets/logos/ShipmentLogo.png";
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
+import { getQtnStatus } from "@/features/quotations/utils/quotationStatus";
 
 interface ReferenceHeaderSecondaryProps {
   quotation: QuotationResource;
@@ -30,8 +31,9 @@ function formatDate(dateString: string | null): string {
 export function ReferenceHeaderSecondary({
   quotation,
 }: ReferenceHeaderSecondaryProps) {
-  const isAccepted = quotation.qtn_status === "accepted";
-  const isResponded = quotation.qtn_status === "responded";
+  const status = getQtnStatus(quotation);
+  const isAccepted = status === "accepted";
+  const isResponded = status === "responded";
 
   return (
     <Paper

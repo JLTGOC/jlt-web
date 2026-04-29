@@ -5,6 +5,8 @@ import {
   RequestQuote,
   ManageAccounts,
   FolderManaged,
+  ListAlt, 
+  Assignment
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import type { UserTabs } from "@/types/api";
 import type { NavItem } from "./AppSidebarUtils";
@@ -27,6 +29,23 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
+    id: "quotations",
+    icon: <RequestQuote width="2rem" height="2rem" />,
+    label: "Quotations",
+    subItems: [
+      { label: "Requests", path: "/quotations/requested" },
+      { label: "Responded", path: "/quotations/responded" },
+      { label: "Accepted", path: "/quotations/accepted" },
+      { label: "Discarded", path: "/quotations/discarded" },
+    ],
+  }, 
+  {
+    id: "job_orders",
+    icon: <Assignment width="2rem" height="2rem" />,
+    label: "Job Orders",
+    path: "/job-orders",
+  }, 
+  {
     id: "shipments",
     icon: <BoxIcon width="2rem" height="2rem" />,
     label: "Shipments",
@@ -47,17 +66,6 @@ export const NAV_ITEMS: NavItem[] = [
           { label: "Licenses", path: "/shipments/regulatory/licenses" },
         ],
       },
-    ],
-  },
-  {
-    id: "quotations",
-    icon: <RequestQuote width="2rem" height="2rem" />,
-    label: "Quotations",
-    subItems: [
-      { label: "Requests", path: "/quotations/requested" },
-      { label: "Responded", path: "/quotations/responded" },
-      { label: "Accepted", path: "/quotations/accepted" },
-      { label: "Discarded", path: "/quotations/discarded" },
     ],
   },
   {

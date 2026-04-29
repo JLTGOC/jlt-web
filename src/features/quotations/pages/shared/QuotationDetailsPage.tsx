@@ -10,6 +10,7 @@ import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import { ReferenceHeader } from "@/features/quotations/components/ReferenceHeader";
 import { ReferenceHeaderSecondary } from "@/features/quotations/components/ReferenceHeaderSecondary";
+import { getQtnStatus } from "@/features/quotations/utils/quotationStatus";
 import updateIcon from "@/assets/icons/update.svg";
 import joborderIcon from "@/assets/icons/joborder.svg";
 import makeQuotationIcon from "@/assets/icons/makequotation.svg";
@@ -56,21 +57,27 @@ export function QuotationDetailsPage() {
 
   if (isLoading || !quotation) return null;
 
-  // Determine button label and icon based on quotation status
-  const isRequested = quotation.qtn_status === "requested";
-  const isResponded = quotation.qtn_status === "responded";
-  const isAccepted = quotation.qtn_status === "accepted";
+  // Determine button label and icon based on quotation status (explicit checks only)
+  const status = getQtnStatus(quotation);
 
+  // Default to the existing "UPDATE QUOTATION" behavior when status is unknown
   let buttonLabel = "UPDATE QUOTATION";
   let ButtonIcon = UpdateQuotationIcon;
 
-  if (isRequested) {
+  if (status === "requested") {
     buttonLabel = "MAKE QUOTATION";
     ButtonIcon = MakeQuotationIcon;
-  } else if (isAccepted) {
+  } else if (status === "responded") {
+    buttonLabel = "UPDATE QUOTATION";
+    ButtonIcon = UpdateQuotationIcon;
+  } else if (status === "accepted") {
     buttonLabel = "CREATE JOB ORDER";
     ButtonIcon = CreateJobOrderIcon;
   }
+
+  const isRequested = status === "requested";
+  const isResponded = status === "responded";
+  const isAccepted = status === "accepted";
 
   const canShowButton = quotation.account_specialist;
 
@@ -102,6 +109,7 @@ export function QuotationDetailsPage() {
         ) : undefined
       }
     >
+      {/**/}
       <Stack gap="lg">
         {/* Reference Headers Row */}
         <Group gap="lg" align="flex-start">

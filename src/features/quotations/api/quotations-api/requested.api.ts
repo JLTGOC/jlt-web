@@ -3,7 +3,7 @@ import type {
   FetchRequestedQuotationsParams,
   RequestedQuotationsResponse,
   ReassignEnumsResponse,
-  ReassignQuotationSpecificDetailsResponse
+  ReassignQuotationSpecificDetailsResponse,
 } from "../../types/quotations.types";
 
 export async function fetchRequestedQuotations(
@@ -26,7 +26,10 @@ export async function fetchRequestedQuotations(
       ...(params.search ? { search: params.search } : {}),
       ...(params.as_search ? { as_search: params.as_search } : {}),
       ...(params.client_type ? { client_type: params.client_type } : {}),
-      ...(params.perPage ? { perPage: params.perPage } : {}),
+      ...(params.per_page ? { per_page: params.per_page } : {}),
+      ...(params.my_per_page ? { my_per_page: params.per_page } : {}),
+      ...(params.page ? { page: params.page } : {}),
+      ...(params.my_page ? { my_page: params.page } : {}),
     },
   });
 
@@ -40,13 +43,17 @@ export async function fetchRequestedQuotations(
       quotations: [],
       my_quotations: [],
       pagination: {
+        current_page: 0,
+        total_pages: 0,
         count: 0,
-        per_page: params.perPage ?? 10,
+        per_page: params.per_page ?? 10,
         total: 0,
       },
       my_quotations_pagination: {
+        current_page: 0,
+        total_pages: 0,
         count: 0,
-        per_page: params.perPage ?? 10,
+        per_page: params.per_page ?? 10,
         total: 0,
       },
     };
@@ -55,22 +62,43 @@ export async function fetchRequestedQuotations(
   return response.data.data;
 }
 
-export async function acceptQuotation(quotationID: number | string): Promise<void> {
+export async function acceptQuotation(
+  quotationID: number | string,
+): Promise<void> {
   await apiClient.put(`/quotations/${quotationID}/accept-assignment`);
 }
 
-export async function reassignQuotation(quotationID: number | string, status: string, as_id: number): Promise<void> {
+export async function reassignQuotation(
+  quotationID: number | string,
+  status: string,
+  as_id: number | null,
+): Promise<void> {
+  const normalizedAsId = as_id ?? null;
+
   await apiClient.put(`/quotations/${quotationID}/reassign-specialist`, {
     status,
-    as_id,
+    as_id: normalizedAsId,
   });
 }
 
-export async function reassignQuotationSpecificDetails(reassignmentRequest: number | null): Promise<ReassignQuotationSpecificDetailsResponse> {
-    const response = await apiClient.get<{data: ReassignQuotationSpecificDetailsResponse}>(
-        `/reassignment-requests/${reassignmentRequest}`
-    )
-    return response.data.data;
+export async function reassignRequest(
+  quotationID: number | string,
+  reason: string,
+  additional_details: string,
+): Promise<void> {
+  await apiClient.post(`/quotations/${quotationID}/request-reassignment`, {
+    reason,
+    additional_details,
+  });
+}
+
+export async function reassignQuotationSpecificDetails(
+  reassignmentRequest: number | null,
+): Promise<ReassignQuotationSpecificDetailsResponse> {
+  const response = await apiClient.get<{
+    data: ReassignQuotationSpecificDetailsResponse;
+  }>(`/reassignment-requests/${reassignmentRequest}`);
+  return response.data.data;
 }
 
 export async function reassignQuotationEnums(
@@ -84,4 +112,3 @@ export async function reassignQuotationEnums(
   );
   return response.data.data;
 }
-

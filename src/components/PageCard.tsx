@@ -51,6 +51,7 @@ export function PageCard({
   jobSwitchValue = "all",
   hideBackButton,
   onJobSwitchChange,
+  bgColor = "#ffffff",
 }: PageCardProps) {
   const navigate = useNavigate();
 
@@ -70,6 +71,7 @@ export function PageCard({
       padding={0}
       className={classes.root}
       style={{
+        backgroundColor: bgColor,
         height: fullHeight
           ? "min(100%, calc(100dvh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2))"
           : undefined,

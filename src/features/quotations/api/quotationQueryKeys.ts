@@ -3,6 +3,11 @@ import type { QuotationStatus } from "@/features/quotations/types/quotations.typ
 interface StatusListKeyParams {
   searchQuery: string;
   perPage: number;
+  clientFilter?: "ALL" | "NEW" | "OLD";
+  serviceFilter?: string;
+  dateFilter?: string;
+  personInChargeFilter?: string;
+  jobFilter?: "all" | "my-items";
 }
 
 export const quotationQueryKeys = {
@@ -14,6 +19,11 @@ export const quotationQueryKeys = {
       ...quotationQueryKeys.byStatusRoot(status),
       params.searchQuery,
       params.perPage,
+      params.clientFilter,
+      params.serviceFilter,
+      params.dateFilter,
+      params.personInChargeFilter,
+      params.jobFilter,
     ] as const,
   quotationDetails: (quotationId?: string) =>
     ["quotation", quotationId] as const,

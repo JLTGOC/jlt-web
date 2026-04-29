@@ -8,6 +8,7 @@ import {
   Text,
   Center,
   Loader,
+  Pagination,
 } from "@mantine/core";
 import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
 import {
@@ -32,15 +33,19 @@ interface RequestTableProps {
   isLoading?: boolean;
   showingCount?: number;
   total?: number;
+  totalPages?: number;
   jobFilter?: "all" | "my-items";
+  perPaginationPage?: number;
+  setPerPaginationPage?: (page: number) => void;
   onRowClick?: (row: RequestedQuotationRow) => void;
   onAcceptClick?: (row: RequestedQuotationRow) => void;
   onReassignClick?: (row: RequestedQuotationRow) => void;
+  onReassignRequestClick?: (row: RequestedQuotationRow) => void;
   onMakeQuotationClick?: (row: RequestedQuotationRow) => void;
 }
 
 function toTitleCase(value: string) {
-  return value
+  return value  
     .toLowerCase()
     .replace(/[_-]+/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
@@ -56,21 +61,27 @@ function statusButtonBg(row: RequestedQuotationRow) {
   return "#1D274E";
 }
 
+function rowBorderColor(row: RequestedQuotationRow) {
+  return row.assignment_status === "AVAILABLE" ? "#54B99B" : "#368DC4";
+}
+
 export function RequestTable({
   rows,
   isLoading = false,
   showingCount,
   total,
   jobFilter,
+  totalPages,
+  perPaginationPage,
+  setPerPaginationPage,
   onRowClick,
   onAcceptClick,
   onReassignClick,
+  onReassignRequestClick,
   onMakeQuotationClick,
 }: RequestTableProps) {
   const currentShowingCount = showingCount ?? rows.length;
   const currentTotal = total ?? rows.length;
-
-  console.log("khate", rows);
 
   return (
     <>
@@ -113,11 +124,15 @@ export function RequestTable({
                 </Table.Td>
               </Table.Tr>
             ) : (
-              rows.map((row) => (
+              rows.map((row, index) => (
                 <Table.Tr
                   key={String(row.id)}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  style={onRowClick ? { cursor: "pointer" } : undefined}
+                  style={{
+                    cursor: onRowClick ? "pointer" : "default",
+                    backgroundColor: index % 2 === 1 ? "#F1F3F4" : "#ffffff",
+                    boxShadow: `inset 6px 0 0 ${rowBorderColor(row)}`,
+                  }}
                 >
                   <Table.Td style={{ maxWidth: "150px" }}>
                     <Stack gap={2}>
@@ -211,12 +226,7 @@ export function RequestTable({
                             leftSection={<Autorenew width={20} />}
                             onClick={(event) => {
                               event.stopPropagation();
-
-                              if (row.assignment_status === "AVAILABLE") {
-                                onAcceptClick?.(row);
-                              } else {
-                                onReassignClick?.(row);
-                              }
+                              onReassignRequestClick?.(row);
                             }}
                           >
                             Request Reassignment
@@ -238,8 +248,8 @@ export function RequestTable({
                           >
                             Reassignment Request
                           </Button>
-                          <Text c="#334155" fz="0.75rem" fw={400} lh={1.4}>
-                            Req. Reassignmet:
+                          <Text c="#334155" fz="0.65rem" fw={400} lh={1.4}>
+                            Req. Reassignmet: {row.requested_at}
                           </Text>
                         </>
                       )}
@@ -258,8 +268,8 @@ export function RequestTable({
                       )}
 
                       {row.assignment_status === "ASSIGNED" && (
-                        <Text c="#334155" fz="0.75rem" fw={400} lh={1.4}>
-                          Req. Accepted:
+                        <Text c="#334155" fz="0.65rem" fw={400} lh={1.4}>
+                          Req. Accepted: {row.assigned_at}
                         </Text>
                       )}
                     </Stack>
@@ -281,9 +291,13 @@ export function RequestTable({
         </Table>
       </Box>
 
-      <Text mt="lg" ml="xs" c="#8a8f99" fz="0.813rem">
-        Showing {currentShowingCount} out of {currentTotal} entries
-      </Text>
+      <Group align="center" justify="space-between" mt="md">
+        <Text c="#8a8f99" fz="0.813rem">
+          Showing {currentShowingCount} out of {currentTotal} entries
+        </Text>
+
+        <Pagination total={totalPages || 1} value={perPaginationPage} onChange={setPerPaginationPage} size="xs" />
+      </Group>
     </>
   );
 }

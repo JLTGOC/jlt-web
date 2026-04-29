@@ -47,6 +47,7 @@ export interface AppTable2Props {
   searchPlaceholder?: string;
   onAcceptClick?: (row: RequestedQuotationRow) => void;
   onReassignClick?: (row: RequestedQuotationRow) => void;
+  onJobFilterChange?: (filter: "all" | "my-items") => void;
 }
 
 function toTitleCase(value: string) {
@@ -85,6 +86,7 @@ export default function AppTable2({
   onAcceptClick,
   onReassignClick,
   jobFilter,
+  onJobFilterChange,
 }: AppTable2Props) {
   const [dateFilter, setDateFilter] = useState("");
   const [serviceFilter, setServiceFilter] = useState<string | null>(null);
@@ -144,6 +146,7 @@ export default function AppTable2({
 
   return (
     <Stack gap="xs">
+      {/**/}
       <Box
         p="xs"
         style={{
@@ -153,9 +156,15 @@ export default function AppTable2({
         }}
       >
         <Group gap="xs">
+          {/* Tab: ALL CLIENTS */}
           <UnstyledButton
+            onClick={() => onJobFilterChange?.("all")}
             styles={topTabStyles}
-            style={{ borderBottomColor: jobFilter === "all" ? "#ef8f27" : "transparent" }}
+            style={{ 
+              borderBottomColor: jobFilter === "all" ? "#ef8f27" : "transparent",
+              cursor: "pointer",
+              transition: "all 150ms ease"
+            }}
           >
             <Text fz="0.82rem" fw={700} c="#2c3f55">ALL CLIENTS</Text>
             <Text fz="0.82rem" fw={700} c="#8a8f99">{allClientCount}</Text>
@@ -163,9 +172,15 @@ export default function AppTable2({
 
           <Divider orientation="vertical" color="#dde2e8" />
 
+          {/* Tab: NEW CLIENT */}
           <UnstyledButton
+            onClick={() => onJobFilterChange?.("my-items")}
             styles={topTabStyles}
-            style={{ borderBottomColor: jobFilter === "my-items" ? "#ef8f27" : "transparent" }}
+            style={{ 
+              borderBottomColor: jobFilter === "my-items" ? "#ef8f27" : "transparent",
+              cursor: "pointer",
+              transition: "all 150ms ease"
+            }}
           >
             <Badge circle size="8" color="teal" p={0} />
             <Text fz="0.82rem" fw={700} c="#2c3f55">NEW CLIENT</Text>
@@ -174,9 +189,15 @@ export default function AppTable2({
 
           <Divider orientation="vertical" color="#dde2e8" />
 
+          {/* Tab: OLD CLIENT - Currently disabled (no separate filter) */}
           <UnstyledButton
+            disabled
             styles={topTabStyles}
-            style={{ borderBottomColor: jobFilter === "my-items" ? "#ef8f27" : "transparent" }}
+            style={{ 
+              borderBottomColor: jobFilter === "my-items" ? "#ef8f27" : "transparent",
+              opacity: 0.5,
+              cursor: "not-allowed"
+            }}
           >
             <Badge circle size="8" color="blue" p={0} />
             <Text fz="0.82rem" fw={700} c="#2c3f55">OLD CLIENT</Text>

@@ -17,6 +17,8 @@ export interface QuotationClientGroup {
 }
 
 export interface QuotationsPagination {
+  current_page: number;
+  total_pages: number;
   count: number;
   per_page: number;
   total: number;
@@ -25,6 +27,14 @@ export interface QuotationsPagination {
 export interface QuotationsIndexResponse {
   quotations: QuotationClientGroup[];
   pagination: QuotationsPagination;
+}
+
+export interface RespondedQuotationLogisticsService {
+  commodity: string;
+  service_type: string;
+  transport_mode: string;
+  origin: string;
+  destination: string;
 }
 
 export interface RespondedQuotationListItem {
@@ -38,11 +48,14 @@ export interface RespondedQuotationListItem {
   as_full_name: string;
   assigned_at: string;
   service: string;
-  logistics_service: string;
+  logistics_service: RespondedQuotationLogisticsService | null;
+  client_type?: "NEW" | "OLD";
 }
 
 export interface RespondedQuotationsResponse {
+  counts: ClientCounts;
   quotations: RespondedQuotationListItem[];
+  my_quotations?: RespondedQuotationListItem[];
   pagination: QuotationsPagination;
 }
 
@@ -67,6 +80,7 @@ export interface RequestedQuotationListItem {
   assignment_status: string | null;
   account_specialist: string | null;
   assigned_at: string | null;
+  requested_at: string | null;
   service: string;
   logistics_service: RequestedQuotationLogisticsService | null;
   regulatory_service: RequestedQuotationRegulatoryService | null;
@@ -240,14 +254,17 @@ export type FetchRequestedQuotationsParams = {
   search?: string;
   as_search?: string;
   client_type?: "NEW" | "OLD";
-  perPage?: number;
+  per_page?: number;
+  my_per_page?: number;
+  page?: number;
+  my_page?: number;
   "filter[assignment_status]"?: string;
   "filter[created_at]"?: string;
   "filter[service]"?: string;
 }
 
 export type ReassignEnumsResponse = {
-  reassign_reasons: string[];
+  reassignment_reasons: string[];
   account_specialists: { id: number; username: string, full_name: string }[];
   operations: {id: number; username: string, full_name: string }[];
 }
