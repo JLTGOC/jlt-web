@@ -25,7 +25,7 @@ export function QuotationDocuments() {
   const queryClient = useQueryClient();
   const quotationId = routeParams?.quotationId;
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const navigate = useNavigate(); // ✅ hook for back arrow
+  const navigate = useNavigate();
   const currentUser = useAuthStore((state) => state.user);
 
   const { data: quotation, isLoading } = useQuery({

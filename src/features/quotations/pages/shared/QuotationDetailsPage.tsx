@@ -81,9 +81,6 @@ export function QuotationDetailsPage() {
 
   const canShowButton = quotation.account_specialist;
 
-  // Debug: log raw and normalized status to help inspect seeded data
-  // (removed debug logs)
-
   return (
     <PageCard
       title="Client Details"
@@ -112,7 +109,7 @@ export function QuotationDetailsPage() {
         ) : undefined
       }
     >
-      {/* Dev debug UI removed */}
+      {/**/}
       <Stack gap="lg">
         {/* Reference Headers Row */}
         <Group gap="lg" align="flex-start">
