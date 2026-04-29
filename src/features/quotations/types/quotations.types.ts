@@ -17,6 +17,8 @@ export interface QuotationClientGroup {
 }
 
 export interface QuotationsPagination {
+  current_page: number;
+  total_pages: number;
   count: number;
   per_page: number;
   total: number;
@@ -67,6 +69,7 @@ export interface RequestedQuotationListItem {
   assignment_status: string | null;
   account_specialist: string | null;
   assigned_at: string | null;
+  requested_at: string | null;
   service: string;
   logistics_service: RequestedQuotationLogisticsService | null;
   regulatory_service: RequestedQuotationRegulatoryService | null;
@@ -240,7 +243,10 @@ export type FetchRequestedQuotationsParams = {
   search?: string;
   as_search?: string;
   client_type?: "NEW" | "OLD";
-  perPage?: number;
+  per_page?: number;
+  my_per_page?: number;
+  page?: number;
+  my_page?: number;
   "filter[assignment_status]"?: string;
   "filter[created_at]"?: string;
   "filter[service]"?: string;

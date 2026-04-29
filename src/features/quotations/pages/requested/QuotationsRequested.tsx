@@ -12,6 +12,7 @@ import {
   reassignQuotation,
   reassignQuotationEnums,
   reassignQuotationSpecificDetails,
+  reassignRequest,
 } from "@/features/quotations/api/quotations.api";
 
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
@@ -29,7 +30,7 @@ import ReassignModal from "./components/ReassignModal";
 import AcceptModal from "./components/AcceptModal";
 import ReassignAcceptModal from "./components/ReassignAcceptModal";
 import ReassignRejectModal from "./components/ReassignRejectModal";
-import ReassigRequestnModal from "./components/ReassignRequestModal";
+import ReassignRequestModal from "./components/ReassignRequestModal";
 
 export function QuotationsRequested() {
   const navigate = useNavigate();
@@ -40,16 +41,21 @@ export function QuotationsRequested() {
 
   const [acceptModalOpen, setAcceptModalOpen] = useState(false);
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
-  const [reassignAcceptModalOpen, setReassignAccceptModalOpen] = useState(false);
+  const [reassignAcceptModalOpen, setReassignAccceptModalOpen] =
+    useState(false);
   const [reassignRejectModalOpen, setReassignRejectModalOpen] = useState(false);
-  const [requestReassignModalOpen, setRequestReassignModalOpen] = useState(false);
+  const [requestReassignModalOpen, setReassignRequestModalOpen] =
+    useState(false);
 
+  const [reassignReason, setReassignReason] = useState<string>("");
+  const [reassignAdditionalDetails, setReassignAdditionalDetails] =
+    useState<string>("");
   const [reassignStatus, setReassignStatus] = useState<string>("");
   const [reassignASId, setReassignASId] = useState<number | null>(null);
   const [reassignAS, setReassignAS] = useState<string>("");
 
   const [jobFilter, setJobFilter] = useState<"all" | "my-items">("all");
-  const [dateFilter, setDateFilter] = useState("");  
+  const [dateFilter, setDateFilter] = useState("");
   const [clientFilter, setClientFilter] = useState<"ALL" | "NEW" | "OLD">(
     "ALL",
   );
@@ -60,8 +66,6 @@ export function QuotationsRequested() {
     "AVAILABLE" | "ASSIGNED" | "REASSIGNMENT REQUESTED" | "ALL"
   >("ALL");
 
-  
-
   const {
     search,
     searchQuery,
@@ -69,6 +73,8 @@ export function QuotationsRequested() {
     secondarySearchQuery,
     perPage,
     setPerPage,
+    perPaginationPage,
+    setPerPaginationPage,
     handleSearch,
     handleSearchChange,
     handleSecondarySearch,
@@ -85,6 +91,7 @@ export function QuotationsRequested() {
       dateFilter,
       perPage,
       jobFilter,
+      perPaginationPage,
     }),
     queryFn: () =>
       fetchRequestedQuotations({
@@ -95,27 +102,14 @@ export function QuotationsRequested() {
         search: searchQuery || undefined,
         as_search: secondarySearchQuery || undefined,
         client_type: clientFilter === "ALL" ? undefined : clientFilter,
-        perPage,
+        per_page: perPage,
+        page: perPaginationPage,
       }),
-  });
-
-  const acceptQuotationMutation = useMutation({
-    mutationFn: (id: number | string) => acceptQuotation(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: requestedQueryKeys.requestedRoot(),
-      });
-      setAcceptModalOpen(false);
-      setSelectedQuotation(null);
-    },
-    onError: (error) => {
-      console.error("Error accepting quotation:", error);
-    },
   });
 
   const { data: reassignEnumsData } = useQuery({
     queryKey: requestedQueryKeys.requestedRoot(),
-    queryFn: () => reassignQuotationEnums("fetch", "fetch", ""),
+    queryFn: () => reassignQuotationEnums("fetch", "fetch", "fetch"),
   });
 
   const reassignPersonels =
@@ -135,36 +129,72 @@ export function QuotationsRequested() {
     enabled: !!selectedQuotation?.reassignment_request_id,
   });
 
-  const handleAcceptConfirm = () => {
-    if (!selectedQuotation) {
-      return;
-    }
-
-    acceptQuotationMutation.mutate(selectedQuotation.id);
-  };
-
-  console.log("khate", reassignAS);
-  console.log("khate2", reassignStatus)
-
   const reassignQuotationMutation = useMutation({
-    mutationFn: ({ id, status, as_id }: { id: number | string; status: string; as_id: number }) =>
-      reassignQuotation(id, status, as_id),
+    mutationFn: ({
+      id,
+      status,
+      as_id,
+    }: {
+      id: number | string;
+      status: string;
+      as_id: number | null;
+    }) => reassignQuotation(id, status, as_id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: requestedQueryKeys.requestedRoot() });
-      setReassignModalOpen(false);
-      setSelectedQuotation(null);
-      setReassignASId(null);
-      setReassignStatus("");
+      queryClient.invalidateQueries({
+        queryKey: requestedQueryKeys.requestedRoot(),
+      });
+      closeModal();
     },
     onError: (error) => {
       console.error("Error reassigning quotation:", error);
     },
   });
 
+  const reassignRequestMutation = useMutation({
+    mutationFn: ({
+      id,
+      reason,
+      additionalDetails,
+    }: {
+      id: number | string;
+      reason: string;
+      additionalDetails: string;
+    }) => reassignRequest(id, reason, additionalDetails),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: requestedQueryKeys.requestedRoot(),
+      });
+      closeModal();
+    },
+    onError: (error) => {
+      console.error("Error reassigning quotation:", error);
+    },
+  });
+
+  const acceptQuotationMutation = useMutation({
+    mutationFn: (id: number | string) => acceptQuotation(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: requestedQueryKeys.requestedRoot(),
+      });
+      setAcceptModalOpen(false);
+      setSelectedQuotation(null);
+    },
+    onError: (error) => {
+      console.error("Error accepting quotation:", error);
+    },
+  });
+  const prefetchQuotationDetails = (quotationId: string) => {
+    void queryClient.prefetchQuery({
+      queryKey: quotationQueryKeys.quotationDetails(quotationId),
+      queryFn: () => fetchQuotation(quotationId),
+      staleTime: 30_000,
+    });
+  };
+
   const handleReassignConfirm = () => {
-    
     if (!selectedQuotation) return;
-    if (!reassignStatus || reassignASId == null) return;
+    if (!reassignStatus === null) return;
 
     reassignQuotationMutation.mutate({
       id: selectedQuotation.id,
@@ -173,12 +203,33 @@ export function QuotationsRequested() {
     });
   };
 
-  const prefetchQuotationDetails = (quotationId: string) => {
-    void queryClient.prefetchQuery({
-      queryKey: quotationQueryKeys.quotationDetails(quotationId),
-      queryFn: () => fetchQuotation(quotationId),
-      staleTime: 30_000,
+  const handleAcceptConfirm = () => {
+    if (!selectedQuotation) return;
+
+    acceptQuotationMutation.mutate(selectedQuotation.id);
+  };
+
+  const handleReassignRequestSubmit = () => {
+    if (!selectedQuotation) return;
+
+    reassignRequestMutation.mutate({
+      id: selectedQuotation.id,
+      reason: reassignReason,
+      additionalDetails: reassignAdditionalDetails,
     });
+  };
+
+  const closeModal = () => {
+    setAcceptModalOpen(false);
+    setReassignModalOpen(false);
+    setReassignRejectModalOpen(false);
+    setReassignAccceptModalOpen(false);
+    setReassignRequestModalOpen(false);
+
+    setReassignASId(null);
+    setSelectedQuotation(null);
+    setReassignAS("");
+    setReassignStatus("");
   };
 
   const openAcceptModal = (row: RequestedQuotationListItem) => {
@@ -189,6 +240,11 @@ export function QuotationsRequested() {
   const openReassignModal = (row: RequestedQuotationListItem) => {
     setSelectedQuotation(row);
     setReassignModalOpen(true);
+  };
+
+  const openReassignRequestModal = (row: RequestedQuotationListItem) => {
+    setSelectedQuotation(row);
+    setReassignRequestModalOpen(true);
   };
 
   const handleJobSwitchChange = (value: "all" | "my-items") => {
@@ -247,12 +303,20 @@ export function QuotationsRequested() {
                     ? data?.quotations || []
                     : data?.my_quotations || []
                 }
+                totalPages={
+                  jobFilter === "all"
+                    ? data?.pagination.total_pages || 0
+                    : data?.my_quotations_pagination.total_pages || 0
+                }
+                perPaginationPage={perPaginationPage}
+                setPerPaginationPage={setPerPaginationPage}
                 jobFilter={jobFilter}
                 isLoading={isLoading || isFetching}
                 showingCount={data?.pagination.count}
                 total={data?.counts.all_quotations}
                 onAcceptClick={openAcceptModal}
                 onReassignClick={openReassignModal}
+                onReassignRequestClick={openReassignRequestModal}
                 onRowClick={(row: RequestedQuotationListItem) => {
                   const quotationId = String(row.id);
                   prefetchQuotationDetails(quotationId);
@@ -269,46 +333,55 @@ export function QuotationsRequested() {
         </Stack>
       </PageCard>
 
-      <ReassignModal
-        reassignModalOpen={reassignModalOpen}
-        setReassignModalOpen={setReassignModalOpen}
-        selectedQuotation={selectedQuotation}
-        reassignPersonels={reassignPersonels}
-        reassignSpecificDetails={reassignSpecificDetails}
-        setReassignAcceptModalOpen={setReassignAccceptModalOpen}
-        setReassignStatus={setReassignStatus}
-        reassignASId={reassignASId}
-        setReassignASId={setReassignASId}
-        setReassignAS={setReassignAS}
-        // onConfirm={handleReassignConfirm}
-      />
-
       <AcceptModal
         acceptModalOpen={acceptModalOpen}
         setAcceptModalOpen={setAcceptModalOpen}
         onConfirm={handleAcceptConfirm}
         isSubmitting={acceptQuotationMutation.isPending}
+        onClose={closeModal}
+      />
+
+      <ReassignModal
+        reassignModalOpen={reassignModalOpen}
+        setReassignModalOpen={setReassignModalOpen}
+        setReassignAcceptModalOpen={setReassignAccceptModalOpen}
+        setReassignRejectModalOpen={setReassignRejectModalOpen}
+        selectedQuotation={selectedQuotation}
+        reassignPersonels={reassignPersonels}
+        reassignSpecificDetails={reassignSpecificDetails}
+        setReassignStatus={setReassignStatus}
+        reassignASId={reassignASId}
+        setReassignASId={setReassignASId}
+        setReassignAS={setReassignAS}
+        onClose={closeModal}
       />
 
       <ReassignAcceptModal
         reassignAcceptModalOpen={reassignAcceptModalOpen}
-        onConfirm={handleAcceptConfirm}
+        onConfirm={handleReassignConfirm}
         currentPerson={selectedQuotation?.account_specialist || "-"}
         newPerson={reassignAS}
-        isLoading={acceptQuotationMutation.isPending}
-        onClose={() => {
-          setReassignAccceptModalOpen(false);
-          setReassignASId(null);
-          setReassignStatus("");
-        }}
-       />
-
-      <ReassignRejectModal
-
+        isLoading={reassignQuotationMutation.isPending}
+        onClose={closeModal}
       />
 
       <ReassignRejectModal
-      
+        reassignRejectModalOpen={reassignRejectModalOpen}
+        onConfirm={handleReassignConfirm}
+        isLoading={reassignQuotationMutation.isPending}
+        onClose={closeModal}
+      />
+
+      <ReassignRequestModal
+        requestReassignModalOpen={requestReassignModalOpen}
+        selectedQuotation={selectedQuotation}
+        reassignReasonEnums={reassignEnumsData?.reassignment_reasons}
+        onClose={closeModal}
+        onConfirm={handleReassignRequestSubmit}
+        reassignReason={reassignReason}
+        setReassignReason={setReassignReason}
+        reassignAdditionalDetails={reassignAdditionalDetails}
+        setReassignAdditionalDetails={setReassignAdditionalDetails}
       />
     </>
   );

@@ -29,9 +29,6 @@ export default function ReassignRequest({
   reassignAdditionalDetails,
   setReassignAdditionalDetails,
 }: ReassignRequestProps) {
-  
-
-  console.log("khate2", reassignReasonEnums)
 
   return (
     <Modal

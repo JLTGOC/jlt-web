@@ -8,12 +8,12 @@ import {
   Text,
   Center,
   Loader,
+  Pagination,
 } from "@mantine/core";
 import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
 import {
   RequestQuote,
   Autorenew,
-  CheckCircle,
   PanToolAlt,
 } from "@nine-thirty-five/material-symbols-react/outlined";
 import type { RequestedQuotationListItem } from "@/features/quotations/types/quotations.types";
@@ -33,14 +33,18 @@ interface RequestTableProps {
   isLoading?: boolean;
   showingCount?: number;
   total?: number;
+  totalPages?: number;
   jobFilter?: "all" | "my-items";
+  perPaginationPage?: number;
+  setPerPaginationPage?: (page: number) => void;
   onRowClick?: (row: RequestedQuotationRow) => void;
   onAcceptClick?: (row: RequestedQuotationRow) => void;
   onReassignClick?: (row: RequestedQuotationRow) => void;
+  onReassignRequestClick?: (row: RequestedQuotationRow) => void;
 }
 
 function toTitleCase(value: string) {
-  return value
+  return value  
     .toLowerCase()
     .replace(/[_-]+/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
@@ -62,14 +66,16 @@ export function RequestTable({
   showingCount,
   total,
   jobFilter,
+  totalPages,
+  perPaginationPage,
+  setPerPaginationPage,
   onRowClick,
   onAcceptClick,
   onReassignClick,
+  onReassignRequestClick,
 }: RequestTableProps) {
   const currentShowingCount = showingCount ?? rows.length;
   const currentTotal = total ?? rows.length;
-
-  console.log("khate", rows);
 
   return (
     <>
@@ -213,10 +219,7 @@ export function RequestTable({
                             leftSection={<Autorenew width={20} />}
                             onClick={(event) => {
                               event.stopPropagation();
-
-                              row.assignment_status === "AVAILABLE"
-                                ? onAcceptClick?.(row)
-                                : onReassignClick?.(row);
+                              onReassignRequestClick?.(row);
                             }}
                           >
                             Request Reassignment
@@ -226,19 +229,21 @@ export function RequestTable({
 
                       {row.assignment_status === "REASSIGNMENT REQUESTED" && (
                         <>
-                        <Button
-                          styles={{ root: { background: statusButtonBg(row) } }}
-                          leftSection={<Autorenew width={20} />}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onReassignClick?.(row);
-                          }}
-                        >
-                          Reassignment Request
-                        </Button>
-                        <Text c="#334155" fz="0.75rem" fw={400} lh={1.4}>
-                          Req. Reassignmet: 
-                        </Text>
+                          <Button
+                            styles={{
+                              root: { background: statusButtonBg(row) },
+                            }}
+                            leftSection={<Autorenew width={20} />}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onReassignClick?.(row);
+                            }}
+                          >
+                            Reassignment Request
+                          </Button>
+                          <Text c="#334155" fz="0.65rem" fw={400} lh={1.4}>
+                            Req. Reassignmet: {row.requested_at}
+                          </Text>
                         </>
                       )}
 
@@ -248,7 +253,7 @@ export function RequestTable({
                           leftSection={<PanToolAlt width={20} />}
                           onClick={(event) => {
                             event.stopPropagation();
-                            onAcceptClick?.(row)
+                            onAcceptClick?.(row);
                           }}
                         >
                           Accept
@@ -256,8 +261,8 @@ export function RequestTable({
                       )}
 
                       {row.assignment_status === "ASSIGNED" && (
-                        <Text c="#334155" fz="0.75rem" fw={400} lh={1.4}>
-                          Req. Accepted: 
+                        <Text c="#334155" fz="0.65rem" fw={400} lh={1.4}>
+                          Req. Accepted: {row.assigned_at}
                         </Text>
                       )}
                     </Stack>
@@ -279,9 +284,13 @@ export function RequestTable({
         </Table>
       </Box>
 
-      <Text mt="lg" ml="xs" c="#8a8f99" fz="0.813rem">
-        Showing {currentShowingCount} out of {currentTotal} entries
-      </Text>
+      <Group align="center" justify="space-between" mt="md">
+        <Text c="#8a8f99" fz="0.813rem">
+          Showing {currentShowingCount} out of {currentTotal} entries
+        </Text>
+
+        <Pagination total={totalPages || 1} value={perPaginationPage} onChange={setPerPaginationPage} size="xs" />
+      </Group>
     </>
   );
 }
