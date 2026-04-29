@@ -41,15 +41,6 @@ export function AppButton({
       disabled={disabled || loading}
       {...rest}
     >
-      {/* icon before text */}
-      {ResolvedIcon && (
-        <ResolvedIcon
-          width="1.25rem"
-          height="1.25rem"
-          style={{ marginRight: "0.5rem" }}
-        />
-      )}
-
       <span className={classes.label}>{children}</span>
 
       {ResolvedIcon && (
