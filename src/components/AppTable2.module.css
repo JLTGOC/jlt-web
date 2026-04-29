@@ -123,8 +123,6 @@
 .tableShell {
   margin-top: 12px;
   border: 1px solid #d7dce3;
-  border-radius: var(--mantine-radius-sm);
-  overflow: hidden;
 }
 
 .headerRow {

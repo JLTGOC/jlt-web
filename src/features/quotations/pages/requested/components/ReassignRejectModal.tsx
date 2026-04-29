@@ -2,21 +2,21 @@ import { Button, Group, Modal, Text } from "@mantine/core";
 import { Close } from "@nine-thirty-five/material-symbols-react/outlined";
 
 type ReassignRejectModalProps = {
-  opened: boolean;
+  reassignRejectModalOpen: boolean;
   onClose: () => void;
   isLoading?: boolean;
   onConfirm: () => void;
 };
 
 export default function ReassignRejectModal({
-  opened,
+  reassignRejectModalOpen,
   onClose,
   isLoading = false,
   onConfirm,
 }: ReassignRejectModalProps) {
   return (
     <Modal
-      opened={opened}
+      opened={reassignRejectModalOpen ?? false}
       onClose={onClose}
       title="CONFIRM REASSIGNMENT"
       centered
@@ -75,15 +75,6 @@ export default function ReassignRejectModal({
           loading={isLoading}
         >
           Reject Request
-        </Button>
-        <Button
-          h={48}
-          radius="md"
-          tt="uppercase"
-          variant="light"
-          onClick={onClose}
-        >
-          Cancel
         </Button>
       </Group>
     </Modal>

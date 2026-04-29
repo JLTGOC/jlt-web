@@ -1,12 +1,11 @@
 import { Flex, Box, Stack, Text, UnstyledButton, Tooltip } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router";
-import { getUserRole } from "@/lib/mappers/user.mapper";
 import { useAuthStore } from "@/stores/authStore";
 
 import classes from "./AppSidebar.module.css";
 import {
   BTN_HEIGHT_REM,
-  getSidebarItemsForRole,
+  getSidebarItemsForTabs,
   PANEL_BASE_PADDING_REM,
   PANEL_INDENT_STEP_REM,
   PILL_HEIGHT_REM,
@@ -29,8 +28,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const currentPath = location.pathname;
-  const userRole = user ? getUserRole(user) : undefined;
-  const navItems = getSidebarItemsForRole(userRole);
+  const navItems = getSidebarItemsForTabs(user?.tabs);
 
   const activeIndex = getActiveIndex(navItems, currentPath);
   const activeItem = getActiveItem(navItems, currentPath);

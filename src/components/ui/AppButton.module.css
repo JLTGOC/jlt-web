@@ -77,35 +77,3 @@
 .primary:hover .orangeBadge {
   transform: translateX(100%);
 }
-
-/* ── Quotation Button ───────────────────────────────────────────────────────────── */
-.quotation {
-  background-color: #4E6174;
-  color: white;
-  text-transform: uppercase;
-  font-weight: 400;
-  font-size: 0.7rem;        /* smaller text */
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;              /* tighter spacing between icon and text */
-  border: none;
-  cursor: pointer;
-  transition: none;         /* disable animation */
-  padding: 0.25rem 0.75rem; /* controls button height and width */
-  white-space: nowrap;      /* ✅ keeps text on one line */
-}
-
-.quotation:hover {
-  background-color: #465766; /* lock fill */
-  color: white;
-  transform: none;
-  box-shadow: none; 
-}
-
-.quotation:active,
-.quotation:focus {
-  background-color: #4E6174; 
-  color: white;
-  transform: none;
-  box-shadow: none;
-}

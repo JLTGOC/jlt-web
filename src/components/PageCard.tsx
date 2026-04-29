@@ -45,12 +45,11 @@ export function PageCard({
   showDivider = false,
   children,
   onBack,
-  hideBackButton = false,
-  bgColor = "white",
   bodyPx = "xl",
   bodyPy = "lg",
   showJobSwitch = false,
   jobSwitchValue = "all",
+  hideBackButton,
   onJobSwitchChange,
 }: PageCardProps) {
   const navigate = useNavigate();
@@ -67,9 +66,8 @@ export function PageCard({
     <Card
       withBorder={false}
       radius={10}
-      shadow={bgColor === "transparent" ? "none" : "sm"}
+      shadow={"sm"}
       padding={0}
-      bg={bgColor}
       className={classes.root}
       style={{
         height: fullHeight

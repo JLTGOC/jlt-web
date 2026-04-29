@@ -5,12 +5,11 @@ import {
   RequestQuote,
   ManageAccounts,
   FolderManaged,
-  ListAlt
 } from "@nine-thirty-five/material-symbols-react/rounded";
+import type { UserTabs } from "@/types/api";
 import type { NavItem } from "./AppSidebarUtils";
-import { ROLES, type Role } from "@/types/roles";
 
-export const CLIENT_ITEMS: NavItem[] = [
+export const NAV_ITEMS: NavItem[] = [
   {
     id: "dashboard",
     icon: <Dashboard width="2rem" height="2rem" />,
@@ -78,138 +77,32 @@ export const CLIENT_ITEMS: NavItem[] = [
   },
 ];
 
-export const AS_ITEMS: NavItem[] = [
-  {
-    id: "dashboard",
-    icon: <Dashboard width="2rem" height="2rem" />,
-    label: "Dashboard",
-    path: "/",
-  },
-  {
-    id: "leads",
-    icon: <DiversityTwo width="2rem" height="2rem" />,
-    label: "Leads",
-    subItems: [
-      { label: "Queries", path: "/leads/queries" },
-      { label: "New", path: "/leads/new" },
-      { label: "Replied", path: "/leads/replied" },
-    ],
-  },
-  {
-    id: "shipments",
-    icon: <BoxIcon width="2rem" height="2rem" />,
-    label: "Shipments",
-    subItems: [
-      {
-        label: "Logistics",
-        path: "/shipments/logistics",
-        subItems: [
-          { label: "Ongoing", path: "/shipments/logistics/ongoing" },
-          { label: "Delivered", path: "/shipments/logistics/delivered" },
-        ],
-      },
-      {
-        label: "Regulatory",
-        path: "/shipments/regulatory",
-        subItems: [
-          { label: "Permits", path: "/shipments/regulatory/permits" },
-          { label: "Licenses", path: "/shipments/regulatory/licenses" },
-        ],
-      },
-    ],
-  },
-  {
-    id: "quotations",
-    icon: <RequestQuote width="2rem" height="2rem" />,
-    label: "Quotations",
-    subItems: [
-      { label: "Requests", path: "/quotations/requested" },
-      { label: "Responded", path: "/quotations/responded" },
-      { label: "Accepted", path: "/quotations/accepted" },
-      { label: "Discarded", path: "/quotations/discarded" },
-    ],
-  },
-  {
-    id: "accounts",
-    icon: <ManageAccounts width="2rem" height="2rem" />,
-    label: "Accounts",
-    subItems: [
-      { label: "Clients", path: "/accounts/clients" },
-      { label: "Employees", path: "/accounts/employees" },
-    ],
-  },
-  {
-    id: "tools",
-    icon: <FolderManaged width="2rem" height="2rem" />,
-    label: "Tools",
-    path: "/tools",
-  },
-];
+type SidebarTabKey = keyof Pick<
+  UserTabs,
+  "dashboard" | "leads" | "shipments" | "accounts" | "job_orders" | "quotations" | "templates"
+>;
 
-export const OPS_ITEMS: NavItem[] = [
-  {
-    id: "dashboard",
-    icon: <Dashboard width="2rem" height="2rem" />,
-    label: "Dashboard",
-    path: "/",
-  },
-   {
-    id: "jobOrders",
-    icon: <ListAlt width="2rem" height="2rem" />,
-    label: "Job Orders",
-    path: "/job-orders",
-  },
-  {
-    id: "shipments",
-    icon: <BoxIcon width="2rem" height="2rem" />,
-    label: "Shipments",
-    subItems: [
-      {
-        label: "Logistics",
-        path: "/shipments/logistics",
-        subItems: [
-          { label: "Ongoing", path: "/shipments/logistics/ongoing" },
-          { label: "Delivered", path: "/shipments/logistics/delivered" },
-        ],
-      },
-      {
-        label: "Regulatory",
-        path: "/shipments/regulatory",
-        subItems: [
-          { label: "Permits", path: "/shipments/regulatory/permits" },
-          { label: "Licenses", path: "/shipments/regulatory/licenses" },
-        ],
-      },
-    ],
-  },
-  {
-    id: "quotations",
-    icon: <RequestQuote width="2rem" height="2rem" />,
-    label: "Quotations",
-    subItems: [
-      { label: "Requests", path: "/quotations/requested" },
-      { label: "Responded", path: "/quotations/responded" },
-      { label: "Accepted", path: "/quotations/accepted" },
-      { label: "Discarded", path: "/quotations/discarded" },
-    ],
-  },
+const ITEM_TAB_KEYS: Partial<Record<string, SidebarTabKey>> = {
+  dashboard: "dashboard",
+  leads: "leads",
+  shipments: "shipments",
+  quotations: "quotations",
+  accounts: "accounts",
+  jobOrders: "job_orders",
+  tools: "templates",
+};
 
-];
+function filterSidebarItemsByTabs(items: NavItem[], tabs?: UserTabs): NavItem[] {
+  if (!tabs) return items;
 
-export function getSidebarItemsForRole(role?: Role): NavItem[] {
-  if (role === ROLES.CLIENT) {
-    return CLIENT_ITEMS;
-  }
+  return items.filter((item) => {
+    const tabKey = ITEM_TAB_KEYS[item.id];
+    return tabKey ? tabs[tabKey] : true;
+  });
+}
 
-  if (role === ROLES.LEAD_ACCOUNT_SPECIALIST) {
-    return AS_ITEMS;
-  }
-
-  if (role === ROLES.OPERATIONS) {
-    return OPS_ITEMS;
-  }
-
-  return AS_ITEMS;
+export function getSidebarItemsForTabs(tabs?: UserTabs): NavItem[] {
+  return filterSidebarItemsByTabs(NAV_ITEMS, tabs);
 }
 
 export const BTN_HEIGHT_REM = 5;

@@ -1,44 +1,42 @@
 import { Button, Group, Modal, Select, Stack, Text, Textarea } from "@mantine/core";
+import type { Dispatch, SetStateAction } from "react";
 import { CheckCircle } from "@nine-thirty-five/material-symbols-react/outlined";
-import { useState } from "react";
 
 type ReassignRequestProps = {
-  opened: boolean;
+  requestReassignModalOpen: boolean;
   onClose: () => void;
+  selectedQuotation?: { reference_number?: string } | null;
   referenceNumber?: string;
-  reasons?: { value: string; label: string }[];
   isLoading?: boolean;
-  onSubmit: (reason: string, additionalDetails: string) => void;
+  onConfirm: () => void;
+  reassignReasonEnums?: string[];
+  reassignReason?: string | null;
+  setReassignReason?: Dispatch<SetStateAction<string>>;
+  reassignAdditionalDetails?: string;
+  setReassignAdditionalDetails?: Dispatch<SetStateAction<string>>;
 };
 
 export default function ReassignRequest({
-  opened,
+  requestReassignModalOpen,
   onClose,
+  selectedQuotation,
   referenceNumber = "-",
-  reasons = [],
   isLoading = false,
-  onSubmit,
+  onConfirm,
+  reassignReasonEnums,
+  reassignReason,
+  setReassignReason,
+  reassignAdditionalDetails,
+  setReassignAdditionalDetails,
 }: ReassignRequestProps) {
-  const [selectedReason, setSelectedReason] = useState<string | null>(null);
-  const [additionalDetails, setAdditionalDetails] = useState("");
+  
 
-  const handleSubmit = () => {
-    if (!selectedReason) return;
-    onSubmit(selectedReason, additionalDetails);
-    setSelectedReason(null);
-    setAdditionalDetails("");
-  };
-
-  const handleClose = () => {
-    setSelectedReason(null);
-    setAdditionalDetails("");
-    onClose();
-  };
+  console.log("khate2", reassignReasonEnums)
 
   return (
     <Modal
-      opened={opened}
-      onClose={handleClose}
+      opened={requestReassignModalOpen ?? false}
+      onClose={onClose}
       title="REASSIGNMENT REQUEST"
       centered
       size={500}
@@ -75,16 +73,16 @@ export default function ReassignRequest({
             Request Ref. No:
           </Text>
           <Text c="#1e3049" fz="0.95rem" fw={600}>
-            {referenceNumber}
+            {selectedQuotation?.reference_number ?? referenceNumber}
           </Text>
         </Group>
 
         <Select
           label="Select Reason"
           placeholder="Choose a reason"
-          data={reasons}
-          value={selectedReason}
-          onChange={setSelectedReason}
+          data={reassignReasonEnums}
+          value={reassignReason}
+          onChange={(value) => setReassignReason?.(value ?? "")}
           searchable
           clearable
           radius="sm"
@@ -105,8 +103,8 @@ export default function ReassignRequest({
               borderColor: "#d7d7d7",
             },
           }}
-          value={additionalDetails}
-          onChange={(e) => setAdditionalDetails(e.currentTarget.value)}
+          value={reassignAdditionalDetails ?? ""}
+          onChange={(e) => setReassignAdditionalDetails?.(e.currentTarget.value)}
         />
 
         <Group grow>
@@ -123,20 +121,11 @@ export default function ReassignRequest({
               },
             }}
             tt="uppercase"
-            onClick={handleSubmit}
+            onClick={onConfirm}
             loading={isLoading}
-            disabled={!selectedReason}
+            disabled={!reassignReason}
           >
             Submit Request
-          </Button>
-          <Button
-            h={48}
-            radius="md"
-            tt="uppercase"
-            variant="light"
-            onClick={handleClose}
-          >
-            Cancel
           </Button>
         </Group>
       </Stack>

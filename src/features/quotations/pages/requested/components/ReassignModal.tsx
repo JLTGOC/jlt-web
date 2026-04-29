@@ -11,21 +11,25 @@ type Reassignprops = {
   reassignASId: number | null;
   setReassignASId: (id: number | null) => void;
   setReassignAcceptModalOpen: (open: boolean) => void;
+  setReassignRejectModalOpen: (open: boolean) => void;
   setReassignAS: (as: string) => void;
+  onClose: () => void;
   // onConfirm?: (status: string, asId: number) => void;
 };
 
 export default function ReassignModal({
   reassignModalOpen,
   setReassignModalOpen,
+  setReassignAcceptModalOpen,
+  setReassignRejectModalOpen,
   selectedQuotation,
   reassignPersonels,
   reassignSpecificDetails,
   setReassignStatus,
   reassignASId,
   setReassignASId,
-  setReassignAcceptModalOpen,
   setReassignAS,
+  onClose,
   // onConfirm,
 }: Reassignprops) {
   const reassignOptions = reassignPersonels
@@ -50,11 +54,7 @@ export default function ReassignModal({
   return (
     <Modal
       opened={reassignModalOpen}
-      onClose={() => {
-        setReassignModalOpen(false);
-        setReassignASId(null);
-        setReassignAcceptModalOpen(false);
-      }}
+      onClose={onClose}
       title="REASSIGNMENT REQUEST"
       centered
       size={600}
@@ -126,7 +126,9 @@ export default function ReassignModal({
         data={reassignOptions}
         value={reassignASId !== null ? String(reassignASId) : null}
         onChange={(val) => {
-          const selectedOption = reassignOptions.find((option) => option.value === val);
+          const selectedOption = reassignOptions.find(
+            (option) => option.value === val,
+          );
           setReassignASId(val ? Number(val) : null);
           setReassignAS(selectedOption?.label ?? "");
         }}
@@ -152,9 +154,6 @@ export default function ReassignModal({
             setReassignStatus("APPROVED");
             setReassignModalOpen(false);
             setReassignAcceptModalOpen(true);
-            // if (reassignASId !== null) {
-            //   onConfirm?.(reassignStatus, reassignASId);
-            // }
           }}
           disabled={reassignASId === null}
         >
@@ -172,7 +171,11 @@ export default function ReassignModal({
               },
             },
           }}
-          onClick={() => setReassignModalOpen(false)}
+          onClick={() => {
+            setReassignStatus("REJECTED");
+            setReassignModalOpen(false);
+            setReassignRejectModalOpen(true);
+          }}
         >
           Decline
         </Button>
