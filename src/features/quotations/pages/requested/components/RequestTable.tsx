@@ -124,12 +124,13 @@ export function RequestTable({
                 </Table.Td>
               </Table.Tr>
             ) : (
-              rows.map((row) => (
+              rows.map((row, index) => (
                 <Table.Tr
                   key={String(row.id)}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                   style={{
                     cursor: onRowClick ? "pointer" : "default",
+                    backgroundColor: index % 2 === 1 ? "#F1F3F4" : "#ffffff",
                     boxShadow: `inset 6px 0 0 ${rowBorderColor(row)}`,
                   }}
                 >
