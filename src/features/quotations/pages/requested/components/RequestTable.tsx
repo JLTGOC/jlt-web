@@ -62,7 +62,8 @@ function statusButtonBg(row: RequestedQuotationRow) {
 }
 
 function rowBorderColor(row: RequestedQuotationRow) {
-  return row.assignment_status === "AVAILABLE" ? "#54B99B" : "#368DC4";
+  // Color by client type: NEW => green, OLD/undefined => blue
+  return row.client_type === "NEW" ? "#54B99B" : "#368DC4";
 }
 
 export function RequestTable({
@@ -124,13 +125,12 @@ export function RequestTable({
                 </Table.Td>
               </Table.Tr>
             ) : (
-              rows.map((row, index) => (
+              rows.map((row) => (
                 <Table.Tr
                   key={String(row.id)}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                   style={{
                     cursor: onRowClick ? "pointer" : "default",
-                    backgroundColor: index % 2 === 1 ? "#F1F3F4" : "#ffffff",
                     boxShadow: `inset 6px 0 0 ${rowBorderColor(row)}`,
                   }}
                 >
