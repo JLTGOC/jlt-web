@@ -379,7 +379,7 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
       gap="sm"
       style={{
         height:
-          "calc(100vh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2)",
+          "calc(100dvh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2)",
         minHeight: 0,
         overflow: "hidden",
       }}
@@ -424,13 +424,25 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
         </AppButton>
       </Group>
 
-      <Group align="stretch" grow style={{ flex: 1, minHeight: 0 }}>
-        <Box style={{ minWidth: 0, flex: 1, minHeight: 0 }}>
+      <Group
+        align="stretch"
+        grow
+        wrap="nowrap"
+        style={{ flex: 1, minHeight: 0 }}
+      >
+        <Box
+          style={{
+            minWidth: 0,
+            flex: 1,
+            minHeight: 0,
+            display: "grid",
+            overflow: "hidden",
+          }}
+        >
           <PageCard
             title="Quotation Details"
             hideBackButton
             showDivider
-            fullHeight
             bodyPx="md"
             bodyPy="md"
           >
@@ -493,12 +505,19 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
           </PageCard>
         </Box>
 
-        <Box style={{ minWidth: 0, flex: 1, minHeight: 0 }}>
+        <Box
+          style={{
+            minWidth: 0,
+            flex: 1,
+            minHeight: 0,
+            display: "grid",
+            overflow: "hidden",
+          }}
+        >
           <PageCard
             title="Billing Details"
             hideBackButton
             showDivider
-            fullHeight
             action={
               <ActionIcon
                 color="jltAccent.6"

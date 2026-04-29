@@ -71,7 +71,7 @@ export function PageCard({
       className={classes.root}
       style={{
         height: fullHeight
-          ? "min(100%, calc(100vh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2))"
+          ? "min(100%, calc(100dvh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2))"
           : undefined,
         ...(fullHeight
           ? {

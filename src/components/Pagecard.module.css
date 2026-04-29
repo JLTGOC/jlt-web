@@ -1,6 +1,6 @@
 .root {
   max-height: calc(
-    100vh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2
+    100dvh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2
   );
   display: flex;
   flex-direction: column;
@@ -78,4 +78,3 @@
 .jobSwitchOption[data-active] .jobSwitchLabel {
   color: #334d66;
 }
-
