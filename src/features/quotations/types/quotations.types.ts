@@ -1,14 +1,5 @@
 // ─── Index response shape (web platform) ──────────────────────────────────────
 
-export interface QuotationListItem {
-  id: string;
-  date: string;
-  person_in_charge: string;
-  commodity: string;
-  service_type: string | null;
-  conversation_id: string | null;
-}
-
 export interface QuotationClientGroup {
   client_id: number;
   name: string;
@@ -24,10 +15,6 @@ export interface QuotationsPagination {
   total: number;
 }
 
-export interface QuotationsIndexResponse {
-  quotations: QuotationClientGroup[];
-  pagination: QuotationsPagination;
-}
 
 export interface RespondedQuotationLogisticsService {
   commodity: string;

@@ -127,7 +127,7 @@ export function useRequestedQuotationsPage() {
       status,
       as_id,
     }: {
-      id: number | string;
+      id: number;
       status: string;
       as_id: number | null;
     }) => reassignQuotation(id, status, as_id),
@@ -148,7 +148,7 @@ export function useRequestedQuotationsPage() {
       reason,
       additionalDetails,
     }: {
-      id: number | string;
+      id: number;
       reason: string;
       additionalDetails: string;
     }) => reassignRequest(id, reason, additionalDetails),
@@ -164,7 +164,7 @@ export function useRequestedQuotationsPage() {
   });
 
   const acceptQuotationMutation = useMutation({
-    mutationFn: (id: number | string) => acceptQuotation(id),
+    mutationFn: (id: number) => acceptQuotation(id),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: requestedQueryKeys.requestedRoot(),
@@ -188,6 +188,7 @@ export function useRequestedQuotationsPage() {
   const handleReassignConfirm = () => {
     if (!selectedQuotation) return;
     if (!reassignStatus) return;
+    if (selectedQuotation.id == null) return;
 
     reassignQuotationMutation.mutate({
       id: selectedQuotation.id,
@@ -198,12 +199,14 @@ export function useRequestedQuotationsPage() {
 
   const handleAcceptConfirm = () => {
     if (!selectedQuotation) return;
+    if (selectedQuotation.id == null) return;
 
     acceptQuotationMutation.mutate(selectedQuotation.id);
   };
 
   const handleReassignRequestSubmit = () => {
     if (!selectedQuotation) return;
+    if (selectedQuotation.id == null) return;
 
     reassignRequestMutation.mutate({
       id: selectedQuotation.id,

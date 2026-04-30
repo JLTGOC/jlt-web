@@ -1,19 +1,17 @@
 import { apiClient } from "@/lib/api/client";
 import type {
-  FetchRequestedQuotationsParams,
-  QuotationsResponse,
   ReassignEnumsResponse,
   ReassignQuotationSpecificDetailsResponse,
 } from "../../types/quotations.types";
 
 export async function acceptQuotation(
-  quotationID: number | string,
+  quotationID: number,
 ): Promise<void> {
   await apiClient.put(`/quotations/${quotationID}/accept-assignment`);
 }
 
 export async function reassignQuotation(
-  quotationID: number | string,
+  quotationID: number,
   status: string,
   as_id: number | null,
 ): Promise<void> {
@@ -26,7 +24,7 @@ export async function reassignQuotation(
 }
 
 export async function reassignRequest(
-  quotationID: number | string,
+  quotationID: number,
   reason: string,
   additional_details: string,
 ): Promise<void> {

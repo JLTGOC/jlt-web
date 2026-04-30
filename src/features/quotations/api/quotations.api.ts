@@ -1,6 +1,5 @@
 import { apiClient } from "@/lib/api/client";
 import type {
-  QuotationsIndexResponse,
   QuotationResource,
   QuotationStatus,
   FetchRequestedQuotationsParams,
@@ -8,7 +7,6 @@ import type {
 } from "../types/quotations.types";
 
 export {
-  fetchRequestedQuotations,
   acceptQuotation,
   reassignQuotationEnums,
   reassignQuotationSpecificDetails,
