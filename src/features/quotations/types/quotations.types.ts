@@ -59,7 +59,7 @@ export interface RespondedQuotationsResponse {
   pagination: QuotationsPagination;
 }
 
-export interface RequestedQuotationLogisticsService {
+export interface QuotationLogisticsService {
   commodity: string;
   service_type: string;
   transport_mode: string;
@@ -67,12 +67,12 @@ export interface RequestedQuotationLogisticsService {
   destination: string;
 }
 
-export interface RequestedQuotationRegulatoryService {
+export interface QuotationRegulatoryService {
   application_type: string;
 }
 
-export interface RequestedQuotationListItem {
-  id: string | number;
+export interface QuotationListItem {
+  id: number | null;
   reference_number: string;
   date: string;
   client_full_name: string;
@@ -82,13 +82,15 @@ export interface RequestedQuotationListItem {
   assigned_at: string | null;
   requested_at: string | null;
   service: string;
-  logistics_service: RequestedQuotationLogisticsService | null;
-  regulatory_service: RequestedQuotationRegulatoryService | null;
+  logistics_service: QuotationLogisticsService | null;
+  regulatory_service: QuotationRegulatoryService | null;
   reassignment_request_id: number | null;
   reassignment_requested_at: number | null;
   conversation_id: string | null;
   prepared_by: string | null;
   issued_quotation_id: string | null;
+  as_profile_image: string | null;
+  client_type: string
 }
 
 export interface ClientCounts {
@@ -97,10 +99,10 @@ export interface ClientCounts {
   new_user_quotations: number;
 }
 
-export interface RequestedQuotationsResponse {
+export interface QuotationsResponse {
   counts: ClientCounts;
-  quotations: RequestedQuotationListItem[];
-  my_quotations: RequestedQuotationListItem[];
+  quotations: QuotationListItem[];
+  my_quotations: QuotationListItem[];
   pagination: QuotationsPagination;
   my_quotations_pagination: QuotationsPagination;
 }
@@ -261,6 +263,7 @@ export type FetchRequestedQuotationsParams = {
   "filter[assignment_status]"?: string;
   "filter[created_at]"?: string;
   "filter[service]"?: string;
+  "filter[status]":string;
 }
 
 export type ReassignEnumsResponse = {

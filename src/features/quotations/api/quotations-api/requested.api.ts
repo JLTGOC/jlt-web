@@ -1,19 +1,21 @@
 import { apiClient } from "@/lib/api/client";
 import type {
   FetchRequestedQuotationsParams,
-  RequestedQuotationsResponse,
+  QuotationsResponse,
   ReassignEnumsResponse,
   ReassignQuotationSpecificDetailsResponse,
 } from "../../types/quotations.types";
 
 export async function fetchRequestedQuotations(
   params: FetchRequestedQuotationsParams,
-): Promise<RequestedQuotationsResponse> {
+): Promise<QuotationsResponse> {
   const response = await apiClient.get<{
-    data: RequestedQuotationsResponse | [];
+    data: QuotationsResponse | [];
   }>("/quotations", {
     params: {
-      "filter[status]": "REQUESTED",
+      ...(params["filter[status]"]
+        ? { "filter[status]": params["filter[status]"] }
+        : {}),
       ...(params["filter[assignment_status]"]
         ? { "filter[assignment_status]": params["filter[assignment_status]"] }
         : {}),

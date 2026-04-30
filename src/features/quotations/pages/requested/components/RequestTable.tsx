@@ -9,16 +9,18 @@ import {
   Center,
   Loader,
   Pagination,
+  Image
 } from "@mantine/core";
 import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
 import {
   RequestQuote,
   Autorenew,
   PanToolAlt,
+  CheckCircle
 } from "@nine-thirty-five/material-symbols-react/outlined";
-import type { RequestedQuotationListItem } from "@/features/quotations/types/quotations.types";
+import type { QuotationListItem } from "@/features/quotations/types/quotations.types";
 
-type RequestedQuotationRow = RequestedQuotationListItem;
+type RequestedQuotationRow = QuotationListItem;
 
 const tableHead = [
   "REQUEST",
@@ -29,7 +31,7 @@ const tableHead = [
 ] as const;
 
 interface RequestTableProps {
-  rows: RequestedQuotationRow[];
+  rows: QuotationRow[];
   isLoading?: boolean;
   showingCount?: number;
   total?: number;
@@ -196,9 +198,12 @@ export function RequestTable({
 
                   <Table.Td>
                     {row.account_specialist !== null ? (
+                      <Group>
+                        <Image radius="xl" h={50} w={50} src={row.as_profile_image}/>
                       <Text c="#334155" fz="0.75rem" lh={1.4}>
                         {row.account_specialist}
                       </Text>
+                      </Group>
                     ) : (
                       <Text c="#334155" fz="0.75rem" lh={1.4}>
                         Unassigned
@@ -234,7 +239,7 @@ export function RequestTable({
                         </>
                       )}
 
-                      {row.assignment_status === "REASSIGNMENT REQUESTED" && (
+                      {row.assignment_status === "REASSIGNMENT REQUESTED" ? (
                         <>
                           <Button
                             styles={{
@@ -252,9 +257,7 @@ export function RequestTable({
                             Req. Reassignmet: {row.requested_at}
                           </Text>
                         </>
-                      )}
-
-                      {row.assignment_status === "AVAILABLE" && (
+                      ) : row.assignment_status === "AVAILABLE" ? (
                         <Button
                           styles={{ root: { background: statusButtonBg(row) } }}
                           leftSection={<PanToolAlt width={20} />}
@@ -265,7 +268,14 @@ export function RequestTable({
                         >
                           Accept
                         </Button>
-                      )}
+                      ) : (
+                        <Group>
+                          <CheckCircle width={20} color={"green"}/>
+                          <Text>Accepted</Text>
+                        </Group>
+  
+  )}
+
 
                       {row.assignment_status === "ASSIGNED" && (
                         <Text c="#334155" fz="0.65rem" fw={400} lh={1.4}>

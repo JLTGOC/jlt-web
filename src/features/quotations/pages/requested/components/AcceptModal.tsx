@@ -37,7 +37,7 @@ export default function AcceptModal({
           },
           title: {
             color: "#16345b",
-            fontSize: "1.75rem",
+            fontSize: "1.2rem",
             fontWeight: 700,
             letterSpacing: "0.02em",
             textTransform: "uppercase",
@@ -50,7 +50,7 @@ export default function AcceptModal({
           },
         }}
       >
-        <Text c="#1f1f1f" fz="1.125rem" lh={1.4} mb="1.75rem">
+        <Text c="#1f1f1f" fz=".9rem" lh={1.4} mb="1.75rem">
           You are about to <strong>ACCEPT</strong> this request.
           <br />
           <br />
@@ -64,7 +64,7 @@ export default function AcceptModal({
         <Group justify="center">
           <Button
             radius={12}
-            h={48}
+            h={40}
             miw={320}
             tt="uppercase"
             styles={{
@@ -80,7 +80,7 @@ export default function AcceptModal({
               },
               label: {
                 color: "#ffffff",
-                fontSize: "1.25rem",
+                fontSize: ".9rem",
                 fontWeight: 500,
                 letterSpacing: "0.01em",
               },

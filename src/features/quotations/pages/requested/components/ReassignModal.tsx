@@ -72,7 +72,7 @@ export default function ReassignModal({
         },
         title: {
           color: "#16345b",
-          fontSize: "1.75rem",
+          fontSize: "1.2rem",
           fontWeight: 700,
           letterSpacing: "0.02em",
           textTransform: "uppercase",
@@ -86,40 +86,40 @@ export default function ReassignModal({
       }}
     >
       <Group gap={6} align="flex-start" mb={4}>
-        <Text c="#7b7b7b" fz="1rem" w={170}>
+        <Text c="#7b7b7b" fz=".9rem" w={"50%"}>
           Quotation Request Ref. No
         </Text>
-        <Text c="#1e3049" fz="1rem" fw={600}>
+        <Text c="#1e3049" fz=".9rem" fw={600}>
           {selectedQuotation?.reference_number ?? "-"}
         </Text>
       </Group>
       <Group gap={6} align="flex-start" mb={4}>
-        <Text c="#7b7b7b" fz="1rem" w={170}>
+        <Text c="#7b7b7b" fz=".9rem" w={"50%"}>
           From:
         </Text>
-        <Text c="#1e3049" fz="1rem" fw={500}>
+        <Text c="#1e3049" fz=".9rem" fw={500}>
           {selectedQuotation?.account_specialist ??
             selectedQuotation?.prepared_by ??
             "-"}
         </Text>
       </Group>
       <Group gap={6} align="flex-start" mb={4}>
-        <Text c="#7b7b7b" fz="1rem" w={170}>
+        <Text c="#7b7b7b" fz=".9rem" w={"50%"}>
           Reason :
         </Text>
-        <Text c="#1e3049" fz="1rem" fw={500}>
+        <Text c="#1e3049" fz=".9rem" fw={500}>
           {reassignSpecificDetails?.reason ?? "-"}
         </Text>
       </Group>
       <Text c="#7b7b7b" fz="1rem" mb={2}>
         Additional Details
       </Text>
-      <Text c="#1e3049" fz="1rem" lh={1.4} mb="1rem">
+      <Text c="#1e3049" fz=".9rem" lh={1.4} mb="1rem">
         {reassignSpecificDetails?.additional_details ?? "-"}
       </Text>
 
       <Select
-        mb="1.25rem"
+        mb=".9rem"
         size="md"
         radius="sm"
         placeholder="Select handler"
@@ -138,7 +138,7 @@ export default function ReassignModal({
 
       <Group grow>
         <Button
-          h={48}
+          h={40}
           radius="md"
           leftSection={<CheckCircle width={18} />}
           styles={{
@@ -160,7 +160,7 @@ export default function ReassignModal({
           Reassign
         </Button>
         <Button
-          h={48}
+          h={40}
           radius="md"
           tt="uppercase"
           styles={{
@@ -170,6 +170,12 @@ export default function ReassignModal({
                 background: "#9e3d48",
               },
             },
+            label: {
+                color: "#ffffff",
+                fontSize: ".9rem",
+                fontWeight: 500,
+                letterSpacing: "0.01em",
+              },
           }}
           onClick={() => {
             setReassignStatus("REJECTED");

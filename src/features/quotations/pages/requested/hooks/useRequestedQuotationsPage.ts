@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 
 import {
   fetchQuotation,
-  fetchRequestedQuotations,
+  fetchQuotations,
   acceptQuotation,
   reassignQuotation,
   reassignQuotationEnums,
@@ -13,7 +13,7 @@ import {
 } from "@/features/quotations/api/quotations.api";
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
-import type { RequestedQuotationListItem } from "@/features/quotations/types/quotations.types";
+import type { QuotationListItem } from "@/features/quotations/types/quotations.types";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 
 import { requestedQueryKeys } from "../utils/requestedQueryKeys";
@@ -23,7 +23,7 @@ export function useRequestedQuotationsPage() {
   const queryClient = useQueryClient();
 
   const [selectedQuotation, setSelectedQuotation] =
-    useState<RequestedQuotationListItem | null>(null);
+    useState<QuotationListItem | null>(null);
 
   const [acceptModalOpen, setAcceptModalOpen] = useState(false);
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
@@ -80,7 +80,8 @@ export function useRequestedQuotationsPage() {
       perPaginationPage,
     }),
     queryFn: () =>
-      fetchRequestedQuotations({
+      fetchQuotations({
+        "filter[status]": "REQUESTED",
         "filter[assignment_status]":
           statusFilter === "ALL" ? undefined : statusFilter,
         "filter[service]": serviceFilter === "ALL" ? undefined : serviceFilter,
@@ -92,6 +93,8 @@ export function useRequestedQuotationsPage() {
         page: perPaginationPage,
       }),
   });
+
+  console.log("khate", data)
 
   const { data: reassignEnumsData } = useQuery({
     queryKey: requestedQueryKeys.requestedRoot(),
@@ -222,17 +225,17 @@ export function useRequestedQuotationsPage() {
     setReassignStatus("");
   };
 
-  const openAcceptModal = (row: RequestedQuotationListItem) => {
+  const openAcceptModal = (row: QuotationListItem) => {
     setSelectedQuotation(row);
     setAcceptModalOpen(true);
   };
 
-  const openReassignModal = (row: RequestedQuotationListItem) => {
+  const openReassignModal = (row: QuotationListItem) => {
     setSelectedQuotation(row);
     setReassignModalOpen(true);
   };
 
-  const openReassignRequestModal = (row: RequestedQuotationListItem) => {
+  const openReassignRequestModal = (row: QuotationListItem) => {
     setSelectedQuotation(row);
     setReassignRequestModalOpen(true);
   };
@@ -254,7 +257,7 @@ export function useRequestedQuotationsPage() {
       ? data?.pagination.count
       : data?.my_quotations_pagination.count;
 
-  const handleMakeQuotationClick = (row: RequestedQuotationListItem) => {
+  const handleMakeQuotationClick = (row: QuotationListItem) => {
     const quotationId = String(row.id);
     prefetchQuotationDetails(quotationId);
     navigate(
@@ -265,7 +268,7 @@ export function useRequestedQuotationsPage() {
     );
   };
 
-  const handleRowClick = (row: RequestedQuotationListItem) => {
+  const handleRowClick = (row: QuotationListItem) => {
     const quotationId = String(row.id);
     prefetchQuotationDetails(quotationId);
     navigate(
