@@ -41,6 +41,11 @@ export interface AppTableAction<T> {
 }
 
 export interface AppTableProps<T> {
+  /** Optional function to provide extra props for each row (e.g., style, className) */
+  getRowProps?: (
+    row: T,
+    index: number,
+  ) => React.HTMLAttributes<HTMLTableRowElement>;
   columns: AppTableColumn<T>[];
   data: T[];
   rowKey?: (row: T) => string | number;
@@ -120,6 +125,7 @@ export function AppTable<T>({
   showingCount: showingCountProp,
   onRowClick,
   onRowHover,
+  getRowProps,
 }: AppTableProps<T>) {
   const hasActions = Array.isArray(actions) && actions.length > 0;
   const showingCount = showingCountProp ?? data.length;
@@ -373,67 +379,72 @@ export function AppTable<T>({
         </Table.Thead>
 
         <Table.Tbody>
-          {data.map((row, idx) => (
-            <Table.Tr
-              key={rowKey ? rowKey(row) : idx}
-              onMouseEnter={onRowHover ? () => onRowHover(row) : undefined}
-            >
-              {finalColumns.map((col) => (
-                <Table.Td
-                  key={String(col.key)}
-                  onClick={
-                    onRowClick && col.type !== "select"
-                      ? () => onRowClick(row)
-                      : undefined
-                  }
-                  style={
-                    onRowClick && col.type !== "select"
-                      ? { cursor: "pointer" }
-                      : undefined
-                  }
-                >
-                  <>{renderCell(col, row, idx)}</>
-                </Table.Td>
-              ))}
-              {hasActions && (
-                <Table.Td
-                  style={{ textAlign: "right" }}
-                  onClick={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
-                  <Menu shadow="md" width="10rem" position="left-start">
-                    <Menu.Target>
-                      <ActionIcon
-                        variant="subtle"
-                        color="dark"
-                        size="sm"
-                        onClick={(e) => e.stopPropagation()}
-                        onMouseDown={(e) => e.stopPropagation()}
-                      >
-                        <MoreVert width={18} />
-                      </ActionIcon>
-                    </Menu.Target>
-                    <Menu.Dropdown>
-                      {actions!.map((action) => (
-                        <Menu.Item
-                          key={action.label}
-                          color={action.color}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            action.onClick(row);
-                          }}
-                          leftSection={action.icon}
-                          styles={{ item: { fontSize: "0.75rem" } }}
+          {data.map((row, idx) => {
+            const extraRowProps =
+              typeof getRowProps === "function" ? getRowProps(row, idx) : {};
+            return (
+              <Table.Tr
+                key={rowKey ? rowKey(row) : idx}
+                onMouseEnter={onRowHover ? () => onRowHover(row) : undefined}
+                {...extraRowProps}
+              >
+                {finalColumns.map((col) => (
+                  <Table.Td
+                    key={String(col.key)}
+                    onClick={
+                      onRowClick && col.type !== "select"
+                        ? () => onRowClick(row)
+                        : undefined
+                    }
+                    style={
+                      onRowClick && col.type !== "select"
+                        ? { cursor: "pointer" }
+                        : undefined
+                    }
+                  >
+                    <>{renderCell(col, row, idx)}</>
+                  </Table.Td>
+                ))}
+                {hasActions && (
+                  <Table.Td
+                    style={{ textAlign: "right" }}
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    <Menu shadow="md" width="10rem" position="left-start">
+                      <Menu.Target>
+                        <ActionIcon
+                          variant="subtle"
+                          color="dark"
+                          size="sm"
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
                         >
-                          {action.label}
-                        </Menu.Item>
-                      ))}
-                    </Menu.Dropdown>
-                  </Menu>
-                </Table.Td>
-              )}
-            </Table.Tr>
-          ))}
+                          <MoreVert width={18} />
+                        </ActionIcon>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        {actions!.map((action) => (
+                          <Menu.Item
+                            key={action.label}
+                            color={action.color}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              action.onClick(row);
+                            }}
+                            leftSection={action.icon}
+                            styles={{ item: { fontSize: "0.75rem" } }}
+                          >
+                            {action.label}
+                          </Menu.Item>
+                        ))}
+                      </Menu.Dropdown>
+                    </Menu>
+                  </Table.Td>
+                )}
+              </Table.Tr>
+            );
+          })}
         </Table.Tbody>
       </Table>
 
