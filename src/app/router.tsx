@@ -131,7 +131,7 @@ export const router = createBrowserRouter([
           { path: "shipments/:category", Component: Shipments },
           { path: "shipments", Component: Shipments },
 
-          // Job Orders routes — role-based
+          // Job Orders routes — role-based — most specific first
           { path: "job-orders", Component: JobOrdersPage },
 
           // ── Tools routes ──

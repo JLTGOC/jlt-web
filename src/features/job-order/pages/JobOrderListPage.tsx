@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Box, Divider, Stack, Text } from "@mantine/core";
+import { useState, useMemo, useEffect } from "react";
+import { Divider, Stack } from "@mantine/core";
 import { AppTable } from "../../../components/AppTable";
 import type { JobOrderListItem, JobOrderClientType } from "../types/jobOrder";
 import { RequestCell } from "../components/RequestCell";
@@ -57,37 +57,54 @@ function getClientType(row: JobOrderListItem): JobOrderClientType {
 }
 
 export default function JobOrderListPage() {
-  // State
   const [activeTab, setActiveTab] = useState<"all" | "new" | "old">("all");
   const [search, setSearch] = useState("");
   const [date, setDate] = useState("");
   const [service, setService] = useState("");
   const [personInCharge, setPersonInCharge] = useState("");
   const [perPage, setPerPage] = useState(10);
+  const [page, setPage] = useState(1);
 
-  // Filtering logic
   const filteredData = useMemo(() => {
     let data = MOCK_DATA;
-    if (activeTab === "new")
+
+    if (activeTab === "new") {
       data = data.filter((row) => getClientType(row) === "new");
-    if (activeTab === "old")
+    }
+
+    if (activeTab === "old") {
       data = data.filter((row) => getClientType(row) === "old");
-    if (search)
+    }
+
+    if (search) {
       data = data.filter(
         (row) =>
           row.client_full_name.toLowerCase().includes(search.toLowerCase()) ||
           row.reference_number.toLowerCase().includes(search.toLowerCase()),
       );
+    }
+
     if (date) data = data.filter((row) => row.created_at === date);
     if (service) data = data.filter((row) => row.service === service);
-    if (personInCharge)
+
+    if (personInCharge) {
       data = data.filter(
         (row) => row.person_in_charge?.name === personInCharge,
       );
+    }
+
     return data;
   }, [activeTab, search, date, service, personInCharge]);
 
-  // Counts for tabs
+  const pagedData = useMemo(
+    () => filteredData.slice((page - 1) * perPage, page * perPage),
+    [filteredData, page, perPage],
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab, search, date, service, personInCharge]);
+
   const counts = useMemo(() => {
     const all = MOCK_DATA.length;
     const newCount = MOCK_DATA.filter(
@@ -99,29 +116,28 @@ export default function JobOrderListPage() {
     return { all, new: newCount, old: oldCount };
   }, []);
 
-  // Service/person options
   const serviceOptions = [
     { value: "Logistics", label: "Logistics" },
     { value: "Regulatory", label: "Regulatory" },
   ];
+
   const personOptions = MOCK_DATA.map((row) => row.person_in_charge?.name)
     .filter(Boolean)
-    .filter((v, i, arr) => arr.indexOf(v) === i)
+    .filter((value, index, arr) => arr.indexOf(value) === index)
     .map((name) => ({ value: name!, label: name! }));
 
-  // Table columns
   const columns = [
     {
       key: "request",
       label: "REQUEST",
       render: (row: JobOrderListItem) => <RequestCell item={row} />,
-      width: "16.25rem", // 260px
+      width: "16.25rem",
     },
     {
       key: "details",
       label: "DETAILS",
       render: (row: JobOrderListItem) => <DetailsCell item={row} />,
-      width: "20rem", // 320px
+      width: "20rem",
     },
     {
       key: "person_in_charge",
@@ -129,7 +145,7 @@ export default function JobOrderListPage() {
       render: (row: JobOrderListItem) => (
         <PersonInChargeCell person={row.person_in_charge} />
       ),
-      width: "12.5rem", // 200px
+      width: "12.5rem",
     },
     {
       key: "quotation",
@@ -140,17 +156,22 @@ export default function JobOrderListPage() {
           id={row.quotation_id}
         />
       ),
-      width: "11.25rem", // 180px
+      width: "11.25rem",
     },
   ];
 
-  // Reset handler
   function handleReset() {
     setSearch("");
     setDate("");
     setService("");
     setPersonInCharge("");
     setActiveTab("all");
+    setPage(1);
+  }
+
+  function handlePerPageChange(value: number) {
+    setPerPage(value);
+    setPage(1);
   }
 
   return (
@@ -168,31 +189,30 @@ export default function JobOrderListPage() {
           date={date}
           onDateChange={setDate}
           service={service}
-          onServiceChange={(v) => setService(v || "")}
+          onServiceChange={(value) => setService(value || "")}
           personInCharge={personInCharge}
-          onPersonInChargeChange={(v) => setPersonInCharge(v || "")}
+          onPersonInChargeChange={(value) => setPersonInCharge(value || "")}
           onReset={handleReset}
           serviceOptions={serviceOptions}
           personOptions={personOptions}
         />
         <Divider />
-        <ShowEntriesControl perPage={perPage} onPerPageChange={setPerPage} />
+        <ShowEntriesControl
+          perPage={perPage}
+          onPerPageChange={handlePerPageChange}
+        />
         <AppTable
           columns={columns}
-          data={filteredData.slice(0, perPage)}
+          data={pagedData}
           rowKey={(row: JobOrderListItem) => row.id}
           total={filteredData.length}
-          showingCount={filteredData.slice(0, perPage).length}
+          showingCount={pagedData.length}
+          page={page}
+          onPageChange={setPage}
           getRowProps={(row) => ({
             style: getJobOrderRowStyle(getClientType(row)),
           })}
         />
-        <Box mt="xs">
-          <Text size="sm" c="dimmed">
-            Showing {Math.min(filteredData.length, perPage)} out of{" "}
-            {filteredData.length} entries
-          </Text>
-        </Box>
       </Stack>
     </PageCard>
   );

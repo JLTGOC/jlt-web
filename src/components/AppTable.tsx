@@ -8,6 +8,7 @@ import {
   Box,
   Switch,
   Tooltip,
+  Button,
 } from "@mantine/core";
 import {
   MoreVert,
@@ -99,6 +100,10 @@ export interface AppTableProps<T> {
   onRowClick?: (row: T) => void;
   /** Optional row hover handler for high-confidence prefetching */
   onRowHover?: (row: T) => void;
+  /** Current page (1-indexed). Enables pagination in the footer when provided. */
+  page?: number;
+  /** Called when the user clicks a page number or prev/next */
+  onPageChange?: (page: number) => void;
 }
 
 const ENTRY_OPTIONS = ["5", "10", "25", "50", "100"];
@@ -125,11 +130,14 @@ export function AppTable<T>({
   showingCount: showingCountProp,
   onRowClick,
   onRowHover,
+  page,
+  onPageChange,
   getRowProps,
 }: AppTableProps<T>) {
   const hasActions = Array.isArray(actions) && actions.length > 0;
   const showingCount = showingCountProp ?? data.length;
   const totalCount = total ?? data.length;
+  const hasPagination = page !== undefined && onPageChange && totalCount > 0;
 
   // Internal search state for uncontrolled usage
   const [internalSearch, setInternalSearch] = useState("");
@@ -449,11 +457,90 @@ export function AppTable<T>({
       </Table>
 
       {/* ── Footer ── */}
-      {withEntryControls && (
-        <Text mt="0.75rem" size="0.75rem" c="dimmed">
-          Showing {showingCount} out of {totalCount} entries
-        </Text>
+      {(withEntryControls || hasPagination) && (
+        <Group justify="space-between" align="center" mt="0.75rem">
+          <Text size="0.75rem" c="dimmed">
+            Showing {showingCount} out of {totalCount} entries
+          </Text>
+          {hasPagination && page !== undefined && onPageChange && (
+            <TablePagination
+              page={page}
+              totalPages={Math.ceil(totalCount / perPage)}
+              onPageChange={onPageChange}
+            />
+          )}
+        </Group>
       )}
     </Box>
+  );
+}
+
+// ─── Pagination ───────────────────────────────────────────────────────────────
+
+interface TablePaginationProps {
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+function TablePagination({
+  page,
+  totalPages,
+  onPageChange,
+}: TablePaginationProps) {
+  // Build the page number list with ellipsis for large ranges
+  const pages = useMemo(() => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (page <= 3) return [1, 2, 3, "...", totalPages];
+    if (page >= totalPages - 2)
+      return [1, "...", totalPages - 2, totalPages - 1, totalPages];
+    return [1, "...", page - 1, page, page + 1, "...", totalPages];
+  }, [page, totalPages]);
+
+  return (
+    <Group gap="0.25rem">
+      <Button
+        variant="outline"
+        size="xs"
+        onClick={() => page > 1 && onPageChange(page - 1)}
+        disabled={page === 1}
+        leftSection={
+          <ChevronRight width={14} style={{ transform: "rotate(180deg)" }} />
+        }
+      >
+        Previous
+      </Button>
+
+      {pages.map((p, i) =>
+        p === "..." ? (
+          <Text key={`ellipsis-${i}`} size="0.75rem" c="dimmed">
+            ...
+          </Text>
+        ) : (
+          <Button
+            key={p}
+            variant={p === page ? "filled" : "default"}
+            size="xs"
+            onClick={() =>
+              typeof p === "number" && p !== page && onPageChange(p)
+            }
+          >
+            {p}
+          </Button>
+        ),
+      )}
+
+      <Button
+        variant="outline"
+        size="xs"
+        onClick={() => page < totalPages && onPageChange(page + 1)}
+        disabled={page === totalPages}
+        rightSection={<ChevronRight width={14} />}
+      >
+        Next
+      </Button>
+    </Group>
   );
 }
