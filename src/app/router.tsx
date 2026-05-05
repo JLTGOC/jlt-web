@@ -35,7 +35,7 @@ const ShipmentDetailsPage = lazy(() =>
 
 //Job Orders imports
 const JobOrdersPage = lazy(
-  () => import("@/features/job-orders/pages/JobOrdersPage"),
+  () => import("@/app/routes/app/job-orders/JobOrdersPage"),
 );
 
 //Tool imports
