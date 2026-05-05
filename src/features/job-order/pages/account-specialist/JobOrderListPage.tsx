@@ -1,15 +1,15 @@
 import { useState, useMemo, useEffect } from "react";
 import { Divider, Stack } from "@mantine/core";
-import { AppTable } from "../../../components/AppTable";
-import type { JobOrderListItem, JobOrderClientType } from "../types/jobOrder";
-import { RequestCell } from "../components/RequestCell";
-import { getJobOrderRowStyle } from "../components/JobOrderTableRow";
-import { DetailsCell } from "../components/DetailsCell";
-import { PersonInChargeCell } from "../components/PersonInChargeCell";
-import { QuotationCell } from "../components/QuotationCell";
-import { JobOrderTabs } from "../components/JobOrderTabs";
-import { JobOrderFilters } from "../components/JobOrderFilters";
-import { ShowEntriesControl } from "../components/ShowEntriesControl";
+import { AppTable } from "../../../../components/AppTable";
+import type { JobOrderListItem, JobOrderClientType } from "../../types/jobOrder";
+import { RequestCell } from "./components/RequestCell";
+import { getJobOrderRowStyle } from "./components/JobOrderTableRow";
+import { DetailsCell } from "./components/DetailsCell";
+import { PersonInChargeCell } from "./components/PersonInChargeCell";
+import { QuotationCell } from "./components/QuotationCell";
+import { JobOrderTabs } from "./components/JobOrderTabs";
+import { JobOrderFilters } from "./components/JobOrderFilters";
+import { ShowEntriesControl } from "./components/ShowEntriesControl";
 import { PageCard } from "@/components/PageCard";
 
 // MOCK DATA (replace with API call/hook)
