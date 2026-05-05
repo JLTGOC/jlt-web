@@ -1,7 +1,7 @@
 import { RoleGuard } from "@/components/guards/RoleGuard";
 import { ROLES } from "@/types/roles";
 import { QuotationsRequested } from "@/features/quotations/pages/requested/QuotationsRequested";
-import JobOrderListPage from "@/features/job-order/pages/JobOrderListPage";
+import JobOrderListPage from "@/features/job-order/pages/account-specialist/JobOrderListPage";
 
 /**
  * JobOrders Page
