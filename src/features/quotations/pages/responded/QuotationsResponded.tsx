@@ -5,7 +5,7 @@ import { Box, Stack, Flex, Pagination } from "@mantine/core";
 
 import { PageCard } from "@/components/PageCard";
 import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
-import { fetchRespondedQuotations } from "@/features/quotations/api/quotations.api";
+import { fetchQuotations } from "@/features/quotations/api/quotations.api";
 import { respondedQueryKeys } from "./utils/respondedQueryKeys";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 
@@ -45,7 +45,8 @@ export function QuotationsResponded() {
       currentPage,
     }),
     queryFn: () =>
-      fetchRespondedQuotations({
+      fetchQuotations({
+        "filter[status]": "RESPONDED",
         search: searchQuery || undefined,
         "filter[service]": serviceFilter === "ALL SERVICES" ? undefined : serviceFilter,
         "filter[created_at]": dateFilter || undefined,

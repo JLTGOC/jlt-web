@@ -1,12 +1,11 @@
 import {
   Badge,
   Box,
-  Divider,
+  ThemeIcon,
   Group,
   Text,
   UnstyledButton,
 } from "@mantine/core";
-
 
 import type { ClientCounts } from "@/features/quotations/types/quotations.types";
 
@@ -54,6 +53,13 @@ export function RequestFilterClient({
             }}
             onClick={() => setClientFilter(client as any)}
           >
+            {client === "NEW" ? (
+              <ThemeIcon radius="xl" size={10} color={"#54B99B"}/>
+            ) : client === "OLD" ? (
+              <ThemeIcon radius="xl" size={10} color={"#368DC4"}/>
+            ) : (
+              <ThemeIcon radius="xl" size={10} color={"#ffffff"}/>
+            )}
             <Text fz="0.82rem" fw={700} c="#2c3f55">
               {client} CLIENTS
             </Text>

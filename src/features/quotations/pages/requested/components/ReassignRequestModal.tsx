@@ -51,7 +51,7 @@ export default function ReassignRequest({
         },
         title: {
           color: "#16345b",
-          fontSize: "1.75rem",
+          fontSize: "1.2rem",
           fontWeight: 700,
           letterSpacing: "0.02em",
           textTransform: "uppercase",
@@ -66,10 +66,10 @@ export default function ReassignRequest({
     >
       <Stack gap="1rem">
         <Group gap={6} align="flex-start">
-          <Text c="#7b7b7b" fz="0.95rem" fw={500}>
+          <Text c="#7b7b7b" fz="0.90rem" fw={500}>
             Request Ref. No:
           </Text>
-          <Text c="#1e3049" fz="0.95rem" fw={600}>
+          <Text c="#1e3049" fz="0.9rem" fw={600}>
             {selectedQuotation?.reference_number ?? referenceNumber}
           </Text>
         </Group>
@@ -106,7 +106,7 @@ export default function ReassignRequest({
 
         <Group grow>
           <Button
-            h={48}
+            h={40}
             radius="md"
             leftSection={<CheckCircle width={18} />}
             styles={{
@@ -115,6 +115,12 @@ export default function ReassignRequest({
                 "&:hover": {
                   background: "#162840",
                 },
+              },
+              label: {
+                color: "#ffffff",
+                fontSize: ".9rem",
+                fontWeight: 500,
+                letterSpacing: "0.01em",
               },
             }}
             tt="uppercase"

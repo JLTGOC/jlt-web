@@ -35,7 +35,7 @@ export default function ReassignRejectModal({
         },
         title: {
           color: "#16345b",
-          fontSize: "1.75rem",
+          fontSize: "1.2rem",
           fontWeight: 700,
           letterSpacing: "0.02em",
           textTransform: "uppercase",
@@ -48,7 +48,7 @@ export default function ReassignRejectModal({
         },
       }}
     >
-      <Text c="#1e3049" fz="1rem" fw={500} mb="1rem">
+      <Text c="#1e3049" fz=".9rem" fw={500} mb="1rem">
         You are about to <strong>REJECT</strong> this request.
       </Text>
 
@@ -59,7 +59,7 @@ export default function ReassignRejectModal({
 
       <Group grow>
         <Button
-          h={48}
+          h={40}
           radius="md"
           leftSection={<Close width={18} />}
           styles={{
@@ -69,6 +69,12 @@ export default function ReassignRejectModal({
                 background: "#9e3d48",
               },
             },
+             label: {
+                color: "#ffffff",
+                fontSize: ".9rem",
+                fontWeight: 500,
+                letterSpacing: "0.01em",
+              },
           }}
           tt="uppercase"
           onClick={onConfirm}
