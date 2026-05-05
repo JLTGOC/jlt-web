@@ -1,4 +1,4 @@
-import type { JobOrderClientType } from "../types/jobOrder";
+import type { JobOrderClientType } from "../../../types/jobOrder";
 
 const CLIENT_TYPE_COLOR: Record<JobOrderClientType, string> = {
   new: "teal",

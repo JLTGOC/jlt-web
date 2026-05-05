@@ -1,5 +1,5 @@
 import { Box, Text } from "@mantine/core";
-import type { JobOrderListItem } from "../types/jobOrder";
+import type { JobOrderListItem } from "../../../types/jobOrder";
 
 interface DetailsCellProps {
   item: JobOrderListItem;
