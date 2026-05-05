@@ -9,7 +9,7 @@ import {
 import { DatePickerInput } from "@mantine/dates";
 import { IconSearch, IconCalendar, IconChevronDown } from "@tabler/icons-react";
 
-interface JobOrderFiltersProps {
+interface JobOrderFilterTableProps {
   search: string;
   onSearchChange: (value: string) => void;
   onSearch: () => void;
@@ -24,7 +24,7 @@ interface JobOrderFiltersProps {
   personOptions: { value: string; label: string }[];
 }
 
-export function JobOrderFilters({
+export function JobOrderFilterTable({
   search,
   onSearchChange,
   onSearch,
@@ -37,7 +37,7 @@ export function JobOrderFilters({
   onReset,
   serviceOptions,
   personOptions,
-}: JobOrderFiltersProps) {
+}: JobOrderFilterTableProps) {
   return (
     <Group
       mb="sm"

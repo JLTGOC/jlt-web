@@ -1,16 +1,16 @@
 import { Group, Button, Text, Box } from "@mantine/core";
 
-interface JobOrderTabsProps {
+interface JobOrderFilterClientProps {
   activeTab: "all" | "new" | "old";
   counts: { all: number; new: number; old: number };
   onTabChange: (tab: "all" | "new" | "old") => void;
 }
 
-export function JobOrderTabs({
+export function JobOrderFilterClient({
   activeTab,
   counts,
   onTabChange,
-}: JobOrderTabsProps) {
+}: JobOrderFilterClientProps) {
   return (
     <Box
       mb="md"
