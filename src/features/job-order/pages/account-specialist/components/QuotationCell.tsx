@@ -1,4 +1,5 @@
 import { Anchor, Group, Text } from "@mantine/core";
+import { Link } from "react-router";
 import { IconExternalLink } from "@tabler/icons-react";
 
 interface QuotationCellProps {
@@ -15,9 +16,10 @@ export function QuotationCell({ reference, id }: QuotationCellProps) {
     );
   return (
     <Anchor
-      href={`/quotations/${id}`}
-      target="_blank"
-      rel="noopener noreferrer"
+      component={Link}
+      to={`/quotations/accepted/${id}/view`}
+      onClick={(event) => event.stopPropagation()}
+      onMouseDown={(event) => event.stopPropagation()}
     >
       <Group gap={4} align="center">
         <Text span fw={500} size="sm">

@@ -105,8 +105,10 @@ export default function JobOrderListPage() {
     if (service) data = data.filter((row) => row.service === service);
 
     if (personInCharge) {
-      data = data.filter(
-        (row) => row.person_in_charge?.name === personInCharge,
+      data = data.filter((row) =>
+        row.person_in_charge?.name
+          .toLowerCase()
+          .includes(personInCharge.toLowerCase()),
       );
     }
 
@@ -137,11 +139,6 @@ export default function JobOrderListPage() {
     { value: "Logistics", label: "Logistics" },
     { value: "Regulatory", label: "Regulatory" },
   ];
-
-  const personOptions = MOCK_DATA.map((row) => row.person_in_charge?.name)
-    .filter(Boolean)
-    .filter((value, index, arr) => arr.indexOf(value) === index)
-    .map((name) => ({ value: name!, label: name! }));
 
   function handleReset() {
     setSearch("");
@@ -194,7 +191,6 @@ export default function JobOrderListPage() {
           }
           onReset={handleReset}
           serviceOptions={serviceOptions}
-          personOptions={personOptions}
         />
         <Divider />
         <ShowEntriesControl
@@ -249,7 +245,7 @@ export default function JobOrderListPage() {
                     ...getJobOrderRowStyle(getClientType(row)),
                     cursor: "pointer",
                   }}
-                  onClick={() => navigate(`/job-orders/${row.id}`)}
+                  onClick={() => navigate(`/accounts/clients/${row.id}`)}
                 >
                   <Table.Td>
                     <RequestCell item={row} />

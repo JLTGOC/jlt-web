@@ -21,7 +21,6 @@ interface JobOrderFilterTableProps {
   onPersonInChargeChange: (value: string) => void;
   onReset: () => void;
   serviceOptions: { value: string; label: string }[];
-  personOptions: { value: string; label: string }[];
 }
 
 export function JobOrderFilterTable({
@@ -36,7 +35,6 @@ export function JobOrderFilterTable({
   onPersonInChargeChange,
   onReset,
   serviceOptions,
-  personOptions,
 }: JobOrderFilterTableProps) {
   return (
     <Group
@@ -141,16 +139,14 @@ export function JobOrderFilterTable({
         />
       </Box>
       <Box style={{ flex: 1, minWidth: "10rem" }}>
-        <Select
+        <TextInput
           placeholder="PERSON IN CHARGE"
-          data={personOptions}
           value={personInCharge}
-          onChange={(value) => onPersonInChargeChange(value ?? "")}
+          onChange={(event) =>
+            onPersonInChargeChange(event.currentTarget.value)
+          }
           radius="sm"
           variant="default"
-          clearable
-          rightSection={<IconChevronDown width={16} height={16} />}
-          rightSectionPointerEvents="none"
           w="100%"
         />
       </Box>

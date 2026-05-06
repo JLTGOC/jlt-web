@@ -1,4 +1,5 @@
 import { Box, Text, Anchor } from "@mantine/core";
+import { Link } from "react-router";
 import type { JobOrderListItem } from "../../../types/jobOrder";
 
 interface RequestCellProps {
@@ -14,7 +15,14 @@ export function RequestCell({ item }: RequestCellProps) {
         flexDirection: "column",
       }}
     >
-      <Anchor href={`#`} fw={700} size="sm">
+      <Anchor
+        component={Link}
+        to={`/job-orders/${item.id}`}
+        fw={700}
+        size="sm"
+        onClick={(event) => event.stopPropagation()}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         {item.reference_number}
       </Anchor>
       <Text size="xs" c="dimmed">
