@@ -79,7 +79,7 @@ export default function JobOrderListPage() {
   return (
     <>
       <PageCard
-        title="LIST OF PENDING JOB ORDERh"
+        title="LIST OF PENDING JOB ORDER"
         showJobSwitch
         jobSwitchValue={jobFilter}
         onJobSwitchChange={handleJobSwitchChange}
