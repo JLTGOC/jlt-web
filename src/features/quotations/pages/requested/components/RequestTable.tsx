@@ -9,18 +9,18 @@ import {
   Center,
   Loader,
   Pagination,
-  Image
+  Image,
 } from "@mantine/core";
 import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
 import {
   RequestQuote,
-  Autorenew,
+  ChangeCircle,
   PanToolAlt,
-  CheckCircle
+  CheckCircle,
 } from "@nine-thirty-five/material-symbols-react/outlined";
 import type { QuotationListItem } from "@/features/quotations/types/quotations.types";
 
-type RequestedQuotationRow = QuotationListItem;
+type QuotationRow = QuotationListItem;
 
 const tableHead = [
   "REQUEST",
@@ -39,15 +39,15 @@ interface RequestTableProps {
   jobFilter?: "all" | "my-items";
   perPaginationPage?: number;
   setPerPaginationPage?: (page: number) => void;
-  onRowClick?: (row: RequestedQuotationRow) => void;
-  onAcceptClick?: (row: RequestedQuotationRow) => void;
-  onReassignClick?: (row: RequestedQuotationRow) => void;
-  onReassignRequestClick?: (row: RequestedQuotationRow) => void;
-  onMakeQuotationClick?: (row: RequestedQuotationRow) => void;
+  onRowClick?: (row: QuotationRow) => void;
+  onAcceptClick?: (row: QuotationRow) => void;
+  onReassignClick?: (row: QuotationRow) => void;
+  onReassignRequestClick?: (row: QuotationRow) => void;
+  onMakeQuotationClick?: (row: QuotationRow) => void;
 }
 
 function toTitleCase(value: string) {
-  return value  
+  return value
     .toLowerCase()
     .replace(/[_-]+/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
@@ -57,13 +57,13 @@ function getServiceLabel(service: string) {
   return toTitleCase(service);
 }
 
-function statusButtonBg(row: RequestedQuotationRow) {
+function statusButtonBg(row: QuotationRow) {
   if (row.assignment_status === "AVAILABLE") return "#007406";
   if (row.assignment_status === "ASSIGNED") return "#3B82F6";
   return "#1D274E";
 }
 
-function rowBorderColor(row: RequestedQuotationRow) {
+function rowBorderColor(row: QuotationRow) {
   // Color by client type: NEW => green, OLD/undefined => blue
   return row.client_type === "NEW" ? "#54B99B" : "#368DC4";
 }
@@ -199,10 +199,15 @@ export function RequestTable({
                   <Table.Td>
                     {row.account_specialist !== null ? (
                       <Group>
-                        <Image radius="xl" h={50} w={50} src={row.as_profile_image}/>
-                      <Text c="#334155" fz="0.75rem" lh={1.4}>
-                        {row.account_specialist}
-                      </Text>
+                        <Image
+                          radius="xl"
+                          h={50}
+                          w={50}
+                          src={row.as_profile_image}
+                        />
+                        <Text c="#334155" fz="0.75rem" lh={1.4}>
+                          {row.account_specialist}
+                        </Text>
                       </Group>
                     ) : (
                       <Text c="#334155" fz="0.75rem" lh={1.4}>
@@ -226,26 +231,44 @@ export function RequestTable({
                           >
                             Make Quotation
                           </Button>
-                          <Button
-                            styles={{ root: { background: "#1D274E" } }}
-                            leftSection={<Autorenew width={20} />}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onReassignRequestClick?.(row);
-                            }}
-                          >
-                            Request Reassignment
-                          </Button>
+                          {row.assignment_status ===
+                          "REASSIGNMENT REQUESTED" ? (
+                            <Button
+                              c={"#CD862C"}
+                              styles={{ root: { background: "#E4D8CA" } }}
+                              leftSection={
+                                <ChangeCircle width={20} color="#CD862C" />
+                              }
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onReassignRequestClick?.(row);
+                              }}
+                            >
+                              Pending...
+                            </Button>
+                          ) : (
+                            <Button
+                              styles={{ root: { background: "#1D274E" } }}
+                              leftSection={<ChangeCircle width={20} />}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onReassignRequestClick?.(row);
+                              }}
+                            >
+                              Request Reassignment
+                            </Button>
+                          )}
                         </>
                       )}
 
-                      {row.assignment_status === "REASSIGNMENT REQUESTED" ? (
+                      {row.assignment_status === "REASSIGNMENT REQUESTED" &&
+                      jobFilter === "all" ? (
                         <>
                           <Button
                             styles={{
                               root: { background: statusButtonBg(row) },
                             }}
-                            leftSection={<Autorenew width={20} />}
+                            leftSection={<ChangeCircle width={20} />}
                             onClick={(event) => {
                               event.stopPropagation();
                               onReassignClick?.(row);
@@ -254,7 +277,7 @@ export function RequestTable({
                             Reassignment Request
                           </Button>
                           <Text c="#334155" fz="0.65rem" fw={400} lh={1.4}>
-                            Req. Reassignmet: {row.requested_at}
+                            Date: {row.requested_at}
                           </Text>
                         </>
                       ) : row.assignment_status === "AVAILABLE" ? (
@@ -268,18 +291,32 @@ export function RequestTable({
                         >
                           Accept
                         </Button>
-                      ) : (
+                      ) : jobFilter === "all" &&
+                        row.previously_assigned_to === null ? (
                         <Group>
-                          <CheckCircle width={20} color={"green"}/>
+                          <CheckCircle width={20} color={"green"} />
                           <Text>Accepted</Text>
                         </Group>
-  
-  )}
-
+                      ) : row.previously_assigned_to !== null ? (
+                        <>
+                          <Group>
+                            <ChangeCircle width={30} color="#CD862C" />
+                            <Text color="#CD862C">Reassigned </Text>
+                          </Group>
+                          <Button
+                            c={"#CD862C"}
+                            styles={{ root: { background: "#E4D8CA" } }}
+                          >
+                            {row.previously_assigned_to ?? "-"}
+                          </Button>
+                        </>
+                      ) : (
+                        ""
+                      )}
 
                       {row.assignment_status === "ASSIGNED" && (
                         <Text c="#334155" fz="0.65rem" fw={400} lh={1.4}>
-                          Req. Accepted: {row.assigned_at}
+                          Date: {row.assigned_at}
                         </Text>
                       )}
                     </Stack>
@@ -306,7 +343,12 @@ export function RequestTable({
           Showing {currentShowingCount} out of {currentTotal} entries
         </Text>
 
-        <Pagination total={totalPages || 1} value={perPaginationPage} onChange={setPerPaginationPage} size="xs" />
+        <Pagination
+          total={totalPages || 1}
+          value={perPaginationPage}
+          onChange={setPerPaginationPage}
+          size="xs"
+        />
       </Group>
     </>
   );

@@ -15,9 +15,9 @@ import {
   CalendarMonth,
   Search,
 } from "@nine-thirty-five/material-symbols-react/rounded";
-import type { RequestedQuotationListItem } from "@/features/quotations/types/quotations.types";
+import type { QuotationListItem } from "@/features/quotations/types/quotations.types";
 
-type RequestedQuotationRow = RequestedQuotationListItem;
+type RequestedQuotationRow = QuotationListItem;
 type ServiceFilterValue = "LOGISTICS" | "REGULATORY" | "ALL";
 type StatusFilterValue =
   | "AVAILABLE"
@@ -82,7 +82,7 @@ export function RequestFilterTable({
       .map(String);
   }, [total]);
 
-  const serviceOptions = ["LOGISTICS", "REGULATORY", "ALL SERVICES"];
+  const serviceOptions = ["ALL SERVICES", "LOGISTICS", "REGULATORY"];
 
   const statusOptions = useMemo(
     () => [
@@ -160,7 +160,7 @@ export function RequestFilterTable({
             size="sm"
             placeholder="ALL SERVICES"
             data={serviceOptions}
-            value={serviceFilter}
+            value={serviceFilter === "ALL" ? "ALL SERVICES" : serviceFilter}
             onChange={(value) => {
               if (value === "LOGISTICS" || value === "REGULATORY") {
                 setServiceFilter(value);

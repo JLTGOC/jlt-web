@@ -77,7 +77,8 @@ export interface QuotationListItem {
   prepared_by: string | null;
   issued_quotation_id: string | null;
   as_profile_image: string | null;
-  client_type: string
+  client_type: string;
+  previously_assigned_to: string | null;
 }
 
 export interface ClientCounts {
