@@ -153,6 +153,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
  */
 export const useCurrentUser = () => useAuthStore((state) => state.user);
 
+// for global access of the logged in uder role
+export const useCurrentUserRole = () =>
+  useAuthStore((state) => state.user?.role ?? null);
+
 /**
  * Get authentication status
  *
