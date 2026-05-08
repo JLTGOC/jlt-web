@@ -7,12 +7,12 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 
-import type { ClientCounts } from "@/features/quotations/types/quotations.types";
+import type { CountsResponse } from "@/features/job-order/types/operations";
 
-interface RequestFilterClientProps {
-  clientFilter: "ALL" | "NEW" | "OLD";
-  setClientFilter: (value: "ALL" | "NEW" | "OLD") => void;
-  clientCounts: ClientCounts | undefined;
+interface JobOrderFilterClientProps {
+  clientFilter: "ALL" | "LOGISTICS" | "REGULATORY";
+  setClientFilter: (value: "ALL" | "LOGISTICS" | "REGULATORY") => void;
+  clientCounts: CountsResponse | undefined;
 }
 
 const tabStyles = {
@@ -26,13 +26,13 @@ const tabStyles = {
   },
 };
 
-const Clients = ["ALL", "NEW", "OLD"];
+const Clients = ["ALL", "LOGISTICS", "REGULATORY"];
 
-export function RequestFilterClient({
+export function JobOrderFilterClient({
   clientFilter,
   setClientFilter,
   clientCounts,
-}: RequestFilterClientProps) {
+}: JobOrderFilterClientProps) {
   return (
     <Box
       p="xs"
@@ -53,22 +53,22 @@ export function RequestFilterClient({
             }}
             onClick={() => setClientFilter(client as any)}
           >
-            {client === "NEW" ? (
+            {client === "LOGISTICS" ? (
               <ThemeIcon radius="xl" size={10} color={"#54B99B"}/>
-            ) : client === "OLD" ? (
+            ) : client === "REGULATORY" ? (
               <ThemeIcon radius="xl" size={10} color={"#368DC4"}/>
             ) : (
               <ThemeIcon radius="xl" size={10} color={"#ffffff"}/>
             )}
             <Text fz="0.82rem" fw={700} c="#2c3f55">
-              {client} CLIENTS
+              {client}
             </Text>
             <Text fz="0.82rem" fw={700} c="#8a8f99">
               {client === "ALL"
-                ? clientCounts?.all_quotations
+                ? clientCounts?.all_job_orders
                 : client === "OLD"
-                  ? clientCounts?.old_user_quotations
-                  : clientCounts?.new_user_quotations}
+                  ? clientCounts?.old_user_job_orders
+                  : clientCounts?.new_user_job_orders}
             </Text>
           </UnstyledButton>
         ))}

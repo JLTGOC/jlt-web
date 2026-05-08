@@ -8,11 +8,12 @@ type Reassignprops = {
   reassignPersonels: any[];
   reassignSpecificDetails: any;
   setReassignStatus: (status: string) => void;
-  reassignASId: number | null;
-  setReassignASId: (id: number | null) => void;
+  reassignOPSId: number | null;
+  setReassignOPSId: (id: number | null) => void;
   setReassignAcceptModalOpen: (open: boolean) => void;
+  reassignOPS: string | null;
   setReassignRejectModalOpen: (open: boolean) => void;
-  setReassignAS: (as: string) => void;
+  setReassignOPS: (as: string) => void;
   onClose: () => void;
   // onConfirm?: (status: string, asId: number) => void;
 };
@@ -26,9 +27,10 @@ export default function ReassignModal({
   reassignPersonels,
   reassignSpecificDetails,
   setReassignStatus,
-  reassignASId,
-  setReassignASId,
-  setReassignAS,
+  reassignOPSId,
+  setReassignOPSId,
+  reassignOPS,
+  setReassignOPS,
   onClose,
   // onConfirm,
 }: Reassignprops) {
@@ -98,7 +100,7 @@ export default function ReassignModal({
           From:
         </Text>
         <Text c="#1e3049" fz=".9rem" fw={500}>
-          {selectedQuotation?.account_specialist ??
+          {selectedQuotation?.assigned_to ??
             selectedQuotation?.prepared_by ??
             "-"}
         </Text>
@@ -124,17 +126,19 @@ export default function ReassignModal({
         radius="sm"
         placeholder="Select handler"
         data={reassignOptions}
-        value={reassignASId !== null ? String(reassignASId) : null}
+        value={reassignOPSId !== null ? String(reassignOPSId) : null}
         onChange={(val) => {
           const selectedOption = reassignOptions.find(
             (option) => option.value === val,
           );
-          setReassignASId(val ? Number(val) : null);
-          setReassignAS(selectedOption?.label ?? "");
+          setReassignOPSId(val ? Number(val) : null);
+          setReassignOPS(selectedOption?.label ?? "");
         }}
+        error={selectedQuotation?.assigned_to === reassignOPS}
         searchable
         nothingFoundMessage="No handlers found"
       />
+      
 
       <Group grow>
         <Button
@@ -155,7 +159,7 @@ export default function ReassignModal({
             setReassignModalOpen(false);
             setReassignAcceptModalOpen(true);
           }}
-          disabled={reassignASId === null}
+          disabled={reassignOPSId === null && reassignOPSId !== null && String(reassignOPSId) === selectedQuotation?.ops_id?.toString()}
         >
           Reassign
         </Button>

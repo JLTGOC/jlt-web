@@ -4,26 +4,35 @@ import { useNavigate } from "react-router";
 
 import {
   fetchQuotation,
-  fetchQuotations,
-  acceptQuotation,
-  reassignQuotation,
   reassignQuotationEnums,
-  reassignQuotationSpecificDetails,
-  reassignRequest,
 } from "@/features/quotations/api/quotations.api";
+
+import {
+  fetchJobOrders,
+  acceptJobOrder,
+  reassignRequestJobOrder,
+  reassignJobOrder,
+  reassignJobOrderDetails,
+} from "@/features/job-order/api/jobOrder.api";
+
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
-import type { QuotationListItem } from "@/features/quotations/types/quotations.types";
+import type { JobOrderResponse } from "@/features/job-order/types/jobOrder";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
+import { jobOrderRoutes } from "@/features/job-order/utils/jobOrderRoutes";
+import { useCurrentUserRole } from "@/stores/authStore";
 
-import { requestedQueryKeys } from "../utils/requestedQueryKeys";
+import { jobOrdersQueryKeys } from "../utils/jobOrdersQueryKeys";
 
-export function useRequestedQuotationsPage() {
+export function useJobOrderPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const currentUserRole = useCurrentUserRole();
+
+  console.log("khate", currentUserRole);
 
   const [selectedQuotation, setSelectedQuotation] =
-    useState<QuotationListItem | null>(null);
+    useState<JobOrderResponse | null>(null);
 
   const [acceptModalOpen, setAcceptModalOpen] = useState(false);
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
@@ -36,15 +45,15 @@ export function useRequestedQuotationsPage() {
   const [reassignReason, setReassignReason] = useState<string>("");
   const [reassignAdditionalDetails, setReassignAdditionalDetails] =
     useState<string>("");
+
   const [reassignStatus, setReassignStatus] = useState<string>("");
-  const [reassignASId, setReassignASId] = useState<number | null>(null);
-  const [reassignAS, setReassignAS] = useState<string>("");
+  const [reassignOPSId, setReassignOPSId] = useState<number | null>(null);
+  const [reassignOPS, setReassignOPS] = useState<string>("");
 
   const [jobFilter, setJobFilter] = useState<"all" | "my-items">("all");
-  const [dateFilter, setDateFilter] = useState("");
-  const [clientFilter, setClientFilter] = useState<"ALL" | "NEW" | "OLD">(
-    "ALL",
-  );
+  const [clientFilter, setClientFilter] = useState<
+    "ALL" | "LOGISTICS" | "REGULATORY"
+  >("ALL");
   const [serviceFilter, setServiceFilter] = useState<
     "LOGISTICS" | "REGULATORY" | "ALL"
   >("ALL");
@@ -68,44 +77,36 @@ export function useRequestedQuotationsPage() {
   } = useQuotationTableSearch();
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: requestedQueryKeys.requestedList({
+    queryKey: jobOrdersQueryKeys.jobOrdersList({
       searchQuery,
       asSearchQuery: secondarySearchQuery,
       clientFilter,
       serviceFilter,
       statusFilter,
-      dateFilter,
       perPage,
       jobFilter,
       perPaginationPage,
     }),
     queryFn: () =>
-      fetchQuotations({
-        "filter[status]": "REQUESTED",
+      fetchJobOrders({
         "filter[assignment_status]":
-          statusFilter === "ALL" ? undefined : statusFilter,
+          statusFilter === "ALL" ? undefined : clientFilter,
         "filter[service]": serviceFilter === "ALL" ? undefined : serviceFilter,
-        "filter[created_at]": dateFilter || undefined,
         search: searchQuery || undefined,
-        as_search: secondarySearchQuery || undefined,
-        client_type: clientFilter === "ALL" ? undefined : clientFilter,
+        // client_type: clientFilter === "ALL" ? undefined : clientFilter,
         per_page: perPage,
         page: perPaginationPage,
       }),
+    staleTime: 0,
   });
 
-  console.log("khate", data)
-
   const { data: reassignEnumsData } = useQuery({
-    queryKey: requestedQueryKeys.requestedRoot(),
-    queryFn: () => reassignQuotationEnums("fetch", "fetch", "fetch"),
+    queryKey: jobOrdersQueryKeys.jobOrdersRoot,
+    queryFn: () => reassignQuotationEnums("", "fetch", "fetch"),
   });
 
   const reassignPersonels = useMemo(
-    () => [
-      ...(reassignEnumsData?.account_specialists ?? []),
-      ...(reassignEnumsData?.operations ?? []),
-    ],
+    () => [...(reassignEnumsData?.operations ?? [])],
     [reassignEnumsData],
   );
 
@@ -115,30 +116,32 @@ export function useRequestedQuotationsPage() {
       selectedQuotation?.reassignment_request_id,
     ],
     queryFn: () =>
-      reassignQuotationSpecificDetails(
+      reassignJobOrderDetails(
         selectedQuotation?.reassignment_request_id || null,
       ),
     enabled: !!selectedQuotation?.reassignment_request_id,
   });
 
-  const reassignQuotationMutation = useMutation({
+  // MUTATION
+
+  const reassignJobOrderMutation = useMutation({
     mutationFn: ({
       id,
       status,
-      as_id,
+      operations_id,
     }: {
       id: number;
       status: string;
-      as_id: number | null;
-    }) => reassignQuotation(id, status, as_id),
+      operations_id: number | null;
+    }) => reassignJobOrder(id, status, operations_id),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: requestedQueryKeys.requestedRoot(),
+        queryKey: jobOrdersQueryKeys.jobOrdersRoot,
       });
       closeModal();
     },
     onError: (error) => {
-      console.error("Error reassigning quotation:", error);
+      console.error("Error reassigning quotation:", error); 
     },
   });
 
@@ -150,11 +153,11 @@ export function useRequestedQuotationsPage() {
     }: {
       id: number;
       reason: string;
-      additionalDetails: string;
-    }) => reassignRequest(id, reason, additionalDetails),
+      additionalDetails: string | null;
+    }) => reassignRequestJobOrder(id, reason, additionalDetails),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: requestedQueryKeys.requestedRoot(),
+        queryKey: jobOrdersQueryKeys.jobOrdersRoot,
       });
       closeModal();
     },
@@ -163,11 +166,11 @@ export function useRequestedQuotationsPage() {
     },
   });
 
-  const acceptQuotationMutation = useMutation({
-    mutationFn: (id: number) => acceptQuotation(id),
+  const acceptJobOrderMutation = useMutation({
+    mutationFn: (id: number) => acceptJobOrder(id),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: requestedQueryKeys.requestedRoot(),
+        queryKey: jobOrdersQueryKeys.jobOrdersRoot,
       });
       setAcceptModalOpen(false);
       setSelectedQuotation(null);
@@ -190,10 +193,10 @@ export function useRequestedQuotationsPage() {
     if (!reassignStatus) return;
     if (selectedQuotation.id == null) return;
 
-    reassignQuotationMutation.mutate({
+    reassignJobOrderMutation.mutate({
       id: selectedQuotation.id,
       status: reassignStatus,
-      as_id: reassignASId,
+      operations_id: reassignOPSId,
     });
   };
 
@@ -201,7 +204,7 @@ export function useRequestedQuotationsPage() {
     if (!selectedQuotation) return;
     if (selectedQuotation.id == null) return;
 
-    acceptQuotationMutation.mutate(selectedQuotation.id);
+    acceptJobOrderMutation.mutate(selectedQuotation.id);
   };
 
   const handleReassignRequestSubmit = () => {
@@ -213,6 +216,9 @@ export function useRequestedQuotationsPage() {
       reason: reassignReason,
       additionalDetails: reassignAdditionalDetails,
     });
+
+    setReassignAdditionalDetails("");
+    setReassignReason("");
   };
 
   const closeModal = () => {
@@ -222,23 +228,23 @@ export function useRequestedQuotationsPage() {
     setReassignAccceptModalOpen(false);
     setReassignRequestModalOpen(false);
 
-    setReassignASId(null);
+    setReassignOPSId(null);
     setSelectedQuotation(null);
-    setReassignAS("");
+    setReassignOPS("");
     setReassignStatus("");
   };
 
-  const openAcceptModal = (row: QuotationListItem) => {
+  const openAcceptModal = (row: JobOrderResponse) => {
     setSelectedQuotation(row);
     setAcceptModalOpen(true);
   };
 
-  const openReassignModal = (row: QuotationListItem) => {
+  const openReassignModal = (row: JobOrderResponse) => {
     setSelectedQuotation(row);
     setReassignModalOpen(true);
   };
 
-  const openReassignRequestModal = (row: QuotationListItem) => {
+  const openReassignRequestModal = (row: JobOrderResponse) => {
     setSelectedQuotation(row);
     setReassignRequestModalOpen(true);
   };
@@ -248,19 +254,19 @@ export function useRequestedQuotationsPage() {
   };
 
   const requestRows =
-    jobFilter === "all" ? data?.quotations || [] : data?.my_quotations || [];
+    jobFilter === "all" ? data?.job_orders || [] : data?.my_job_orders || [];
 
   const totalPages =
     jobFilter === "all"
       ? data?.pagination.total_pages || 0
-      : data?.my_quotations_pagination.total_pages || 0;
+      : data?.my_job_orders_pagination.total_pages || 0;
 
   const showingCount =
     jobFilter === "all"
       ? data?.pagination.count
-      : data?.my_quotations_pagination.count;
+      : data?.my_job_orders_pagination.count;
 
-  const handleMakeQuotationClick = (row: QuotationListItem) => {
+  const handleMakeQuotationClick = (row: JobOrderResponse) => {
     const quotationId = String(row.id);
     prefetchQuotationDetails(quotationId);
     navigate(
@@ -271,24 +277,23 @@ export function useRequestedQuotationsPage() {
     );
   };
 
-  const handleRowClick = (row: QuotationListItem) => {
-    const quotationId = String(row.id);
-    prefetchQuotationDetails(quotationId);
+  const handleRowClick = (row: JobOrderResponse) => {
+    const jobOrderId = String(row.id);
     navigate(
-      quotationRoutes.details({
-        tab: "requested",
-        quotationId,
+      jobOrderRoutes.details({
+        tab: "operations",
+        jobOrderId,
       }),
     );
   };
 
   return {
     acceptModalOpen,
-    acceptQuotationPending: acceptQuotationMutation.isPending,
+    acceptQuotationPending: acceptJobOrderMutation.isPending,
     clientCounts: data?.counts,
     clientFilter,
     closeModal,
-    dateFilter,
+    currentUserRole,
     handleAcceptConfirm,
     handleJobSwitchChange,
     handleMakeQuotationClick,
@@ -307,8 +312,8 @@ export function useRequestedQuotationsPage() {
     openReassignRequestModal,
     perPage,
     perPaginationPage,
-    reassignAS,
-    reassignASId,
+    reassignOPS,
+    reassignOPSId,
     reassignAcceptModalOpen,
     reassignAdditionalDetails,
     reassignModalOpen,
@@ -318,7 +323,7 @@ export function useRequestedQuotationsPage() {
     reassignRejectModalOpen,
     reassignSpecificDetails,
     reassignStatus,
-    reassignQuotationPending: reassignQuotationMutation.isPending,
+    reassignQuotationPending: reassignJobOrderMutation.isPending,
     requestReassignModalOpen,
     requestRows,
     search,
@@ -327,12 +332,11 @@ export function useRequestedQuotationsPage() {
     serviceFilter,
     setAcceptModalOpen,
     setClientFilter,
-    setDateFilter,
     setJobFilter,
     setPerPage,
     setPerPaginationPage,
-    setReassignAS,
-    setReassignASId,
+    setReassignOPS,
+    setReassignOPSId,
     setReassignAccceptModalOpen,
     setReassignAdditionalDetails,
     setReassignModalOpen,
@@ -346,6 +350,6 @@ export function useRequestedQuotationsPage() {
     statusFilter,
     showingCount,
     totalPages,
-    totalQuotations: data?.counts.all_quotations ?? 0,
+    totalQuotations: data?.counts.all_job_orders ?? 0,
   };
 }

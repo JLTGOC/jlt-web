@@ -1,11 +1,11 @@
 // JobOrderListItem and related types for the Job Order feature
 
-export type {FetchJobOrdersParams} from "./operations";
+export type {FetchJobOrdersParams, JobOrderResponse, JobOrdersResponse, CountsResponse} from "./operations";
 
 export interface JobOrderListItem {
   id: string | number;
   reference_number: string;
-  client_full_name: string;
+  client: string;
   created_at: string;
   assignment_status: "AVAILABLE" | "ASSIGNED" | string;
   service: string;

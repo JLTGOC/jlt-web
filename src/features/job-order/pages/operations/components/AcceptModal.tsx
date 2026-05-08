@@ -56,7 +56,7 @@ export default function AcceptModal({
           <br />
           This request will be assigned to you,
           <br />
-          and you will be responsible for creating the quotation.
+          and you will be responsible for generating shipment.
           <br />
           <br />
           Do you want to proceed?
@@ -89,7 +89,7 @@ export default function AcceptModal({
             loading={isSubmitting}
             disabled={isSubmitting}
           >
-            ACCEPT REQUEST
+            ACCEPT
           </Button>
         </Group>
       </Modal></>
