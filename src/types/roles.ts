@@ -11,4 +11,6 @@ export const ROLES = {
   IT: "IT",
 } as const;
 
+export const JOB_ORDER_ROLES: Role[] = [ROLES.OPERATIONS, ROLES.LEAD_OPERATIONS];
+
 export type Role = (typeof ROLES)[keyof typeof ROLES];
