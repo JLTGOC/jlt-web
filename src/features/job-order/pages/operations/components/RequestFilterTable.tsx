@@ -15,9 +15,9 @@ import {
   CalendarMonth,
   Search,
 } from "@nine-thirty-five/material-symbols-react/rounded";
-import type { QuotationListItem } from "@/features/quotations/types/quotations.types";
+import type { RequestedQuotationListItem } from "@/features/quotations/types/quotations.types";
 
-type RequestedQuotationRow = QuotationListItem;
+type RequestedQuotationRow = RequestedQuotationListItem;
 type ServiceFilterValue = "LOGISTICS" | "REGULATORY" | "ALL";
 type StatusFilterValue =
   | "AVAILABLE"
@@ -82,7 +82,7 @@ export function RequestFilterTable({
       .map(String);
   }, [total]);
 
-  const serviceOptions = ["ALL SERVICES", "LOGISTICS", "REGULATORY"];
+  const serviceOptions = ["LOGISTICS", "REGULATORY", "ALL SERVICES"];
 
   const statusOptions = useMemo(
     () => [
@@ -129,16 +129,12 @@ export function RequestFilterTable({
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, md: 2 }}>
-          <DateInput
+          <Input
             w="100%"
             size="sm"
+            placeholder="SELECT STATUS"
+            // value={statusFilter}
             rightSectionWidth={45}
-            placeholder="REQ. DATE"
-            value={dateFilter}
-            onChange={(date) => {
-              const formatted = date ? dayjs(date).format("YYYY-MM-DD") : "";
-              setDateFilter(formatted);
-            }}
             rightSection={
               <Button
                 type="button"
@@ -147,50 +143,12 @@ export function RequestFilterTable({
                 p={0}
                 radius="sm"
                 color="#4f657d"
+                aria-label="Search"
+                onClick={() => onClientSearch(clientSearchValue)}
               >
-                <CalendarMonth width={24} height={24} fill="white" />
+                <Search width={24} height={24} fill="white" />
               </Button>
             }
-          />
-        </Grid.Col>
-
-        <Grid.Col span={{ base: 12, md: 2 }}>
-          <Select
-            w="100%"
-            size="sm"
-            placeholder="ALL SERVICES"
-            data={serviceOptions}
-            value={serviceFilter === "ALL" ? "ALL SERVICES" : serviceFilter}
-            onChange={(value) => {
-              if (value === "LOGISTICS" || value === "REGULATORY") {
-                setServiceFilter(value);
-                return;
-              }
-              setServiceFilter("ALL");
-            }}
-            rightSection={<ChevronRight width={16} />}
-          />
-        </Grid.Col>
-
-        <Grid.Col span={{ base: 12, md: 2 }}>
-          <Select
-            w="100%"
-            size="sm"
-            placeholder="SELECT STATUS"
-            data={statusOptions}
-            value={statusFilter}
-            onChange={(value) => {
-              if (
-                value === "AVAILABLE" ||
-                value === "ASSIGNED" ||
-                value === "REASSIGNMENT REQUESTED"
-              ) {
-                setStatusFilter(value);
-                return;
-              }
-              setStatusFilter("ALL");
-            }}
-            rightSection={<ChevronRight width={16} />}
           />
         </Grid.Col>
 

@@ -1,5 +1,7 @@
 // JobOrderListItem and related types for the Job Order feature
 
+export type {FetchJobOrdersParams} from "./operations";
+
 export interface JobOrderListItem {
   id: string | number;
   reference_number: string;
