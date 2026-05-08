@@ -21,7 +21,7 @@ export function PersonInChargeCell({ person }: PersonInChargeCellProps) {
     );
   }
   return (
-    <Group gap="xs">
+    <Group gap="xs" c="jltBlue">
       <Avatar src={person.avatar_url} radius="xl" size="2rem" color="blue">
         {person.name[0]}
       </Avatar>

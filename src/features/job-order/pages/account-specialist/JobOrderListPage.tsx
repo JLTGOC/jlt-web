@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import {
   Divider,
   Stack,
@@ -13,16 +13,17 @@ import {
   MoreVert,
   ChevronRight,
 } from "@nine-thirty-five/material-symbols-react/rounded";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import type {
   JobOrderListItem,
-  JobOrderClientType,
+  JobOrderServiceType,
 } from "../../types/jobOrder";
 import { RequestCell } from "./components/RequestCell";
 import { getJobOrderRowStyle } from "./components/JobOrderTableRow";
 import { DetailsCell } from "./components/DetailsCell";
+import { ServiceInformationCell } from "./components/ServiceInformationCell";
 import { PersonInChargeCell } from "./components/PersonInChargeCell";
-import { QuotationCell } from "./components/QuotationCell";
+import { StatusCell } from "./components/StatusCell";
 import { JobOrderFilterClient } from "./components/JobOrderFilterClient";
 import { JobOrderFilterTable } from "./components/JobOrderFilterTable";
 import { ShowEntriesControl } from "./components/ShowEntriesControl";
@@ -37,12 +38,17 @@ const MOCK_DATA: JobOrderListItem[] = [
     created_at: "2026-04-16",
     assignment_status: "ASSIGNED",
     service: "Logistics",
+    trade_type: "Import",
+    status: "Accepted",
     logistics_service: {
+      BL: "AMP012863",
       commodity: "Import",
-      service_type: "Air",
-      transport_mode: "Air",
+      transport_mode: "Sea",
       origin: "YTN Port, China",
       destination: "MNL Port, Manila",
+      service_level: "CC, DE",
+      eta: "2026-04-30",
+      etd: "2026-04-30",
     },
     person_in_charge: {
       name: "LEAD OPS PEÑA",
@@ -58,8 +64,12 @@ const MOCK_DATA: JobOrderListItem[] = [
     created_at: "2026-04-16",
     assignment_status: "AVAILABLE",
     service: "Regulatory",
+    trade_type: "Export",
+    status: "Pending",
     regulatory_service: {
       application_type: "Renewal",
+      assistance_type: "BOC New Importer Accreditation",
+      client_type: "NEW",
     },
     person_in_charge: undefined,
     quotation_reference: "QT-09-2026-055",
@@ -67,30 +77,47 @@ const MOCK_DATA: JobOrderListItem[] = [
   },
 ];
 
-function getClientType(row: JobOrderListItem): JobOrderClientType {
-  // Replace with real logic
-  return row.id === 1 ? "new" : "old";
-}
+// Filtering will use the `service` field on the row (e.g., "Logistics" | "Regulatory")
 
 export default function JobOrderListPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"all" | "new" | "old">("all");
-  const [search, setSearch] = useState("");
-  const [date, setDate] = useState("");
-  const [service, setService] = useState("");
-  const [personInCharge, setPersonInCharge] = useState("");
-  const [perPage, setPerPage] = useState(10);
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // derive filter state from query params (source of truth)
+  const activeTab =
+    (searchParams.get("service") as "all" | "Logistics" | "Regulatory") ||
+    "all";
+  const search = searchParams.get("q") || "";
+  const tradeType = searchParams.get("trade") || "";
+  const personInCharge = searchParams.get("person") || "";
+  const status = searchParams.get("status") || "";
+  const perPage = parseInt(searchParams.get("perPage") || "10", 10) || 10;
+  const page = parseInt(searchParams.get("page") || "1", 10) || 1;
+
+  function setParam(key: string, value: string) {
+    const next = new URLSearchParams(searchParams.toString());
+    if (value) next.set(key, value);
+    else next.delete(key);
+    // reset page when filters change (except when explicitly setting page)
+    if (key !== "page") next.delete("page");
+    setSearchParams(next);
+  }
+
+  function setPageParam(p: number) {
+    const next = new URLSearchParams(searchParams.toString());
+    next.set("page", String(p));
+    setSearchParams(next);
+  }
 
   const filteredData = useMemo(() => {
     let data = MOCK_DATA;
 
-    if (activeTab === "new") {
-      data = data.filter((row) => getClientType(row) === "new");
+    if (activeTab === "Logistics") {
+      data = data.filter((row) => row.service === "Logistics");
     }
 
-    if (activeTab === "old") {
-      data = data.filter((row) => getClientType(row) === "old");
+    if (activeTab === "Regulatory") {
+      data = data.filter((row) => row.service === "Regulatory");
     }
 
     if (search) {
@@ -101,8 +128,14 @@ export default function JobOrderListPage() {
       );
     }
 
-    if (date) data = data.filter((row) => row.created_at === date);
-    if (service) data = data.filter((row) => row.service === service);
+    if (tradeType) {
+      data = data.filter(
+        (row) =>
+          row.service !== "Logistics" ||
+          (row.service === "Logistics" && row.trade_type === tradeType),
+      );
+    }
+    if (status) data = data.filter((row) => row.status === status);
 
     if (personInCharge) {
       data = data.filter((row) =>
@@ -113,45 +146,41 @@ export default function JobOrderListPage() {
     }
 
     return data;
-  }, [activeTab, search, date, service, personInCharge]);
+  }, [activeTab, search, tradeType, status, personInCharge]);
 
   const pagedData = useMemo(
     () => filteredData.slice((page - 1) * perPage, page * perPage),
     [filteredData, page, perPage],
   );
 
-  useEffect(() => {
-    setPage(1);
-  }, [activeTab, search, date, service, personInCharge]);
-
   const counts = useMemo(() => {
     const all = MOCK_DATA.length;
-    const newCount = MOCK_DATA.filter(
-      (row) => getClientType(row) === "new",
+    const logisticsCount = MOCK_DATA.filter(
+      (row) => row.service === "Logistics",
     ).length;
-    const oldCount = MOCK_DATA.filter(
-      (row) => getClientType(row) === "old",
+    const regulatoryCount = MOCK_DATA.filter(
+      (row) => row.service === "Regulatory",
     ).length;
-    return { all, new: newCount, old: oldCount };
+    return { all, Logistics: logisticsCount, Regulatory: regulatoryCount };
   }, []);
 
-  const serviceOptions = [
-    { value: "Logistics", label: "Logistics" },
-    { value: "Regulatory", label: "Regulatory" },
+  const tradeTypeOptions = [
+    { value: "Import", label: "Import" },
+    { value: "Export", label: "Export" },
+  ];
+
+  const statusOptions = [
+    { value: "Accepted", label: "Accepted" },
+    { value: "Pending", label: "Pending" },
   ];
 
   function handleReset() {
-    setSearch("");
-    setDate("");
-    setService("");
-    setPersonInCharge("");
-    setActiveTab("all");
-    setPage(1);
+    setSearchParams({});
   }
 
   function handlePerPageChange(value: number) {
-    setPerPage(value);
-    setPage(1);
+    setParam("perPage", String(value));
+    setPageParam(1);
   }
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / perPage));
@@ -175,22 +204,23 @@ export default function JobOrderListPage() {
         <JobOrderFilterClient
           activeTab={activeTab}
           counts={counts}
-          onTabChange={setActiveTab}
+          onTabChange={(tab) => setParam("service", tab === "all" ? "" : tab)}
         />
         <JobOrderFilterTable
           search={search}
-          onSearchChange={setSearch}
+          onSearchChange={(value: string) => setParam("q", value)}
           onSearch={() => {}}
-          date={date}
-          onDateChange={setDate}
-          service={service}
-          onServiceChange={(value: string) => setService(value || "")}
+          tradeType={tradeType}
+          onTradeTypeChange={(value: string) => setParam("trade", value || "")}
           personInCharge={personInCharge}
           onPersonInChargeChange={(value: string) =>
-            setPersonInCharge(value || "")
+            setParam("person", value || "")
           }
+          status={status}
+          onStatusChange={(value: string) => setParam("status", value || "")}
           onReset={handleReset}
-          serviceOptions={serviceOptions}
+          tradeTypeOptions={tradeTypeOptions}
+          statusOptions={statusOptions}
         />
         <Divider />
         <ShowEntriesControl
@@ -223,15 +253,18 @@ export default function JobOrderListPage() {
             <Table.Tr>
               <Table.Th style={{ width: "16.25rem" }}>REQUEST</Table.Th>
               <Table.Th style={{ width: "20rem" }}>DETAILS</Table.Th>
+              <Table.Th style={{ width: "14rem" }}>
+                SERVICE INFORMATION
+              </Table.Th>
               <Table.Th style={{ width: "12.5rem" }}>PERSON IN CHARGE</Table.Th>
-              <Table.Th style={{ width: "11.25rem" }}>QUOTATION</Table.Th>
+              <Table.Th style={{ width: "11.25rem" }}>STATUS</Table.Th>
               <Table.Th style={{ width: "3rem" }} />
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {pagedData.length === 0 ? (
               <Table.Tr>
-                <Table.Td colSpan={5}>
+                <Table.Td colSpan={6}>
                   <Text ta="center" py="xl" c="dimmed" size="sm">
                     No job orders found.
                   </Text>
@@ -242,7 +275,7 @@ export default function JobOrderListPage() {
                 <Table.Tr
                   key={row.id}
                   style={{
-                    ...getJobOrderRowStyle(getClientType(row)),
+                    ...getJobOrderRowStyle(row.service as JobOrderServiceType),
                     cursor: "pointer",
                   }}
                   onClick={() => navigate(`/accounts/clients/${row.id}`)}
@@ -254,11 +287,23 @@ export default function JobOrderListPage() {
                     <DetailsCell item={row} />
                   </Table.Td>
                   <Table.Td>
+                    <ServiceInformationCell
+                      showDashOnly={row.service === "Regulatory"}
+                      serviceLevel={row.logistics_service?.service_level}
+                      eta={row.logistics_service?.eta}
+                      etd={row.logistics_service?.etd}
+                      transportMode={row.logistics_service?.transport_mode}
+                    />
+                  </Table.Td>
+                  <Table.Td>
                     <PersonInChargeCell person={row.person_in_charge} />
                   </Table.Td>
                   <Table.Td>
-                    <QuotationCell
-                      reference={row.quotation_reference}
+                    <StatusCell
+                      status={row.status}
+                      dateAccepted={
+                        row.status === "Accepted" ? row.created_at : undefined
+                      }
                       id={row.quotation_id}
                     />
                   </Table.Td>
@@ -305,7 +350,7 @@ export default function JobOrderListPage() {
             <Button
               variant="outline"
               size="xs"
-              onClick={() => page > 1 && setPage(page - 1)}
+              onClick={() => page > 1 && setPageParam(page - 1)}
               disabled={page === 1}
               leftSection={
                 <ChevronRight
@@ -330,7 +375,7 @@ export default function JobOrderListPage() {
                   onClick={() =>
                     typeof currentPage === "number" &&
                     currentPage !== page &&
-                    setPage(currentPage)
+                    setPageParam(currentPage)
                   }
                 >
                   {currentPage}
@@ -341,7 +386,7 @@ export default function JobOrderListPage() {
             <Button
               variant="outline"
               size="xs"
-              onClick={() => page < totalPages && setPage(page + 1)}
+              onClick={() => page < totalPages && setPageParam(page + 1)}
               disabled={page === totalPages}
               rightSection={<ChevronRight width={14} />}
             >

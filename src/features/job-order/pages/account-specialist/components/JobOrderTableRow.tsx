@@ -1,14 +1,14 @@
-import type { JobOrderClientType } from "../../../types/jobOrder";
+import type { JobOrderServiceType } from "../../../types/jobOrder";
 
-const CLIENT_TYPE_COLOR: Record<JobOrderClientType, string> = {
-  new: "teal",
-  old: "blue",
+const SERVICE_COLOR: Record<JobOrderServiceType, string> = {
+  Logistics: "blue",
+  Regulatory: "green",
 };
 
 export function getJobOrderRowStyle(
-  clientType: JobOrderClientType,
+  serviceType: JobOrderServiceType,
 ): React.CSSProperties {
   return {
-    boxShadow: `inset 0.5rem 0 0 0 var(--mantine-color-${CLIENT_TYPE_COLOR[clientType]}-6)`,
+    boxShadow: `inset 0.5rem 0 0 0 var(--mantine-color-${SERVICE_COLOR[serviceType]}-6)`,
   };
 }
