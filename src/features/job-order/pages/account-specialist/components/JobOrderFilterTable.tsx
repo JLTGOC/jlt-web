@@ -6,35 +6,36 @@ import {
   Box,
   ActionIcon,
 } from "@mantine/core";
-import { DatePickerInput } from "@mantine/dates";
-import { IconSearch, IconCalendar, IconChevronDown } from "@tabler/icons-react";
+import { IconSearch, IconChevronDown } from "@tabler/icons-react";
 
 interface JobOrderFilterTableProps {
   search: string;
   onSearchChange: (value: string) => void;
   onSearch: () => void;
-  date: string;
-  onDateChange: (value: string) => void;
-  service: string;
-  onServiceChange: (value: string) => void;
+  tradeType: string;
+  onTradeTypeChange: (value: string) => void;
   personInCharge: string;
   onPersonInChargeChange: (value: string) => void;
+  status: string;
+  onStatusChange: (value: string) => void;
   onReset: () => void;
-  serviceOptions: { value: string; label: string }[];
+  tradeTypeOptions: { value: string; label: string }[];
+  statusOptions: { value: string; label: string }[];
 }
 
 export function JobOrderFilterTable({
   search,
   onSearchChange,
   onSearch,
-  date,
-  onDateChange,
-  service,
-  onServiceChange,
+  tradeType,
+  onTradeTypeChange,
   personInCharge,
   onPersonInChargeChange,
+  status,
+  onStatusChange,
   onReset,
-  serviceOptions,
+  tradeTypeOptions,
+  statusOptions,
 }: JobOrderFilterTableProps) {
   return (
     <Group
@@ -75,61 +76,25 @@ export function JobOrderFilterTable({
         />
       </Box>
       <Box style={{ flex: 1, minWidth: "8.75rem" }}>
-        <DatePickerInput
-          placeholder="DATE CREATED"
-          value={
-            date
-              ? typeof date === "string"
-                ? date
-                  ? new Date(date)
-                  : null
-                : date
-              : null
-          }
-          onChange={(value) => {
-            if (
-              value &&
-              typeof value === "object" &&
-              typeof (value as Date).toISOString === "function"
-            ) {
-              onDateChange((value as Date).toISOString().slice(0, 10));
-            } else {
-              onDateChange("");
-            }
-          }}
-          rightSection={
-            <ActionIcon
-              radius={"sm"}
-              variant="filled"
-              aria-label="Calendar"
-              h="100%"
-              w="100%"
-              style={{
-                backgroundColor: "var(--mantine-color-jltAccent-6)",
-                borderTopLeftRadius: 0,
-                borderBottomLeftRadius: 0,
-                pointerEvents: "none",
-              }}
-              tabIndex={-1}
-            >
-              <IconCalendar width={16} height={16} />
-            </ActionIcon>
-          }
-          rightSectionPointerEvents="none"
-          size="sm"
+        <Select
+          placeholder="TRADE TYPE"
+          data={tradeTypeOptions}
+          value={tradeType}
+          onChange={(value) => onTradeTypeChange(value ?? "")}
           radius="sm"
           variant="default"
-          valueFormat="YYYY-MM-DD"
           clearable
+          rightSection={<IconChevronDown width={16} height={16} />}
+          rightSectionPointerEvents="none"
           w="100%"
         />
       </Box>
       <Box style={{ flex: 1, minWidth: "8.75rem" }}>
         <Select
-          placeholder="ALL SERVICES"
-          data={serviceOptions}
-          value={service}
-          onChange={(value) => onServiceChange(value ?? "")}
+          placeholder="STATUS"
+          data={statusOptions}
+          value={status}
+          onChange={(value) => onStatusChange(value ?? "")}
           radius="sm"
           variant="default"
           clearable
