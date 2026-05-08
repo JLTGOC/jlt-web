@@ -8,16 +8,14 @@ import {
   Text,
   Input,
 } from "@mantine/core";
-import { DateInput } from "@mantine/dates";
-import dayjs from "dayjs";
 import {
-  ChevronRight,
-  CalendarMonth,
   Search,
+  ChevronRight,
 } from "@nine-thirty-five/material-symbols-react/rounded";
-import type { RequestedQuotationListItem } from "@/features/quotations/types/quotations.types";
 
-type RequestedQuotationRow = RequestedQuotationListItem;
+import type {JobOrderResponse} from "@/features/job-order/types/jobOrder";
+
+type JobOrderRow = JobOrderResponse;
 type ServiceFilterValue = "LOGISTICS" | "REGULATORY" | "ALL";
 type StatusFilterValue =
   | "AVAILABLE"
@@ -25,8 +23,8 @@ type StatusFilterValue =
   | "REASSIGNMENT REQUESTED"
   | "ALL";
 
-interface RequestFilterTableProps {
-  quotations: RequestedQuotationRow[];
+interface JobOrderFilterTableProps {
+  quotations: JobOrderRow[];
   clientSearchValue: string;
   onClientSearchChange: (value: string) => void;
   onClientSearch: (value: string) => void;
@@ -35,34 +33,25 @@ interface RequestFilterTableProps {
   onAsSearch: (value: string) => void;
   perPage: number;
   setPerPage?: (value: number) => void;
-  serviceFilter: ServiceFilterValue;
-  setServiceFilter: (value: ServiceFilterValue) => void;
   statusFilter: StatusFilterValue;
   setStatusFilter: (value: StatusFilterValue) => void;
-  dateFilter: string,
-  setDateFilter: (value: string) => void;
   searchPlaceholder?: string;
   total?: number;
 }
 
-export function RequestFilterTable({
+export function JobOrderFilterTable({
   quotations: _quotations,
   clientSearchValue,
   onClientSearchChange,
   onClientSearch,
-  asSearchValue,
   onAsSearchChange,
   onAsSearch,
   perPage,
-  serviceFilter,
-  setServiceFilter,
   statusFilter,
   setStatusFilter,
   setPerPage,
-  dateFilter,
-  setDateFilter,
   total = 10,
-}: RequestFilterTableProps) {
+}: JobOrderFilterTableProps) {
 
   //for drop down ahow entries
   const entryOptions = useMemo(() => {
@@ -82,7 +71,6 @@ export function RequestFilterTable({
       .map(String);
   }, [total]);
 
-  const serviceOptions = ["LOGISTICS", "REGULATORY", "ALL SERVICES"];
 
   const statusOptions = useMemo(
     () => [
@@ -129,58 +117,27 @@ export function RequestFilterTable({
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, md: 2 }}>
-          <Input
+          <Select
             w="100%"
             size="sm"
             placeholder="SELECT STATUS"
-            // value={statusFilter}
-            rightSectionWidth={45}
-            rightSection={
-              <Button
-                type="button"
-                h={36}
-                w={45}
-                p={0}
-                radius="sm"
-                color="#4f657d"
-                aria-label="Search"
-                onClick={() => onClientSearch(clientSearchValue)}
-              >
-                <Search width={24} height={24} fill="white" />
-              </Button>
-            }
+            data={statusOptions}
+            value={statusFilter}
+            onChange={(value) => {
+              if (
+                value === "AVAILABLE" ||
+                value === "ASSIGNED" ||
+                value === "REASSIGNMENT REQUESTED"
+              ) {
+                setStatusFilter(value);
+                return;
+              }
+              setStatusFilter("ALL");
+            }}
+            rightSection={<ChevronRight width={16} />}
           />
         </Grid.Col>
 
-        <Grid.Col span={{ base: 12, md: 2 }}>
-          <Input
-            w="100%"
-            size="sm"
-            rightSectionWidth={45}
-            placeholder={"SEARCH AS"}
-            value={asSearchValue}
-            onChange={(event) => onAsSearchChange(event.currentTarget.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                onAsSearch(asSearchValue);
-              }
-            }}
-            rightSection={
-              <Button
-                type="button"
-                h={36}
-                w={45}
-                p={0}
-                radius="sm"
-                color="#4f657d"
-                aria-label="Search"
-                onClick={() => onAsSearch(asSearchValue)}
-              >
-                <Search width={24} height={24} fill="white" />
-              </Button>
-            }
-          />
-        </Grid.Col>
 
         <Grid.Col span={{ base: 12, md: 1 }}>
           <Button
@@ -191,8 +148,6 @@ export function RequestFilterTable({
             radius="sm"
             color="#4f657d"
             onClick={() => {
-              setDateFilter("");
-              setServiceFilter("ALL");
               setStatusFilter("ALL");
               onClientSearchChange("");
               onClientSearch("");

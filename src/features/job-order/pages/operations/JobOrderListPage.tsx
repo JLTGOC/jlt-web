@@ -2,16 +2,16 @@ import { Box, Stack } from "@mantine/core";
 
 import { PageCard } from "@/components/PageCard";
 
-import { RequestFilterClient } from "./components/RequestFilterClient";
-import { RequestFilterTable } from "./components/RequestFilterTable";
-import { RequestTable } from "./components/RequestTable";
+import { JobOrderFilterClient } from "./components/JobOrderFilterClient";
+import { JobOrderFilterTable } from "./components/JobOrderFilterTable";
+import { JobOrderTable } from "./components/JobOrderTable";
 
 import ReassignModal from "./components/ReassignModal";
 import AcceptModal from "./components/AcceptModal";
 import ReassignAcceptModal from "./components/ReassignAcceptModal";
 import ReassignRejectModal from "./components/ReassignRejectModal";
 import ReassignRequestModal from "./components/ReassignRequestModal";
-import { useRequestedQuotationsPage } from "./hooks/useRequestedQuotationsPage";
+import { useJobOrderPage } from "./hooks/useJobOrderPage";
 
 export default function JobOrderListPage() {
   const {
@@ -20,7 +20,7 @@ export default function JobOrderListPage() {
     clientCounts,
     clientFilter,
     closeModal,
-    dateFilter,
+    currentUserRole,
     handleAcceptConfirm,
     handleJobSwitchChange,
     handleMakeQuotationClick,
@@ -39,8 +39,8 @@ export default function JobOrderListPage() {
     openReassignRequestModal,
     perPage,
     perPaginationPage,
-    reassignAS,
-    reassignASId,
+    reassignOPS,
+    reassignOPSId,
     reassignAcceptModalOpen,
     reassignAdditionalDetails,
     reassignModalOpen,
@@ -58,11 +58,10 @@ export default function JobOrderListPage() {
     serviceFilter,
     setAcceptModalOpen,
     setClientFilter,
-    setDateFilter,
     setPerPage,
     setPerPaginationPage,
-    setReassignAS,
-    setReassignASId,
+    setReassignOPS,
+    setReassignOPSId,
     setReassignAccceptModalOpen,
     setReassignAdditionalDetails,
     setReassignModalOpen,
@@ -75,18 +74,18 @@ export default function JobOrderListPage() {
     statusFilter,
     totalPages,
     totalQuotations,
-  } = useRequestedQuotationsPage();
+  } = useJobOrderPage();
 
   return (
     <>
       <PageCard
-        title="LIST OF NEW REQUEST"
+        title="LIST OF PENDING JOB ORDERh"
         showJobSwitch
         jobSwitchValue={jobFilter}
         onJobSwitchChange={handleJobSwitchChange}
       >
         <Stack gap="xs">
-          <RequestFilterClient
+          <JobOrderFilterClient
             clientFilter={clientFilter}
             setClientFilter={setClientFilter}
             clientCounts={clientCounts}
@@ -100,7 +99,7 @@ export default function JobOrderListPage() {
             }}
           >
             <Box>
-              <RequestFilterTable
+              <JobOrderFilterTable
                 quotations={requestRows}
                 clientSearchValue={search}
                 onClientSearchChange={handleSearchChange}
@@ -110,16 +109,12 @@ export default function JobOrderListPage() {
                 onAsSearch={handleSecondarySearch}
                 perPage={perPage}
                 setPerPage={setPerPage}
-                serviceFilter={serviceFilter}
-                setServiceFilter={setServiceFilter}
                 statusFilter={statusFilter}
                 setStatusFilter={setStatusFilter}
-                dateFilter={dateFilter}
-                setDateFilter={setDateFilter}
                 total={totalQuotations}
               />
 
-              <RequestTable
+              <JobOrderTable
                 rows={requestRows}
                 totalPages={totalPages}
                 perPaginationPage={perPaginationPage}
@@ -128,6 +123,7 @@ export default function JobOrderListPage() {
                 isLoading={isLoading || isFetching}
                 showingCount={showingCount}
                 total={totalQuotations}
+                currentUserRole={currentUserRole}
                 onAcceptClick={openAcceptModal}
                 onReassignClick={openReassignModal}
                 onReassignRequestClick={openReassignRequestModal}
@@ -156,17 +152,18 @@ export default function JobOrderListPage() {
         reassignPersonels={reassignPersonels}
         reassignSpecificDetails={reassignSpecificDetails}
         setReassignStatus={setReassignStatus}
-        reassignASId={reassignASId}
-        setReassignASId={setReassignASId}
-        setReassignAS={setReassignAS}
+        reassignOPSId={reassignOPSId}
+        setReassignOPSId={setReassignOPSId}
+        reassignOPS={reassignOPS}
+        setReassignOPS={setReassignOPS}
         onClose={closeModal}
       />
 
       <ReassignAcceptModal
         reassignAcceptModalOpen={reassignAcceptModalOpen}
         onConfirm={handleReassignConfirm}
-        currentPerson={selectedQuotation?.account_specialist || "-"}
-        newPerson={reassignAS}
+        currentPerson={selectedQuotation?.assigned_to || "-"}
+        newPerson={reassignOPS}
         isLoading={reassignQuotationPending}
         onClose={closeModal}
       />
