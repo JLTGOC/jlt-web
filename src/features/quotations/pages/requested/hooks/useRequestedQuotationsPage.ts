@@ -17,10 +17,16 @@ import type { QuotationListItem } from "@/features/quotations/types/quotations.t
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 
 import { requestedQueryKeys } from "../utils/requestedQueryKeys";
+import { useCurrentUserRole } from "@/stores/authStore";
+
 
 export function useRequestedQuotationsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const currentUserRole = useCurrentUserRole();
+
+  console.log("khate", currentUserRole)
 
   const [selectedQuotation, setSelectedQuotation] =
     useState<QuotationListItem | null>(null);
