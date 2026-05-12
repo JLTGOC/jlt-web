@@ -1,15 +1,14 @@
 import { apiClient } from "@/lib/api/client";
 
-import type { FetchJobOrdersParams, JobOrdersResponse } from "../types/jobOrder";
+import type { FetchJobOrdersParams, JobOrdersResponse, JobOrderQuotationDetailsResponse } from "../types/jobOrder";
 
 export {acceptJobOrder, reassignRequestJobOrder, reassignJobOrder, reassignJobOrderDetails} from "./operations.api"
 
 export async function fetchJobOrders(
   params: FetchJobOrdersParams,
 ): Promise<JobOrdersResponse> {
-  const response = await apiClient.get<{
-    data: JobOrdersResponse;
-  }>("/job-orders", {
+  const response = await apiClient.get<{data: JobOrdersResponse}>
+  ("/job-orders", {
     params: {
       ...(params["filter[assignment_status]"]
         ? { "filter[assignment_status]": params.client_type }
@@ -27,4 +26,11 @@ export async function fetchJobOrders(
   });
 
   return response.data.data;
+}
+
+
+export async function fetchJobOrderQuotation(quotationID: number): Promise<JobOrderQuotationDetailsResponse>{
+  const response = await apiClient.get<{data: JobOrderQuotationDetailsResponse}> (`/job-orders/${quotationID}/quotation`)
+
+  return response.data.data
 }
