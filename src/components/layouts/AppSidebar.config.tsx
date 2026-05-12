@@ -1,12 +1,12 @@
 import {
   Dashboard,
   DiversityTwo,
-  Box as BoxIcon,
+  LinkedServices,
   RequestQuote,
   ManageAccounts,
   FolderManaged,
-  ListAlt, 
-  Assignment
+  ListAlt,
+  Assignment,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import type { UserTabs } from "@/types/api";
 import type { NavItem } from "./AppSidebarUtils";
@@ -38,17 +38,17 @@ export const NAV_ITEMS: NavItem[] = [
       { label: "Accepted", path: "/quotations/accepted" },
       { label: "Discarded", path: "/quotations/discarded" },
     ],
-  }, 
+  },
   {
     id: "job_orders",
     icon: <Assignment width="2rem" height="2rem" />,
     label: "Job Orders",
     path: "/job-orders",
-  }, 
+  },
   {
     id: "shipments",
-    icon: <BoxIcon width="2rem" height="2rem" />,
-    label: "Shipments",
+    icon: <LinkedServices width="2rem" height="2rem" />,
+    label: "Services",
     subItems: [
       {
         label: "Logistics",
@@ -79,7 +79,13 @@ export const NAV_ITEMS: NavItem[] = [
 
 type SidebarTabKey = keyof Pick<
   UserTabs,
-  "dashboard" | "leads" | "shipments" | "accounts" | "job_orders" | "quotations" | "templates"
+  | "dashboard"
+  | "leads"
+  | "shipments"
+  | "accounts"
+  | "job_orders"
+  | "quotations"
+  | "templates"
 >;
 
 const ITEM_TAB_KEYS: Partial<Record<string, SidebarTabKey>> = {
@@ -92,7 +98,10 @@ const ITEM_TAB_KEYS: Partial<Record<string, SidebarTabKey>> = {
   tools: "templates",
 };
 
-function filterSidebarItemsByTabs(items: NavItem[], tabs?: UserTabs): NavItem[] {
+function filterSidebarItemsByTabs(
+  items: NavItem[],
+  tabs?: UserTabs,
+): NavItem[] {
   if (!tabs) return items;
 
   return items.filter((item) => {

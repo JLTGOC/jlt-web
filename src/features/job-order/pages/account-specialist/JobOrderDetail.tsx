@@ -7,7 +7,7 @@ import {
   Grid,
   UnstyledButton,
 } from "@mantine/core";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, Link } from "react-router";
 import {
   Article,
   Person,
@@ -145,7 +145,8 @@ export default function JobOrderDetailPage() {
               From Accepted Quotation
             </Text>
             <Anchor
-              href={`/quotations/accepted/${detail.quotation_id}`}
+              component={Link}
+              to={`/quotations/accepted/${detail.quotation_id}`}
               fw={600}
               size="sm"
             >

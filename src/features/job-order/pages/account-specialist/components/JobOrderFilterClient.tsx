@@ -1,9 +1,9 @@
 import { Group, Button, Text, Box } from "@mantine/core";
 
 interface JobOrderFilterClientProps {
-  activeTab: "all" | "new" | "old";
-  counts: { all: number; new: number; old: number };
-  onTabChange: (tab: "all" | "new" | "old") => void;
+  activeTab: "all" | "Logistics" | "Regulatory";
+  counts: { all: number; Logistics: number; Regulatory: number };
+  onTabChange: (tab: "all" | "Logistics" | "Regulatory") => void;
 }
 
 export function JobOrderFilterClient({
@@ -32,19 +32,19 @@ export function JobOrderFilterClient({
         />
         <VerticalDivider />
         <TabButton
-          label="NEW CLIENT"
-          count={counts.new}
-          active={activeTab === "new"}
-          onClick={() => onTabChange("new")}
+          label="LOGISTICS"
+          count={counts.Logistics}
+          active={activeTab === "Logistics"}
+          onClick={() => onTabChange("Logistics")}
           color="teal"
           dot
         />
         <VerticalDivider />
         <TabButton
-          label="OLD CLIENT"
-          count={counts.old}
-          active={activeTab === "old"}
-          onClick={() => onTabChange("old")}
+          label="REGULATORY"
+          count={counts.Regulatory}
+          active={activeTab === "Regulatory"}
+          onClick={() => onTabChange("Regulatory")}
           color="blue"
           dot
         />

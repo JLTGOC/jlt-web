@@ -9,15 +9,22 @@ export interface JobOrderListItem {
   created_at: string;
   assignment_status: "AVAILABLE" | "ASSIGNED" | string;
   service: string;
+  trade_type?: "Import" | "Export";
+  status?: "Accepted" | "Pending";
   logistics_service?: {
+    BL?: string;
     commodity: string;
-    service_type: string;
     transport_mode: string;
     origin: string;
     destination: string;
+    service_level?: string;
+    eta?: string;
+    etd?: string;
   };
   regulatory_service?: {
     application_type: string;
+    assistance_type?: string;
+    client_type?: JobOrderClientType;
   };
   person_in_charge?: {
     name: string;
@@ -90,3 +97,8 @@ export interface JobOrderQuotationDetailsResponse {
 export type JobOrderClientType = "new" | "old";
 
 
+export type JobOrderServiceType = "Logistics" | "Regulatory";
+
+export type JobOrderTradeType = "Import" | "Export";
+
+export type JobOrderStatus = "Accepted" | "Pending";
