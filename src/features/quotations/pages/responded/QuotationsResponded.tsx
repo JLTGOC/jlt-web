@@ -5,11 +5,13 @@ import { Box, Stack, Flex, Pagination } from "@mantine/core";
 
 import { PageCard } from "@/components/PageCard";
 import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
-import { fetchQuotations } from "@/features/quotations/api/quotations.api";
+import { fetchRespondedQuotations } from "@/features/quotations/api/quotations.api";
 import { respondedQueryKeys } from "./utils/respondedQueryKeys";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 
-import { RespondedQuotationListItem } from "@/features/quotations/types/quotations.types";
+import { RespondedFilterClient } from "./components/RespondedFilterClient";
+import { RespondedFilterTable } from "./components/RespondedFilterTable";
+import { RespondedTable } from "./components/RespondedTable";
 
 export function QuotationsResponded() {
   const navigate = useNavigate();
@@ -55,11 +57,11 @@ export function QuotationsResponded() {
       if (statusFilter !== "ALL STATUS") {
         params["filter[status]"] = statusFilter;
       }
-      return fetchQuotations(params);
+      return fetchRespondedQuotations(params);
     },
   });
 
-  const rows = (data?.quotations ?? []) as RespondedQuotationListItem[];
+  const rows = data?.quotations ?? [];
   const myRows = data?.my_quotations ?? [];
   const total = data?.pagination.total ?? 0;
   const count = data?.pagination.count ?? rows.length;
@@ -68,7 +70,7 @@ export function QuotationsResponded() {
     setClientSearchValue("");
     setDateFilter("");
     setServiceFilter("ALL SERVICES");
-    setStatusFilter("ALL STATUS");   // ✅ reset status
+    setStatusFilter("ALL STATUS");
     handleSearch("");
     setCurrentPage(1);
   };
@@ -112,7 +114,7 @@ export function QuotationsResponded() {
             onSearchChange={setClientSearchValue}
             onSearch={handleSearch}
             dateValue={dateFilter}
-            onDateChange={(dateString) => setDateFilter(dateString)}
+            onDateChange={(dateString: string) => setDateFilter(dateString)}
             serviceValue={serviceFilter}
             onServiceChange={setServiceFilter}
             statusValue={statusFilter}                 
