@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Stack } from "@mantine/core";
+import { Box, Group, Stack } from "@mantine/core";
 import { useState } from "react";
 import { PageCard } from "@/components/PageCard";
 import { fetchShipment } from "@/features/shipments/services/shipments.service";
@@ -81,34 +81,21 @@ export function ShipmentDetailsPage() {
       shadow={false}
     >
       <Stack gap="lg">
-        {/* Reference Header */}
-        <div style={{ marginTop: "-1rem" }}>
-          <ReferenceHeader shipment={shipment} />
-        </div>
+        <Group align="flex-start" gap="lg" wrap="wrap" style={{ width: "100%" }}>
+          <Box style={{ flex: "1 1 680px", minWidth: 0 }}>
+            <ReferenceHeader shipment={shipment} />
+            <Box mt="md">
+              <StatusUpdate shipment={shipment} />
+            </Box>
+          </Box>
 
-        {/* Status Update */}
-        <StatusUpdate 
-          shipment={shipment} 
-          customMargins={{ 1: "200px", 2: "200px", 3: "200px", 4: "200px", 5: "200px" }}
-        />
-
-        {/* Shipment Files - Positioned absolutely to the right */}
-        <div style={{ position: 'relative' }}>
-          <div
-            style={{
-              position: 'absolute',
-              top: '-25.6rem',
-              right: '0',
-              width: '400px',
-              zIndex: 10
-            }}
-          >
+          <Box style={{ flex: "0 0 min(360px, 100%)", minWidth: 320, width: "100%" }}>
             <ShipmentFiles shipment={shipment} />
-          </div>
-        </div>
+          </Box>
+        </Group>
 
         {/* Consignee Details */}
-        <div style={{ marginTop: "-1rem" }}>
+        <div style={{}}>
           <ConsigneeDetails
             shipment={shipment}
             expanded={expandedSections.consignee}

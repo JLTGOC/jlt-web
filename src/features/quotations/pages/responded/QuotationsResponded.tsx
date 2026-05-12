@@ -9,9 +9,7 @@ import { fetchQuotations } from "@/features/quotations/api/quotations.api";
 import { respondedQueryKeys } from "./utils/respondedQueryKeys";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 
-import { RespondedFilterClient } from "./components/RespondedFilterClient";
-import { RespondedFilterTable } from "./components/RespondedFilterTable";
-import { RespondedTable } from "./components/RespondedTable";
+import { RespondedQuotationListItem } from "@/features/quotations/types/quotations.types";
 
 export function QuotationsResponded() {
   const navigate = useNavigate();
@@ -44,20 +42,24 @@ export function QuotationsResponded() {
       jobFilter,
       currentPage,
     }),
-    queryFn: () =>
-      fetchQuotations({
+    queryFn: () => {
+      const params: any = {
         "filter[status]": "RESPONDED",
         search: searchQuery || undefined,
         "filter[service]": serviceFilter === "ALL SERVICES" ? undefined : serviceFilter,
-        "filter[status]": statusFilter === "ALL STATUS" ? undefined : statusFilter,
         "filter[created_at]": dateFilter || undefined,
         client_type: clientFilter === "ALL" ? undefined : clientFilter,
         perPage,
         page: currentPage,
-      }),
+      };
+      if (statusFilter !== "ALL STATUS") {
+        params["filter[status]"] = statusFilter;
+      }
+      return fetchQuotations(params);
+    },
   });
 
-  const rows = data?.quotations ?? [];
+  const rows = (data?.quotations ?? []) as RespondedQuotationListItem[];
   const myRows = data?.my_quotations ?? [];
   const total = data?.pagination.total ?? 0;
   const count = data?.pagination.count ?? rows.length;

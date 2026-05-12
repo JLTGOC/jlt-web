@@ -391,7 +391,7 @@ function DocumentDetailCard({ doc, shipmentId }: DocumentDetailCardProps) {
   return (
     <>
       <DetailCard
-        icon={
+        headerLeft={
           <Box style={{ width: 72, height: 72, minWidth: 72, minHeight: 72 }}>
             <PdfThumbnail url={doc.file_url ?? ""} />
           </Box>
@@ -399,6 +399,7 @@ function DocumentDetailCard({ doc, shipmentId }: DocumentDetailCardProps) {
         title={doc.file_name}
       >
         <Box style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+
           <Box>
             {doc.uploadedDate && (
               <Text size="sm" c="dimmed">

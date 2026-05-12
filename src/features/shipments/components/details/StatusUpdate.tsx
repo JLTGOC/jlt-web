@@ -1,9 +1,8 @@
-import { Box, Group, Paper, Stack, Text } from "@mantine/core";
+import { Box, Paper, Text } from "@mantine/core";
 import type { ShipmentResource } from "@/features/shipments/types/shipments.types";
 
 interface StatusUpdateProps {
   shipment: ShipmentResource;
-  customMargins?: Record<number, string>; // Index-based margin overrides
 }
 
 const statusSequence = [
@@ -31,146 +30,130 @@ function formatTime(value?: string): string {
   return `${hour12}:${minutes}${ampm}`;
 }
 
-export function StatusUpdate({ shipment, customMargins }: StatusUpdateProps) {
+export function StatusUpdate({ shipment }: StatusUpdateProps) {
   const currentStatus = shipment.general_info.status || "NOT YET DEPARTED";
   const currentIndex = statusSequence.indexOf(currentStatus as (typeof statusSequence)[number]);
   const latestUpdatedAt =
     shipment.shipment_information.updated_at || shipment.general_info.date || "";
   const currentTimeLabel = formatTime(latestUpdatedAt);
 
-  // Calculate positions for circles and lines
-  const baseLeft = 80; // 5rem in pixels
-  const lineHorizontalOffset = -570; // extra shift for the line to the right
-  const lineVerticalOffset = 30; // move the line upward
-  const positions = statusSequence.map((_, index) => {
-    let pos = baseLeft;
-    for (let i = 0; i < index; i++) {
-      pos += parseInt((customMargins?.[i + 1] || "0").replace("px", "")) || 0;
-    }
-    return pos;
-  });
+  const segmentPercent = 100 / (statusSequence.length - 1);
 
   return (
     <Paper
       radius="md"
       withBorder
-      p="lg"
+      p="sm"
       style={{
-        width: "75%",
-        maxWidth: "75%",
+        width: "100%",
+        maxWidth: "100%",
         border: "1px solid var(--mantine-color-gray-2)",
         backgroundColor: "#ffffff",
+        pb: "0rem",
       }}
     >
-      <Group justify="space-between" align="flex-start" mt="xs">
-        <Stack gap="xs">
-        </Stack>
-      </Group>
-
-      <Box>
-        {/* Centered Wrapper for all status content */}
+      <Box style={{ width: "100%" }}>
         <Box
           style={{
-            display: "flex",
-            justifyContent: "center",
-            width: "100%",
+            minWidth: 0,
+            position: "relative",
+            padding: "1rem 0 1.5rem",
           }}
         >
-          {/* Circles and Text Container */}
           <Box
             style={{
-              position: "relative",
-              height: 80,
-              width: 700,
+              position: "absolute",
+              left: 16,
+              right: 16,
+              top: 34,
+              height: 2,
+              backgroundColor: "#d1d5db",
+              zIndex: 1,
             }}
-          >
-          {statusSequence.map((statusLabel, index) => {
-            const isCompleted = index < currentIndex;
-            const isCurrent = index === currentIndex;
-            const isNext = index === currentIndex + 1;
-            const accentColor = (isCompleted || isCurrent )? "#16A34A" : "#a3a3a3";
-            const circleBackground = "#ffffff";
-            const checkColor = (isCompleted || isCurrent )? "#16A34A" : "transparent";
-            const textColor = isCompleted || isCurrent ? "#0F172A" : "#334155";
-            const left = positions[index];
+          />
 
-            return (
-              <Box
-                key={statusLabel}
-                style={{
-                  position: "absolute",
-                  left: `${left}px`,
-                  zIndex: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <Box
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: "50%",
-                    backgroundColor: circleBackground,
-                    border: `2px solid ${accentColor}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: checkColor,
-                    fontWeight: 700,
-                    fontSize: "0.875rem",
-                  }}
-                >
-                  {(isCompleted || isCurrent) ? "✓" : ""} {/* Show checkmark for completed and current status */}
-                </Box>
-                
-                <Box mt="sm" style={{ textAlign: "center", minWidth: 100 }}>
-                  <Text fw={600} size="xs" c={textColor}>
-                    {statusLabel}
-                  </Text>
-                  <Text c="gray.6" size="xs">
-                    {isCurrent ? currentTimeLabel : isNext ? "Pending" : ""} {/* Show time for current status, "Pending" for next status, and nothing for others */}
-                  </Text>
-                </Box>
-              </Box>
-            );
-          })}
-        </Box>
-
-        {/* Lines Container */}
-        <Box
-          style={{
-            position: "relative",
-            height: 2,
-            width: 700,
-            marginTop: -16, // Adjust to position lines below circles
-          }}
-        >
           {statusSequence.slice(0, -1).map((_, index) => {
-            const start = positions[index] + 16 + lineHorizontalOffset;
-            const end = positions[index + 1] + 16 + lineHorizontalOffset;
-            const width = end - start;
             const isCompleted = index < currentIndex;
-            const lineColor = isCompleted ? "#16A34A" : "#a3a3a3";
-
             return (
               <Box
                 key={index}
                 style={{
                   position: "absolute",
-                  left: `${start}px`,
-                  top: `${lineVerticalOffset}px`,
-                  width: `${width}px`,
+                  left: `${segmentPercent * index}%`,
+                  width: `${segmentPercent}%`,
                   height: 2,
-                  backgroundColor: lineColor,
-                  zIndex: 1,
+                  top: 34,
+                  backgroundColor: isCompleted ? "#16A34A" : "transparent",
+                  zIndex: 2,
+                  transform: "translateX(16px)",
                 }}
               />
             );
           })}
+
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              position: "relative",
+              zIndex: 3,
+              width: "100%",
+            }}
+          >
+            {statusSequence.map((statusLabel, index) => {
+              const isCompleted = index < currentIndex;
+              const isCurrent = index === currentIndex;
+              const isNext = index === currentIndex + 1;
+              const accentColor = isCompleted || isCurrent ? "#16A34A" : "#a3a3a3";
+              const checkColor = isCompleted || isCurrent ? "#16A34A" : "transparent";
+              const textColor = isCompleted || isCurrent ? "#0F172A" : "#334155";
+
+              return (
+                <Box
+                  key={statusLabel}
+                  style={{
+                    flex: "1 1 120px",
+                    minWidth: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <Box
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      backgroundColor: "#ffffff",
+                      border: `2px solid ${accentColor}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: checkColor,
+                      fontWeight: 700,
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    {(isCompleted || isCurrent) ? "✓" : ""}
+                  </Box>
+
+                  <Box style={{ minWidth: 0 }}>
+                    <Text fw={600} size="xs" c={textColor}>
+                      {statusLabel}
+                    </Text>
+                    <Text c="gray.6" size="xs">
+                      {isCurrent ? currentTimeLabel : isNext ? "Pending" : ""}
+                    </Text>
+                  </Box>
+                </Box>
+              );
+            })}
+          </Box>
         </Box>
-        </Box>
-        </Box>
+      </Box>
     </Paper>
   );
 }
