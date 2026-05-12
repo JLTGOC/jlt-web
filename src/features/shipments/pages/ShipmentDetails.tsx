@@ -5,16 +5,18 @@ import { useState } from "react";
 import { PageCard } from "@/components/PageCard";
 import { fetchShipment } from "@/features/shipments/services/shipments.service";
 import { ReferenceHeader } from "@/features/shipments/components/details/ReferenceHeader";
+import { StatusUpdate } from "@/features/shipments/components/details/StatusUpdate";
+import { ShipmentFiles } from "@/features/shipments/components/details/ShipmentFiles";
 import { ShipmentInformation } from "@/features/shipments/components/details/ShipmentInfo";
 import { ConsigneeDetails } from "@/features/shipments/components/details/ConsigneeDetails";
-import { PersonInCharge } from "@/features/shipments/components/details/PersonInCharge";
-import { BillingSummary } from "@/features/shipments/components/details/BillingSummary";
+import { Documents } from "@/features/shipments/components/details/Documents";
+import { ShipmentHistory } from "@/features/shipments/components/details/ShipmentHistory";
 
 interface ExpandedSections {
   shipment: boolean;
   consignee: boolean;
-  personInCharge: boolean;
-  billingSummary: boolean;
+  documents: boolean;
+  shipmentHistory: boolean;
 }
 
 export function ShipmentDetailsPage() {
@@ -27,8 +29,8 @@ export function ShipmentDetailsPage() {
   const [expandedSections, setExpandedSections] = useState<ExpandedSections>({
     shipment: false,
     consignee: false,
-    personInCharge: false,
-    billingSummary: false,
+    documents: false,
+    shipmentHistory: false,
   });
 
   const {
@@ -72,10 +74,47 @@ export function ShipmentDetailsPage() {
   };
 
   return (
-    <PageCard title={shipment.general_info.reference_number} showDivider>
+    <PageCard 
+      title="SHIPMENTS OVERVIEW"
+      subtitle="View shipments details and tracking information"
+      bgColor="transparent"
+      shadow={false}
+    >
       <Stack gap="lg">
         {/* Reference Header */}
-        <ReferenceHeader shipment={shipment} />
+        <div style={{ marginTop: "-1rem" }}>
+          <ReferenceHeader shipment={shipment} />
+        </div>
+
+        {/* Status Update */}
+        <StatusUpdate 
+          shipment={shipment} 
+          customMargins={{ 1: "200px", 2: "200px", 3: "200px", 4: "200px", 5: "200px" }}
+        />
+
+        {/* Shipment Files - Positioned absolutely to the right */}
+        <div style={{ position: 'relative' }}>
+          <div
+            style={{
+              position: 'absolute',
+              top: '-25.6rem',
+              right: '0',
+              width: '400px',
+              zIndex: 10
+            }}
+          >
+            <ShipmentFiles shipment={shipment} />
+          </div>
+        </div>
+
+        {/* Consignee Details */}
+        <div style={{ marginTop: "-1rem" }}>
+          <ConsigneeDetails
+            shipment={shipment}
+            expanded={expandedSections.consignee}
+            onToggle={() => toggleSection("consignee")}
+          />
+        </div>
 
         {/* Shipment Information */}
         <ShipmentInformation
@@ -84,25 +123,18 @@ export function ShipmentDetailsPage() {
           onToggle={() => toggleSection("shipment")}
         />
 
-        {/* Consignee Details */}
-        <ConsigneeDetails
-          shipment={shipment}
-          expanded={expandedSections.consignee}
-          onToggle={() => toggleSection("consignee")}
+        {/* Documents */}
+        <Documents
+          documents={[...(shipment?.documents ?? []), ...(shipment?.client_documents ?? [])]}
+          expanded={expandedSections.documents}
+          onToggle={() => toggleSection("documents")}
         />
 
-        {/* Person In-Charge */}
-        <PersonInCharge
+        {/* Shipment History */}
+        <ShipmentHistory
           shipment={shipment}
-          expanded={expandedSections.personInCharge}
-          onToggle={() => toggleSection("personInCharge")}
-        />
-
-        {/* Billing Summary */}
-        <BillingSummary
-          shipment={shipment}
-          expanded={expandedSections.billingSummary}
-          onToggle={() => toggleSection("billingSummary")}
+          expanded={expandedSections.shipmentHistory}
+          onToggle={() => toggleSection("shipmentHistory")}
         />
       </Stack>
     </PageCard>

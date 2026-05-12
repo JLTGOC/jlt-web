@@ -19,7 +19,7 @@ const tabStyles = {
     alignItems: "center",
     gap: "0.4rem",
     padding: "0.45rem 0.7rem",
-    borderBottom: "4px solid transparent",
+    borderBottom: "2px solid transparent",
     cursor: "default",
     transition: "border-bottom-color 150ms ease",
   },
@@ -70,14 +70,16 @@ export function RespondedFilterClient({
 
   return (
     <Box
-      p="0.15rem"
+      p="xs"
       style={{
         background: "#ffffff",
         borderRadius: "0.55rem",
         border: "1px solid #e2e6eb",
-        borderBottom: "1px solid #e2e6eb",
-        paddingLeft: "1rem",
-        paddingRight: "1rem",
+        paddingBottom: 2,
+        paddingTop: 2,
+        width: 1675,
+        marginLeft: 13,
+        paddingLeft: 20,
       }}
     >
       <Group gap="md">

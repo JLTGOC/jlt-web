@@ -3,12 +3,11 @@ import {
   Paper,
   Stack,
   Text,
-  Image,
   ActionIcon,
   Box as MantineBox,
   Avatar,
 } from "@mantine/core";
-import chatbubble from "@/assets/icons/chatbubble.svg";
+import { Chat } from "@nine-thirty-five/material-symbols-react/outlined";
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
 
 interface ReferenceHeaderProps {
@@ -22,60 +21,97 @@ export function ReferenceHeader({ quotation }: ReferenceHeaderProps) {
       withBorder
       style={{
         marginTop: "-1rem",
-        width: "100%",
+        width: "auto",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
+        borderBottomLeftRadius: "0.5rem",
+        borderBottomRightRadius: "0.5rem",
+        height: 218,
       }}
     >
       {/* Top bar with avatar + client name + chat icon */}
       <MantineBox
         bg="#D4DAE0"
-        p="xs"
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          minHeight: 48,
+          minHeight: 61,
+          padding: "0.5rem",
         }}
       >
         <Group gap="sm">
           <Avatar
             radius="xl"
             size="md"
-            src={null} // will replace with actual avatar URL when available
+            src={null}
             alt={quotation.client?.full_name || "Client Avatar"}
           />
-          <Text fw={700} size="lg" c="jltBlue.8">
+          <Text fw={700} size="lg" c="jltBlue.8" tt="uppercase">
             {quotation.client?.full_name || "—"}
           </Text>
         </Group>
         <ActionIcon
-          variant="transparent"
-          color="transparent"
+          variant="subtle"
           radius="xxl"
           size="lg"
           aria-label="Chat"
           onClick={() => console.log("Chat clicked")}
+          style={{ zIndex: 10 }}
         >
-          <Image src={chatbubble} alt="Chat Icon" width={30} height={30} />
+          <Chat width={30} height={30} />
         </ActionIcon>
       </MantineBox>
 
       {/* Company info */}
-      <MantineBox p="lg" bg="white" style={{ flex: 1 }}>
-        <Stack gap="sm">
-          <Group>
-            <Text c="gray.6">COMPANY NAME:</Text>
-            <Text fw={450}>{quotation.company.name || "—"}</Text>
+      <MantineBox p="0.5rem" bg="white" style={{ flex: 1, marginTop: "1rem", position: "relative" }}>
+        {/* Vertical Spacing */}
+        <Stack gap="sm" style={{ paddingLeft: "0.5rem" }}>
+          {/* Horizontal Spacing */}
+          <Group gap="0.75rem" align="baseline">
+            <Text
+              c="dimmed"
+              size="sm"
+              tt="uppercase"
+              lts="0.06em"
+              style={{ flexShrink: 0, minWidth: "10rem" }}
+            >
+              COMPANY NAME
+            </Text>
+            <Text size="sm" c="var(--mantine-color-jltBlue-8)">
+              {quotation.client?.company_name || "—"}
+            </Text>
           </Group>
-          <Group>
-            <Text c="gray.6">CONTACT NO.:</Text>
-            <Text fw={450}>{quotation.company.contact_number || "—"}</Text>
+
+          <Group gap="0.75rem" align="baseline">
+            <Text
+              c="dimmed"
+              size="sm"
+              tt="uppercase"
+              lts="0.06em"
+              style={{ flexShrink: 0, minWidth: "10rem" }}
+            >
+              CONTACT NO.
+            </Text>
+            <Text size="sm" c="var(--mantine-color-jltBlue-8)">
+              {quotation.client?.contact_number || "—"}
+            </Text>
           </Group>
-          <Group>
-            <Text c="gray.6">EMAIL:</Text>
-            <Text fw={450}>{quotation.company.email || "—"}</Text>
+
+          <Group gap="0.75rem" align="baseline">
+            <Text
+              c="dimmed"
+              size="sm"
+              tt="uppercase"
+              lts="0.06em"
+              style={{ flexShrink: 0, minWidth: "10rem" }}
+            >
+              EMAIL
+            </Text>
+            <Text size="sm" c="var(--mantine-color-jltBlue-8)">
+              {quotation.client?.email || "—"}
+            </Text>
           </Group>
         </Stack>
       </MantineBox>

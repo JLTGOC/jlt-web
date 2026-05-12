@@ -3,7 +3,6 @@ import {
   Group,
   Text,
   Box as MantineBox,
-  UnstyledButton,
 } from "@mantine/core";
 import {
   ChevronRight,
@@ -24,13 +23,18 @@ export function ConsigneeDetails({
   onToggle,
 }: ConsigneeDetailsProps) {
   return (
-    <UnstyledButton w="100%" onClick={onToggle} style={{ textAlign: "left" }}>
+    <MantineBox
+      w="100%"
+      onClick={onToggle}
+      role="button"
+      tabIndex={0}
+      style={{ textAlign: "left", cursor: "pointer" }}
+    >
       <Paper
         radius="md"
         p={0}
         style={{
           border: "1px solid var(--mantine-color-gray-2)",
-          cursor: "pointer",
           transition: "all 0.2s ease",
         }}
       >
@@ -38,7 +42,17 @@ export function ConsigneeDetails({
           w="100%"
           bg="#D4DAE0"
           p="lg"
-          style={{ borderBottom: "1px solid var(--mantine-color-gray-2)" }}
+          style={{
+            borderBottom: "1px solid var(--mantine-color-gray-2)",
+            borderTopLeftRadius: "0.5rem",
+            borderTopRightRadius: "0.5rem",
+            ...(expanded
+              ? {}
+              : {
+                  borderBottomLeftRadius: "0.5rem",
+                  borderBottomRightRadius: "0.5rem",
+                }),
+          }}
         >
           <Group justify="space-between" align="center">
             <Group gap="sm">
@@ -51,8 +65,8 @@ export function ConsigneeDetails({
               >
                 <InboxTextPerson width="1.5rem" height="1.5rem" />
               </MantineBox>
-              <Text fw={700} tt="uppercase" c="jltBlue.8">
-                Commodity Details
+              <Text fw={500} tt="uppercase" c="jltBlue.8">
+                Consignee Details
               </Text>
             </Group>
             <ChevronRight
@@ -71,27 +85,30 @@ export function ConsigneeDetails({
             <DetailGrid
               rows={[
                 {
-                  label: "Commodity",
-                  value: shipment.commodity_details.commodity,
+                  label: "COMPANY NAME",
+                  value: shipment.consignee_details?.company_name || "—",
                 },
                 {
-                  label: "Consignee Name",
-                  value: shipment.commodity_details.consignee_name,
+                  label: "COMPANY ADDRESS",
+                  value: shipment.consignee_details?.company_address || "—",
                 },
                 {
-                  label: "Cargo Type",
-                  value: shipment.commodity_details.cargo_type,
+                  label: "CONTACT PERSON",
+                  value: shipment.consignee_details?.contact_person || "—",
                 },
                 {
-                  label: "Container Size",
-                  value: shipment.commodity_details.container_size,
+                  label: "CONTACT NUMBER",
+                  value: shipment.consignee_details?.contact_number || "—",
+                },
+                {
+                  label: "EMAIL ADDRESS",
+                  value: shipment.consignee_details?.email || "—",
                 },
               ]}
             />
           </MantineBox>
         )}
       </Paper>
-    </UnstyledButton>
+    </MantineBox>
   );
 }
-  

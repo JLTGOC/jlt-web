@@ -5,9 +5,10 @@ interface StatusListKeyParams {
   perPage: number;
   clientFilter?: "ALL" | "NEW" | "OLD";
   serviceFilter?: string;
+  statusFilter?: string;
   dateFilter?: string;
-  personInChargeFilter?: string;
   jobFilter?: "all" | "my-items";
+  currentPage?: number;
 }
 
 export const quotationQueryKeys = {
@@ -22,7 +23,7 @@ export const quotationQueryKeys = {
       params.clientFilter,
       params.serviceFilter,
       params.dateFilter,
-      params.personInChargeFilter,
+      params.statusFilter,
       params.jobFilter,
     ] as const,
   quotationDetails: (quotationId?: string) =>
