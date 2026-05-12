@@ -5,7 +5,6 @@ import {
   RequestQuote,
   ManageAccounts,
   FolderManaged,
-  ListAlt,
   Assignment,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import type { UserTabs } from "@/types/api";

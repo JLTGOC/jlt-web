@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { UnstyledButton, Text } from "@mantine/core";
+import { UnstyledButton } from "@mantine/core";
 import classes from "./NumberedOptionButton.module.css";
 
 export interface NumberedOptionButtonProps {

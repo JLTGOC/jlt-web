@@ -22,11 +22,12 @@ export function useSecureFileUrl(url: string) {
           setObjectUrl(localUrl);
           setLoading(false);
         }
-      } catch (err) {
+      } catch (error) {
         if (isMounted) {
           setError(true);
           setLoading(false);
         }
+        void error;
       }
     }
 
