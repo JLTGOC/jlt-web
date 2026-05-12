@@ -1,6 +1,5 @@
 import { apiClient } from "@/lib/api/client";
 import type {
-	RespondedQuotationListItem,
 	RespondedQuotationsResponse,
 } from "../../types/quotations.types";
 
@@ -8,6 +7,7 @@ export interface FetchRespondedQuotationsParams {
 	search?: string;
 	"filter[service]"?: string;
 	"filter[created_at]"?: string;
+	"filter[status]"?: string;
 	"filter[as_full_name]"?: string;
 	client_type?: "ALL" | "NEW" | "OLD";
 	perPage?: number;
@@ -21,7 +21,7 @@ export async function fetchRespondedQuotations(
 		data: RespondedQuotationsResponse;
 	}>("/quotations", {
 		params: {
-			"filter[status]": "RESPONDED",
+			"filter[status]": params["filter[status]"] ?? "RESPONDED",
 			...(params.search ? { search: params.search } : {}),
 			...(params["filter[service]"] ? { "filter[service]": params["filter[service]"] } : {}),
 			...(params["filter[created_at]"] ? { "filter[created_at]": params["filter[created_at]"] } : {}),
@@ -32,5 +32,17 @@ export async function fetchRespondedQuotations(
 		},
 	});
 
-	return response.data.data;
+	const payload = response.data.data;
+
+	return {
+		...payload,
+		quotations: payload.quotations.map((quotation) => ({
+			...quotation,
+			qtn_status: quotation.qtn_status ?? "responded",
+		})),
+		my_quotations: payload.my_quotations?.map((quotation) => ({
+			...quotation,
+			qtn_status: quotation.qtn_status ?? "responded",
+		})),
+	};
 }

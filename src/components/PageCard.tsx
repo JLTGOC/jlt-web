@@ -14,7 +14,8 @@ import classes from "./PageCard.module.css";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface PageCardProps {
-  title: string;
+  title?: string;
+  subtitle?: string;
   subtext?: string;
   subtextColor?: string;
   action?: React.ReactNode;
@@ -31,6 +32,7 @@ interface PageCardProps {
   jobSwitchSecondaryValue?: "my-items";
   jobSwitchSecondaryLabel?: string;
   bgColor?: string;
+  shadow?: string | false;
 
 }
 
@@ -38,6 +40,7 @@ interface PageCardProps {
 
 export function PageCard({
   title,
+  subtitle,
   subtext,
   subtextColor = "dimmed",
   action,
@@ -52,6 +55,7 @@ export function PageCard({
   hideBackButton,
   onJobSwitchChange,
   bgColor = "#ffffff",
+  shadow = "sm",
 }: PageCardProps) {
   const navigate = useNavigate();
 
@@ -67,11 +71,12 @@ export function PageCard({
     <Card
       withBorder={false}
       radius={10}
-      shadow={"sm"}
+      shadow={shadow === false ? "none" : shadow}
       padding={0}
       className={classes.root}
       style={{
         backgroundColor: bgColor,
+        overflow: "visible",
         height: fullHeight
           ? "min(100%, calc(100dvh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2))"
           : undefined,
@@ -86,6 +91,7 @@ export function PageCard({
       pos="relative"
     >
       {/* ── Header ── */}
+      {title && (
       <Group
         justify="space-between"
         p="lg"
@@ -98,16 +104,23 @@ export function PageCard({
               <ArrowBack width="1.25rem" height="1.25rem" fill="currentColor" />
             </UnstyledButton>
           )}
-          <Group gap="0.5rem" align="baseline" wrap="nowrap">
-            <Title order={5} fw={800} tt="uppercase" c="jltBlue.8">
-              {title}
-            </Title>
-            {subtext && (
-              <Text size="xs" c={subtextColor} fs="italic">
-                ({subtext})
+          <div style={{ flex: 1 }}>
+            <Group gap="0.5rem" align="baseline" wrap="nowrap">
+              <Title order={5} fw={800} tt="uppercase" c="jltBlue.8">
+                {title}
+              </Title>
+              {subtext && (
+                <Text size="xs" c={subtextColor} fs="italic">
+                  ({subtext})
+                </Text>
+              )}
+            </Group>
+            {subtitle && (
+              <Text size="sm" c="jltBlue.8" fw={400} style={{ overflow: "visible" }}>
+                {subtitle}
               </Text>
             )}
-          </Group>
+          </div>
         </Group>
 
         <Group gap="sm" wrap="nowrap">
@@ -142,6 +155,7 @@ export function PageCard({
           {action && <Box style={{ flexShrink: 0 }}>{action}</Box>}
         </Group>
       </Group>
+      )}
 
       {showDivider && (
         <Divider

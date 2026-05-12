@@ -1,38 +1,40 @@
-import { Button, Grid, Group, Input, Select, Text } from "@mantine/core";
+import { Button, Divider, Grid, Group, Input, Select, Text } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { Search, CalendarMonth, ChevronRight } from "@nine-thirty-five/material-symbols-react/rounded";
 
-interface RespondedFilterTableProps {
+interface ShipmentFilterTableProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
   onSearch: (value: string) => void;
-  dateValue: string;
-  onDateChange: (value: string) => void;
-  statusValue: string;
-  onStatusChange: (value: string) => void;
-  serviceValue: string;
-  onServiceChange: (value: string) => void;
+  etaValue: string;
+  onEtaChange: (value: string) => void;
+  shipmentTypeValue: string;
+  onShipmentTypeChange: (value: string) => void;
+  personInChargeValue: string;
+  onPersonInChargeChange: (value: string) => void;
   onReset: () => void;
   perPage: number;
   setPerPage: (value: number) => void;
+  total: number;
 }
 
-//for drop down show entries
-export function RespondedFilterTable({
+export function ShipmentFilterTable({
   searchValue,
   onSearchChange,
   onSearch,
-  dateValue,
-  onDateChange,
-  serviceValue,
-  statusValue,
-  onStatusChange,
-  onServiceChange,
+  etaValue,
+  onEtaChange,
+  shipmentTypeValue,
+  onShipmentTypeChange,
+  personInChargeValue,
+  onPersonInChargeChange,
   onReset,
   perPage,
   setPerPage,
-}: RespondedFilterTableProps) {
+  total,
+}: ShipmentFilterTableProps) {
   const entryOptions = ["10", "20", "30"];
+
   return (
     <Grid gutter="xs" mb="sm" align="end">
       <Grid.Col span={{ base: 12, md: 3 }}>
@@ -64,14 +66,15 @@ export function RespondedFilterTable({
           }
         />
       </Grid.Col>
+
       <Grid.Col span={{ base: 12, md: 2 }}>
         <DateInput
           w="100%"
           size="sm"
           rightSectionWidth={45}
-          placeholder="DATE RESPONDED"
-          value={dateValue ? new Date(dateValue) : null}
-          onChange={(date) => onDateChange(date ? date.toString().split("T")[0] : "")}
+          placeholder="ETA"
+          value={etaValue ? new Date(etaValue) : null}
+          onChange={(date) => onEtaChange(date ? date.toString().split("T")[0] : "")}
           rightSection={
             <Button
               type="button"
@@ -86,35 +89,56 @@ export function RespondedFilterTable({
           }
         />
       </Grid.Col>
+
       <Grid.Col span={{ base: 12, md: 2 }}>
         <Select
           w="100%"
           size="sm"
-          placeholder="ALL STATUS"
+          placeholder="TYPE OF SHIPMENT"
           data={[
-            { value: "ALL STATUS", label: "ALL STATUS" },
-            { value: "RESPONDED", label: "FOLLOW UP" },
-            { value: "VIEWED BY CLIENT", label: "VIEWED BY CLIENT" },
+            { value: "", label: "All Types" },
+            { value: "IMPORT", label: "IMPORT" },
+            { value: "EXPORT", label: "EXPORT" },
           ]}
-          value={statusValue}
-          onChange={(value) => onStatusChange(value || "ALL STATUS")}
+          value={shipmentTypeValue}
+          onChange={(value) => onShipmentTypeChange(value || "")}
           rightSection={<ChevronRight width={16} />}
         />
       </Grid.Col>
-      <Grid.Col span={{ base: 12, md: 2 }}>
-        <Select
+
+      <Grid.Col span={{ base: 12, md: 3 }}>
+        <Input
           w="100%"
           size="sm"
-          placeholder="ALL SERVICES"
-          data={["ALL SERVICES", "LOGISTICS", "REGULATORY"]}
-          value={serviceValue}
-          onChange={(value) => onServiceChange(value || "ALL SERVICES")}
-          rightSection={<ChevronRight width={16} />}
+          rightSectionWidth={45}
+          placeholder={"PERSON IN CHARGE"}
+          value={personInChargeValue}
+          onChange={(event) => onPersonInChargeChange(event.currentTarget.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              onPersonInChargeChange(personInChargeValue);
+            }
+          }}
+          rightSection={
+            <Button
+              type="button"
+              h={36}
+              w={45}
+              p={0}
+              radius="sm"
+              color="#4f657d"
+              aria-label="Search"
+              onClick={() => onPersonInChargeChange(personInChargeValue)}
+            >
+              <Search width={24} height={24} fill="white" />
+            </Button>
+          }
         />
       </Grid.Col>
+
       <Grid.Col span={{ base: 12, md: 2 }}>
         <Button variant="outline" bg="#4f657d" color="white" onClick={onReset}>
-          RESET
+          Reset
         </Button>
       </Grid.Col>
 

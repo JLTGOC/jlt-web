@@ -32,6 +32,11 @@ const ShipmentDetailsPage = lazy(() =>
     default: m.ShipmentDetailsPage,
   })),
 );
+const ShipmentDocumentsPage = lazy(() =>
+  import("@/features/shipments/pages/ShipmentDocuments").then((m) => ({
+    default: m.ShipmentDocuments,
+  })),
+);
 
 //Job Orders imports
 const JobOrdersPage = lazy(
@@ -117,7 +122,11 @@ export const router = createBrowserRouter([
           // Shipment routes — most specific first
           {
             path: "shipments/:tab/client/:clientId/:shipmentId/documents",
-            Component: ShipmentDetailsPage,
+            Component: ShipmentDocumentsPage,
+          },
+          {
+            path: "shipments/:tab/:shipmentId/documents",
+            Component: ShipmentDocumentsPage,
           },
           {
             path: "shipments/:tab/client/:clientId/:shipmentId/compose",
