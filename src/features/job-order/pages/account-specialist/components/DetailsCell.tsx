@@ -65,7 +65,7 @@ export function DetailsCell({ item }: DetailsCellProps) {
     const r = item.regulatory_service;
     return (
       <Box c="jltBlue">
-        <Text size="xs">{r.assistance_type ?? "-"}</Text>
+        <Text size="xs">{r.regulatory_assistance ?? "-"}</Text>
         <Text size="xs">
           <Text component="span" c="dimmed">
             Client Type:

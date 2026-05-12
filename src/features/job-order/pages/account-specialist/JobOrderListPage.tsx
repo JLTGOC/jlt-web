@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   Divider,
   Stack,
@@ -14,10 +13,8 @@ import {
   ChevronRight,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import { useNavigate, useSearchParams } from "react-router";
-import type {
-  JobOrderListItem,
-  JobOrderServiceType,
-} from "../../types/jobOrder";
+import { useQuery } from "@tanstack/react-query";
+import type { JobOrderServiceType } from "../../types/jobOrder";
 import { RequestCell } from "./components/RequestCell";
 import { getJobOrderRowStyle } from "./components/JobOrderTableRow";
 import { DetailsCell } from "./components/DetailsCell";
@@ -28,60 +25,19 @@ import { JobOrderFilterClient } from "./components/JobOrderFilterClient";
 import { JobOrderFilterTable } from "./components/JobOrderFilterTable";
 import { ShowEntriesControl } from "./components/ShowEntriesControl";
 import { PageCard } from "@/components/PageCard";
-
-// MOCK DATA (replace with API call/hook)
-const MOCK_DATA: JobOrderListItem[] = [
-  {
-    id: 1,
-    reference_number: "SJO-04-2026-013",
-    client_full_name: "Jenny Carla Dela Cruz",
-    created_at: "2026-04-16",
-    assignment_status: "ASSIGNED",
-    service: "Logistics",
-    trade_type: "Import",
-    status: "Accepted",
-    logistics_service: {
-      BL: "AMP012863",
-      commodity: "Import",
-      transport_mode: "Sea",
-      origin: "YTN Port, China",
-      destination: "MNL Port, Manila",
-      service_level: "CC, DE",
-      eta: "2026-04-30",
-      etd: "2026-04-30",
-    },
-    person_in_charge: {
-      name: "LEAD OPS PEÑA",
-      avatar_url: undefined,
-    },
-    quotation_reference: "QT-09-2026-052",
-    quotation_id: "QT-09-2026-052",
-  },
-  {
-    id: 2,
-    reference_number: "SJO-04-2026-012",
-    client_full_name: "Sample 2",
-    created_at: "2026-04-16",
-    assignment_status: "AVAILABLE",
-    service: "Regulatory",
-    trade_type: "Export",
-    status: "Pending",
-    regulatory_service: {
-      application_type: "Renewal",
-      assistance_type: "BOC New Importer Accreditation",
-      client_type: "NEW",
-    },
-    person_in_charge: undefined,
-    quotation_reference: "QT-09-2026-055",
-    quotation_id: "QT-09-2026-055",
-  },
-];
-
-// Filtering will use the `service` field on the row (e.g., "Logistics" | "Regulatory")
+import { fetchAllJobOrders } from "../../api/jobOrders.api";
+import { jobOrdersQueryKeys } from "../../api/jobOrdersQueryKeys";
+import { useJobOrderListData } from "./hooks/useJobOrderListData";
 
 export default function JobOrderListPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  function buildDetailPath(id: number | string, service: JobOrderServiceType) {
+    const params = new URLSearchParams();
+    params.set("service", service);
+    return `/job-orders/${id}?${params.toString()}`;
+  }
 
   // derive filter state from query params (source of truth)
   const activeTab =
@@ -109,60 +65,25 @@ export default function JobOrderListPage() {
     setSearchParams(next);
   }
 
-  const filteredData = useMemo(() => {
-    let data = MOCK_DATA;
+  const { data: jobOrdersResponse } = useQuery({
+    queryKey: jobOrdersQueryKeys.list(),
+    queryFn: () => fetchAllJobOrders(),
+    staleTime: 30_000,
+  });
 
-    if (activeTab === "Logistics") {
-      data = data.filter((row) => row.service === "Logistics");
-    }
+  const jobOrders = jobOrdersResponse?.jobOrders ?? [];
 
-    if (activeTab === "Regulatory") {
-      data = data.filter((row) => row.service === "Regulatory");
-    }
-
-    if (search) {
-      data = data.filter(
-        (row) =>
-          row.client_full_name.toLowerCase().includes(search.toLowerCase()) ||
-          row.reference_number.toLowerCase().includes(search.toLowerCase()),
-      );
-    }
-
-    if (tradeType) {
-      data = data.filter(
-        (row) =>
-          row.service !== "Logistics" ||
-          (row.service === "Logistics" && row.trade_type === tradeType),
-      );
-    }
-    if (status) data = data.filter((row) => row.status === status);
-
-    if (personInCharge) {
-      data = data.filter((row) =>
-        row.person_in_charge?.name
-          .toLowerCase()
-          .includes(personInCharge.toLowerCase()),
-      );
-    }
-
-    return data;
-  }, [activeTab, search, tradeType, status, personInCharge]);
-
-  const pagedData = useMemo(
-    () => filteredData.slice((page - 1) * perPage, page * perPage),
-    [filteredData, page, perPage],
-  );
-
-  const counts = useMemo(() => {
-    const all = MOCK_DATA.length;
-    const logisticsCount = MOCK_DATA.filter(
-      (row) => row.service === "Logistics",
-    ).length;
-    const regulatoryCount = MOCK_DATA.filter(
-      (row) => row.service === "Regulatory",
-    ).length;
-    return { all, Logistics: logisticsCount, Regulatory: regulatoryCount };
-  }, []);
+  const { filteredData, pagedData, counts, totalPages, pages } =
+    useJobOrderListData({
+      data: jobOrders,
+      activeTab,
+      search,
+      tradeType,
+      status,
+      personInCharge,
+      perPage,
+      page,
+    });
 
   const tradeTypeOptions = [
     { value: "Import", label: "Import" },
@@ -182,21 +103,6 @@ export default function JobOrderListPage() {
     setParam("perPage", String(value));
     setPageParam(1);
   }
-
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / perPage));
-
-  const pages = useMemo(() => {
-    if (totalPages <= 5) {
-      return Array.from({ length: totalPages }, (_, index) => index + 1);
-    }
-
-    if (page <= 3) return [1, 2, 3, "...", totalPages];
-    if (page >= totalPages - 2) {
-      return [1, "...", totalPages - 2, totalPages - 1, totalPages];
-    }
-
-    return [1, "...", page - 1, page, page + 1, "...", totalPages];
-  }, [page, totalPages]);
 
   return (
     <PageCard title="Job Order">
@@ -278,7 +184,7 @@ export default function JobOrderListPage() {
                     ...getJobOrderRowStyle(row.service as JobOrderServiceType),
                     cursor: "pointer",
                   }}
-                  onClick={() => navigate(`/accounts/clients/${row.id}`)}
+                  onClick={() => navigate(buildDetailPath(row.id, row.service))}
                 >
                   <Table.Td>
                     <RequestCell item={row} />
@@ -329,7 +235,7 @@ export default function JobOrderListPage() {
                           style={{ fontSize: "0.75rem" }}
                           onClick={(event) => {
                             event.stopPropagation();
-                            navigate(`/job-orders/${row.id}`);
+                            navigate(buildDetailPath(row.id, row.service));
                           }}
                         >
                           View Details
