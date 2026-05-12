@@ -2,11 +2,12 @@ import { Box, Text, Anchor } from "@mantine/core";
 import { Link } from "react-router";
 import type { JobOrderListItem } from "../../../types/jobOrder";
 
-interface RequestCellProps {
+interface JOCellProps {
   item: JobOrderListItem;
+  detailPath: string;
 }
 
-export function RequestCell({ item }: RequestCellProps) {
+export function JOCell({ item, detailPath }: JOCellProps) {
   return (
     <Box
       style={{
@@ -17,7 +18,7 @@ export function RequestCell({ item }: RequestCellProps) {
     >
       <Anchor
         component={Link}
-        to={`/job-orders/${item.id}`}
+        to={detailPath}
         fw={700}
         size="sm"
         onClick={(event) => event.stopPropagation()}
@@ -26,7 +27,7 @@ export function RequestCell({ item }: RequestCellProps) {
         {item.reference_number}
       </Anchor>
       <Text size="xs" c="dimmed">
-        {item.client_full_name}
+        {item.client}
       </Text>
       <Text size="xs" c="dimmed">
         JO Created:{" "}

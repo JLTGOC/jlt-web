@@ -48,16 +48,14 @@ export function useJobOrderListData({
       const lowered = search.toLowerCase();
       next = next.filter(
         (row) =>
-          row.client_full_name.toLowerCase().includes(lowered) ||
+          row.client.toLowerCase().includes(lowered) ||
           row.reference_number.toLowerCase().includes(lowered),
       );
     }
 
     if (tradeType) {
       next = next.filter(
-        (row) =>
-          row.service !== "Logistics" ||
-          (row.service === "Logistics" && row.trade_type === tradeType),
+        (row) => row.service === "Logistics" && row.trade_type === tradeType,
       );
     }
 

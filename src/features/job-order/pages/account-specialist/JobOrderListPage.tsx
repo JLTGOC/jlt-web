@@ -7,6 +7,8 @@ import {
   Text,
   Group,
   Button,
+  Center,
+  Loader,
 } from "@mantine/core";
 import {
   MoreVert,
@@ -14,8 +16,9 @@ import {
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import { useNavigate, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
 import type { JobOrderServiceType } from "../../types/jobOrder";
-import { RequestCell } from "./components/RequestCell";
+import { JOCell } from "./components/JOCell";
 import { getJobOrderRowStyle } from "./components/JobOrderTableRow";
 import { DetailsCell } from "./components/DetailsCell";
 import { ServiceInformationCell } from "./components/ServiceInformationCell";
@@ -25,9 +28,8 @@ import { JobOrderFilterClient } from "./components/JobOrderFilterClient";
 import { JobOrderFilterTable } from "./components/JobOrderFilterTable";
 import { ShowEntriesControl } from "./components/ShowEntriesControl";
 import { PageCard } from "@/components/PageCard";
-import { fetchAllJobOrders } from "../../api/jobOrders.api";
+import { fetchJobOrders } from "../../api/jobOrderQueries.api";
 import { jobOrdersQueryKeys } from "../../api/jobOrdersQueryKeys";
-import { useJobOrderListData } from "./hooks/useJobOrderListData";
 
 export default function JobOrderListPage() {
   const navigate = useNavigate();
@@ -59,31 +61,112 @@ export default function JobOrderListPage() {
     setSearchParams(next);
   }
 
-  function setPageParam(p: number) {
-    const next = new URLSearchParams(searchParams.toString());
-    next.set("page", String(p));
-    setSearchParams(next);
+  const setPageParam = useCallback(
+    (p: number) => {
+      const next = new URLSearchParams(searchParams.toString());
+      next.set("page", String(p));
+      setSearchParams(next);
+    },
+    [searchParams, setSearchParams],
+  );
+
+  function mapServiceFilter(value: "all" | JobOrderServiceType) {
+    if (value === "Logistics") return "LOGISTICS";
+    if (value === "Regulatory") return "REGULATORY";
+    return undefined;
   }
 
-  const { data: jobOrdersResponse } = useQuery({
-    queryKey: jobOrdersQueryKeys.list(),
-    queryFn: () => fetchAllJobOrders(),
-    staleTime: 30_000,
-  });
+  function mapTradeTypeFilter(value: string) {
+    if (value === "Import") return "IMPORT";
+    if (value === "Export") return "EXPORT";
+    return undefined;
+  }
 
-  const jobOrders = jobOrdersResponse?.jobOrders ?? [];
+  function mapStatusFilter(value: string) {
+    if (value === "Accepted") return "ACCEPTED";
+    if (value === "Pending") return "PENDING";
+    return undefined;
+  }
 
-  const { filteredData, pagedData, counts, totalPages, pages } =
-    useJobOrderListData({
-      data: jobOrders,
-      activeTab,
+  const listParams = {
+    search: search || undefined,
+    ops_search: personInCharge || undefined,
+    "filter[service]": mapServiceFilter(activeTab),
+    "filter[service_type]": mapTradeTypeFilter(tradeType),
+    "filter[assignment_status]": mapStatusFilter(status),
+    perPage,
+    page,
+  };
+
+  const {
+    data: jobOrdersResponse,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: jobOrdersQueryKeys.list({
       search,
+      service: activeTab,
       tradeType,
       status,
       personInCharge,
       perPage,
       page,
-    });
+    }),
+    queryFn: () => fetchJobOrders(listParams),
+    staleTime: 30_000,
+  });
+
+  const { data: allCountsResponse } = useQuery({
+    queryKey: jobOrdersQueryKeys.listCounts("all"),
+    queryFn: () => fetchJobOrders({ perPage: 1, page: 1 }),
+    staleTime: 30_000,
+  });
+
+  const { data: logisticsCountsResponse } = useQuery({
+    queryKey: jobOrdersQueryKeys.listCounts("LOGISTICS"),
+    queryFn: () =>
+      fetchJobOrders({ "filter[service]": "LOGISTICS", perPage: 1, page: 1 }),
+    staleTime: 30_000,
+  });
+
+  const { data: regulatoryCountsResponse } = useQuery({
+    queryKey: jobOrdersQueryKeys.listCounts("REGULATORY"),
+    queryFn: () =>
+      fetchJobOrders({ "filter[service]": "REGULATORY", perPage: 1, page: 1 }),
+    staleTime: 30_000,
+  });
+
+  const jobOrders = jobOrdersResponse?.jobOrders ?? [];
+  const pagination = jobOrdersResponse?.pagination;
+  const totalPages = Math.max(1, pagination?.total_pages ?? 1);
+  const pages = (() => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    }
+
+    if (page <= 3) return [1, 2, 3, "...", totalPages];
+    if (page >= totalPages - 2) {
+      return [1, "...", totalPages - 2, totalPages - 1, totalPages];
+    }
+
+    return [1, "...", page - 1, page, page + 1, "...", totalPages];
+  })();
+
+  const counts = {
+    all: allCountsResponse?.pagination?.total ?? 0,
+    Logistics: logisticsCountsResponse?.pagination?.total ?? 0,
+    Regulatory: regulatoryCountsResponse?.pagination?.total ?? 0,
+  };
+
+  const showingCount = pagination?.count ?? jobOrders.length;
+  const totalCount = pagination?.total ?? jobOrders.length;
+  const isTableLoading = isLoading || isFetching;
+
+  useEffect(() => {
+    if (pagination?.current_page && pagination.current_page !== page) {
+      setPageParam(pagination.current_page);
+    }
+  }, [page, pagination?.current_page, setPageParam]);
 
   const tradeTypeOptions = [
     { value: "Import", label: "Import" },
@@ -115,7 +198,7 @@ export default function JobOrderListPage() {
         <JobOrderFilterTable
           search={search}
           onSearchChange={(value: string) => setParam("q", value)}
-          onSearch={() => {}}
+          onSearch={() => setParam("q", search)}
           tradeType={tradeType}
           onTradeTypeChange={(value: string) => setParam("trade", value || "")}
           personInCharge={personInCharge}
@@ -157,7 +240,7 @@ export default function JobOrderListPage() {
         >
           <Table.Thead>
             <Table.Tr>
-              <Table.Th style={{ width: "16.25rem" }}>REQUEST</Table.Th>
+              <Table.Th style={{ width: "16.25rem" }}>JOB ORDER</Table.Th>
               <Table.Th style={{ width: "20rem" }}>DETAILS</Table.Th>
               <Table.Th style={{ width: "14rem" }}>
                 SERVICE INFORMATION
@@ -168,7 +251,20 @@ export default function JobOrderListPage() {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {pagedData.length === 0 ? (
+            {isTableLoading ? (
+              <Table.Tr>
+                <Table.Td colSpan={6}>
+                  <Center py="xl">
+                    <Group gap="xs">
+                      <Loader size="sm" />
+                      <Text size="sm" c="dimmed">
+                        Loading job orders...
+                      </Text>
+                    </Group>
+                  </Center>
+                </Table.Td>
+              </Table.Tr>
+            ) : jobOrders.length === 0 ? (
               <Table.Tr>
                 <Table.Td colSpan={6}>
                   <Text ta="center" py="xl" c="dimmed" size="sm">
@@ -177,17 +273,20 @@ export default function JobOrderListPage() {
                 </Table.Td>
               </Table.Tr>
             ) : (
-              pagedData.map((row) => (
+              jobOrders.map((row) => (
                 <Table.Tr
                   key={row.id}
                   style={{
                     ...getJobOrderRowStyle(row.service as JobOrderServiceType),
                     cursor: "pointer",
                   }}
-                  onClick={() => navigate(buildDetailPath(row.id, row.service))}
+                  onClick={() => navigate("/404")}
                 >
                   <Table.Td>
-                    <RequestCell item={row} />
+                    <JOCell
+                      item={row}
+                      detailPath={buildDetailPath(row.id, row.service)}
+                    />
                   </Table.Td>
                   <Table.Td>
                     <DetailsCell item={row} />
@@ -231,13 +330,7 @@ export default function JobOrderListPage() {
                         </ActionIcon>
                       </Menu.Target>
                       <Menu.Dropdown>
-                        <Menu.Item
-                          style={{ fontSize: "0.75rem" }}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            navigate(buildDetailPath(row.id, row.service));
-                          }}
-                        >
+                        <Menu.Item style={{ fontSize: "0.75rem" }} disabled>
                           View Details
                         </Menu.Item>
                       </Menu.Dropdown>
@@ -250,7 +343,7 @@ export default function JobOrderListPage() {
         </Table>
         <Group justify="space-between" align="center" mt="0.75rem">
           <Text size="0.75rem" c="dimmed">
-            Showing {pagedData.length} out of {filteredData.length} entries
+            Showing {showingCount} out of {totalCount} entries
           </Text>
           <Group gap="0.25rem">
             <Button

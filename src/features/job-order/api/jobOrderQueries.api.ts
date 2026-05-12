@@ -4,10 +4,10 @@ import type { JobOrderDetail } from "../types/jobOrderDetail";
 
 export interface FetchJobOrdersParams {
   search?: string;
+  ops_search?: string;
   "filter[service]"?: string;
-  "filter[trade_type]"?: string;
-  "filter[person_in_charge]"?: string;
-  "filter[status]"?: string;
+  "filter[service_type]"?: string;
+  "filter[assignment_status]"?: string;
   perPage?: number;
   page?: number;
 }
@@ -40,6 +40,34 @@ type JobOrderListApiItem = {
   ops_image?: string | null;
   application_type?: string;
   regulatory_assistance?: string;
+};
+
+type JobOrderListPagination = {
+  current_page?: number;
+  total_pages?: number;
+  count?: number;
+  per_page?: number;
+  total?: number;
+};
+
+type JobOrderListWrappedData = {
+  job_orders?: JobOrderListApiItem[];
+  pagination?: JobOrderListPagination;
+  counts?: {
+    all_job_orders?: number;
+    new_user_job_orders?: number;
+    old_user_job_orders?: number;
+  };
+};
+
+type JobOrderListResponse = {
+  data?: JobOrderListWrappedData | JobOrderListApiItem[];
+};
+
+type JobOrderListResult = {
+  jobOrders: JobOrderListItem[];
+  pagination?: JobOrderListPagination;
+  counts?: JobOrderListWrappedData["counts"];
 };
 
 function mapAssignmentStatus(status?: string) {
@@ -110,21 +138,19 @@ function mapJobOrderList(items: JobOrderListApiItem[]): JobOrderListItem[] {
 
 export async function fetchJobOrders(
   params: FetchJobOrdersParams,
-): Promise<{ jobOrders: JobOrderListItem[]; pagination?: any } | any> {
-  const response = await apiClient.get<{ data: any }>("/job-orders", {
+): Promise<JobOrderListResult> {
+  const response = await apiClient.get<JobOrderListResponse>("/job-orders", {
     params: {
       ...(params.search ? { search: params.search } : {}),
+      ...(params.ops_search ? { ops_search: params.ops_search } : {}),
       ...(params["filter[service]"]
         ? { "filter[service]": params["filter[service]"] }
         : {}),
-      ...(params["filter[trade_type]"]
-        ? { "filter[trade_type]": params["filter[trade_type]"] }
+      ...(params["filter[service_type]"]
+        ? { "filter[service_type]": params["filter[service_type]"] }
         : {}),
-      ...(params["filter[person_in_charge]"]
-        ? { "filter[person_in_charge]": params["filter[person_in_charge]"] }
-        : {}),
-      ...(params["filter[status]"]
-        ? { "filter[status]": params["filter[status]"] }
+      ...(params["filter[assignment_status]"]
+        ? { "filter[assignment_status]": params["filter[assignment_status]"] }
         : {}),
       ...(params.perPage ? { per_page: params.perPage } : {}),
       ...(params.page ? { page: params.page } : {}),
@@ -132,15 +158,22 @@ export async function fetchJobOrders(
   });
 
   // Backend may return a wrapped response similar to quotations API
-  if (!response || !response.data) return { jobOrders: [], pagination: {} };
+  if (!response || !response.data) {
+    return { jobOrders: [], pagination: {} };
+  }
 
   // Try to return a normalized shape when possible
-  if (response.data.data && Array.isArray(response.data.data.job_orders)) {
+  if (
+    response.data.data &&
+    !Array.isArray(response.data.data) &&
+    Array.isArray(response.data.data.job_orders)
+  ) {
     return {
       jobOrders: mapJobOrderList(
         response.data.data.job_orders as JobOrderListApiItem[],
       ),
       pagination: response.data.data.pagination,
+      counts: response.data.data.counts,
     };
   }
 
@@ -151,7 +184,7 @@ export async function fetchJobOrders(
     };
   }
 
-  return response.data.data;
+  return { jobOrders: [], pagination: {} };
 }
 
 export async function fetchAllJobOrders(
@@ -184,7 +217,7 @@ export async function fetchAllJobOrders(
 export async function fetchJobOrderDetail(
   jobOrderId: number | string,
 ): Promise<JobOrderDetail> {
-  const response = await apiClient.get<{ data: any }>(
+  const response = await apiClient.get<{ data: unknown }>(
     `/job-orders/${jobOrderId}`,
   );
 
