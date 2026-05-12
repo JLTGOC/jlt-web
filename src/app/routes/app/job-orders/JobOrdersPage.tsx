@@ -2,7 +2,7 @@ import { RoleGuard } from "@/components/guards/RoleGuard";
 import { JOB_ORDER_ROLES, ROLES } from "@/types/roles";
 import ASJobOrderListPage from "@/features/job-order/pages/account-specialist/JobOrderListPage";
 import OPSJobOrderListPage from "@/features/job-order/pages/operations/JobOrderListPage";
-import { JobOrderDetailsPage } from "@/features/job-order/components/JobOrderDetailsPage";
+import JobOrderDetailPage from "@/features/job-order/pages/shared/JobOrderDetailPage";
 import { useParams } from "react-router";
 
 /**
@@ -21,7 +21,7 @@ export default function JobOrdersPage() {
         allowedRoles={[...JOB_ORDER_ROLES, ROLES.LEAD_ACCOUNT_SPECIALIST]}
         fallback={<></>}
       >
-        <JobOrderDetailsPage />
+        <JobOrderDetailPage />
       </RoleGuard>
     );
   }

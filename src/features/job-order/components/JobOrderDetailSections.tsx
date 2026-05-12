@@ -9,7 +9,7 @@ import {
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import { DetailCard } from "@/components/DetailCard";
 import { DetailGrid } from "@/components/DetailGrid";
-import type { JobOrderDetail } from "../../../types/jobOrderDetail";
+import type { JobOrderDetail } from "../types/jobOrderDetail";
 
 type JobOrderDetailSectionsProps = {
   detail: JobOrderDetail;
@@ -18,7 +18,7 @@ type JobOrderDetailSectionsProps = {
 
 const em = "—"; // empty value placeholder
 
-function formatDate(value?: string) {
+function formatDate(value?: string | null) {
   if (!value) return em;
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
@@ -40,6 +40,27 @@ export function JobOrderDetailSections({
   detail,
   isRegulatory,
 }: JobOrderDetailSectionsProps) {
+  const regulatoryAssistance = detail.service?.regulatory_assistance ?? em;
+  const applicationType = detail.service?.application_type ?? em;
+  const processingType = detail.service?.accredited ?? em;
+  const regulatoryRemarks = detail.service?.remarks ?? em;
+  const serviceRows = isRegulatory
+    ? [
+        { label: "Service", value: regulatoryAssistance },
+        { label: "Application Type", value: applicationType },
+        { label: "Processing Type", value: processingType },
+        { label: "Remarks", value: regulatoryRemarks },
+      ]
+    : [
+        {
+          label: "Service Level",
+          value: detail.service?.service_level || em,
+        },
+        { label: "BL No.", value: detail.service?.bl_no || em },
+        { label: "ETA", value: formatDate(detail.service?.eta) },
+        { label: "ETD", value: formatDate(detail.service?.etd) },
+      ];
+
   return (
     <>
       <DetailCard
@@ -132,17 +153,7 @@ export function JobOrderDetailSections({
         title="Service Information"
         headerBg="#EFF0F4"
       >
-        <DetailGrid
-          rows={[
-            {
-              label: "Service Level",
-              value: detail.service?.service_level || em,
-            },
-            { label: "BL No.", value: detail.service?.bl_no || em },
-            { label: "ETA", value: formatDate(detail.service?.eta) },
-            { label: "ETD", value: formatDate(detail.service?.etd) },
-          ]}
-        />
+        <DetailGrid rows={serviceRows} />
       </DetailCard>
 
       {!isRegulatory && (
@@ -219,7 +230,9 @@ export function JobOrderDetailSections({
                 },
                 {
                   label: "When to Bill",
-                  value: em,
+                  value: formatDate(
+                    detail.billing_details?.billing_date ?? null,
+                  ),
                 },
                 {
                   label: "Shall Be Billed",
