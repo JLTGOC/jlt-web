@@ -53,18 +53,10 @@ export const NAV_ITEMS: NavItem[] = [
       {
         label: "Logistics",
         path: "/shipments/logistics",
-        subItems: [
-          { label: "Ongoing", path: "/shipments/logistics/ongoing" },
-          { label: "Delivered", path: "/shipments/logistics/delivered" },
-        ],
       },
       {
         label: "Regulatory",
         path: "/shipments/regulatory",
-        subItems: [
-          { label: "Permits", path: "/shipments/regulatory/permits" },
-          { label: "Licenses", path: "/shipments/regulatory/licenses" },
-        ],
       },
     ],
   },

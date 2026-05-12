@@ -1,4 +1,4 @@
-import { Button, Divider, Grid, Group, Input, Select, Text } from "@mantine/core";
+import { Button, Grid, Group, Input, Select, Text } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { Search, CalendarMonth, ChevronRight } from "@nine-thirty-five/material-symbols-react/rounded";
 
@@ -8,17 +8,16 @@ interface RespondedFilterTableProps {
   onSearch: (value: string) => void;
   dateValue: string;
   onDateChange: (value: string) => void;
+  statusValue: string;
+  onStatusChange: (value: string) => void;
   serviceValue: string;
   onServiceChange: (value: string) => void;
-  personInChargeValue: string;
-  onPersonInChargeChange: (value: string) => void;
   onReset: () => void;
   perPage: number;
   setPerPage: (value: number) => void;
-  total: number;
 }
 
-//for drop down ahow entries
+//for drop down show entries
 export function RespondedFilterTable({
   searchValue,
   onSearchChange,
@@ -26,13 +25,12 @@ export function RespondedFilterTable({
   dateValue,
   onDateChange,
   serviceValue,
+  statusValue,
+  onStatusChange,
   onServiceChange,
-  personInChargeValue,
-  onPersonInChargeChange,
   onReset,
   perPage,
   setPerPage,
-  total,
 }: RespondedFilterTableProps) {
   const entryOptions = ["10", "20", "30"];
   return (
@@ -88,33 +86,19 @@ export function RespondedFilterTable({
           }
         />
       </Grid.Col>
-      <Grid.Col span={{ base: 12, md: 3 }}>
-        <Input
+      <Grid.Col span={{ base: 12, md: 2 }}>
+        <Select
           w="100%"
           size="sm"
-          rightSectionWidth={45}
-          placeholder={"PERSON IN CHARGE"}
-          value={personInChargeValue}
-          onChange={(event) => onPersonInChargeChange(event.currentTarget.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              onPersonInChargeChange(personInChargeValue);
-            }
-          }}
-          rightSection={
-            <Button
-              type="button"
-              h={36}
-              w={45}
-              p={0}
-              radius="sm"
-              color="#4f657d"
-              aria-label="Search"
-              onClick={() => onPersonInChargeChange(personInChargeValue)}
-            >
-              <Search width={24} height={24} fill="white" />
-            </Button>
-          }
+          placeholder="ALL STATUS"
+          data={[
+            { value: "ALL STATUS", label: "ALL STATUS" },
+            { value: "RESPONDED", label: "FOLLOW UP" },
+            { value: "VIEWED BY CLIENT", label: "VIEWED BY CLIENT" },
+          ]}
+          value={statusValue}
+          onChange={(value) => onStatusChange(value || "ALL STATUS")}
+          rightSection={<ChevronRight width={16} />}
         />
       </Grid.Col>
       <Grid.Col span={{ base: 12, md: 2 }}>
@@ -130,7 +114,7 @@ export function RespondedFilterTable({
       </Grid.Col>
       <Grid.Col span={{ base: 12, md: 2 }}>
         <Button variant="outline" bg="#4f657d" color="white" onClick={onReset}>
-          Reset
+          RESET
         </Button>
       </Grid.Col>
 

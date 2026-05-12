@@ -41,7 +41,10 @@ export default function DashboardPage() {
     case ROLES.LEAD_ACCOUNT_SPECIALIST:
       return <AccountSpecialistDashboard />;
 
-    case ROLES.OPERATIONS:
+     case ROLES.LEAD_OPERATIONS:
+      return <OperationsDashboard />;
+    
+      case ROLES.OPERATIONS:
       return <OperationsDashboard />;
 
     case ROLES.MARKETING:

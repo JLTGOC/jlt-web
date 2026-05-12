@@ -1,24 +1,24 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Stack, Text, Box, Button, Menu, Group, Modal, TextInput } from "@mantine/core";
-import { MoreVert, Download, Print } from "@nine-thirty-five/material-symbols-react/outlined";
-import { ArrowBack } from "@nine-thirty-five/material-symbols-react/rounded";
+import { MoreVert, Download, Print, AddCircle, EditDocument } from "@nine-thirty-five/material-symbols-react/outlined";
+import { ArrowBack, PictureAsPdf } from "@nine-thirty-five/material-symbols-react/rounded";
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router"; // ✅ for navigation
+import { useNavigate } from "react-router"; 
 import { notifications } from "@mantine/notifications";
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore";
 import { ROLES } from "@/types/roles";
 import { PageCard } from "@/components/PageCard";
 import { DetailCard } from "@/components/DetailCard";
+import { PdfThumbnail } from "@/components/PdfThumbnail";
+import { toClientFileUrl } from "@/utils/file-url";
 import { fetchQuotation } from "@/features/quotations/api/quotations.api";
 import { useQuotationRouteParams } from "@/features/quotations/hooks/useQuotationRouteParams";
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
-import { PdfThumbnail } from "../../pdf/PdfThumbnail"; 
+import type { QuotationDocument } from "@/features/quotations/types/quotations.types";
 
-import docAddIcon from "@/assets/icons/docAdd.svg";
 import docClientIcon from "@/assets/icons/docClient.svg";
 import docJLTCBIcon from "@/assets/icons/docJLTCB.svg";
-import renameIcon from "@/assets/icons/rename.svg";
 
 export function QuotationDocuments() {
   const routeParams = useQuotationRouteParams(["tab", "quotationId"] as const);
@@ -53,9 +53,17 @@ export function QuotationDocuments() {
     quotation?.documents && quotation.documents !== "No documents available."
       ? quotation.documents
       : [];
+  const quotationFiles =
+    quotation?.quotation_file && quotation.quotation_file !== "No file available."
+      ? quotation.quotation_file
+      : [];
 
-  const jltcbDocs = documents.filter((doc) => doc.uploadedBy === "JLTCB");
+  const jltcbDocs = [
+    ...quotationFiles,
+    ...documents.filter((doc) => doc.uploadedBy === "JLTCB"),
+  ];
   const clientDocs = documents.filter((doc) => doc.uploadedBy === "Client");
+  const hasDocuments = jltcbDocs.length > 0 || clientDocs.length > 0;
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -120,7 +128,7 @@ export function QuotationDocuments() {
           <Text size="0.8rem" c="dimmed">
             Loading documents...
           </Text>
-        ) : documents.length === 0 ? (
+        ) : !hasDocuments ? (
           <Text size="0.8rem" c="dimmed">
             No documents available.
           </Text>
@@ -129,7 +137,7 @@ export function QuotationDocuments() {
             {/* JLTCB documents */}
             {jltcbDocs.length > 0 && (
               <Box>
-                <Group mb="md" style={{marginTop: -23}}>
+                <Group mb="md" style={{marginTop: 0}}>
                   <img src={docJLTCBIcon} alt="JLTCB" style={{ width: 24, height: 24, marginTop: 0 }} />
                   <Text fw={600}>Documents uploaded by JLTCB</Text>
                 </Group>
@@ -163,7 +171,7 @@ export function QuotationDocuments() {
               bg="#4E6174"
               c="white"
               style={{ textTransform: "uppercase", fontWeight: 500 }}
-              leftSection={<img src={docAddIcon} alt="Add" style={{ width: 18, height: 18 }} />}
+              leftSection={<AddCircle width={18} height={18} />}
               onClick={handleUploadClick}
             >
               Upload more documents
@@ -183,14 +191,7 @@ export function QuotationDocuments() {
 }
 
 interface DocumentDetailCardProps {
-  doc: {
-    id: number;
-    file_name: string;
-    uploadedDate?: string;
-    uploadedBy: "JLTCB" | "Client";
-    file_url?: string;
-    uploadedByUser?: string; // Name of the user who uploaded
-  };
+  doc: QuotationDocument;
   quotationId?: string;
 }
 
@@ -199,10 +200,13 @@ function DocumentDetailCard({ doc, quotationId }: DocumentDetailCardProps) {
   const [renameModalOpen, setRenameModalOpen] = useState(false);
   const [newFileName, setNewFileName] = useState(doc.file_name);
 
+  const fileUrl = doc.file_url ? toClientFileUrl(doc.file_url) : "";
+  const isPdf = fileUrl && doc.file_name.toLowerCase().endsWith(".pdf");
+
   const handleDownload = () => {
-    if (doc.file_url) {
+    if (fileUrl) {
       const link = document.createElement("a");
-      link.href = doc.file_url;
+      link.href = fileUrl;
       link.download = doc.file_name;
       document.body.appendChild(link);
       link.click();
@@ -211,8 +215,8 @@ function DocumentDetailCard({ doc, quotationId }: DocumentDetailCardProps) {
   };
 
   const handlePrint = () => {
-    if (doc.file_url) {
-      const printWindow = window.open(doc.file_url, "_blank");
+    if (fileUrl) {
+      const printWindow = window.open(fileUrl, "_blank");
       if (printWindow) {
         printWindow.onload = () => {
           printWindow.print();
@@ -262,43 +266,52 @@ function DocumentDetailCard({ doc, quotationId }: DocumentDetailCardProps) {
 
   return (
     <>
-      <DetailCard
-        icon={<PdfThumbnail fileUrl={doc.file_url ?? ""} />}
-        title={doc.file_name}
-      >
-        <Box style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Box>
-            {doc.uploadedDate && (
+      <Box style={{ minHeight: 90, padding: "0.5rem 0.75rem", fontSize: "0.85rem" }}>
+        <DetailCard
+          icon={
+            isPdf && fileUrl ? (
+              <Box style={{ width: 60, height: 80, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <PdfThumbnail url={fileUrl} />
+              </Box>
+            ) : (
+              <PictureAsPdf width={32} height={32} style={{ color: "var(--mantine-color-red-6)" }} />
+            )
+          }
+          title={doc.file_name}
+        >
+          <Box style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Box>
+              {doc.uploadedDate && (
+                <Text size="sm" c="dimmed">
+                  {new Date(doc.uploadedDate).toLocaleDateString()} at {new Date(doc.uploadedDate).toLocaleTimeString()}
+                </Text>
+              )}
               <Text size="sm" c="dimmed">
-                {new Date(doc.uploadedDate).toLocaleDateString()} at {new Date(doc.uploadedDate).toLocaleTimeString()}
+                Uploaded by: {doc.uploadedByUser || doc.uploadedBy || "Unknown"}
               </Text>
-            )}
-            <Text size="sm" c="dimmed">
-              Uploaded by: {doc.uploadedByUser || doc.uploadedBy}
-            </Text>
+            </Box>
+
+            <Menu position="bottom-end">
+              <Menu.Target>
+                <Button variant="subtle" p={0}>
+                  <MoreVert />
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item leftSection={<Download style={{ width: 16, height: 16 }} />} onClick={handleDownload}>
+                  Download
+                </Menu.Item>
+                <Menu.Item leftSection={<Print style={{ width: 16, height: 16 }} />} onClick={handlePrint}>
+                  Print
+                </Menu.Item>
+                <Menu.Item leftSection={<EditDocument width={16} height={16} />} onClick={() => setRenameModalOpen(true)}>
+                  Rename
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
           </Box>
-
-          <Menu position="bottom-end">
-            <Menu.Target>
-              <Button variant="subtle" p={0}>
-                <MoreVert />
-              </Button>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Item leftSection={<Download style={{ width: 16, height: 16 }} />} onClick={handleDownload}>
-                Download
-              </Menu.Item>
-              <Menu.Item leftSection={<Print style={{ width: 16, height: 16 }} />} onClick={handlePrint}>
-                Print
-              </Menu.Item>
-              <Menu.Item leftSection={<img src={renameIcon} alt="Rename" style={{ width: 16, height: 16 }} />} onClick={() => setRenameModalOpen(true)}>
-                Rename
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </Box>
-      </DetailCard>
-
+        </DetailCard>
+      </Box>
       <Modal opened={renameModalOpen} onClose={() => setRenameModalOpen(false)} title="Rename Document" centered>
         <Stack gap="md">
           <TextInput

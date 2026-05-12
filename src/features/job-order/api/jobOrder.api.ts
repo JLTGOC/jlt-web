@@ -1,0 +1,30 @@
+import { apiClient } from "@/lib/api/client";
+
+import type { FetchJobOrdersParams, JobOrdersResponse } from "../types/jobOrder";
+
+export {acceptJobOrder, reassignRequestJobOrder, reassignJobOrder, reassignJobOrderDetails} from "./operations.api"
+
+export async function fetchJobOrders(
+  params: FetchJobOrdersParams,
+): Promise<JobOrdersResponse> {
+  const response = await apiClient.get<{
+    data: JobOrdersResponse;
+  }>("/job-orders", {
+    params: {
+      ...(params["filter[assignment_status]"]
+        ? { "filter[assignment_status]": params.client_type }
+        : {}),
+      ...(params["filter[service]"]
+        ? { "filter[service]": params["filter[service]"] }
+        : {}),
+      ...(params.search ? { search: params.search } : {}),
+      // ...(params.client_type ? { client_type: params.client_type } : {}),
+      ...(params.per_page ? { per_page: params.per_page } : {}),
+      ...(params.my_per_page ? { my_per_page: params.my_per_page } : {}),
+      ...(params.page ? { page: params.page } : {}),
+      ...(params.my_page ? { my_page: params.my_page } : {}),
+    },
+  });
+
+  return response.data.data;
+}

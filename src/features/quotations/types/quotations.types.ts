@@ -30,13 +30,21 @@ export interface RespondedQuotationListItem {
   date: string;
   client_full_name: string;
   status: string;
+  qtn_status?: "requested" | "responded" | "accepted" | null;
   assignment_status?: string;
   as_username: string;
   as_full_name: string;
+  account_specialist?: string | null;
   assigned_at: string;
   service: string;
+  viewed_at: string | null;
   logistics_service: RespondedQuotationLogisticsService | null;
+  regulatory_service?: RequestedQuotationRegulatoryService | null;
   client_type?: "NEW" | "OLD";
+  company_name?: string;
+  client?: {
+    company_name?: string;
+  };
 }
 
 export interface RespondedQuotationsResponse {
@@ -56,6 +64,8 @@ export interface QuotationLogisticsService {
 
 export interface QuotationRegulatoryService {
   application_type: string;
+  type_of_regulatory_assistance: string;
+  business_type?: string | null;
 }
 
 export interface QuotationListItem {
@@ -77,7 +87,8 @@ export interface QuotationListItem {
   prepared_by: string | null;
   issued_quotation_id: string | null;
   as_profile_image: string | null;
-  client_type: string
+  client_type: string;
+  previously_assigned_to: string | null;
 }
 
 export interface ClientCounts {
@@ -105,7 +116,7 @@ export interface QuotationResource {
     company_name: string;
     contact_number: string;
     email: string;
-  } | null;
+  } | null;                                                       
   account_specialist: string | null;
   status: string;
   shipment_status: string;
@@ -134,7 +145,6 @@ export interface QuotationResource {
   } | null;
   regulatory_service: {
     type_of_regulatory_assistance: string[];
-    service_level: string | null;
     message: string | null;
   } | null;
   quotation_file: QuotationDocument[] | "No file available.";
@@ -153,8 +163,13 @@ export interface QuotationDocument {
   id: number;
   file_name: string;
   file_url: string;
-  uploadedBy: "JLTCB" | "Client";
+  file_type?: string;
+  uploadedBy?: "JLTCB" | "Client";
+  uploaded_by?: number;
+  uploadedByUser?: string;
   uploadedDate?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // ─── Quotation file resource ───────────────────────────────────────────────────

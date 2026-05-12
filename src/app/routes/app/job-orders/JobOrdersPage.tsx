@@ -1,7 +1,7 @@
 import { RoleGuard } from "@/components/guards/RoleGuard";
-import { ROLES } from "@/types/roles";
-import { QuotationsRequested } from "@/features/quotations/pages/requested/QuotationsRequested";
-import JobOrderListPage from "@/features/job-order/pages/account-specialist/JobOrderListPage";
+import { JOB_ORDER_ROLES, ROLES } from "@/types/roles";
+import ASJobOrderListPage from "@/features/job-order/pages/account-specialist/JobOrderListPage";
+import OPSJobOrderListPage from "@/features/job-order/pages/operations/JobOrderListPage";
 
 /**
  * JobOrders Page
@@ -14,9 +14,8 @@ export default function JobOrdersPage() {
   return (
     <>
       {/* Operations role */}
-      <RoleGuard allowedRoles={[ROLES.OPERATIONS]} fallback={<></>}>
-        <div>Operational Job Orders View</div>
-        <QuotationsRequested />
+      <RoleGuard allowedRoles={JOB_ORDER_ROLES} fallback={<></>}>
+        <OPSJobOrderListPage />
       </RoleGuard>
 
       {/* Lead Account Specialist role */}
@@ -24,7 +23,7 @@ export default function JobOrdersPage() {
         allowedRoles={[ROLES.LEAD_ACCOUNT_SPECIALIST]}
         fallback={<></>}
       >
-        <JobOrderListPage />
+        <ASJobOrderListPage />
       </RoleGuard>
     </>
   );

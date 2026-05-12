@@ -1,0 +1,60 @@
+/* Status Button Background Colors - customize here */
+:root {
+  --status-button-color-not-yet-departed: #E7E8EE;
+  --status-button-color-in-transit: #D1E6FD;
+  --status-button-color-arrived: #CDEEF0;
+  --status-button-color-berthed: #E1D8F6;
+  --status-button-color-discharged: #FFECBF;
+  --status-button-color-delivered: #CFEAD7;
+}
+
+/* Status Text Color & Outline - customize here */
+:root {
+  --status-outline-color-not-yet-departed: #000000;
+  --status-outline-color-in-transit: #0963E3;
+  --status-outline-color-arrived: #27A2AF;
+  --status-outline-color-berthed: #6D37C7;
+  --status-outline-color-discharged: #F5940A;
+  --status-outline-color-delivered: #0E8C42;
+}
+
+.statusBadge {
+  padding: 0.375rem 2rem;
+  border-radius: 0.375rem;
+  display: inline-block;
+  text-align: center;
+  position: relative;
+  background-color: #999;
+  border: 2px solid #666;
+  width: 200px;
+}
+
+.statusBadge[data-status="Not Yet Departed"] {
+  background-color: var(--status-button-color-not-yet-departed);
+  border: 2px solid var(--status-outline-color-not-yet-departed);
+}
+
+.statusBadge[data-status="In Transit"] {
+  background-color: var(--status-button-color-in-transit);
+  border: 2px solid var(--status-outline-color-in-transit);
+}
+
+.statusBadge[data-status="Arrived"] {
+  background-color: var(--status-button-color-arrived);
+  border: 2px solid var(--status-outline-color-arrived);
+}
+
+.statusBadge[data-status="Berthed"] {
+  background-color: var(--status-button-color-berthed);
+  border: 2px solid var(--status-outline-color-berthed);
+}
+
+.statusBadge[data-status="Discharged"] {
+  background-color: var(--status-button-color-discharged);
+  border: 2px solid var(--status-outline-color-discharged);
+}
+
+.statusBadge[data-status="Delivered"] {
+  background-color: var(--status-button-color-delivered);
+  border: 2px solid var(--status-outline-color-delivered);
+}

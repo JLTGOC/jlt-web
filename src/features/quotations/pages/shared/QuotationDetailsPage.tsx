@@ -1,9 +1,8 @@
 import { useNavigate, useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Stack, Group, Text, Image } from "@mantine/core";
+import { Stack, Group, Text, Image, Button } from "@mantine/core";
 import { PageCard } from "@/components/PageCard";
 import { fetchQuotation } from "@/features/quotations/api/quotations.api";
-import { AppButton } from "@/components/ui/AppButton";
 import { QuotationDetailsSections } from "@/features/quotations/components/QuotationDetailsSections";
 import { useQuotationRouteParams } from "@/features/quotations/hooks/useQuotationRouteParams";
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
@@ -11,21 +10,14 @@ import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import { ReferenceHeader } from "@/features/quotations/components/ReferenceHeader";
 import { ReferenceHeaderSecondary } from "@/features/quotations/components/ReferenceHeaderSecondary";
 import { getQtnStatus } from "@/features/quotations/utils/quotationStatus";
-import updateIcon from "@/assets/icons/update.svg";
-import joborderIcon from "@/assets/icons/joborder.svg";
-import makeQuotationIcon from "@/assets/icons/makequotation.svg";
+import { ContractEdit, Article, RequestQuote } from "@nine-thirty-five/material-symbols-react/outlined";
 
-const UpdateQuotationIcon = () => (
-  <Image src={updateIcon} alt="Update Quotation Icon" width={30} height={30} />
-);
+const UpdateQuotationIcon = () => <ContractEdit width={30} height={30} />;
 
-const CreateJobOrderIcon = () => (
-  <Image src={joborderIcon} alt="Create Job Order Icon" width={30} height={30} />
-);
+const CreateJobOrderIcon = () => <Article width={30} height={30} />;
 
-const MakeQuotationIcon = () => (
-  <Image src={makeQuotationIcon} alt="Make Quotation Icon" width={30} height={30} />
-);
+const MakeQuotationIcon = () => <RequestQuote width={30} height={30} />
+;
 
 export function QuotationDetailsPage() {
   const routeParams = useQuotationRouteParams(["tab", "quotationId"] as const);
@@ -40,7 +32,10 @@ export function QuotationDetailsPage() {
       if (!routeParams) {
         throw new Error("Missing required route parameters.");
       }
-      return fetchQuotation(routeParams.quotationId);
+      return fetchQuotation(
+        routeParams.quotationId,
+        routeParams.tab as "requested" | "responded" | "accepted",
+      );
     },
     enabled: Boolean(routeParams),
   });
@@ -76,7 +71,6 @@ export function QuotationDetailsPage() {
   }
 
   const isRequested = status === "requested";
-  const isResponded = status === "responded";
   const isAccepted = status === "accepted";
 
   const canShowButton = quotation.account_specialist;
@@ -85,10 +79,14 @@ export function QuotationDetailsPage() {
     <PageCard
       title="Client Details"
       bgColor="transparent"
+      shadow={false}
       action={
         canShowButton ? (
-          <AppButton
-            variant="quotation"
+          <Button
+            size="md"
+            bg="#4E6174"
+            c="white"
+            leftSection={<ButtonIcon />}
             onClick={() => {
               if (isAccepted) {
                 console.log("TODO: Make job order flow");
@@ -102,10 +100,9 @@ export function QuotationDetailsPage() {
                 );
               }
             }}
-            icon={ButtonIcon}
           >
             {buttonLabel}
-          </AppButton>
+          </Button>
         ) : undefined
       }
     >
