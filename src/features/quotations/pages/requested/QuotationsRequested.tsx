@@ -97,6 +97,7 @@ export function QuotationsRequested() {
             style={{
               borderRadius: "0.75rem",
               border: "1px solid #e0e5eb",
+              backgroundColor: "white",
             }}
           >
             <Box>

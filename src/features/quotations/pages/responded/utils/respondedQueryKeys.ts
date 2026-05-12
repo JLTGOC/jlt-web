@@ -8,8 +8,8 @@ export const respondedQueryKeys = {
     perPage,
     clientFilter,
     serviceFilter,
+    statusFilter,   
     dateFilter,
-    personInChargeFilter,
     jobFilter,
     currentPage,
   }: { 
@@ -17,8 +17,8 @@ export const respondedQueryKeys = {
     perPage: number;
     clientFilter?: "ALL" | "NEW" | "OLD";
     serviceFilter?: string;
+    statusFilter?: string;   
     dateFilter?: string;
-    personInChargeFilter?: string;
     jobFilter?: "all" | "my-items";
     currentPage?: number;
   }) =>
@@ -27,8 +27,8 @@ export const respondedQueryKeys = {
       perPage,
       clientFilter,
       serviceFilter,
+      statusFilter,   
       dateFilter,
-      personInChargeFilter,
       jobFilter,
       currentPage,
     }),

@@ -30,7 +30,7 @@ export function QuotationsResponded() {
   const [clientSearchValue, setClientSearchValue] = useState(search);
   const [dateFilter, setDateFilter] = useState<string>("");
   const [serviceFilter, setServiceFilter] = useState<string>("ALL SERVICES");
-  const [personInChargeFilter, setPersonInChargeFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL STATUS");   
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data, isLoading, isFetching } = useQuery({
@@ -38,8 +38,8 @@ export function QuotationsResponded() {
       searchQuery,
       clientFilter,
       serviceFilter,
+      statusFilter,
       dateFilter,
-      personInChargeFilter,
       perPage,
       jobFilter,
       currentPage,
@@ -48,8 +48,8 @@ export function QuotationsResponded() {
       fetchRespondedQuotations({
         search: searchQuery || undefined,
         "filter[service]": serviceFilter === "ALL SERVICES" ? undefined : serviceFilter,
+        "filter[status]": statusFilter === "ALL STATUS" ? undefined : statusFilter,
         "filter[created_at]": dateFilter || undefined,
-        "filter[as_full_name]": personInChargeFilter || undefined,
         client_type: clientFilter === "ALL" ? undefined : clientFilter,
         perPage,
         page: currentPage,
@@ -65,7 +65,7 @@ export function QuotationsResponded() {
     setClientSearchValue("");
     setDateFilter("");
     setServiceFilter("ALL SERVICES");
-    setPersonInChargeFilter("");
+    setStatusFilter("ALL STATUS");   // ✅ reset status
     handleSearch("");
     setCurrentPage(1);
   };
@@ -98,11 +98,10 @@ export function QuotationsResponded() {
         />
 
         <Box
-          p="xs"
+          p="sm"
           style={{
             borderRadius: "0.75rem",
             border: "none",
-            backgroundColor: "transparent",
           }}
         >
           <RespondedFilterTable
@@ -113,12 +112,11 @@ export function QuotationsResponded() {
             onDateChange={(dateString) => setDateFilter(dateString)}
             serviceValue={serviceFilter}
             onServiceChange={setServiceFilter}
-            personInChargeValue={personInChargeFilter}
-            onPersonInChargeChange={setPersonInChargeFilter}
+            statusValue={statusFilter}                 
+            onStatusChange={setStatusFilter}           
             onReset={handleReset}
             perPage={perPage}
             setPerPage={setPerPage}
-            total={total}
           />
 
           <RespondedTable

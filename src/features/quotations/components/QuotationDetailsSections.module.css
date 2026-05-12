@@ -10,6 +10,7 @@
   font-size: 1rem;
   display: flex;
   align-items: center;
+  border-radius: 0 !important;
 }
 
 .sectionHeader:hover,
@@ -21,10 +22,20 @@
 
 .accordionItem {
   border: 1px solid #ccc;
-  border-radius: 0.5rem;
+  border-radius: 0.5rem 0.5rem 0.5rem 0.5rem !important;
   overflow: hidden;
   margin-bottom: 1rem;
   background: white;
+  width: auto;
+}
+
+.accordionItem:last-child {
+  border-radius: 0.5rem 0.5rem 0.5rem 0.5rem !important;
+}
+
+.accordionPanel {
+  border-radius: 0 !important;
+  height: auto;
 }
 
 .sectionHeaderIcon {
