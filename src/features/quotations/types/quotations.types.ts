@@ -39,7 +39,7 @@ export interface RespondedQuotationListItem {
   service: string;
   viewed_at: string | null;
   logistics_service: RespondedQuotationLogisticsService | null;
-  regulatory_service?: RequestedQuotationRegulatoryService | null;
+  regulatory_service?: QuotationRegulatoryService | null;
   client_type?: "NEW" | "OLD";
   company_name?: string;
   client?: {

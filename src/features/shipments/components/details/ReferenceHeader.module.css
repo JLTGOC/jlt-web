@@ -19,14 +19,29 @@
 }
 
 .statusBadge {
-  padding: 0.375rem 2rem;
+  padding: 0.375rem 1rem;
   border-radius: 0.375rem;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   position: relative;
   background-color: #999;
   border: 2px solid #666;
-  width: 200px;
+  min-width: 160px;
+  width: auto;
+}
+
+.referenceHeaderBody {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .verticalDivider {
+    display: none;
+  }
 }
 
 .statusBadge[data-status="Not Yet Departed"] {

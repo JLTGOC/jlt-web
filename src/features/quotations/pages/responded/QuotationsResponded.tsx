@@ -5,7 +5,7 @@ import { Box, Stack, Flex, Pagination } from "@mantine/core";
 
 import { PageCard } from "@/components/PageCard";
 import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
-import { fetchQuotations } from "@/features/quotations/api/quotations.api";
+import { fetchRespondedQuotations } from "@/features/quotations/api/quotations.api";
 import { respondedQueryKeys } from "./utils/respondedQueryKeys";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 
@@ -44,17 +44,21 @@ export function QuotationsResponded() {
       jobFilter,
       currentPage,
     }),
-    queryFn: () =>
-      fetchQuotations({
+    queryFn: () => {
+      const params: any = {
         "filter[status]": "RESPONDED",
         search: searchQuery || undefined,
         "filter[service]": serviceFilter === "ALL SERVICES" ? undefined : serviceFilter,
-        "filter[status]": statusFilter === "ALL STATUS" ? undefined : statusFilter,
         "filter[created_at]": dateFilter || undefined,
         client_type: clientFilter === "ALL" ? undefined : clientFilter,
         perPage,
         page: currentPage,
-      }),
+      };
+      if (statusFilter !== "ALL STATUS") {
+        params["filter[status]"] = statusFilter;
+      }
+      return fetchRespondedQuotations(params);
+    },
   });
 
   const rows = data?.quotations ?? [];
@@ -66,7 +70,7 @@ export function QuotationsResponded() {
     setClientSearchValue("");
     setDateFilter("");
     setServiceFilter("ALL SERVICES");
-    setStatusFilter("ALL STATUS");   // ✅ reset status
+    setStatusFilter("ALL STATUS");
     handleSearch("");
     setCurrentPage(1);
   };
@@ -110,7 +114,7 @@ export function QuotationsResponded() {
             onSearchChange={setClientSearchValue}
             onSearch={handleSearch}
             dateValue={dateFilter}
-            onDateChange={(dateString) => setDateFilter(dateString)}
+            onDateChange={(dateString: string) => setDateFilter(dateString)}
             serviceValue={serviceFilter}
             onServiceChange={setServiceFilter}
             statusValue={statusFilter}                 

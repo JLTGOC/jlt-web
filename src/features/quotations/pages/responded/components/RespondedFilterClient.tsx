@@ -77,9 +77,11 @@ export function RespondedFilterClient({
         border: "1px solid #e2e6eb",
         paddingBottom: 2,
         paddingTop: 2,
-        width: 1675,
-        marginLeft: 13,
+        width: "100%",
+        maxWidth: "100%",
+        marginLeft: 0,
         paddingLeft: 20,
+        overflow: "hidden",
       }}
     >
       <Group gap="md">

@@ -178,12 +178,11 @@ export function ShipmentList() {
             backgroundColor: "#fff",
             border: "none",
             width: "100%",
-            whiteSpace: "nowrap",
             display: "flex",
             alignItems: "center",
           }}
         >
-          <Group gap="lg" wrap="wrap">
+          <Group gap="sm" wrap="wrap">
             {Object.entries(SHIPMENT_STATUS_DESCRIPTIONS).map(
               ([status, description], index, arr) => (
                 <Group key={status} gap="sm" align="flex-start">
@@ -199,10 +198,10 @@ export function ShipmentList() {
                       }}
                     />
                     <div>
-                      <Text fz="0.85rem" fw={600} c="#2c3f55">
+                      <Text fz="0.75rem" fw={600} c="#2c3f55">
                         {formatStatusLabel(status)}
                       </Text>
-                      <Text fz="0.8rem" c="#7a808a">
+                      <Text fz="0.7rem" c="#7a808a">
                         {description}
                       </Text>
                     </div>

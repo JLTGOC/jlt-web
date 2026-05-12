@@ -119,12 +119,12 @@ export function ShipmentTable({
 
   return (
     <>
-      <Box mt="sm">
+      <Box mt="sm" style={{ width: "100%", overflowX: "auto" }}>
         <Table
           withTableBorder
           withColumnBorders={false}
           styles={{
-            table: { width: "100%" },
+            table: { width: "100%", minWidth: 980 },
             tbody: { borderTop: "none", borderBottom: "none" },
           }}
         >
@@ -196,14 +196,14 @@ export function ShipmentTable({
                           zIndex: 1,
                         }}
                       />
-                      <Stack gap={2}>
-                        <Text fw={700} c="#475569" fz="0.813rem">
+                      <Stack gap={2} style={{ minWidth: 0 }}>
+                        <Text fw={700} c="#475569" fz="0.813rem" lineClamp={1}>
                           {row.reference_number}
                         </Text>
-                        <Text fw={500} c="#475569" fz="0.813rem" lh={1.45}>
+                        <Text fw={500} c="#475569" fz="0.813rem" lh={1.45} lineClamp={1}>
                           {typeof row.client === 'object' ? row.client.full_name : row.client_full_name || row.client || "—"}
                         </Text>
-                        <Text fw={500} c="#475569" fz="0.813rem" lh={1.45}>
+                        <Text fw={500} c="#475569" fz="0.813rem" lh={1.45} lineClamp={1}>
                           {typeof row.client === 'object' ? row.client.company_name : row.company_name || "—"}
                         </Text>
                       </Stack>
@@ -322,7 +322,7 @@ export function ShipmentTable({
                           position: "relative",
                         }}
                       >
-                        <Text fw={500} c={statusTextColor} fz="0.813rem" style={{ position: "relative", zIndex: 2 }}>
+                        <Text fw={500} c={statusTextColor} fz="0.8rem" style={{ position: "relative", zIndex: 2 }}>
                           {row.status || "—"}
                         </Text>
                       </Box>
