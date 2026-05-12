@@ -10,13 +10,15 @@ import {
   Loader,
   Pagination,
   Image,
+  Menu,
 } from "@mantine/core";
-import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
+import { MoreVert, FileOpen } from "@nine-thirty-five/material-symbols-react/rounded";
 import {
   RequestQuote,
   ChangeCircle,
   PanToolAlt,
   CheckCircle,
+  Delete,
 } from "@nine-thirty-five/material-symbols-react/outlined";
 import type { QuotationListItem } from "@/features/quotations/types/quotations.types";
 
@@ -322,14 +324,39 @@ export function RequestTable({
                     </Stack>
                   </Table.Td>
 
-                  <Table.Td style={{ width: "2.75rem", textAlign: "center" }}>
-                    <ActionIcon
-                      variant="subtle"
-                      color="#334155"
-                      aria-label="More actions"
-                    >
-                      <MoreVert width={16} />
-                    </ActionIcon>
+                  <Table.Td
+                    style={{ width: "2.75rem", textAlign: "center" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Menu position="left">
+                      <Menu.Target>
+                        <ActionIcon
+                          variant="subtle"
+                          color="#334155"
+                          aria-label="More actions"
+                        >
+                          <MoreVert width={16} />
+                        </ActionIcon>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        <Menu.Item
+                          leftSection={<FileOpen width={16} />}
+                          onClick={() => onRowClick?.(row)}
+                        >
+                          View Details
+                        </Menu.Item>
+                        <Menu.Item leftSection={<FileOpen width={16} />}>
+                          Documents
+                        </Menu.Item>
+                        <Menu.Divider />
+                        <Menu.Item
+                          color="red"
+                          leftSection={<Delete width={16} />}
+                        >
+                          Discard
+                        </Menu.Item>
+                      </Menu.Dropdown>
+                    </Menu>
                   </Table.Td>
                 </Table.Tr>
               ))

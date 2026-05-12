@@ -13,6 +13,7 @@ import {
   reassignRequestJobOrder,
   reassignJobOrder,
   reassignJobOrderDetails,
+  fetchJobOrderQuotation
 } from "@/features/job-order/api/jobOrder.api";
 
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
@@ -188,6 +189,8 @@ export function useJobOrderPage() {
     });
   };
 
+  const fetchDetails = (quotationId: string) => {}
+
   const handleReassignConfirm = () => {
     if (!selectedQuotation) return;
     if (!reassignStatus) return;
@@ -278,13 +281,8 @@ export function useJobOrderPage() {
   };
 
   const handleRowClick = (row: JobOrderResponse) => {
-    const jobOrderId = String(row.id);
-    navigate(
-      jobOrderRoutes.details({
-        tab: "operations",
-        jobOrderId,
-      }),
-    );
+    const jobOrderId = row.id;
+    navigate(jobOrderRoutes.details(jobOrderId), { state: { jobOrder: row } });
   };
 
   return {

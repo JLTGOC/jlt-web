@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   ActionIcon,
   Box,
@@ -8,17 +9,20 @@ import {
   Text,
   Center,
   Loader,
-  Pagination,
   Avatar,
+  Menu,
 } from "@mantine/core";
 import {
   MoreVert,
   RequestQuote,
+  FileOpen,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import {
   Autorenew,
   PanToolAlt,
   CheckCircle,
+  ChevronRight,
+  Delete,
 } from "@nine-thirty-five/material-symbols-react/outlined";
 import type { JobOrderResponse } from "@/features/job-order/types/jobOrder";
 
@@ -83,10 +87,28 @@ export function JobOrderTable({
 }: JobOrderTableProps) {
   const currentShowingCount = showingCount ?? rows.length;
   const currentTotal = total ?? rows.length;
+  const currentPage = perPaginationPage ?? 1;
+  const resolvedTotalPages = Math.max(totalPages ?? 1, 1);
+
+  const pages = useMemo(() => {
+    if (resolvedTotalPages <= 5) {
+      return Array.from({ length: resolvedTotalPages }, (_, index) => index + 1);
+    }
+
+    if (currentPage <= 3) {
+      return [1, 2, 3, "...", resolvedTotalPages];
+    }
+
+    if (currentPage >= resolvedTotalPages - 2) {
+      return [1, "...", resolvedTotalPages - 2, resolvedTotalPages - 1, resolvedTotalPages];
+    }
+
+    return [1, "...", currentPage - 1, currentPage, currentPage + 1, "...", resolvedTotalPages];
+  }, [currentPage, resolvedTotalPages]);
 
   return (
     <>
-      <Box mt="sm">
+      <Box>
         <Table
           withTableBorder
           withColumnBorders={false}
@@ -297,7 +319,7 @@ export function JobOrderTable({
                         <Button
                           styles={{ root: { background: "#FF8800" } }}
                           leftSection={<RequestQuote width={20} />}
-                          onClick={(event) => {}}
+                          onClick={() => {}}
                         >
                           Generate Shipment
                         </Button>
@@ -352,14 +374,39 @@ export function JobOrderTable({
                     </Stack>
                   </Table.Td>
 
-                  <Table.Td style={{ width: "2.75rem", textAlign: "center" }}>
-                    <ActionIcon
-                      variant="subtle"
-                      color="#334155"
-                      aria-label="More actions"
-                    >
-                      <MoreVert width={16} />
-                    </ActionIcon>
+                  <Table.Td
+                    style={{ width: "2.75rem", textAlign: "center" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Menu position="left">
+                      <Menu.Target>
+                        <ActionIcon
+                          variant="subtle"
+                          color="#334155"
+                          aria-label="More actions"
+                        >
+                          <MoreVert width={16} />
+                        </ActionIcon>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        <Menu.Item
+                          leftSection={<FileOpen width={16} />}
+                          onClick={() => onRowClick?.(row)}
+                        >
+                          View Details
+                        </Menu.Item>
+                        <Menu.Item leftSection={<FileOpen width={16} />}>
+                          Documents
+                        </Menu.Item>
+                        <Menu.Divider />
+                        <Menu.Item
+                          color="red"
+                          leftSection={<Delete width={16} />}
+                        >
+                          Discard
+                        </Menu.Item>
+                      </Menu.Dropdown>
+                    </Menu>
                   </Table.Td>
                 </Table.Tr>
               ))
@@ -373,12 +420,90 @@ export function JobOrderTable({
           Showing {currentShowingCount} out of {currentTotal} entries
         </Text>
 
-        <Pagination
-          total={totalPages || 1}
-          value={perPaginationPage}
-          onChange={setPerPaginationPage}
-          size="xs"
-        />
+        {resolvedTotalPages > 1 && setPerPaginationPage ? (
+          <Group gap={6} wrap="nowrap">
+            <Button
+              variant="outline"
+              size="xs"
+              radius="sm"
+              leftSection={
+                <ChevronRight width={14} style={{ transform: "rotate(180deg)" }} />
+              }
+              onClick={() => currentPage > 1 && setPerPaginationPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              styles={{
+                root: {
+                  minWidth: 92,
+                  height: 30,
+                  borderColor: "#D1D5DB",
+                  color: "#4B5563",
+                  fontWeight: 500,
+                  paddingInline: 12,
+                },
+                section: {
+                  marginRight: 4,
+                },
+              }}
+            >
+              Previous
+            </Button>
+
+            {pages.map((page, index) =>
+              page === "..." ? (
+                <Text key={`ellipsis-${index}`} c="#8a8f99" fz="0.813rem">
+                  ...
+                </Text>
+              ) : (
+                <Button
+                  key={page}
+                  variant={page === currentPage ? "filled" : "outline"}
+                  size="xs"
+                  radius="sm"
+                  onClick={() =>
+                    typeof page === "number" && page !== currentPage && setPerPaginationPage(page)
+                  }
+                  styles={{
+                    root: {
+                      minWidth: 30,
+                      height: 30,
+                      borderColor: page === currentPage ? "#1D274E" : "#D1D5DB",
+                      backgroundColor: page === currentPage ? "#1D274E" : "#FFFFFF",
+                      color: page === currentPage ? "#FFFFFF" : "#4B5563",
+                      fontWeight: 600,
+                      paddingInline: 10,
+                    },
+                  }}
+                >
+                  {page}
+                </Button>
+              ),
+            )}
+
+            <Button
+              variant="outline"
+              size="xs"
+              radius="sm"
+              rightSection={<ChevronRight width={14} />}
+              onClick={() => currentPage < resolvedTotalPages && setPerPaginationPage(currentPage + 1)}
+              disabled={currentPage === resolvedTotalPages}
+              styles={{
+                root: {
+                  minWidth: 74,
+                  height: 30,
+                  borderColor: "#D1D5DB",
+                  color: "#4B5563",
+                  fontWeight: 500,
+                  paddingInline: 12,
+                },
+                section: {
+                  marginLeft: 4,
+                },
+              }}
+            >
+              Next
+            </Button>
+          </Group>
+        ) : null}
       </Group>
     </>
   );

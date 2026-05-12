@@ -2,6 +2,8 @@ import { RoleGuard } from "@/components/guards/RoleGuard";
 import { JOB_ORDER_ROLES, ROLES } from "@/types/roles";
 import ASJobOrderListPage from "@/features/job-order/pages/account-specialist/JobOrderListPage";
 import OPSJobOrderListPage from "@/features/job-order/pages/operations/JobOrderListPage";
+import { JobOrderDetailsPage } from "@/features/job-order/components/JobOrderDetailsPage";
+import { useParams } from "react-router";
 
 /**
  * JobOrders Page
@@ -11,6 +13,19 @@ import OPSJobOrderListPage from "@/features/job-order/pages/operations/JobOrderL
  * - Lead Account Specialist: Account specialist job orders
  */
 export default function JobOrdersPage() {
+  const { jobOrderId } = useParams<{ jobOrderId?: string }>();
+
+  if (jobOrderId) {
+    return (
+      <RoleGuard
+        allowedRoles={[...JOB_ORDER_ROLES, ROLES.LEAD_ACCOUNT_SPECIALIST]}
+        fallback={<></>}
+      >
+        <JobOrderDetailsPage />
+      </RoleGuard>
+    );
+  }
+
   return (
     <>
       {/* Operations role */}
