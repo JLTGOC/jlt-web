@@ -50,7 +50,11 @@ export default function JobOrderListPage() {
   const tradeType = searchParams.get("trade") || "";
   const personInCharge = searchParams.get("person") || "";
   const status = searchParams.get("status") || "";
-  const perPage = parseInt(searchParams.get("perPage") || "10", 10) || 10;
+  const perPage =
+    parseInt(
+      searchParams.get("per_page") || searchParams.get("perPage") || "10",
+      10,
+    ) || 10;
   const page = parseInt(searchParams.get("page") || "1", 10) || 1;
 
   function setParam(key: string, value: string) {
@@ -164,9 +168,14 @@ export default function JobOrderListPage() {
   }
 
   function handlePerPageChange(value: number) {
-    setParam("perPage", String(value));
-    setPageParam(1);
+    const next = new URLSearchParams(searchParams.toString());
+    next.set("per_page", String(value));
+    next.delete("perPage");
+    next.set("page", "1");
+    setSearchParams(next);
   }
+
+  const perPageValue = pagination?.per_page ?? perPage;
 
   return (
     <PageCard title="Job Order">
@@ -194,7 +203,7 @@ export default function JobOrderListPage() {
         />
         <Divider />
         <ShowEntriesControl
-          perPage={perPage}
+          perPage={perPageValue}
           onPerPageChange={handlePerPageChange}
         />
         <Table
