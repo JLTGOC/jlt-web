@@ -1,12 +1,12 @@
 import { Button } from "@mantine/core";
 import { useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
-import { notifications } from "@mantine/notifications";
 import { Add } from "@nine-thirty-five/material-symbols-react/rounded";
 import { PageCard } from "@/components/PageCard";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
 import { toolsQueryKeys } from "../config/queryKeys";
+import { useStandardTemplateListMutations } from "../hooks/useStandardTemplateListMutations";
 import {
   standardTemplatesService,
   type StandardTemplateSummaryResource,
@@ -14,7 +14,6 @@ import {
 
 export function StandardQuotationTemplatePage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const [search, setSearch] = useState("");
   const [perPage, setPerPage] = useState(10);
@@ -24,27 +23,7 @@ export function StandardQuotationTemplatePage() {
     queryFn: () => standardTemplatesService.getStandardTemplates(),
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) =>
-      standardTemplatesService.deleteStandardTemplate(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: toolsQueryKeys.standardTemplates,
-      });
-      notifications.show({
-        title: "Success",
-        message: "Template deleted successfully",
-        color: "teal",
-      });
-    },
-    onError: () => {
-      notifications.show({
-        title: "Error",
-        message: "Failed to delete template",
-        color: "red",
-      });
-    },
-  });
+  const { deleteMutation } = useStandardTemplateListMutations();
 
   const templates = useMemo(
     () => templatesResponse?.data ?? [],

@@ -1,8 +1,8 @@
 import { Box, Group, Text } from "@mantine/core";
 import {
   IconAnchor,
-  IconPlaneArrival,
-  IconPlaneDeparture,
+  IconPlaneArrivalFilled,
+  IconPlaneDepartureFilled,
   IconShip,
 } from "@tabler/icons-react";
 
@@ -48,15 +48,15 @@ export function ServiceInformationCell({
   }
 
   const isAir = isAirTransportMode(transportMode);
-  const EtaIcon = isAir ? IconPlaneArrival : IconAnchor;
-  const EtdIcon = isAir ? IconPlaneDeparture : IconShip;
+  const EtaIcon = isAir ? IconPlaneArrivalFilled : IconAnchor;
+  const EtdIcon = isAir ? IconPlaneDepartureFilled : IconShip;
 
   return (
     <Box>
       <Text size="sm">{serviceLevel || "-"}</Text>
 
       <Group gap="0.4rem" mt="0.2rem" wrap="nowrap" c="jltBlue">
-        <EtaIcon size={15} stroke={1.8} color="var(--mantine-color-gray-7)" />
+        <EtaIcon size={15} color="var(--mantine-color-gray-7)" />
         <Text size="sm">ETA: {formatDate(eta)}</Text>
       </Group>
 
