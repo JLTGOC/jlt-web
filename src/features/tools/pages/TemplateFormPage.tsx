@@ -5,52 +5,36 @@ import {
   Checkbox,
   Divider,
   Group,
-  MultiSelect,
-  Paper,
   Stack,
   Text,
   TextInput,
   Skeleton,
 } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import {
-  Add,
-  Delete,
-  Save,
-} from "@nine-thirty-five/material-symbols-react/rounded";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Add, Save } from "@nine-thirty-five/material-symbols-react/rounded";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { PageCard } from "@/components/PageCard";
 import { AppButton } from "@/components/ui/AppButton";
 import type {
   QuotationTemplateChargeResource,
-  QuotationTemplateResource,
   ServiceType,
   StoreTemplateRequest,
   UpdateTemplateRequest,
 } from "@/types/templates";
 import { billingConfigsService } from "../api/billing-configs.service";
+import { DetailConfigGroupList } from "../components/DetailConfigGroupList";
 import { ConfigPageHeader } from "../components/ConfigPageHeader";
+import { TemplateChargesList } from "../components/TemplateChargesList";
 import { detailsConfigsService } from "../api/details-configs.service";
 import { quotationFieldsService } from "../api/quotation-fields.service";
 import { templatesService } from "../api/templates.service";
 import { toolsQueryKeys } from "../config/queryKeys";
-
-type TemplateChargeDraft = {
-  key: number;
-  id?: number;
-  name: string;
-  receipt_option_ids: string[];
-};
-
-interface TemplateFormDraft {
-  name: string;
-  selectedDetailIds: number[];
-  selectedFieldIds: number[];
-  charges: TemplateChargeDraft[];
-  nextChargeKey: number;
-}
+import { useTemplateFormMutations } from "../hooks/useTemplateFormMutations";
+import type {
+  TemplateChargeDraft,
+  TemplateFormDraft,
+} from "../types/templateForm";
 
 const INITIAL_CHARGE_KEY = 1;
 
@@ -84,7 +68,6 @@ const getChargeReceiptOptionIds = (
 export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
   const navigate = useNavigate();
   const { templateId } = useParams<{ templateId: string }>();
-  const queryClient = useQueryClient();
   const isEditMode = mode === "edit";
 
   const [draft, setDraft] = useState<TemplateFormDraft | null>(null);
@@ -154,120 +137,26 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
     );
   };
 
-  const createMutation = useMutation({
-    mutationFn: (payload: StoreTemplateRequest) =>
-      templatesService.createTemplate(payload),
-    onMutate: async (payload) => {
-      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.templates });
+  const { createMutation, updateMutation } =
+    useTemplateFormMutations(templateId);
 
-      const previousTemplates = queryClient.getQueryData(
-        toolsQueryKeys.templates,
-      );
-      const optimisticTemplate: QuotationTemplateResource = {
-        id: Date.now(),
-        name: payload.name,
-        service_type: payload.service_type,
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
-      queryClient.setQueryData(
-        toolsQueryKeys.templates,
-        (current: { data?: QuotationTemplateResource[] } | undefined) => ({
-          ...current,
-          data: [...(current?.data ?? []), optimisticTemplate],
-        }),
-      );
-
-      return { previousTemplates };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.templates });
-      notifications.show({
-        title: "Success",
-        message: "Template created successfully",
-        color: "teal",
-      });
-      navigate("/tools/templates");
-    },
-    onError: (_error, _payload, context) => {
-      queryClient.setQueryData(
-        toolsQueryKeys.templates,
-        context?.previousTemplates,
-      );
-      notifications.show({
-        title: "Error",
-        message: "Failed to create template",
-        color: "red",
-      });
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (payload: UpdateTemplateRequest) =>
-      templatesService.updateTemplate(Number(templateId), payload),
-    onMutate: async (payload) => {
-      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.templates });
-      await queryClient.cancelQueries({
-        queryKey: toolsQueryKeys.template(templateId),
-      });
-
-      const previousTemplates = queryClient.getQueryData(
-        toolsQueryKeys.templates,
-      );
-      const previousTemplate = queryClient.getQueryData(
-        toolsQueryKeys.template(templateId),
-      );
-
-      queryClient.setQueryData(
-        toolsQueryKeys.templates,
-        (current: { data?: QuotationTemplateResource[] } | undefined) => ({
-          ...current,
-          data: (current?.data ?? []).map((template) =>
-            template.id === Number(templateId)
-              ? { ...template, name: payload.name }
-              : template,
-          ),
-        }),
-      );
-
-      return { previousTemplates, previousTemplate };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.templates });
-      queryClient.invalidateQueries({
-        queryKey: toolsQueryKeys.template(templateId),
-      });
-      notifications.show({
-        title: "Success",
-        message: "Template updated successfully",
-        color: "teal",
-      });
-      navigate("/tools/templates");
-    },
-    onError: (_error, _payload, context) => {
-      queryClient.setQueryData(
-        toolsQueryKeys.templates,
-        context?.previousTemplates,
-      );
-      queryClient.setQueryData(
-        toolsQueryKeys.template(templateId),
-        context?.previousTemplate,
-      );
-      notifications.show({
-        title: "Error",
-        message: "Failed to update template",
-        color: "red",
-      });
-    },
-  });
-
-  const detailConfigs = useMemo(
+  const detailConfigGroups = useMemo(
     () => [
-      ...(detailsResponse?.data?.DROPDOWN ?? []),
-      ...(detailsResponse?.data?.["DATE PICKER"] ?? []),
-      ...(detailsResponse?.data?.TEXT ?? []),
+      {
+        id: "dropdown",
+        label: "Dropdown",
+        items: detailsResponse?.data?.DROPDOWN ?? [],
+      },
+      {
+        id: "date-picker",
+        label: "Date Picker",
+        items: detailsResponse?.data?.["DATE PICKER"] ?? [],
+      },
+      {
+        id: "text",
+        label: "Text Field",
+        items: detailsResponse?.data?.TEXT ?? [],
+      },
     ],
     [detailsResponse?.data],
   );
@@ -367,11 +256,15 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
     };
 
     if (isEditMode) {
-      updateMutation.mutate(payload);
+      updateMutation.mutate(payload, {
+        onSuccess: () => navigate("/tools/templates"),
+      });
       return;
     }
 
-    createMutation.mutate(payload);
+    createMutation.mutate(payload, {
+      onSuccess: () => navigate("/tools/templates"),
+    });
   };
 
   return (
@@ -461,21 +354,11 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
                   <Text size="sm" fw={600} mb="xs">
                     Detail Configurations
                   </Text>
-                  <Stack gap={6}>
-                    {detailConfigs.map((config) => (
-                      <Checkbox
-                        key={config.id}
-                        label={config.label}
-                        checked={form.selectedDetailIds.includes(config.id)}
-                        onChange={(event) =>
-                          handleDetailToggle(
-                            config.id,
-                            event.currentTarget.checked,
-                          )
-                        }
-                      />
-                    ))}
-                  </Stack>
+                  <DetailConfigGroupList
+                    groups={detailConfigGroups}
+                    selectedDetailIds={form.selectedDetailIds}
+                    onToggle={handleDetailToggle}
+                  />
                 </Box>
 
                 <Divider />
@@ -537,63 +420,12 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
                 <Skeleton height={40} />
               </Stack>
             ) : (
-              <Stack gap="sm">
-                {form.charges.map((charge, index) => (
-                  <Paper
-                    key={charge.key}
-                    p="sm"
-                    radius="md"
-                    withBorder
-                    bg="var(--mantine-color-gray-0)"
-                  >
-                    <Stack gap="xs">
-                      <Group justify="space-between" align="center">
-                        <Text size="sm" fw={600} c="jltBlue.8">
-                          Charge Section {index + 1}
-                        </Text>
-                        <ActionIcon
-                          variant="subtle"
-                          color="red"
-                          onClick={() => handleDeleteCharge(charge.key)}
-                          disabled={form.charges.length === 1}
-                        >
-                          <Delete />
-                        </ActionIcon>
-                      </Group>
-
-                      <Stack style={{ flex: 1 }} gap={8}>
-                        <Text size="xs" c="dimmed" fw={500}>
-                          Table Name
-                        </Text>
-                        <TextInput
-                          placeholder="TABLE NAME"
-                          value={charge.name}
-                          onChange={(event) =>
-                            handleChargeChange(charge.key, {
-                              name: event.currentTarget.value,
-                            })
-                          }
-                        />
-
-                        <Text size="xs" c="dimmed" fw={500} mt={4}>
-                          Receipt Charges
-                        </Text>
-                        <MultiSelect
-                          placeholder="SELECT RECEIPT CHARGES"
-                          data={receiptOptions}
-                          value={charge.receipt_option_ids}
-                          onChange={(value) =>
-                            handleChargeChange(charge.key, {
-                              receipt_option_ids: value,
-                            })
-                          }
-                          searchable
-                        />
-                      </Stack>
-                    </Stack>
-                  </Paper>
-                ))}
-              </Stack>
+              <TemplateChargesList
+                charges={form.charges}
+                receiptOptions={receiptOptions}
+                onChange={handleChargeChange}
+                onDelete={handleDeleteCharge}
+              />
             )}
           </PageCard>
         </Box>

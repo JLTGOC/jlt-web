@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
 import { PageCard } from "@/components/PageCard";
 import {
@@ -20,13 +20,20 @@ export default function ServicesPage() {
   const [search, setSearch] = useState("");
   const [perPage, setPerPage] = useState(10);
 
-  const searchTerm = search.trim().toLowerCase();
-  const filteredServices = searchTerm
-    ? SERVICE_TYPES.filter((service) =>
-        service.name.toLowerCase().includes(searchTerm),
-      )
-    : SERVICE_TYPES;
-  const paginatedServices = filteredServices.slice(0, perPage);
+  const filteredServices = useMemo(() => {
+    const searchTerm = search.trim().toLowerCase();
+
+    return searchTerm
+      ? SERVICE_TYPES.filter((service) =>
+          service.name.toLowerCase().includes(searchTerm),
+        )
+      : SERVICE_TYPES;
+  }, [search]);
+
+  const paginatedServices = useMemo(
+    () => filteredServices.slice(0, perPage),
+    [filteredServices, perPage],
+  );
 
   return (
     <PageCard title="List of Services" showDivider>

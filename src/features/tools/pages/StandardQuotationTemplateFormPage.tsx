@@ -1,16 +1,14 @@
 import { Box, Paper, Stack, Text, TextInput } from "@mantine/core";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { notifications } from "@mantine/notifications";
+import { useQuery } from "@tanstack/react-query";
 import { Save } from "@nine-thirty-five/material-symbols-react/rounded";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { LabeledTextareaSection } from "@/components/LabeledTextareaSection";
 import { PageCard } from "@/components/PageCard";
 import { AppButton } from "@/components/ui/AppButton";
-import { toolsQueryKeys } from "../config/queryKeys";
+import { useStandardTemplateFormMutations } from "../hooks/useStandardTemplateFormMutations";
 import {
   standardTemplatesService,
-  type StandardTemplateSummaryResource,
   type StoreStandardTemplateRequest,
 } from "../api/standard-templates.service";
 
@@ -46,7 +44,6 @@ export function StandardQuotationTemplateFormPage({
 }: StandardQuotationTemplateFormPageProps) {
   const navigate = useNavigate();
   const { templateId } = useParams<{ templateId: string }>();
-  const queryClient = useQueryClient();
   const isEditMode = mode === "edit";
 
   const [draftValues, setDraftValues] =
@@ -72,150 +69,8 @@ export function StandardQuotationTemplateFormPage({
 
   const values = draftValues ?? loadedValues ?? EMPTY_FORM;
 
-  const createMutation = useMutation({
-    mutationFn: (payload: StoreStandardTemplateRequest) =>
-      standardTemplatesService.createStandardTemplate(payload),
-    onMutate: async (payload) => {
-      await queryClient.cancelQueries({
-        queryKey: toolsQueryKeys.standardTemplates,
-      });
-
-      const previousTemplates = queryClient.getQueryData(
-        toolsQueryKeys.standardTemplates,
-      ) as { data?: StandardTemplateSummaryResource[] } | undefined;
-
-      const optimisticItem: StandardTemplateSummaryResource = {
-        id: Date.now(),
-        template_name: payload.template_name,
-      };
-
-      queryClient.setQueryData(
-        toolsQueryKeys.standardTemplates,
-        (
-          current: { data?: StandardTemplateSummaryResource[] } | undefined,
-        ) => ({
-          ...current,
-          data: [...(current?.data ?? []), optimisticItem],
-        }),
-      );
-
-      return { previousTemplates };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: toolsQueryKeys.standardTemplates,
-      });
-      notifications.show({
-        title: "Success",
-        message: "Standard quotation template created successfully",
-        color: "teal",
-      });
-      navigate("/tools/templates/config/standard-quotation-template");
-    },
-    onError: (_error, _payload, context) => {
-      if (context?.previousTemplates) {
-        queryClient.setQueryData(
-          toolsQueryKeys.standardTemplates,
-          context.previousTemplates,
-        );
-      }
-
-      notifications.show({
-        title: "Error",
-        message: "Failed to create standard quotation template",
-        color: "red",
-      });
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (payload: StoreStandardTemplateRequest) =>
-      standardTemplatesService.updateStandardTemplate(
-        Number(templateId),
-        payload,
-      ),
-    onMutate: async (payload) => {
-      await queryClient.cancelQueries({
-        queryKey: toolsQueryKeys.standardTemplates,
-      });
-      await queryClient.cancelQueries({
-        queryKey: toolsQueryKeys.standardTemplate(templateId),
-      });
-
-      const previousTemplates = queryClient.getQueryData(
-        toolsQueryKeys.standardTemplates,
-      ) as { data?: StandardTemplateSummaryResource[] } | undefined;
-      const previousTemplate = queryClient.getQueryData(
-        toolsQueryKeys.standardTemplate(templateId),
-      );
-
-      queryClient.setQueryData(
-        toolsQueryKeys.standardTemplates,
-        (
-          current: { data?: StandardTemplateSummaryResource[] } | undefined,
-        ) => ({
-          ...current,
-          data: (current?.data ?? []).map((item) =>
-            String(item.id) === String(templateId)
-              ? { ...item, template_name: payload.template_name }
-              : item,
-          ),
-        }),
-      );
-
-      queryClient.setQueryData(
-        toolsQueryKeys.standardTemplate(templateId),
-        (
-          current:
-            | { data?: StoreStandardTemplateRequest & { id?: number } }
-            | undefined,
-        ) => ({
-          ...current,
-          data: {
-            ...(current?.data ?? {}),
-            ...payload,
-          },
-        }),
-      );
-
-      return { previousTemplates, previousTemplate };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: toolsQueryKeys.standardTemplates,
-      });
-      queryClient.invalidateQueries({
-        queryKey: toolsQueryKeys.standardTemplate(templateId),
-      });
-      notifications.show({
-        title: "Success",
-        message: "Standard quotation template updated successfully",
-        color: "teal",
-      });
-      navigate("/tools/templates/config/standard-quotation-template");
-    },
-    onError: (_error, _payload, context) => {
-      if (context?.previousTemplates) {
-        queryClient.setQueryData(
-          toolsQueryKeys.standardTemplates,
-          context.previousTemplates,
-        );
-      }
-
-      if (context?.previousTemplate) {
-        queryClient.setQueryData(
-          toolsQueryKeys.standardTemplate(templateId),
-          context.previousTemplate,
-        );
-      }
-
-      notifications.show({
-        title: "Error",
-        message: "Failed to update standard quotation template",
-        color: "red",
-      });
-    },
-  });
+  const { createMutation, updateMutation } =
+    useStandardTemplateFormMutations(templateId);
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
@@ -253,11 +108,17 @@ export function StandardQuotationTemplateFormPage({
     };
 
     if (isEditMode) {
-      updateMutation.mutate(payload);
+      updateMutation.mutate(payload, {
+        onSuccess: () =>
+          navigate("/tools/templates/config/standard-quotation-template"),
+      });
       return;
     }
 
-    createMutation.mutate(payload);
+    createMutation.mutate(payload, {
+      onSuccess: () =>
+        navigate("/tools/templates/config/standard-quotation-template"),
+    });
   };
 
   return (

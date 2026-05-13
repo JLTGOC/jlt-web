@@ -1,27 +1,21 @@
 import { useMemo, useState } from "react";
-import {
-  ActionIcon,
-  Button,
-  Group,
-  Modal,
-  Stack,
-  Text,
-  TextInput,
-} from "@mantine/core";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Add, Delete } from "@nine-thirty-five/material-symbols-react/rounded";
-import { notifications } from "@mantine/notifications";
+import { ActionIcon, Text } from "@mantine/core";
+import { useQuery } from "@tanstack/react-query";
+import { Add } from "@nine-thirty-five/material-symbols-react/rounded";
 import { PageCard } from "@/components/PageCard";
 import { toolsQueryKeys } from "../config/queryKeys";
+import { DetailsConfigModal } from "../components/DetailsConfigModal";
 import { ConfigLayout } from "../components/ConfigLayout";
 import { ConfigPageHeader } from "../components/ConfigPageHeader";
 import { ConfigRowsTable } from "../components/ConfigRowsTable";
 import {
-  detailsConfigsService,
   type DetailConfigOption,
   type DetailConfigResource,
   type DetailConfigType,
 } from "../api/details-configs.service";
+import { detailsConfigsService } from "../api/details-configs.service";
+import { useDetailsConfigMutations } from "../hooks/useDetailsConfigMutations";
+import { toolNotifications } from "../utils/toolNotifications";
 
 interface OptionDraft {
   id?: number;
@@ -29,209 +23,21 @@ interface OptionDraft {
 }
 
 export function DetailsConfigurationPage() {
-  const queryClient = useQueryClient();
   const [activeType, setActiveType] = useState<DetailConfigType | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [label, setLabel] = useState("");
   const [options, setOptions] = useState<OptionDraft[]>([{ name: "" }]);
 
+  const {
+    createMutation,
+    updateMutation,
+    deleteMutation,
+    detailsByIdMutation,
+  } = useDetailsConfigMutations();
+
   const { data: detailsResponse, isLoading: isDetailsLoading } = useQuery({
     queryKey: toolsQueryKeys.detailsConfigs,
     queryFn: () => detailsConfigsService.getDetailsConfigs(),
-  });
-
-  const createMutation = useMutation({
-    mutationFn: detailsConfigsService.createDetailsConfig,
-    onMutate: async (payload) => {
-      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.detailsConfigs });
-      const previous = queryClient.getQueryData(toolsQueryKeys.detailsConfigs);
-
-      queryClient.setQueryData(
-        toolsQueryKeys.detailsConfigs,
-        (
-          current:
-            | { data?: Record<DetailConfigType, DetailConfigResource[]> }
-            | undefined,
-        ) => {
-          const optimisticItem: DetailConfigResource = {
-            id: Date.now(),
-            label: payload.label,
-            type: payload.type,
-            ...(payload.type === "DROPDOWN"
-              ? { count: payload.options?.length ?? 0 }
-              : {}),
-          };
-
-          const nextData = current?.data ?? {
-            DROPDOWN: [],
-            TEXT: [],
-            "DATE PICKER": [],
-          };
-
-          return {
-            ...current,
-            data: {
-              ...nextData,
-              [payload.type]: [
-                ...(nextData[payload.type] ?? []),
-                optimisticItem,
-              ],
-            },
-          };
-        },
-      );
-
-      return { previous };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.detailsConfigs });
-      notifications.show({
-        title: "Success",
-        message: "Details configuration added",
-        color: "teal",
-      });
-      handleCloseModal();
-    },
-    onError: (_error, _payload, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(toolsQueryKeys.detailsConfigs, context.previous);
-      }
-      notifications.show({
-        title: "Error",
-        message: "Failed to save details configuration",
-        color: "red",
-      });
-    },
-  });
-
-  const detailsByIdMutation = useMutation({
-    mutationFn: (id: number) => detailsConfigsService.getDetailsConfig(id),
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({
-      id,
-      payload,
-    }: {
-      id: number;
-      payload: { label: string; options?: DetailConfigOption[] };
-    }) => detailsConfigsService.updateDetailsConfig(id, payload),
-    onMutate: async ({ id, payload }) => {
-      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.detailsConfigs });
-      const previous = queryClient.getQueryData(toolsQueryKeys.detailsConfigs);
-
-      queryClient.setQueryData(
-        toolsQueryKeys.detailsConfigs,
-        (
-          current:
-            | { data?: Record<DetailConfigType, DetailConfigResource[]> }
-            | undefined,
-        ) => {
-          if (!current?.data) {
-            return current;
-          }
-
-          const updateItem = (item: DetailConfigResource) =>
-            item.id === id
-              ? {
-                  ...item,
-                  label: payload.label,
-                  ...(item.type === "DROPDOWN" && payload.options
-                    ? { count: payload.options.length }
-                    : {}),
-                }
-              : item;
-
-          return {
-            ...current,
-            data: {
-              ...current.data,
-              DROPDOWN: (current.data.DROPDOWN ?? []).map(updateItem),
-              TEXT: (current.data.TEXT ?? []).map(updateItem),
-              "DATE PICKER": (current.data["DATE PICKER"] ?? []).map(
-                updateItem,
-              ),
-            },
-          };
-        },
-      );
-
-      return { previous };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.detailsConfigs });
-      notifications.show({
-        title: "Success",
-        message: "Details configuration updated",
-        color: "teal",
-      });
-      handleCloseModal();
-    },
-    onError: (_error, _payload, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(toolsQueryKeys.detailsConfigs, context.previous);
-      }
-      notifications.show({
-        title: "Error",
-        message: "Failed to update details configuration",
-        color: "red",
-      });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => detailsConfigsService.deleteDetailsConfig(id),
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.detailsConfigs });
-      const previous = queryClient.getQueryData(toolsQueryKeys.detailsConfigs);
-
-      queryClient.setQueryData(
-        toolsQueryKeys.detailsConfigs,
-        (
-          current:
-            | { data?: Record<DetailConfigType, DetailConfigResource[]> }
-            | undefined,
-        ) => {
-          if (!current?.data) {
-            return current;
-          }
-
-          return {
-            ...current,
-            data: {
-              ...current.data,
-              DROPDOWN: (current.data.DROPDOWN ?? []).filter(
-                (item) => item.id !== id,
-              ),
-              TEXT: (current.data.TEXT ?? []).filter((item) => item.id !== id),
-              "DATE PICKER": (current.data["DATE PICKER"] ?? []).filter(
-                (item) => item.id !== id,
-              ),
-            },
-          };
-        },
-      );
-
-      return { previous };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.detailsConfigs });
-      notifications.show({
-        title: "Success",
-        message: "Details configuration deleted",
-        color: "teal",
-      });
-    },
-    onError: (_error, _payload, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(toolsQueryKeys.detailsConfigs, context.previous);
-      }
-      notifications.show({
-        title: "Error",
-        message: "Failed to delete details configuration",
-        color: "red",
-      });
-    },
   });
 
   const grouped = useMemo(
@@ -276,11 +82,7 @@ export function DetailsConfigurationPage() {
       }));
       setOptions(resolvedOptions.length > 0 ? resolvedOptions : [{ name: "" }]);
     } catch {
-      notifications.show({
-        title: "Error",
-        message: "Failed to load configuration details",
-        color: "red",
-      });
+      toolNotifications.error("Failed to load configuration details");
     }
   };
 
@@ -312,36 +114,42 @@ export function DetailsConfigurationPage() {
     }
 
     if (editingId) {
-      updateMutation.mutate({
-        id: editingId,
-        payload: {
-          label: label.trim(),
-          ...(isDropdown
-            ? {
-                options: options
-                  .map((option) => ({
-                    ...(option.id ? { id: option.id } : {}),
-                    name: option.name.trim(),
-                  }))
-                  .filter((option) => option.name),
-              }
-            : {}),
+      updateMutation.mutate(
+        {
+          id: editingId,
+          payload: {
+            label: label.trim(),
+            ...(isDropdown
+              ? {
+                  options: options
+                    .map((option) => ({
+                      ...(option.id ? { id: option.id } : {}),
+                      name: option.name.trim(),
+                    }))
+                    .filter((option) => option.name),
+                }
+              : {}),
+          },
         },
-      });
+        { onSuccess: handleCloseModal },
+      );
       return;
     }
 
-    createMutation.mutate({
-      label: label.trim(),
-      type: activeType,
-      ...(isDropdown
-        ? {
-            options: options
-              .map((option) => ({ name: option.name.trim() }))
-              .filter((option) => option.name),
-          }
-        : {}),
-    });
+    createMutation.mutate(
+      {
+        label: label.trim(),
+        type: activeType,
+        ...(isDropdown
+          ? {
+              options: options
+                .map((option) => ({ name: option.name.trim() }))
+                .filter((option) => option.name),
+            }
+          : {}),
+      },
+      { onSuccess: handleCloseModal },
+    );
   };
 
   const updateOption = (index: number, value: string) => {
@@ -454,63 +262,24 @@ export function DetailsConfigurationPage() {
         }
       />
 
-      <Modal
+      <DetailsConfigModal
         opened={Boolean(activeType)}
-        onClose={handleCloseModal}
         title={activeType ?? "Add Field"}
-        centered
-        size="lg"
-      >
-        <Stack>
-          <TextInput
-            label="FIELD LABEL"
-            value={label}
-            onChange={(event) => setLabel(event.currentTarget.value)}
-          />
-
-          {isDropdown && (
-            <Stack gap="xs">
-              <Group justify="space-between">
-                <Text fw={600}>OPTIONS</Text>
-                <ActionIcon onClick={addOption} color="jltAccent.6">
-                  <Add />
-                </ActionIcon>
-              </Group>
-              {options.map((option, index) => (
-                <Group key={`option-${index}`} align="center">
-                  <TextInput
-                    value={option.name}
-                    onChange={(event) =>
-                      updateOption(index, event.currentTarget.value)
-                    }
-                    style={{ flex: 1 }}
-                    placeholder={`Option ${index + 1}`}
-                  />
-                  <ActionIcon
-                    color="red"
-                    variant="subtle"
-                    onClick={() => removeOption(index)}
-                    disabled={options.length === 1}
-                  >
-                    <Delete />
-                  </ActionIcon>
-                </Group>
-              ))}
-            </Stack>
-          )}
-
-          <Button
-            onClick={handleSave}
-            loading={
-              createMutation.isPending ||
-              updateMutation.isPending ||
-              detailsByIdMutation.isPending
-            }
-          >
-            Save
-          </Button>
-        </Stack>
-      </Modal>
+        label={label}
+        options={options}
+        isDropdown={isDropdown}
+        isSubmitting={
+          createMutation.isPending ||
+          updateMutation.isPending ||
+          detailsByIdMutation.isPending
+        }
+        onClose={handleCloseModal}
+        onLabelChange={setLabel}
+        onOptionChange={updateOption}
+        onAddOption={addOption}
+        onRemoveOption={removeOption}
+        onSubmit={handleSave}
+      />
     </>
   );
 }
