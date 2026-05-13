@@ -28,8 +28,9 @@ import { JobOrderFilterClient } from "./components/JobOrderFilterClient";
 import { JobOrderFilterTable } from "./components/JobOrderFilterTable";
 import { ShowEntriesControl } from "./components/ShowEntriesControl";
 import { PageCard } from "@/components/PageCard";
-import { fetchJobOrders } from "../../api/jobOrderQueries.api";
+import { fetchJobOrders } from "../../api/jobOrder.api";
 import { jobOrdersQueryKeys } from "../../api/jobOrdersQueryKeys";
+import { mapJobOrderResponses } from "../../utils/jobOrderListMapper";
 
 export default function JobOrderListPage() {
   const navigate = useNavigate();
@@ -94,7 +95,7 @@ export default function JobOrderListPage() {
     "filter[service]": mapServiceFilter(activeTab),
     "filter[service_type]": mapTradeTypeFilter(tradeType),
     "filter[assignment_status]": mapStatusFilter(status),
-    perPage,
+    per_page: perPage,
     page,
   };
 
@@ -116,27 +117,7 @@ export default function JobOrderListPage() {
     staleTime: 30_000,
   });
 
-  const { data: allCountsResponse } = useQuery({
-    queryKey: jobOrdersQueryKeys.listCounts("all"),
-    queryFn: () => fetchJobOrders({ perPage: 1, page: 1 }),
-    staleTime: 30_000,
-  });
-
-  const { data: logisticsCountsResponse } = useQuery({
-    queryKey: jobOrdersQueryKeys.listCounts("LOGISTICS"),
-    queryFn: () =>
-      fetchJobOrders({ "filter[service]": "LOGISTICS", perPage: 1, page: 1 }),
-    staleTime: 30_000,
-  });
-
-  const { data: regulatoryCountsResponse } = useQuery({
-    queryKey: jobOrdersQueryKeys.listCounts("REGULATORY"),
-    queryFn: () =>
-      fetchJobOrders({ "filter[service]": "REGULATORY", perPage: 1, page: 1 }),
-    staleTime: 30_000,
-  });
-
-  const jobOrders = jobOrdersResponse?.jobOrders ?? [];
+  const jobOrders = mapJobOrderResponses(jobOrdersResponse?.job_orders ?? []);
   const pagination = jobOrdersResponse?.pagination;
   const totalPages = Math.max(1, pagination?.total_pages ?? 1);
   const pages = (() => {
@@ -153,9 +134,9 @@ export default function JobOrderListPage() {
   })();
 
   const counts = {
-    all: allCountsResponse?.pagination?.total ?? 0,
-    Logistics: logisticsCountsResponse?.pagination?.total ?? 0,
-    Regulatory: regulatoryCountsResponse?.pagination?.total ?? 0,
+    all: jobOrdersResponse?.counts?.all_job_orders ?? 0,
+    Logistics: jobOrdersResponse?.counts?.logistics_job_orders ?? 0,
+    Regulatory: jobOrdersResponse?.counts?.regulatory_job_orders ?? 0,
   };
 
   const showingCount = pagination?.count ?? jobOrders.length;
