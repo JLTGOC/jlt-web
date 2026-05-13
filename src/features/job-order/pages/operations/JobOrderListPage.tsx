@@ -27,6 +27,7 @@ export default function JobOrderListPage() {
     handleReassignConfirm,
     handleReassignRequestSubmit,
     handleRowClick,
+    handleUnderLinedRefNumberCLick,
     handleSearch,
     handleSearchChange,
     handleSecondarySearch,
@@ -129,6 +130,7 @@ export default function JobOrderListPage() {
                 onReassignRequestClick={openReassignRequestModal}
                 onMakeQuotationClick={handleMakeQuotationClick}
                 onRowClick={handleRowClick}
+                handleUnderLinedRefNumberCLick={handleUnderLinedRefNumberCLick}
               />
             </Box>
           </Box>

@@ -13,7 +13,7 @@ import {
   reassignRequestJobOrder,
   reassignJobOrder,
   reassignJobOrderDetails,
-  fetchJobOrderQuotation
+  fetchJobOrderQuotation,
 } from "@/features/job-order/api/jobOrder.api";
 
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
@@ -142,7 +142,7 @@ export function useJobOrderPage() {
       closeModal();
     },
     onError: (error) => {
-      console.error("Error reassigning quotation:", error); 
+      console.error("Error reassigning quotation:", error);
     },
   });
 
@@ -189,7 +189,7 @@ export function useJobOrderPage() {
     });
   };
 
-  const fetchDetails = (quotationId: string) => {}
+  const fetchDetails = (quotationId: string) => {};
 
   const handleReassignConfirm = () => {
     if (!selectedQuotation) return;
@@ -282,6 +282,11 @@ export function useJobOrderPage() {
 
   const handleRowClick = (row: JobOrderResponse) => {
     const jobOrderId = row.id;
+    navigate(jobOrderRoutes.clientDetails(jobOrderId), { state: { jobOrder: row } });
+  };
+
+  const handleUnderLinedRefNumberCLick = (row: JobOrderResponse) => {
+    const jobOrderId = row.id;
     navigate(jobOrderRoutes.details(jobOrderId), { state: { jobOrder: row } });
   };
 
@@ -298,6 +303,7 @@ export function useJobOrderPage() {
     handleReassignConfirm,
     handleReassignRequestSubmit,
     handleRowClick,
+    handleUnderLinedRefNumberCLick,
     handleSearch,
     handleSearchChange,
     handleSecondarySearch,

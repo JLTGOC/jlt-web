@@ -6,6 +6,7 @@ type JobOrderDetailHeaderProps = {
   referenceNumber: string;
   quotationReference?: string | null;
   quotationId?: string | number | null;
+  subTitle?: boolean;
   onBack: () => void;
 };
 
@@ -13,6 +14,7 @@ export function JobOrderDetailHeader({
   referenceNumber,
   quotationReference,
   quotationId,
+  subTitle,
   onBack,
 }: JobOrderDetailHeaderProps) {
   return (
@@ -30,9 +32,10 @@ export function JobOrderDetailHeader({
           >
             {referenceNumber}
           </Text>
-          <Text size="sm" c="dimmed" tt="uppercase" lts="0.06em" mt="0.125rem">
+          {!!subTitle && <Text size="sm" c="dimmed" tt="uppercase" lts="0.06em" mt="0.125rem">
             Job Order
-          </Text>
+          </Text>}
+          
         </Box>
       </Group>
 

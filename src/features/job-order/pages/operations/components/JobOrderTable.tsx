@@ -47,6 +47,7 @@ interface JobOrderTableProps {
   currentUserRole?: string | null;
   setPerPaginationPage?: (page: number) => void;
   onRowClick?: (row: JobOrderRow) => void;
+  handleUnderLinedRefNumberCLick?: (row: JobOrderRow) => void;
   onAcceptClick?: (row: JobOrderRow) => void;
   onReassignClick?: (row: JobOrderRow) => void;
   onReassignRequestClick?: (row: JobOrderRow) => void;
@@ -81,6 +82,7 @@ export function JobOrderTable({
   perPaginationPage,
   setPerPaginationPage,
   onRowClick,
+  handleUnderLinedRefNumberCLick,
   onAcceptClick,
   onReassignClick,
   onReassignRequestClick,
@@ -159,14 +161,29 @@ export function JobOrderTable({
                 >
                   <Table.Td style={{ maxWidth: "150px" }}>
                     <Stack gap={2}>
-                      <Text c="#000000" fz="0.875rem" fw={700}>
+                      <Text
+                        component="button"
+                        type="button"
+                        c="#000000"
+                        fz="0.875rem"
+                        fw={700}
+                        style={{
+                          background: "transparent",
+                          border: 0,
+                          padding: 0,
+                          textAlign: "left",
+                          textDecoration: "underline",
+                          cursor: onRowClick ? "pointer" : "default",
+                        }}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleUnderLinedRefNumberCLick?.(row);
+                        }}
+                      >
                         {row.reference_number}
                       </Text>
                       <Text c="#000000" fz="0.813rem" lh={1.45}>
                         {row.client}
-                      </Text>
-                      <Text c="#000000" fz="0.813rem" lh={1.45}>
-                        {row.date_created}
                       </Text>
                     </Stack>
                   </Table.Td>
@@ -180,11 +197,11 @@ export function JobOrderTable({
                       {row.job_type === "REGULATORY" ? (
                         <Group gap={6} align="center" wrap="nowrap">
                           <Text c="#000000" fz="0.813rem" lh={1.45}>
-                            {row.service_type}
+                            Application Type
                           </Text>
                           ---&gt; {""}
                           <Text c="#000000" fz="0.813rem" lh={1.45}>
-                            {row.destination}
+                            {row.application_type}
                           </Text>
                         </Group>
                       ) : (
