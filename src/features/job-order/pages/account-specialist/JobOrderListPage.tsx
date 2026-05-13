@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   Divider,
   Stack,
@@ -8,17 +7,18 @@ import {
   Text,
   Group,
   Button,
+  Center,
+  Loader,
 } from "@mantine/core";
 import {
   MoreVert,
   ChevronRight,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import { useNavigate, useSearchParams } from "react-router";
-import type {
-  JobOrderListItem,
-  JobOrderServiceType,
-} from "../../types/jobOrder";
-import { RequestCell } from "./components/RequestCell";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
+import type { JobOrderServiceType } from "../../types/jobOrder";
+import { JOCell } from "./components/JOCell";
 import { getJobOrderRowStyle } from "./components/JobOrderTableRow";
 import { DetailsCell } from "./components/DetailsCell";
 import { ServiceInformationCell } from "./components/ServiceInformationCell";
@@ -28,60 +28,19 @@ import { JobOrderFilterClient } from "./components/JobOrderFilterClient";
 import { JobOrderFilterTable } from "./components/JobOrderFilterTable";
 import { ShowEntriesControl } from "./components/ShowEntriesControl";
 import { PageCard } from "@/components/PageCard";
-
-// MOCK DATA (replace with API call/hook)
-const MOCK_DATA: JobOrderListItem[] = [
-  {
-    id: 1,
-    reference_number: "SJO-04-2026-013",
-    client_full_name: "Jenny Carla Dela Cruz",
-    created_at: "2026-04-16",
-    assignment_status: "ASSIGNED",
-    service: "Logistics",
-    trade_type: "Import",
-    status: "Accepted",
-    logistics_service: {
-      BL: "AMP012863",
-      commodity: "Import",
-      transport_mode: "Sea",
-      origin: "YTN Port, China",
-      destination: "MNL Port, Manila",
-      service_level: "CC, DE",
-      eta: "2026-04-30",
-      etd: "2026-04-30",
-    },
-    person_in_charge: {
-      name: "LEAD OPS PEÑA",
-      avatar_url: undefined,
-    },
-    quotation_reference: "QT-09-2026-052",
-    quotation_id: "QT-09-2026-052",
-  },
-  {
-    id: 2,
-    reference_number: "SJO-04-2026-012",
-    client_full_name: "Sample 2",
-    created_at: "2026-04-16",
-    assignment_status: "AVAILABLE",
-    service: "Regulatory",
-    trade_type: "Export",
-    status: "Pending",
-    regulatory_service: {
-      application_type: "Renewal",
-      assistance_type: "BOC New Importer Accreditation",
-      client_type: "NEW",
-    },
-    person_in_charge: undefined,
-    quotation_reference: "QT-09-2026-055",
-    quotation_id: "QT-09-2026-055",
-  },
-];
-
-// Filtering will use the `service` field on the row (e.g., "Logistics" | "Regulatory")
+import { fetchJobOrders } from "../../api/jobOrder.api";
+import { jobOrdersQueryKeys } from "../../api/jobOrdersQueryKeys";
+import { mapJobOrderResponses } from "../../utils/jobOrderListMapper";
 
 export default function JobOrderListPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  function buildDetailPath(id: number | string, service: JobOrderServiceType) {
+    const params = new URLSearchParams();
+    params.set("service", service);
+    return `/job-orders/${id}?${params.toString()}`;
+  }
 
   // derive filter state from query params (source of truth)
   const activeTab =
@@ -91,7 +50,11 @@ export default function JobOrderListPage() {
   const tradeType = searchParams.get("trade") || "";
   const personInCharge = searchParams.get("person") || "";
   const status = searchParams.get("status") || "";
-  const perPage = parseInt(searchParams.get("perPage") || "10", 10) || 10;
+  const perPage =
+    parseInt(
+      searchParams.get("per_page") || searchParams.get("perPage") || "10",
+      10,
+    ) || 10;
   const page = parseInt(searchParams.get("page") || "1", 10) || 1;
 
   function setParam(key: string, value: string) {
@@ -103,66 +66,92 @@ export default function JobOrderListPage() {
     setSearchParams(next);
   }
 
-  function setPageParam(p: number) {
-    const next = new URLSearchParams(searchParams.toString());
-    next.set("page", String(p));
-    setSearchParams(next);
-  }
-
-  const filteredData = useMemo(() => {
-    let data = MOCK_DATA;
-
-    if (activeTab === "Logistics") {
-      data = data.filter((row) => row.service === "Logistics");
-    }
-
-    if (activeTab === "Regulatory") {
-      data = data.filter((row) => row.service === "Regulatory");
-    }
-
-    if (search) {
-      data = data.filter(
-        (row) =>
-          row.client_full_name.toLowerCase().includes(search.toLowerCase()) ||
-          row.reference_number.toLowerCase().includes(search.toLowerCase()),
-      );
-    }
-
-    if (tradeType) {
-      data = data.filter(
-        (row) =>
-          row.service !== "Logistics" ||
-          (row.service === "Logistics" && row.trade_type === tradeType),
-      );
-    }
-    if (status) data = data.filter((row) => row.status === status);
-
-    if (personInCharge) {
-      data = data.filter((row) =>
-        row.person_in_charge?.name
-          .toLowerCase()
-          .includes(personInCharge.toLowerCase()),
-      );
-    }
-
-    return data;
-  }, [activeTab, search, tradeType, status, personInCharge]);
-
-  const pagedData = useMemo(
-    () => filteredData.slice((page - 1) * perPage, page * perPage),
-    [filteredData, page, perPage],
+  const setPageParam = useCallback(
+    (p: number) => {
+      const next = new URLSearchParams(searchParams.toString());
+      next.set("page", String(p));
+      setSearchParams(next);
+    },
+    [searchParams, setSearchParams],
   );
 
-  const counts = useMemo(() => {
-    const all = MOCK_DATA.length;
-    const logisticsCount = MOCK_DATA.filter(
-      (row) => row.service === "Logistics",
-    ).length;
-    const regulatoryCount = MOCK_DATA.filter(
-      (row) => row.service === "Regulatory",
-    ).length;
-    return { all, Logistics: logisticsCount, Regulatory: regulatoryCount };
-  }, []);
+  function mapServiceFilter(value: "all" | JobOrderServiceType) {
+    if (value === "Logistics") return "LOGISTICS";
+    if (value === "Regulatory") return "REGULATORY";
+    return undefined;
+  }
+
+  function mapTradeTypeFilter(value: string) {
+    if (value === "Import") return "IMPORT";
+    if (value === "Export") return "EXPORT";
+    return undefined;
+  }
+
+  function mapStatusFilter(value: string) {
+    if (value === "Accepted") return "ACCEPTED";
+    if (value === "Pending") return "PENDING";
+    return undefined;
+  }
+
+  const listParams = {
+    search: search || undefined,
+    ops_search: personInCharge || undefined,
+    "filter[service]": mapServiceFilter(activeTab),
+    "filter[service_type]": mapTradeTypeFilter(tradeType),
+    "filter[assignment_status]": mapStatusFilter(status),
+    per_page: perPage,
+    page,
+  };
+
+  const {
+    data: jobOrdersResponse,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: jobOrdersQueryKeys.list({
+      search,
+      service: activeTab,
+      tradeType,
+      status,
+      personInCharge,
+      perPage,
+      page,
+    }),
+    queryFn: () => fetchJobOrders(listParams),
+    staleTime: 30_000,
+  });
+
+  const jobOrders = mapJobOrderResponses(jobOrdersResponse?.job_orders ?? []);
+  const pagination = jobOrdersResponse?.pagination;
+  const totalPages = Math.max(1, pagination?.total_pages ?? 1);
+  const pages = (() => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    }
+
+    if (page <= 3) return [1, 2, 3, "...", totalPages];
+    if (page >= totalPages - 2) {
+      return [1, "...", totalPages - 2, totalPages - 1, totalPages];
+    }
+
+    return [1, "...", page - 1, page, page + 1, "...", totalPages];
+  })();
+
+  const counts = {
+    all: jobOrdersResponse?.counts?.all_job_orders ?? 0,
+    Logistics: jobOrdersResponse?.counts?.logistics_job_orders ?? 0,
+    Regulatory: jobOrdersResponse?.counts?.regulatory_job_orders ?? 0,
+  };
+
+  const showingCount = pagination?.count ?? jobOrders.length;
+  const totalCount = pagination?.total ?? jobOrders.length;
+  const isTableLoading = isLoading || isFetching;
+
+  useEffect(() => {
+    if (pagination?.current_page && pagination.current_page !== page) {
+      setPageParam(pagination.current_page);
+    }
+  }, [page, pagination?.current_page, setPageParam]);
 
   const tradeTypeOptions = [
     { value: "Import", label: "Import" },
@@ -179,24 +168,14 @@ export default function JobOrderListPage() {
   }
 
   function handlePerPageChange(value: number) {
-    setParam("perPage", String(value));
-    setPageParam(1);
+    const next = new URLSearchParams(searchParams.toString());
+    next.set("per_page", String(value));
+    next.delete("perPage");
+    next.set("page", "1");
+    setSearchParams(next);
   }
 
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / perPage));
-
-  const pages = useMemo(() => {
-    if (totalPages <= 5) {
-      return Array.from({ length: totalPages }, (_, index) => index + 1);
-    }
-
-    if (page <= 3) return [1, 2, 3, "...", totalPages];
-    if (page >= totalPages - 2) {
-      return [1, "...", totalPages - 2, totalPages - 1, totalPages];
-    }
-
-    return [1, "...", page - 1, page, page + 1, "...", totalPages];
-  }, [page, totalPages]);
+  const perPageValue = pagination?.per_page ?? perPage;
 
   return (
     <PageCard title="Job Order">
@@ -209,7 +188,7 @@ export default function JobOrderListPage() {
         <JobOrderFilterTable
           search={search}
           onSearchChange={(value: string) => setParam("q", value)}
-          onSearch={() => {}}
+          onSearch={() => setParam("q", search)}
           tradeType={tradeType}
           onTradeTypeChange={(value: string) => setParam("trade", value || "")}
           personInCharge={personInCharge}
@@ -224,7 +203,7 @@ export default function JobOrderListPage() {
         />
         <Divider />
         <ShowEntriesControl
-          perPage={perPage}
+          perPage={perPageValue}
           onPerPageChange={handlePerPageChange}
         />
         <Table
@@ -251,7 +230,7 @@ export default function JobOrderListPage() {
         >
           <Table.Thead>
             <Table.Tr>
-              <Table.Th style={{ width: "16.25rem" }}>REQUEST</Table.Th>
+              <Table.Th style={{ width: "16.25rem" }}>JOB ORDER</Table.Th>
               <Table.Th style={{ width: "20rem" }}>DETAILS</Table.Th>
               <Table.Th style={{ width: "14rem" }}>
                 SERVICE INFORMATION
@@ -262,7 +241,20 @@ export default function JobOrderListPage() {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {pagedData.length === 0 ? (
+            {isTableLoading ? (
+              <Table.Tr>
+                <Table.Td colSpan={6}>
+                  <Center py="xl">
+                    <Group gap="xs">
+                      <Loader size="sm" />
+                      <Text size="sm" c="dimmed">
+                        Loading job orders...
+                      </Text>
+                    </Group>
+                  </Center>
+                </Table.Td>
+              </Table.Tr>
+            ) : jobOrders.length === 0 ? (
               <Table.Tr>
                 <Table.Td colSpan={6}>
                   <Text ta="center" py="xl" c="dimmed" size="sm">
@@ -271,17 +263,20 @@ export default function JobOrderListPage() {
                 </Table.Td>
               </Table.Tr>
             ) : (
-              pagedData.map((row) => (
+              jobOrders.map((row) => (
                 <Table.Tr
                   key={row.id}
                   style={{
                     ...getJobOrderRowStyle(row.service as JobOrderServiceType),
                     cursor: "pointer",
                   }}
-                  onClick={() => navigate(`/accounts/clients/${row.id}`)}
+                  onClick={() => navigate("/404")}
                 >
                   <Table.Td>
-                    <RequestCell item={row} />
+                    <JOCell
+                      item={row}
+                      detailPath={buildDetailPath(row.id, row.service)}
+                    />
                   </Table.Td>
                   <Table.Td>
                     <DetailsCell item={row} />
@@ -325,13 +320,7 @@ export default function JobOrderListPage() {
                         </ActionIcon>
                       </Menu.Target>
                       <Menu.Dropdown>
-                        <Menu.Item
-                          style={{ fontSize: "0.75rem" }}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            navigate(`/job-orders/${row.id}`);
-                          }}
-                        >
+                        <Menu.Item style={{ fontSize: "0.75rem" }} disabled>
                           View Details
                         </Menu.Item>
                       </Menu.Dropdown>
@@ -344,7 +333,7 @@ export default function JobOrderListPage() {
         </Table>
         <Group justify="space-between" align="center" mt="0.75rem">
           <Text size="0.75rem" c="dimmed">
-            Showing {pagedData.length} out of {filteredData.length} entries
+            Showing {showingCount} out of {totalCount} entries
           </Text>
           <Group gap="0.25rem">
             <Button

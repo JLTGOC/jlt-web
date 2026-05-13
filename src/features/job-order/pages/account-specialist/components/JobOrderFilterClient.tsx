@@ -36,7 +36,7 @@ export function JobOrderFilterClient({
           count={counts.Logistics}
           active={activeTab === "Logistics"}
           onClick={() => onTabChange("Logistics")}
-          color="teal"
+          color="blue"
           dot
         />
         <VerticalDivider />
@@ -45,7 +45,7 @@ export function JobOrderFilterClient({
           count={counts.Regulatory}
           active={activeTab === "Regulatory"}
           onClick={() => onTabChange("Regulatory")}
-          color="blue"
+          color="teal"
           dot
         />
       </Group>

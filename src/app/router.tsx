@@ -42,10 +42,8 @@ const ShipmentDocumentsPage = lazy(() =>
 const JobOrdersPage = lazy(
   () => import("@/app/routes/app/job-orders/JobOrdersPage"),
 );
-const JobOrderDetailsPage = lazy(() =>
-  import("@/features/job-order/components/JobOrderDetailsPage").then((m) => ({
-    default: m.JobOrderDetailsPage,
-  })),
+const JobOrderDetailPage = lazy(
+  () => import("@/features/job-order/pages/shared/JobOrderDetailPage"),
 );
 
 //Tool imports
@@ -146,7 +144,7 @@ export const router = createBrowserRouter([
           { path: "shipments", Component: Shipments },
 
           // Job Orders routes — most specific first
-          { path: "job-orders/:jobOrderId", Component: JobOrderDetailsPage },
+          { path: "job-orders/:jobOrderId", Component: JobOrderDetailPage },
           { path: "job-orders", Component: JobOrdersPage },
 
           // ── Tools routes ──

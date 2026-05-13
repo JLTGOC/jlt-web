@@ -1,53 +1,49 @@
-// ─── Detail page type ─────────────────────────────────────────────────────────
-
-export interface JobOrderDetail {
-  id: string | number;
+export type JobOrderDetail = {
   reference_number: string;
-  quotation_reference?: string;
-  quotation_id?: string | number;
-
-  jo_information: {
-    subject: string;
-    date: string; // ISO date string
-    message: string;
+  quotation_id?: number | string | null;
+  job_type?: string | null;
+  service_type?: string | null;
+  subject?: string | null;
+  date?: string | null;
+  email_body?: string | null;
+  client: {
+    consignee?: string | null;
+    client_type?: string | null;
+    accredited?: string | null;
+    shipper?: string | null;
+    tone_and_attitude?: string | null;
+    remarks?: string | null;
   };
-
-  client_information: {
-    consignee: string;
-    client_type: string;
-    accredited?: string;
-    shipper?: string;
-    client_tone?: string;
-    remarks_on_handling?: string;
-  };
-
-  service_information: {
-    service_level: string;
-    bl_no?: string;
-    eta?: string; // ISO date string
-    etd?: string; // ISO date string
-  };
-
-  shipment_information: {
-    commodity?: string;
-    volume_dimension?: string;
-    hs_code?: string;
-    rod?: string;
-    permits_needed?: string;
-    if_coordinated?: string;
-    special_remarks?: string;
-  };
-
-  commitment_information: {
-    target_delivery?: string;
-    target_completion_period?: string;
-    special_remarks?: string;
-  };
-
-  billing_information: {
-    terms_of_payment?: string;
-    when_to_bill?: string;
-    shall_be_billed?: string;
-    available_docs_attached?: string;
-  };
-}
+  service?: {
+    service_type?: string | null;
+    type?: string | null;
+    regulatory_assistance?: string | null;
+    application_type?: string | null;
+    accredited?: string | null;
+    remarks?: string | null;
+    service_level?: string | null;
+    bl_no?: string | null;
+    eta?: string | null;
+    etd?: string | null;
+  } | null;
+  shipment?: {
+    commodity?: string | null;
+    cargo_type?: string | null;
+    container_size?: string | null;
+    hs_code?: string | null;
+    rod?: string | null;
+    permits?: string | null;
+    if_coordinated?: string | null;
+    special_remarks?: string | null;
+  } | null;
+  target?: {
+    target_delivery_date?: string | null;
+    target_completion_date?: string | null;
+    special_remarks?: string | null;
+  } | null;
+  billing_details?: {
+    terms_of_payment?: string | null;
+    billing_date?: string | null;
+    shall_be_billed?: string | null;
+  } | null;
+};

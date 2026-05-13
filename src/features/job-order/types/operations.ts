@@ -1,5 +1,6 @@
 export type FetchJobOrdersParams = {
   search?: string;
+  ops_search?: string;
   client_type?: "LOGISTICS" | "REGULATORY";
   per_page?: number;
   my_per_page?: number;
@@ -7,13 +8,15 @@ export type FetchJobOrdersParams = {
   my_page?: number;
   "filter[assignment_status]"?: string;
   "filter[service]"?: string;
+  "filter[service_type]"?: string;
 };
 
+//updated to match API response
 export type CountsResponse = {
   all_job_orders: number;
-  new_user_job_orders: number;
-  old_user_job_orders: number;  
-}
+  logistics_job_orders: number;
+  regulatory_job_orders: number;
+};
 
 export type JobOrderResponse = {
   assigned_at: string | null;
@@ -21,7 +24,9 @@ export type JobOrderResponse = {
   assignment_status: string;
   bl_no: string;
   client: string;
+  client_type?: "OLD" | "NEW" | null;
   commodity: string;
+  created_at?: string | null;
   date_created: string;
   destination: string;
   id: number;
@@ -29,11 +34,18 @@ export type JobOrderResponse = {
   ops_image: string | null;
   origin: string;
   quotation_id: number | null;
+  quotation_reference?: string | null;
   quotation_reference_number: string | null;
+  regulatory_assistance?: string | null;
+  application_type?: string | null;
   reassignment_request_id: number | null;
   reference_number: string;
   service_level: string;
+  service?: string | null;
   service_type: string;
+  eta?: string | null;
+  etd?: string | null;
+  status?: string | null;
   transport_mode: string;
 };
 
@@ -43,7 +55,7 @@ export type pagination = {
   count: number;
   per_page: number;
   total: number;
-}
+};
 
 export type JobOrdersResponse = {
   counts: CountsResponse;
@@ -51,4 +63,4 @@ export type JobOrdersResponse = {
   my_job_orders: JobOrderResponse[];
   pagination: pagination;
   my_job_orders_pagination: pagination;
-}
+};

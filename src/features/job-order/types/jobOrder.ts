@@ -1,15 +1,20 @@
 // JobOrderListItem and related types for the Job Order feature
 
-export type {FetchJobOrdersParams, JobOrderResponse, JobOrdersResponse, CountsResponse} from "./operations";
+export type {
+  FetchJobOrdersParams,
+  JobOrderResponse,
+  JobOrdersResponse,
+  CountsResponse,
+} from "./operations";
 
 export interface JobOrderListItem {
   id: string | number;
   reference_number: string;
   client: string;
   created_at: string;
-  assignment_status: "AVAILABLE" | "ASSIGNED" | string;
-  service: string;
-  trade_type?: "Import" | "Export";
+  assignment_status: JobOrderStatus;
+  service: JobOrderServiceType;
+  trade_type?: JobOrderTradeType;
   status?: "Accepted" | "Pending";
   logistics_service?: {
     BL?: string;
@@ -23,7 +28,7 @@ export interface JobOrderListItem {
   };
   regulatory_service?: {
     application_type: string;
-    assistance_type?: string;
+    regulatory_assistance?: string;
     client_type?: JobOrderClientType;
   };
   person_in_charge?: {
@@ -94,8 +99,7 @@ export interface JobOrderQuotationDetailsResponse {
   conversation_id?: number | string | null;
 }
 
-export type JobOrderClientType = "new" | "old";
-
+export type JobOrderClientType = "NEW" | "OLD";
 
 export type JobOrderServiceType = "Logistics" | "Regulatory";
 
