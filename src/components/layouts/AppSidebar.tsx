@@ -1,4 +1,13 @@
-import { Flex, Box, Stack, Text, UnstyledButton, Tooltip } from "@mantine/core";
+import { useState } from "react";
+import {
+  Flex,
+  Box,
+  Stack,
+  Text,
+  UnstyledButton,
+  Tooltip,
+  Accordion,
+} from "@mantine/core";
 import { useLocation, useNavigate } from "react-router";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -6,8 +15,6 @@ import classes from "./AppSidebar.module.css";
 import {
   BTN_HEIGHT_REM,
   getSidebarItemsForTabs,
-  PANEL_BASE_PADDING_REM,
-  PANEL_INDENT_STEP_REM,
   PILL_HEIGHT_REM,
   RAIL_PADDING_TOP_REM,
 } from "./AppSidebar.config";
@@ -29,10 +36,23 @@ export function AppSidebar() {
   const user = useAuthStore((state) => state.user);
   const currentPath = location.pathname;
   const navItems = getSidebarItemsForTabs(user?.tabs);
+  const [expandedDrawers, setExpandedDrawers] = useState<string[]>([]);
 
   const activeIndex = getActiveIndex(navItems, currentPath);
   const activeItem = getActiveItem(navItems, currentPath);
   const panelOpen = !!activeItem?.subItems?.length;
+
+  const activeDrawerValues =
+    activeItem?.id === "services"
+      ? (activeItem.subItems ?? []).flatMap((section, index) =>
+          isSubItemActive(section, currentPath) ? [`section-${index}`] : [],
+        )
+      : [];
+
+  const drawerValues =
+    activeItem?.id === "services"
+      ? Array.from(new Set([...expandedDrawers, ...activeDrawerValues]))
+      : [];
 
   const pillTop =
     activeIndex >= 0
@@ -51,7 +71,9 @@ export function AppSidebar() {
   }
 
   function getMenuItemPaddingLeft(depth: number): string {
-    return `${PANEL_BASE_PADDING_REM + depth * PANEL_INDENT_STEP_REM}rem`;
+    if (depth === 0) return "0.625rem";
+    if (depth === 1) return "1rem";
+    return `${1 + (depth - 1) * 0.5}rem`;
   }
 
   function renderNestedItems(items: MenuNode[], depth = 0): React.ReactNode {
@@ -76,17 +98,22 @@ export function AppSidebar() {
               paddingBottom: "0.375rem",
             }}
           >
-            <Text
-              size="xs"
-              fw={itemActive ? 700 : 400}
-              tt="uppercase"
-              lts="0.08em"
-              className={
-                topLevelSubItem ? classes.subParentText : classes.subSubText
-              }
-            >
-              {item.label}
-            </Text>
+            <Box className={classes.menuItemContent}>
+              {item.icon && (
+                <Box className={classes.subItemIcon}>{item.icon}</Box>
+              )}
+              <Text
+                size="xs"
+                fw={itemActive ? 700 : 400}
+                tt={topLevelSubItem ? "uppercase" : undefined}
+                lts={topLevelSubItem ? "0.08em" : "0.01em"}
+                className={
+                  topLevelSubItem ? classes.subParentText : classes.subSubText
+                }
+              >
+                {item.label}
+              </Text>
+            </Box>
           </UnstyledButton>
 
           {showNested && (
@@ -98,6 +125,79 @@ export function AppSidebar() {
             </Stack>
           )}
         </Box>
+      );
+    });
+  }
+
+  function renderOperationsDrawers(items: MenuNode[]): React.ReactNode {
+    return items.map((item, index) => {
+      const drawerValue = `section-${index}`;
+      const sectionActive = isSubItemActive(item, currentPath);
+      const itemPath = getFirstNavigablePath(item);
+
+      if (!item.subItems?.length) {
+        return (
+          <Box key={`${item.label}-${index}`}>
+            <UnstyledButton
+              onClick={() => {
+                if (itemPath) navigate(itemPath);
+              }}
+              data-active={sectionActive || undefined}
+              className={classes.drawerLink}
+            >
+              <Text
+                size="xs"
+                fw={sectionActive ? 700 : 400}
+                tt="uppercase"
+                lts="0.08em"
+                className={classes.subParentText}
+              >
+                {item.label}
+              </Text>
+            </UnstyledButton>
+          </Box>
+        );
+      }
+
+      return (
+        <Accordion
+          key={`${item.label}-${index}`}
+          multiple
+          value={drawerValues.includes(drawerValue) ? [drawerValue] : []}
+          onChange={(value) => {
+            const next = Array.isArray(value) ? value : value ? [value] : [];
+            setExpandedDrawers((current) =>
+              next.length
+                ? Array.from(new Set([...current, ...next]))
+                : current.filter((entry) => entry !== drawerValue),
+            );
+          }}
+          className={classes.drawerAccordion}
+          chevronPosition="right"
+        >
+          <Accordion.Item value={drawerValue} className={classes.drawerItem}>
+            <Accordion.Control
+              className={classes.drawerControl}
+              data-active={sectionActive || undefined}
+            >
+              <Text
+                size="xs"
+                fw={sectionActive ? 700 : 400}
+                tt="uppercase"
+                lts="0.08em"
+                className={classes.subParentText}
+              >
+                {item.label}
+              </Text>
+            </Accordion.Control>
+
+            <Accordion.Panel className={classes.drawerPanel}>
+              <Stack gap={0} className={classes.subSubList}>
+                {renderNestedItems(item.subItems ?? [], 1)}
+              </Stack>
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
       );
     });
   }
@@ -194,8 +294,12 @@ export function AppSidebar() {
         bg="white"
       >
         {activeItem?.subItems && (
-          <Box className={classes.subPanelInner} data-active py="xl" pt="2rem">
-            <Stack gap="xs">{renderNestedItems(activeItem.subItems)}</Stack>
+          <Box className={classes.subPanelInner} data-active>
+            {activeItem.id === "services" ? (
+              renderOperationsDrawers(activeItem.subItems)
+            ) : (
+              <Stack gap="xs">{renderNestedItems(activeItem.subItems)}</Stack>
+            )}
           </Box>
         )}
       </Box>

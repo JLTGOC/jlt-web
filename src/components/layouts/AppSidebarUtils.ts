@@ -1,4 +1,6 @@
 export interface MenuNode {
+  key?: string;
+  icon?: React.ReactNode;
   label: string;
   path?: string;
   subItems?: MenuNode[];
@@ -51,7 +53,10 @@ export function isItemActive(item: NavItem, currentPath: string): boolean {
   return false;
 }
 
-export function isSubItemActive(subItem: MenuNode, currentPath: string): boolean {
+export function isSubItemActive(
+  subItem: MenuNode,
+  currentPath: string,
+): boolean {
   return isNodeActive(subItem, currentPath);
 }
 
