@@ -91,7 +91,7 @@ export function useJobOrderPage() {
     queryFn: () =>
       fetchJobOrders({
         "filter[assignment_status]":
-          statusFilter === "ALL" ? undefined : clientFilter,
+          statusFilter === "ALL" ? undefined : statusFilter,
         "filter[service]": serviceFilter === "ALL" ? undefined : serviceFilter,
         search: searchQuery || undefined,
         // client_type: clientFilter === "ALL" ? undefined : clientFilter,
