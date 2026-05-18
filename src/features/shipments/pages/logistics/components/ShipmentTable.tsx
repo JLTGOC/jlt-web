@@ -322,7 +322,7 @@ export function ShipmentTable({
                           position: "relative",
                         }}
                       >
-                        <Text fw={500} c={statusTextColor} fz="0.8rem" style={{ position: "relative", zIndex: 2 }}>
+                        <Text fw={500} c={statusTextColor} fz="0.7rem" style={{ position: "relative", zIndex: 2 }}>
                           {row.status || "—"}
                         </Text>
                       </Box>

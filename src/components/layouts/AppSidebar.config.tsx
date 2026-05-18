@@ -64,10 +64,7 @@ export const NAV_ITEMS: NavItem[] = [
     id: "accounts",
     icon: <ManageAccounts width="2rem" height="2rem" />,
     label: "Accounts",
-    subItems: [
-      { label: "Clients", path: "/accounts/clients" },
-      { label: "Employees", path: "/accounts/employees" },
-    ],
+    path: "/accounts",
   },
   {
     id: "tools",

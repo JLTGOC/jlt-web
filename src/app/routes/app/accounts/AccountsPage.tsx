@@ -1,62 +1,65 @@
 // src/features/accounts/pages/AccountsPage.tsx
-import { Navigate, useParams } from "react-router";
-import { OldClients } from "@/features/accounts/components/clients/OldClients";
-import { NewClients } from "@/features/accounts/components/clients/NewClients";
+import { useNavigate, useParams } from "react-router";
+import { Box } from "@mantine/core";
 import { ClientsList } from "@/features/accounts/components/clients/ClientsList";
-import { OperationsEmployees } from "@/features/accounts/components/employees/OperationsEmployees";
-import { AccountSpecialistsEmployees } from "@/features/accounts/components/employees/AccountSpecialistsEmployees";
-import { HumanResourcesEmployees } from "@/features/accounts/components/employees/HumanResourcesEmployees";
-import { ITEmployees } from "@/features/accounts/components/employees/ITEmployees";
-import { FinanceEmployees } from "@/features/accounts/components/employees/FinanceEmployees";
-import { MarketingEmployees } from "@/features/accounts/components/employees/MarketingEmployees";
 import { EmployeesList } from "@/features/accounts/components/employees/EmployeesList";
 import { AccountsProfile } from "@/features/accounts/pages/AccountsProfile";
+import { getAccountTabs } from "@/features/accounts/utils/accountTabs";
+import { ROLES } from "@/types/roles";
+import type { User } from "@/types/api";
 
 export default function AccountsPage() {
-  const { category, subCategory, id } = useParams();
+  const navigate = useNavigate();
+  const { category, id } = useParams();
 
-  // Default route: /accounts -> redirect to /accounts/clients
-  if (!category) {
-    return <Navigate to="/accounts/clients" replace />;
-  }
+  // ✅ Temporary Account Specialist user (until auth is wired up)
+  const user: User = {
+    id: 0,
+    firstName: "Default",
+    middleName: null,
+    lastName: "User",
+    fullName: "Default User",
+    role: ROLES.ACCOUNT_SPECIALIST,
+    email: "default@example.com",
+    company: "Default Co",
+    address: "N/A",
+    contactNumber: "N/A",
+    companyName: "Default Co",
+    imageUrl: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    tabs: {
+      dashboard: true,
+      leads: true,
+      quotations: true,
+      shipments: true,
+      accounts: true,
+      job_orders: true,
+      templates: true,
+    },
+    permissions: [],
+  };
 
-  // If an ID is present, show the profile view
-  if (id) {
-    return <AccountsProfile />;
-  }
+  const activeTab = category ?? "clients";
 
-  // Clients routes
-  if (category === "clients") {
-    switch (subCategory) {
-      case "old":
-        return <OldClients />;
-      case "new":
-        return <NewClients />;
-      default:
-        return <ClientsList />;
-    }
-  }
+  const handleTabChange = (tab: string | null) => {
+    if (tab) navigate(`/accounts/${tab}`);
+  };
 
-  // Employees routes
-  if (category === "employees") {
-    switch (subCategory) {
-      case "account-specialists":
-        return <AccountSpecialistsEmployees />;
-      case "human-resources":
-        return <HumanResourcesEmployees />;
-      case "it":
-        return <ITEmployees />;
-      case "marketing":
-        return <MarketingEmployees />;
-      case "operations":
-        return <OperationsEmployees />;
-      case "finance":
-        return <FinanceEmployees />;
-      default:
-        return <EmployeesList />;
-    }
-  }
+  return (
+    <Box style={{ width: "100%" }}>
+      {/* ✅ Tabs now fully rendered via accountTabs.tsx */}
+      {getAccountTabs(user, activeTab, handleTabChange)}
 
-  // Fallback: redirect to /accounts/clients
-  return <Navigate to="/accounts/clients" replace />;
+      <Box style={{ width: "100%", marginTop: "1rem" }}>
+        {id ? (
+          <AccountsProfile />
+        ) : activeTab === "clients" ? (
+          <ClientsList />
+        ) : activeTab === "employees" ? (
+          <EmployeesList />
+        ) : null}
+      </Box>
+    </Box>
+  );
 }

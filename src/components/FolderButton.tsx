@@ -21,7 +21,7 @@ export function FolderButton({
   icon: Icon,
   label,
   onClick,
-  iconColor = "var(--mantine-color-jltOrange-5)",
+  iconColor = "#1C213B",
 }: FolderButtonProps) {
   return (
     <UnstyledButton onClick={onClick} className={classes.root}>

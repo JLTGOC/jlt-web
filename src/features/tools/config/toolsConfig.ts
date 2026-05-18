@@ -1,7 +1,7 @@
 import {
-  AccountTree,
-  Description,
+  LinkedServices,
   RequestQuote,
+  Sms,
 } from "@nine-thirty-five/material-symbols-react/outlined";
 import type { ComponentType } from "react";
 import type { Role } from "@/types/roles";
@@ -21,13 +21,13 @@ export interface ToolItem {
 export const TOOL_ITEMS: ToolItem[] = [
   {
     id: "services",
-    icon: AccountTree,
+    icon: LinkedServices,
     label: "List of Services",
     path: "/tools/services",
   },
   {
     id: "message-template",
-    icon: Description,
+    icon: Sms,
     label: "Message Template",
     path: "/tools/messages",
   },

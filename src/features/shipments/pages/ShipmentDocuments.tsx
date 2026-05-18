@@ -172,12 +172,12 @@ export function ShipmentDocuments() {
             Loading documents...
           </Text>
         ) : (
-          <Box style={{ display: "flex", gap: "0.8rem", width: "100%", flexWrap: "wrap", justifyContent: "flex-start", alignItems: "flex-start" }}>
+          <Box style={{ display: "flex", gap: "0.8rem", width: "100%", flexWrap: "wrap", justifyContent: "center", alignItems: "center" }}>
             <Paper
               withBorder
               radius="md"
               p="md"
-              style={{ width: 800, minWidth: 800, minHeight: 820, backgroundColor: "white" }}
+              style={{ width: 750, minWidth: 750, minHeight: 750, backgroundColor: "white" }}
             >
               <Stack gap="lg">
                 <Box>
@@ -261,7 +261,7 @@ export function ShipmentDocuments() {
               withBorder
               radius="md"
               p="md"
-              style={{ width: 800, minWidth: 800, minHeight: 820, backgroundColor: "white" }}
+              style={{ width: 750, minWidth: 750, minHeight: 750, backgroundColor: "white" }}
             >
               <Group mb="md" align="center">
                 <img src={invoiceIcon} alt="Billing" style={{ width: 24, height: 24 }} />
@@ -392,7 +392,7 @@ function DocumentDetailCard({ doc, shipmentId }: DocumentDetailCardProps) {
     <>
       <DetailCard
         headerLeft={
-          <Box style={{ width: 72, height: 72, minWidth: 72, minHeight: 72 }}>
+          <Box style={{ width: 62, height: 62, minWidth: 62, minHeight: 62 }}>
             <PdfThumbnail url={doc.file_url ?? ""} />
           </Box>
         }
