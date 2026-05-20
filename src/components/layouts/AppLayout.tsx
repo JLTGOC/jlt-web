@@ -5,7 +5,13 @@ import { AppHeader } from "@/components/layouts/AppHeader";
 
 const PANEL_WIDTH_REM = 7.9375;
 
-const SUB_ITEM_PREFIXES = ["/leads", "/shipments", "/quotations", "/accounts"];
+const SUB_ITEM_PREFIXES = [
+  "/leads",
+  "/shipments",
+  "/quotations",
+  "/accounts",
+  "/job-order",
+];
 
 function useIsPanelOpen() {
   const { pathname } = useLocation();
