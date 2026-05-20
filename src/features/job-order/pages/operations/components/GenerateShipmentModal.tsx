@@ -1,5 +1,5 @@
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
-import { Warning } from "@nine-thirty-five/material-symbols-react/outlined";
+import { Warning, AssignmentTurnedIn } from "@nine-thirty-five/material-symbols-react/outlined";
 import { type Dispatch, type SetStateAction } from "react";
 
 type GenerateShipmentModalProps = {

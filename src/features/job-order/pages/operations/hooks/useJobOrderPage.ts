@@ -241,7 +241,6 @@ export function useJobOrderPage() {
     if (!selectedQuotation) return;
     if (selectedQuotation.reference_number == null) return;
 
-    console.log("marjorie");
     generateShipmentConfirm.mutate({
       reference_number: selectedQuotation.reference_number,
     });

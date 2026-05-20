@@ -1,11 +1,14 @@
 import { Box, Button, Group, Modal, Stack, Text } from "@mantine/core";
+import { AssignmentTurnedIn } from "@nine-thirty-five/material-symbols-react/outlined";
+
 
 type Props = {
 	opened: boolean;
 	onClose: () => void;
+	onConfirm?: () => void;
 };
 
-export default function GenerateShipmentConfirmModal({ opened, onClose }: Props) {
+export default function GenerateShipmentConfirmModal({ opened, onClose, onConfirm }: Props) {
 	return (
 		<Modal
 			opened={opened}
@@ -44,12 +47,19 @@ export default function GenerateShipmentConfirmModal({ opened, onClose }: Props)
 		>
 			<Stack gap="0.9rem" py="1.2rem" px="1.5rem" align="center">
 				<Group gap="md" justify="center" align="center" wrap="nowrap">
-					<svg width="72" height="72" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<rect x="3" y="4" width="14" height="18" rx="2" fill="#E6F7EA" />
-						<path d="M9 2h6v2" stroke="#1D7A3A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-						<path d="M8 11l2.2 2.4L16 8.6" stroke="#1D7A3A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-						<rect x="5" y="2" width="10" height="2" rx="1" fill="#1D7A3A" opacity="0.06" />
-					</svg>
+					<Box
+						w={72}
+						h={72}
+						display="flex"
+						style={{
+							alignItems: "center",
+							justifyContent: "center",
+							background: "#E6F7EA",
+							borderRadius: 12,
+						}}
+					>
+						<AssignmentTurnedIn width={44} height={44} color="#1D7A3A" />
+					</Box>
 				</Group>
 
 				<Stack gap={2} align="center">
@@ -68,7 +78,10 @@ export default function GenerateShipmentConfirmModal({ opened, onClose }: Props)
 				<Group justify="center">
 					<Button
 						variant="subtle"
-						onClick={onClose}
+						onClick={() => {
+							if (onConfirm) onConfirm();
+							else onClose();
+						}}
 						styles={{
 							root: {
 								color: "#ffffff",

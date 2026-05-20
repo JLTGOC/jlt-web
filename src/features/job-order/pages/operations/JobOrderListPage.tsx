@@ -1,4 +1,5 @@
 import { Box, Stack } from "@mantine/core";
+import { useNavigate } from "react-router";
 
 import { PageCard } from "@/components/PageCard";
 
@@ -17,6 +18,7 @@ import GenerateShipmentConfirmModal from "./components/GenerateShipmentConfirmMo
 import { useJobOrderPage } from "./hooks/useJobOrderPage";
 
 export default function JobOrderListPage() {
+  const navigate = useNavigate();
   const {
     acceptModalOpen,
     acceptQuotationPending,
@@ -207,6 +209,13 @@ export default function JobOrderListPage() {
       <GenerateShipmentConfirmModal
         opened={generateShipmentConfirmModalOpen}
         onClose={() => setGenerateShipmentConfirmModalOpen(false)}
+        onConfirm={() => {
+          setGenerateShipmentConfirmModalOpen(false);
+          const jobType = selectedQuotation?.job_type?.toLowerCase();
+          const shipmentCategory =
+            jobType === "REGULATORY" ? "regulatory" : "logistics";
+          navigate(`/shipments/${shipmentCategory}`);
+        }}
       />
     </>
   );
