@@ -5,6 +5,8 @@ import type {
   JobOrdersResponse,
   JobOrderQuotationDetailsResponse,
 } from "../types/jobOrder";
+import type { JobOrderDocument } from "../types/jobOrderDetail";
+import { fetchJobOrderDetail } from "./jobOrderQueries.api";
 
 export {
   acceptJobOrder,
@@ -44,11 +46,86 @@ export async function fetchJobOrders(
 }
 
 export async function fetchJobOrderQuotation(
-  quotationID: number,
+  jobOrderId: number | string,
 ): Promise<JobOrderQuotationDetailsResponse> {
   const response = await apiClient.get<{
     data: JobOrderQuotationDetailsResponse;
-  }>(`/job-orders/${quotationID}/quotation`);
+  }>(`/job-orders/${jobOrderId}/quotation`);
 
   return response.data.data;
+}
+
+type QuotationFilesIndexResponse = {
+  proposal_files?: Array<{
+    id: number | string;
+    file_name: string;
+    file_url: string;
+    file_type: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+  requested_files?: Array<{
+    id: number | string;
+    file_name: string;
+    file_url: string;
+    file_type: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+};
+
+function mapQuotationFileToJobOrderDocument(
+  file: NonNullable<QuotationFilesIndexResponse["proposal_files"]>[number],
+  uploadedBy: "Client" | "JLTCB",
+): JobOrderDocument {
+  return {
+    id: file.id,
+    file_name: file.file_name,
+    file_url: file.file_url,
+    file_type: file.file_type,
+    created_at: file.created_at,
+    updated_at: file.updated_at,
+    uploadedBy,
+    uploadedByUser: uploadedBy,
+    uploadedDate: file.created_at,
+  };
+}
+
+function mapQuotationFilesToDocuments(
+  files: NonNullable<QuotationFilesIndexResponse["proposal_files"]>,
+  uploadedBy: "Client" | "JLTCB",
+): JobOrderDocument[] {
+  return files.map((file) =>
+    mapQuotationFileToJobOrderDocument(file, uploadedBy),
+  );
+}
+
+export async function fetchJobOrderDocuments(
+  jobOrderId: number | string,
+): Promise<JobOrderDocument[]> {
+  const jobOrderDetail = await fetchJobOrderDetail(jobOrderId);
+  const quotationId = jobOrderDetail.quotation_id;
+
+  if (!quotationId) {
+    return [];
+  }
+
+  const response = await apiClient.get<{
+    data: QuotationFilesIndexResponse | string;
+  }>(`/quotations/${quotationId}/files`);
+
+  if (typeof response.data.data === "string") {
+    return [];
+  }
+
+  return [
+    ...mapQuotationFilesToDocuments(
+      response.data.data.requested_files ?? [],
+      "Client",
+    ),
+    ...mapQuotationFilesToDocuments(
+      response.data.data.proposal_files ?? [],
+      "JLTCB",
+    ),
+  ];
 }

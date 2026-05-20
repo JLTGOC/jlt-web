@@ -14,4 +14,6 @@ export const jobOrdersQueryKeys = {
     [...jobOrdersQueryKeys.all, "list", params ?? {}] as const,
   detail: (id?: string | number | null) =>
     [...jobOrdersQueryKeys.all, "detail", id ?? null] as const,
+  documents: (id?: string | number | null) =>
+    [...jobOrdersQueryKeys.all, "documents", id ?? null] as const,
 };
