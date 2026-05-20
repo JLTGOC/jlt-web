@@ -5,9 +5,9 @@ import {
   getRowsTotal,
   hasAnyCharge,
   hasChargeContent,
-} from "@/features/quotations/utils/billing";
-import type { BillingDetailsValues } from "@/features/quotations/schemas/compose.schema";
-import type { QuotationTemplate } from "@/features/quotations/types/compose.types";
+} from "../../src/features/quotations/utils/billing";
+import type { BillingDetailsValues } from "../../src/features/quotations/schemas/compose.schema";
+import type { QuotationTemplate } from "../../src/features/quotations/types/compose.types";
 
 const template: QuotationTemplate = {
   id: "template-1",
