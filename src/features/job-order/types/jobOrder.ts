@@ -1,5 +1,7 @@
 // JobOrderListItem and related types for the Job Order feature
 
+import type { JobOrderHistoryItem } from "./jobOrderDetail";
+
 export type {
   FetchJobOrdersParams,
   JobOrderResponse,
@@ -55,6 +57,10 @@ export interface JobOrderQuotationDetailsResponse {
   created_at: string;
   updated_at: string;
   issued_quotation_id?: number | string | null;
+  job_order?: {
+    reference_number?: string | null;
+    person_in_charge?: string | null;
+  } | null;
   company?: {
     name: string;
     address: string;
@@ -77,8 +83,9 @@ export interface JobOrderQuotationDetailsResponse {
   shipment?: {
     origin: string;
     destination: string;
+    remarks?: string | null;
   } | null;
-  regulatory_service?: any | null;
+  regulatory_service?: Record<string, unknown> | null;
   quotation_file: Array<{
     id: number | string;
     file_name: string;
@@ -95,6 +102,12 @@ export interface JobOrderQuotationDetailsResponse {
     created_at: string;
     updated_at: string;
   }>;
+  history?: JobOrderHistoryItem[];
+  histories?: JobOrderHistoryItem[];
+  activity_logs?: JobOrderHistoryItem[];
+  activities?: JobOrderHistoryItem[];
+  timeline?: JobOrderHistoryItem[];
+  events?: JobOrderHistoryItem[];
   remarks?: string | null;
   conversation_id?: number | string | null;
 }
