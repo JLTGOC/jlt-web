@@ -66,7 +66,7 @@ export function JobOrderDetailSections({
       <DetailCard
         headerLeft={<Article width={20} height={20} />}
         title="JO Information"
-        headerBg="#EFF0F4"
+        headerBg="#D4DAE0"
       >
         <Grid mb="lg" gutter="xl">
           <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -116,7 +116,7 @@ export function JobOrderDetailSections({
       <DetailCard
         headerLeft={<Person width={20} height={20} />}
         title="Client Information"
-        headerBg="#EFF0F4"
+        headerBg="#D4DAE0"
       >
         <DetailGrid
           rows={[
@@ -151,7 +151,7 @@ export function JobOrderDetailSections({
       <DetailCard
         headerLeft={<LocalShipping width={20} height={20} />}
         title="Service Information"
-        headerBg="#EFF0F4"
+        headerBg="#D4DAE0"
       >
         <DetailGrid rows={serviceRows} />
       </DetailCard>
@@ -161,7 +161,7 @@ export function JobOrderDetailSections({
           <DetailCard
             headerLeft={<Inventory width={20} height={20} />}
             title="Shipment Information"
-            headerBg="#EFF0F4"
+            headerBg="#D4DAE0"
           >
             <DetailGrid
               rows={[
@@ -197,7 +197,7 @@ export function JobOrderDetailSections({
           <DetailCard
             headerLeft={<Commit width={20} height={20} />}
             title="Commitment Information"
-            headerBg="#EFF0F4"
+            headerBg="#D4DAE0"
           >
             <DetailGrid
               rows={[
@@ -220,7 +220,7 @@ export function JobOrderDetailSections({
           <DetailCard
             headerLeft={<Receipt width={20} height={20} />}
             title="Billing Information"
-            headerBg="#EFF0F4"
+            headerBg="#D4DAE0"
           >
             <DetailGrid
               rows={[
