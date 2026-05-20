@@ -14,7 +14,7 @@ export function PdfThumbnail({ url }: PdfThumbnailProps) {
 
   useEffect(() => {
     let cancelled = false;
-    let objectUrl: string | null = null;
+    let createdObjectUrl: string | null = null;
 
     async function render() {
       try {
@@ -25,12 +25,20 @@ export function PdfThumbnail({ url }: PdfThumbnailProps) {
           import.meta.url,
         ).toString();
 
-        const blob = await GET<Blob>(url, { responseType: "blob" });
+        // If the URL is already a blob URL or data URL we can skip fetching it again.
+        const isBlobLike = url.startsWith("blob:") || url.startsWith("data:");
 
-        objectUrl = URL.createObjectURL(blob);
+        let sourceUrl = url;
+
+        if (!isBlobLike) {
+          const blob = await GET<Blob>(url, { responseType: "blob" });
+          createdObjectUrl = URL.createObjectURL(blob);
+          sourceUrl = createdObjectUrl;
+        }
+
         if (cancelled) return;
 
-        const pdf = await pdfjsLib.getDocument(objectUrl).promise;
+        const pdf = await pdfjsLib.getDocument(sourceUrl).promise;
         if (cancelled) return;
 
         const page = await pdf.getPage(1);
@@ -69,7 +77,7 @@ export function PdfThumbnail({ url }: PdfThumbnailProps) {
 
     return () => {
       cancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      if (createdObjectUrl) URL.revokeObjectURL(createdObjectUrl);
     };
   }, [url]);
 
