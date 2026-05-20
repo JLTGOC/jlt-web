@@ -1,6 +1,6 @@
 ---
 name: performance-optimization
-description: "Optimize React and Vite performance with route-level code splitting, state and rendering tuning, image delivery improvements, Web Vitals checks, and React Query prefetching. Use when requests mention slow pages, rerenders, bundle size, Lighthouse, or loading latency."
+description: "Optimize React/Vite performance: route-level code splitting, state/render tuning, image delivery, Web Vitals, and TanStack Query prefetching. Use whenever a task mentions slow pages, rerenders, bundle size, Lighthouse/Core Web Vitals, loading latency, or perceived sluggish UI, even if it is only a hint."
 argument-hint: 'Provide scope and strictness, for example: "quotations viewer quick" or "dashboard strict"'
 ---
 
@@ -29,11 +29,12 @@ Use these references as the source of truth while executing this skill.
 ## Workflow
 
 1. Identify the bottleneck category first: route load, rerenders, network/data latency, or media delivery.
-2. Apply the smallest high-impact change first (route split, state relocation, selector use, or targeted prefetch).
-3. Avoid broad rewrites; keep architecture boundaries intact.
-4. For mutation-heavy interactions, prefer optimistic UI to reduce perceived latency and tune reconciliation to avoid jittery rerenders.
-5. Re-check affected flows for behavioral regressions (including optimistic rollback and stale-cache correction paths).
-6. Validate with lint/tests and collect measurable evidence (Lighthouse/PageSpeed/Core Web Vitals when applicable).
+2. Capture a baseline metric when applicable (LCP/INP/TBT, route load time, bundle size).
+3. Apply the smallest high-impact change first (route split, state relocation, selector use, targeted prefetch).
+4. Avoid broad rewrites; keep architecture boundaries intact.
+5. For mutation-heavy interactions, prefer optimistic UI to reduce perceived latency and tune reconciliation to avoid jittery rerenders.
+6. Re-check affected flows for behavioral regressions (including optimistic rollback and stale-cache correction paths).
+7. Validate with lint/tests and collect measurable evidence (Lighthouse/PageSpeed/Core Web Vitals when applicable).
 
 ## Operating Modes
 

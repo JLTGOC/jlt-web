@@ -1,6 +1,6 @@
 ---
 name: security-auth
-description: "Harden client-side security for authentication and authorization with JWT handling, token storage tradeoffs, XSS mitigation, and RBAC/PBAC checks in React apps. Use when requests mention auth, login, token storage, permissions, role guards, OWASP, or security review."
+description: "Harden client-side auth/authorization: JWT flows, token storage tradeoffs (memory/localStorage/HttpOnly cookies), XSS mitigation, and RBAC/PBAC checks. Use whenever a task mentions login, auth, permissions, token handling, role guards, OWASP, or security review, even if only implied."
 argument-hint: 'Provide scope and strictness, for example: "auth flow standard" or "quotations permissions strict"'
 ---
 
@@ -37,7 +37,8 @@ Use these references as the source of truth while executing this skill.
 7. Add PBAC checks for ownership or policy-sensitive operations.
 8. Validate that untrusted content is sanitized before rendering.
 9. Prefer global fixes in auth middleware/guards/permission helpers over local permission patches repeated across screens.
-10. Report residual risk and required server-side safeguards.
+10. Confirm server-side enforcement expectations and dependencies.
+11. Report residual risk and required server-side safeguards.
 
 ## Operating Modes
 

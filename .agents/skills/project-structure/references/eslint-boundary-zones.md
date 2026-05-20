@@ -78,3 +78,4 @@ Enforce Shared -> Features -> App flow.
 2. Keep exceptions explicit and minimal.
 3. Prefer moving shared logic to shared folders instead of expanding exceptions.
 4. Re-run lint after every zone update to catch regressions quickly.
+5. If using absolute import aliases, mirror the same restrictions for aliased paths.
