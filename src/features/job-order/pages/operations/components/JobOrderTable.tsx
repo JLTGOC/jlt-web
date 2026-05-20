@@ -51,6 +51,7 @@ interface JobOrderTableProps {
   onAcceptClick?: (row: JobOrderRow) => void;
   onReassignClick?: (row: JobOrderRow) => void;
   onReassignRequestClick?: (row: JobOrderRow) => void;
+  openGenerateShipment?: (row: JobOrderRow) => void;
 }
 
 function toTitleCase(value?: string) {
@@ -81,6 +82,7 @@ export function JobOrderTable({
   totalPages,
   perPaginationPage,
   setPerPaginationPage,
+  openGenerateShipment,
   onRowClick,
   handleUnderLinedRefNumberCLick,
   onAcceptClick,
@@ -94,7 +96,10 @@ export function JobOrderTable({
 
   const pages = useMemo(() => {
     if (resolvedTotalPages <= 5) {
-      return Array.from({ length: resolvedTotalPages }, (_, index) => index + 1);
+      return Array.from(
+        { length: resolvedTotalPages },
+        (_, index) => index + 1,
+      );
     }
 
     if (currentPage <= 3) {
@@ -102,10 +107,24 @@ export function JobOrderTable({
     }
 
     if (currentPage >= resolvedTotalPages - 2) {
-      return [1, "...", resolvedTotalPages - 2, resolvedTotalPages - 1, resolvedTotalPages];
+      return [
+        1,
+        "...",
+        resolvedTotalPages - 2,
+        resolvedTotalPages - 1,
+        resolvedTotalPages,
+      ];
     }
 
-    return [1, "...", currentPage - 1, currentPage, currentPage + 1, "...", resolvedTotalPages];
+    return [
+      1,
+      "...",
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      "...",
+      resolvedTotalPages,
+    ];
   }, [currentPage, resolvedTotalPages]);
 
   return (
@@ -332,11 +351,14 @@ export function JobOrderTable({
                       )}
 
                       {row.assignment_status === "ASSIGNED" &&
-                      currentUserRole === "Lead Operations" ? (
+                      currentUserRole === "Lead Operations" && row.generate_shipment ? (
                         <Button
                           styles={{ root: { background: "#FF8800" } }}
                           leftSection={<RequestQuote width={20} />}
-                          onClick={() => {}}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            openGenerateShipment?.(row);
+                          }}
                         >
                           Generate Shipment
                         </Button>
@@ -345,7 +367,8 @@ export function JobOrderTable({
                           <CheckCircle width={20} color={"green"} />
                           <Text>Accepted</Text>
                         </Group>
-                      ) : row.assignment_status === "REASSIGNMENT REQUESTED" && jobFilter === "all" ? (
+                      ) : row.assignment_status === "REASSIGNMENT REQUESTED" &&
+                        jobFilter === "all" ? (
                         <>
                           <Button
                             styles={{
@@ -381,7 +404,9 @@ export function JobOrderTable({
                             Available
                           </Text>
                         </>
-                      ) : ""}
+                      ) : (
+                        ""
+                      )}
 
                       {row.assignment_status === "ASSIGNED" && (
                         <Text c="#1D274E" fz="0.65rem" fw={400} lh={1.4}>
@@ -444,9 +469,14 @@ export function JobOrderTable({
               size="xs"
               radius="sm"
               leftSection={
-                <ChevronRight width={14} style={{ transform: "rotate(180deg)" }} />
+                <ChevronRight
+                  width={14}
+                  style={{ transform: "rotate(180deg)" }}
+                />
               }
-              onClick={() => currentPage > 1 && setPerPaginationPage(currentPage - 1)}
+              onClick={() =>
+                currentPage > 1 && setPerPaginationPage(currentPage - 1)
+              }
               disabled={currentPage === 1}
               styles={{
                 root: {
@@ -477,14 +507,17 @@ export function JobOrderTable({
                   size="xs"
                   radius="sm"
                   onClick={() =>
-                    typeof page === "number" && page !== currentPage && setPerPaginationPage(page)
+                    typeof page === "number" &&
+                    page !== currentPage &&
+                    setPerPaginationPage(page)
                   }
                   styles={{
                     root: {
                       minWidth: 30,
                       height: 30,
                       borderColor: page === currentPage ? "#1D274E" : "#D1D5DB",
-                      backgroundColor: page === currentPage ? "#1D274E" : "#FFFFFF",
+                      backgroundColor:
+                        page === currentPage ? "#1D274E" : "#FFFFFF",
                       color: page === currentPage ? "#FFFFFF" : "#4B5563",
                       fontWeight: 600,
                       paddingInline: 10,
@@ -501,7 +534,10 @@ export function JobOrderTable({
               size="xs"
               radius="sm"
               rightSection={<ChevronRight width={14} />}
-              onClick={() => currentPage < resolvedTotalPages && setPerPaginationPage(currentPage + 1)}
+              onClick={() =>
+                currentPage < resolvedTotalPages &&
+                setPerPaginationPage(currentPage + 1)
+              }
               disabled={currentPage === resolvedTotalPages}
               styles={{
                 root: {

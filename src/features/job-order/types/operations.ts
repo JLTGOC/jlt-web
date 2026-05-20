@@ -47,6 +47,7 @@ export type JobOrderResponse = {
   etd?: string | null;
   status?: string | null;
   transport_mode: string;
+  generate_shipment?: boolean
 };
 
 export type pagination = {

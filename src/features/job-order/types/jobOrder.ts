@@ -112,6 +112,25 @@ export interface JobOrderQuotationDetailsResponse {
   conversation_id?: number | string | null;
 }
 
+export interface QuotationFilesIndexResponse {
+  proposal_files?: Array<{
+    id: number | string;
+    file_name: string;
+    file_url: string;
+    file_type: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+  requested_files?: Array<{
+    id: number | string;
+    file_name: string;
+    file_url: string;
+    file_type: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+};
+
 export type JobOrderClientType = "NEW" | "OLD";
 
 export type JobOrderServiceType = "Logistics" | "Regulatory";

@@ -4,6 +4,7 @@ import type {
   FetchJobOrdersParams,
   JobOrdersResponse,
   JobOrderQuotationDetailsResponse,
+  QuotationFilesIndexResponse
 } from "../types/jobOrder";
 import type { JobOrderDocument } from "../types/jobOrderDetail";
 import { fetchJobOrderDetail } from "./jobOrderQueries.api";
@@ -54,25 +55,6 @@ export async function fetchJobOrderQuotation(
 
   return response.data.data;
 }
-
-type QuotationFilesIndexResponse = {
-  proposal_files?: Array<{
-    id: number | string;
-    file_name: string;
-    file_url: string;
-    file_type: string;
-    created_at: string;
-    updated_at: string;
-  }>;
-  requested_files?: Array<{
-    id: number | string;
-    file_name: string;
-    file_url: string;
-    file_type: string;
-    created_at: string;
-    updated_at: string;
-  }>;
-};
 
 function mapQuotationFileToJobOrderDocument(
   file: NonNullable<QuotationFilesIndexResponse["proposal_files"]>[number],
@@ -128,4 +110,10 @@ export async function fetchJobOrderDocuments(
       "JLTCB",
     ),
   ];
+}
+
+export async function generateShipment(
+  reference_number: string,
+): Promise<void> {
+ await apiClient.post(`/shipments`, { reference_number });
 }
