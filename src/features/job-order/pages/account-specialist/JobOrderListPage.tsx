@@ -31,15 +31,18 @@ import { PageCard } from "@/components/PageCard";
 import { fetchJobOrders } from "../../api/jobOrder.api";
 import { jobOrdersQueryKeys } from "../../api/jobOrdersQueryKeys";
 import { mapJobOrderResponses } from "../../utils/jobOrderListMapper";
+import { jobOrderRoutes } from "../../utils/jobOrderRoutes";
 
 export default function JobOrderListPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  function buildDetailPath(id: number | string, service: JobOrderServiceType) {
-    const params = new URLSearchParams();
-    params.set("service", service);
-    return `/job-orders/${id}?${params.toString()}`;
+  function buildJoDetailPath(id: number | string) {
+    return jobOrderRoutes.details(Number(id));
+  }
+
+  function buildClientDetailPath(id: number | string) {
+    return jobOrderRoutes.clientDetails(Number(id));
   }
 
   // derive filter state from query params (source of truth)
@@ -68,11 +71,13 @@ export default function JobOrderListPage() {
 
   const setPageParam = useCallback(
     (p: number) => {
-      const next = new URLSearchParams(searchParams.toString());
-      next.set("page", String(p));
-      setSearchParams(next);
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set("page", String(p));
+        return next;
+      });
     },
-    [searchParams, setSearchParams],
+    [setSearchParams],
   );
 
   function mapServiceFilter(value: "all" | JobOrderServiceType) {
@@ -270,13 +275,10 @@ export default function JobOrderListPage() {
                     ...getJobOrderRowStyle(row.service as JobOrderServiceType),
                     cursor: "pointer",
                   }}
-                  onClick={() => navigate("/404")}
+                  onClick={() => navigate(buildClientDetailPath(row.id))}
                 >
                   <Table.Td>
-                    <JOCell
-                      item={row}
-                      detailPath={buildDetailPath(row.id, row.service)}
-                    />
+                    <JOCell item={row} detailPath={buildJoDetailPath(row.id)} />
                   </Table.Td>
                   <Table.Td>
                     <DetailsCell item={row} />
