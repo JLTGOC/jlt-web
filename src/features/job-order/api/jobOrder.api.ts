@@ -52,3 +52,9 @@ export async function fetchJobOrderQuotation(
 
   return response.data.data;
 }
+
+export async function generateShipment(
+  reference_number: string,
+): Promise<void> {
+ await apiClient.post(`/shipments`, { reference_number });
+}

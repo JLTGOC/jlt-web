@@ -11,6 +11,9 @@ import AcceptModal from "./components/AcceptModal";
 import ReassignAcceptModal from "./components/ReassignAcceptModal";
 import ReassignRejectModal from "./components/ReassignRejectModal";
 import ReassignRequestModal from "./components/ReassignRequestModal";
+import GenerateShipmentModal from "./components/GenerateShipmentModal";
+import GenerateShipmentConfirmModal from "./components/GenerateShipmentConfirmModal";
+
 import { useJobOrderPage } from "./hooks/useJobOrderPage";
 
 export default function JobOrderListPage() {
@@ -23,7 +26,6 @@ export default function JobOrderListPage() {
     currentUserRole,
     handleAcceptConfirm,
     handleJobSwitchChange,
-    handleMakeQuotationClick,
     handleReassignConfirm,
     handleReassignRequestSubmit,
     handleRowClick,
@@ -32,12 +34,14 @@ export default function JobOrderListPage() {
     handleSearchChange,
     handleSecondarySearch,
     handleSecondarySearchChange,
+    handleGenerateShipment,
     isFetching,
     isLoading,
     jobFilter,
     openAcceptModal,
     openReassignModal,
     openReassignRequestModal,
+    openGenerateShipment,
     perPage,
     perPaginationPage,
     reassignOPS,
@@ -53,10 +57,11 @@ export default function JobOrderListPage() {
     reassignSpecificDetails,
     requestReassignModalOpen,
     requestRows,
+    generateShipmentModalOpen,
+    generateShipmentConfirmModalOpen,
     search,
     secondarySearch,
     selectedQuotation,
-    serviceFilter,
     setAcceptModalOpen,
     setClientFilter,
     setPerPage,
@@ -69,7 +74,8 @@ export default function JobOrderListPage() {
     setReassignReason,
     setReassignRejectModalOpen,
     setReassignStatus,
-    setServiceFilter,
+    setGenerateShipmentModalOpen,
+    setGenerateShipmentConfirmModalOpen,
     setStatusFilter,
     showingCount,
     statusFilter,
@@ -128,9 +134,9 @@ export default function JobOrderListPage() {
                 onAcceptClick={openAcceptModal}
                 onReassignClick={openReassignModal}
                 onReassignRequestClick={openReassignRequestModal}
-                onMakeQuotationClick={handleMakeQuotationClick}
                 onRowClick={handleRowClick}
                 handleUnderLinedRefNumberCLick={handleUnderLinedRefNumberCLick}
+                openGenerateShipment={openGenerateShipment}
               />
             </Box>
           </Box>
@@ -187,6 +193,20 @@ export default function JobOrderListPage() {
         setReassignReason={setReassignReason}
         reassignAdditionalDetails={reassignAdditionalDetails}
         setReassignAdditionalDetails={setReassignAdditionalDetails}
+      />
+
+      <GenerateShipmentModal
+        generateShipmentModalOpen={generateShipmentModalOpen}
+        setGenerateShipmentConfirmModalOpen={
+          setGenerateShipmentConfirmModalOpen
+        }
+        onConfirm={handleGenerateShipment}
+        onClose={() => setGenerateShipmentModalOpen(false)}
+      />
+
+      <GenerateShipmentConfirmModal
+        opened={generateShipmentConfirmModalOpen}
+        onClose={() => setGenerateShipmentConfirmModalOpen(false)}
       />
     </>
   );

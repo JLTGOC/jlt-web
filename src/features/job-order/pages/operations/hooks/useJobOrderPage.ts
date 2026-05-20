@@ -13,7 +13,7 @@ import {
   reassignRequestJobOrder,
   reassignJobOrder,
   reassignJobOrderDetails,
-  fetchJobOrderQuotation,
+  generateShipment,
 } from "@/features/job-order/api/jobOrder.api";
 
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
@@ -24,13 +24,10 @@ import { jobOrderRoutes } from "@/features/job-order/utils/jobOrderRoutes";
 import { useCurrentUserRole } from "@/stores/authStore";
 
 import { jobOrdersQueryKeys } from "../utils/jobOrdersQueryKeys";
-
 export function useJobOrderPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const currentUserRole = useCurrentUserRole();
-
-  console.log("khate", currentUserRole);
 
   const [selectedQuotation, setSelectedQuotation] =
     useState<JobOrderResponse | null>(null);
@@ -42,6 +39,12 @@ export function useJobOrderPage() {
   const [reassignRejectModalOpen, setReassignRejectModalOpen] = useState(false);
   const [requestReassignModalOpen, setReassignRequestModalOpen] =
     useState(false);
+  const [generateShipmentModalOpen, setGenerateShipmentModalOpen] =
+    useState(false);
+  const [
+    generateShipmentConfirmModalOpen,
+    setGenerateShipmentConfirmModalOpen,
+  ] = useState(false);
 
   const [reassignReason, setReassignReason] = useState<string>("");
   const [reassignAdditionalDetails, setReassignAdditionalDetails] =
@@ -167,6 +170,18 @@ export function useJobOrderPage() {
     },
   });
 
+  const generateShipmentConfirm = useMutation({
+    mutationFn: ({ reference_number }: { reference_number: string }) =>
+      generateShipment(reference_number),
+    onSuccess: () => {
+      setGenerateShipmentModalOpen(false)
+      setGenerateShipmentConfirmModalOpen(true);
+      queryClient.invalidateQueries({
+        queryKey: jobOrdersQueryKeys.jobOrdersRoot,
+      });
+    },
+  });
+
   const acceptJobOrderMutation = useMutation({
     mutationFn: (id: number) => acceptJobOrder(id),
     onSuccess: () => {
@@ -188,8 +203,6 @@ export function useJobOrderPage() {
       staleTime: 30_000,
     });
   };
-
-  const fetchDetails = (quotationId: string) => {};
 
   const handleReassignConfirm = () => {
     if (!selectedQuotation) return;
@@ -224,6 +237,16 @@ export function useJobOrderPage() {
     setReassignReason("");
   };
 
+  const handleGenerateShipment = () => {
+    if (!selectedQuotation) return;
+    if (selectedQuotation.reference_number == null) return;
+
+    console.log("marjorie");
+    generateShipmentConfirm.mutate({
+      reference_number: selectedQuotation.reference_number,
+    });
+  };
+
   const closeModal = () => {
     setAcceptModalOpen(false);
     setReassignModalOpen(false);
@@ -250,6 +273,12 @@ export function useJobOrderPage() {
   const openReassignRequestModal = (row: JobOrderResponse) => {
     setSelectedQuotation(row);
     setReassignRequestModalOpen(true);
+  };
+
+  const openGenerateShipment = (row: JobOrderResponse) => {
+    setSelectedQuotation(row);
+    console.log("marjoriey")
+    setGenerateShipmentModalOpen(true);
   };
 
   const handleJobSwitchChange = (value: "all" | "my-items") => {
@@ -282,7 +311,9 @@ export function useJobOrderPage() {
 
   const handleRowClick = (row: JobOrderResponse) => {
     const jobOrderId = row.id;
-    navigate(jobOrderRoutes.clientDetails(jobOrderId), { state: { jobOrder: row } });
+    navigate(jobOrderRoutes.clientDetails(jobOrderId), {
+      state: { jobOrder: row },
+    });
   };
 
   const handleUnderLinedRefNumberCLick = (row: JobOrderResponse) => {
@@ -308,12 +339,14 @@ export function useJobOrderPage() {
     handleSearchChange,
     handleSecondarySearch,
     handleSecondarySearchChange,
+    handleGenerateShipment,
     isFetching,
     isLoading,
     jobFilter,
     openAcceptModal,
     openReassignModal,
     openReassignRequestModal,
+    openGenerateShipment,
     perPage,
     perPaginationPage,
     reassignOPS,
@@ -330,6 +363,8 @@ export function useJobOrderPage() {
     reassignQuotationPending: reassignJobOrderMutation.isPending,
     requestReassignModalOpen,
     requestRows,
+    generateShipmentModalOpen,
+    generateShipmentConfirmModalOpen,
     search,
     secondarySearch,
     selectedQuotation,
@@ -347,6 +382,8 @@ export function useJobOrderPage() {
     setReassignReason,
     setReassignRejectModalOpen,
     setReassignRequestModalOpen,
+    setGenerateShipmentModalOpen,
+    setGenerateShipmentConfirmModalOpen,
     setReassignStatus,
     setServiceFilter,
     setSelectedQuotation,
