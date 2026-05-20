@@ -5,7 +5,6 @@ import { AppLayout } from "@/components/layouts/AppLayout";
 import { lazy } from "react";
 import NotFound from "./routes/NotFound";
 import { Loader } from "@mantine/core";
-import JobOrderClientDetailPage from "@/features/job-order/pages/shared/JobOrderClientDetailPage";
 
 //auth import
 const LoginPage = lazy(() => import("./routes/auth/LoginPage"));
@@ -48,6 +47,9 @@ const JobOrderDetailPage = lazy(
 );
 const JobOrderClientDetailsPage = lazy(
   () => import("@/features/job-order/pages/shared/JobOrderClientDetailPage"),
+);
+const JobOrderClientDocumentsPage = lazy(
+  () => import("@/features/job-order/pages/shared/JobOrderClientDocumentsPage"),
 );
 
 //Tool imports
@@ -151,6 +153,10 @@ export const router = createBrowserRouter([
           {
             path: "job-orders/:jobOrderId/client-details",
             Component: JobOrderClientDetailsPage,
+          },
+          {
+            path: "job-orders/:jobOrderId/client-details/documents",
+            Component: JobOrderClientDocumentsPage,
           },
           {
             path: "job-orders/:jobOrderId/details",
