@@ -1,14 +1,16 @@
-import { Box, Text, UnstyledButton } from "@mantine/core";
+import { Box, Center, Text } from "@mantine/core";
 import type { ComponentType } from "react";
-import classes from "./FolderButton.module.css";
+import { ArrowForward } from "@nine-thirty-five/material-symbols-react/outlined";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface FolderButtonProps {
   /** Material Symbols icon component */
   icon: ComponentType<{ width?: string | number; height?: string | number }>;
-  /** Label text shown below the icon */
+  /** Title text shown next to the icon */
   label: string;
+  /** Supporting description text */
+  description?: string;
   /** Click handler */
   onClick?: () => void;
   /** Optional custom icon color */
@@ -20,38 +22,91 @@ interface FolderButtonProps {
 export function FolderButton({
   icon: Icon,
   label,
+  description,
   onClick,
-  iconColor = "var(--mantine-color-jltOrange-5)",
+  iconColor = "#17314B",
 }: FolderButtonProps) {
   return (
-    <UnstyledButton onClick={onClick} className={classes.root}>
-      {/* Layer 0: Grey offset tab behind the folder */}
-      <Box className={classes.background} />
+    <Box
+      role="button"
+      onClick={onClick}
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (!onClick) return;
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      w="17.5rem"
+      mih="6.5rem"
+      p="1rem 1.25rem"
+      bdrs="0.75rem"
+      bd="1px solid #e6e8ec"
+      bg="#ffffff"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        gap: "0.75rem",
+        boxShadow: "0 2px 6px rgba(17, 24, 39, 0.08)",
+        cursor: "pointer",
+      }}
+    >
+      <Center
+        w="2.5rem"
+        h="2.5rem"
+        bdrs="999px"
+        bd="1px solid #e5e7eb"
+        bg="#f3f4f6"
+        style={{
+          flex: "0 0 auto",
+          color: iconColor,
+        }}
+      >
+        <Icon width="1.5rem" height="1.5rem"  />
+      </Center>
 
-      {/* Layer 1: Main white folder SVG with drop shadow */}
-      <Box className={classes.folderLayer}>
-        <svg
-          viewBox="0 0 146 102"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className={classes.folderSvg}
-          preserveAspectRatio="none"
+      <Box
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.35rem",
+          flex: "1 1 auto",
+          minWidth: 0,
+        }}
+      >
+        <Text
+          fz="0.7rem"
+          fw={700}
+          tt="uppercase"
+          c="#111827"
+          style={{ letterSpacing: "0.06em" }}
         >
-          <path
-            d="M132.127 16.94H77.4538L59.2293 0H13.6683C6.11942 0 0 5.68814 0 12.705V88.9351C0 95.952 6.11942 101.64 13.6683 101.64H132.127C139.676 101.64 145.795 95.952 145.795 88.9351V29.645C145.795 22.6282 139.676 16.94 132.127 16.94Z"
-            fill="white"
-          />
-        </svg>
+          {label}
+        </Text>
+        {description ? (
+          <Text fz="0.78rem" c="#6b7280" lh={1.35}>
+            {description}
+          </Text>
+        ) : null}
       </Box>
 
-      {/* Layer 2: Icon + Label centered inside the white folder */}
-      <Box className={classes.contentLayer}>
-        <Box className={classes.iconWrapper} style={{ color: iconColor }}>
-          <Icon width="2.5rem" height="2.5rem" />{" "}
-          {/* Shrunk slightly to match Figma proportions */}
-        </Box>
-        <Text className={classes.label}>{label}</Text>
+      <Box
+        aria-hidden="true"
+        w="1.5rem"
+        h="1.5rem"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#111827",
+          flex: "0 0 auto",
+          alignSelf: "flex-end",
+        }}
+      >
+        <ArrowForward width="1.25rem" height="1.25rem" />
       </Box>
-    </UnstyledButton>
+    </Box>
   );
 }

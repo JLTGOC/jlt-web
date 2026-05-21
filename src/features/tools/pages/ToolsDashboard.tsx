@@ -23,6 +23,7 @@ export function ToolsDashboard() {
           key={tool.id}
           icon={tool.icon}
           label={tool.label}
+          description={tool.description}
           onClick={() => navigate(tool.path)}
         />
       ))}

@@ -6,6 +6,7 @@ import { SubServicesPage } from "@/features/tools/pages/SubServicesPage";
 import MessagesPage from "@/features/tools/pages/MessageTemplatePage";
 import { DetailsConfigurationPage } from "@/features/tools/pages/DetailsConfigurationPage";
 import { BillingConfigurationPage } from "@/features/tools/pages/BillingConfigurationPage";
+import PlanningTimelinePage from "@/features/tools/pages/PlanningTimelinePage";
 import { StandardQuotationTemplatePage } from "@/features/tools/pages/StandardQuotationTemplatePage";
 import { StandardQuotationTemplateFormPage } from "@/features/tools/pages/StandardQuotationTemplateFormPage";
 import { TemplateFormPage } from "@/features/tools/pages/TemplateFormPage";
@@ -29,6 +30,7 @@ export default function ToolsPage() {
   const servicesMatch = useMatch("/tools/services");
   const messagesMatch = useMatch("/tools/messages");
   const templatesMatch = useMatch("/tools/templates");
+  const planningTimelineMatch = useMatch("/tools/planningTimeline");
 
   if (detailsConfigMatch) return <DetailsConfigurationPage />;
   if (billingConfigMatch) return <BillingConfigurationPage />;
@@ -59,6 +61,7 @@ export default function ToolsPage() {
   if (servicesMatch) return <ServicesPage />;
   if (messagesMatch) return <MessagesPage />;
   if (templatesMatch) return <TemplatesPage />;
+  if (planningTimelineMatch) return <PlanningTimelinePage />;
 
   return <ToolsDashboard />;
 }

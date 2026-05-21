@@ -182,6 +182,7 @@ export const router = createBrowserRouter([
           { path: "tools/services/:serviceType", Component: Tools },
           { path: "tools/services", Component: Tools },
           { path: "tools/messages", Component: Tools },
+          { path: "tools/planningTimeline", Component: Tools },
           { path: "tools/templates/new", Component: Tools },
           { path: "tools/templates/:templateId/edit", Component: Tools },
           { path: "tools/templates", Component: Tools },
