@@ -31,6 +31,32 @@ export interface AccountDashboardStats {
   pendingQuotations: number; // quotations awaiting response
 }
 
+export interface AccountDetails {
+  accountInfo: {
+    fullName: string;
+    email: string;
+    contactNumber: string;
+    username: string;
+    role?: string;
+  };
+  companyInfo: {
+    companyName: string;
+    position?: string;
+    companyAddress: string;
+    businessType?: string;
+  };
+  identification: {
+    profileImageUrl?: string | null;
+    idImageUrl?: string | null;
+  };
+}
+
+export interface EmployeeDetails extends AccountDetails {
+  isLead?: boolean;
+  employeeNumber?: string;
+  status: AccountStatus;
+}
+
 // ============================================
 // Account List Types (for table view)
 // ============================================
@@ -116,8 +142,10 @@ export interface ClientQuotation {
   dateQuoted: string;     // ISO date
   validUntil: string;     // ISO date
   quotedBy: string;
+  quotedByAvatarUrl?: string | null;
+  quotedByUrl?: string | null;
   status: string;         // e.g. "Pending", "Accepted"
-  alerts?: string;        // optional alerts message
+  alerts?: string;        // alerts message
 }
 
 export interface ClientShipment {
@@ -130,6 +158,7 @@ export interface ClientShipment {
   eta: string;            // ISO date
   etd: string;            // ISO date
   personInCharge: string;
+  pic_image_path?: string | null;
   status: string;         // e.g. "In Progress", "Completed"
 }
 

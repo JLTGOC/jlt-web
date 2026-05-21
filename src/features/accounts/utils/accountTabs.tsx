@@ -1,12 +1,17 @@
-// src/features/accounts/utils/accountTabs.tsx
-import { Box, Tabs } from "@mantine/core";
-import { Group as GroupIcon, GroupsTwo } from "@nine-thirty-five/material-symbols-react/outlined";
-import classes from "../../../app/routes/app/accounts/AccountsPage.module.css";
+import { Tabs, Box } from "@mantine/core";
+import {
+  Group as GroupIcon,
+  GroupsTwo,
+  Apartment,
+} from "@nine-thirty-five/material-symbols-react/outlined";
 import type { User } from "@/types/api";
-import { ROLES } from "@/types/roles";
-import type { ReactNode } from "react";
+import classes from "@/app/routes/app/accounts/AccountsPage.module.css";
 
-export function getAccountTabs(user: User, activeTab: string, handleTabChange: (tab: string | null) => void) {
+export function getAccountTabs(
+  user: User,
+  activeTab: string,
+  handleTabChange: (tab: string | null) => void
+) {
   return (
     <Tabs
       value={activeTab}
@@ -15,35 +20,44 @@ export function getAccountTabs(user: User, activeTab: string, handleTabChange: (
       style={{ width: "100%" }}
       classNames={{
         list: classes.tabList,
-        tab: classes.tab,
+        tab: classes.tab,      
       }}
     >
       <Tabs.List grow>
-        {/* Clients tab (only if not Client role) */}
-        {user.role !== ROLES.CLIENT && (
-          <Tabs.Tab value="clients">
-            <Box className={classes.tabContent}>
-              <GroupIcon width={40} height={40} style={{ color: "#4E6174" }} />
-              <Box className={classes.tabText}>
-                <span className={classes.tabTitle}>Clients</span>
-                <span className={classes.tabSubtitle}>
-                  Manage and monitor all client accounts
-                </span>
-              </Box>
+        {/* Clients Tab */}
+        <Tabs.Tab value="clients">
+          <Box className={classes.tabContent}>
+            <GroupIcon width={40} height={40} style={{ color: "#4E6174" }} />
+            <Box className={classes.tabText}>
+              <span className={classes.tabTitle}>Clients</span>
+              <span className={classes.tabSubtitle}>
+                Manage and monitor all client accounts
+              </span>
             </Box>
-          </Tabs.Tab>
-        )}
+          </Box>
+        </Tabs.Tab>
 
-        {/* Employees tab */}
+        {/* Employees Tab */}
         <Tabs.Tab value="employees">
           <Box className={classes.tabContent}>
             <GroupsTwo width={50} height={50} style={{ color: "#4E6174" }} />
             <Box className={classes.tabText}>
-              <span className={classes.tabTitle}>
-                {user.role === ROLES.ACCOUNT_SPECIALIST ? "Account Specialists" : user.role}
-              </span>
+              <span className={classes.tabTitle}>Account Specialists</span>
               <span className={classes.tabSubtitle}>
                 View and manage employees and their access
+              </span>
+            </Box>
+          </Box>
+        </Tabs.Tab>
+
+        {/* Companies Tab */}
+        <Tabs.Tab value="companies">
+          <Box className={classes.tabContent}>
+            <Apartment width={40} height={40} style={{ color: "#4E6174" }} />
+            <Box className={classes.tabText}>
+              <span className={classes.tabTitle}>Companies</span>
+              <span className={classes.tabSubtitle}>
+                Browse and manage company records
               </span>
             </Box>
           </Box>

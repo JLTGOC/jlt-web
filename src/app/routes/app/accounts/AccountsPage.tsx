@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router";
 import { Box } from "@mantine/core";
 import { ClientsList } from "@/features/accounts/components/clients/ClientsList";
 import { EmployeesList } from "@/features/accounts/components/employees/EmployeesList";
+import { CompaniesList } from "@/features/accounts/components/companies/CompaniesList";
 import { AccountsProfile } from "@/features/accounts/pages/AccountsProfile";
 import { getAccountTabs } from "@/features/accounts/utils/accountTabs";
 import { ROLES } from "@/types/roles";
@@ -12,7 +13,6 @@ export default function AccountsPage() {
   const navigate = useNavigate();
   const { category, id } = useParams();
 
-  // ✅ Temporary Account Specialist user (until auth is wired up)
   const user: User = {
     id: 0,
     firstName: "Default",
@@ -46,18 +46,27 @@ export default function AccountsPage() {
     if (tab) navigate(`/accounts/${tab}`);
   };
 
+  if (id) {
+    return (
+      <Box style={{ width: "100%" }}>
+        <Box style={{ width: "100%" }}>
+          <AccountsProfile />
+        </Box>
+      </Box>
+    );
+  }
+
   return (
     <Box style={{ width: "100%" }}>
-      {/* ✅ Tabs now fully rendered via accountTabs.tsx */}
       {getAccountTabs(user, activeTab, handleTabChange)}
 
       <Box style={{ width: "100%", marginTop: "1rem" }}>
-        {id ? (
-          <AccountsProfile />
-        ) : activeTab === "clients" ? (
+        {activeTab === "clients" ? (
           <ClientsList />
         ) : activeTab === "employees" ? (
           <EmployeesList />
+        ) : activeTab === "companies" ? (
+          <CompaniesList />
         ) : null}
       </Box>
     </Box>

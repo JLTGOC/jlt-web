@@ -12,7 +12,7 @@
 }
 
 .tab {
-  flex: 1;
+  flex: 1; /* ✅ evenly distribute across 3 tabs */
   height: 4rem;
   min-height: 4rem;
   display: flex;
@@ -40,7 +40,7 @@
   top: 50%;
   transform: translateY(-50%);
   width: 2px;
-  height: 65%; /* ✅ control divider height */
+  height: 65%; /* ✅ divider spans 65% of tab height */
   background-color: #BEBEBE;
 }
 

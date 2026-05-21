@@ -7,13 +7,25 @@ import {
   License,
   RequestQuote,
 } from "@nine-thirty-five/material-symbols-react/outlined";
+import { useQuery } from "@tanstack/react-query";
+import { accountsService } from "@/features/accounts/services/accounts.service";
 import type { ClientDashboardStats } from "@/features/accounts/types/accounts.types";
 
-interface ClientsStatusProps {
-  stats: ClientDashboardStats;
-}
+export function ClientsStatus() {
+  const { data } = useQuery({
+    queryKey: ["accounts", "clients", "dashboard"],
+    queryFn: () => accountsService.getClientDashboardStats(),
+    retry: false,
+  });
 
-export function ClientsStatus({ stats }: ClientsStatusProps) {
+  const stats: ClientDashboardStats =
+    data ?? {
+      totalClients: 0,
+      newClients: 0,
+      activeShipments: 0,
+      activeRegulatory: 0,
+      pendingQuotations: 0,
+    };
   return (
     <SimpleGrid cols={5} spacing="1.5rem">
       {/* Total Clients */}

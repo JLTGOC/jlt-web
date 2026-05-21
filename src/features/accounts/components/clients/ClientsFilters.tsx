@@ -28,7 +28,7 @@ export function ClientsFilters({
   perPage,
   setPerPage,
 }: ClientFilterTableProps) {
-  const entryOptions = ["10", "20", "30"];
+  const entryOptions = ["10", "20", "30", "All"];
 
   return (
     <Grid gutter="xs" mb="sm" align="end">
@@ -112,7 +112,7 @@ export function ClientsFilters({
 
       {/* Entries selector */}
       <Grid.Col span={12}>
-        <Group gap="xs" align="center" mt="-0.5rem"ml="xs">
+        <Group gap="xs" align="center" mt="-0.5rem" ml="xs">
           <Text c="#7a808a" fz="0.9rem">
             Show
           </Text>
@@ -120,11 +120,14 @@ export function ClientsFilters({
             w={70}
             size="xs"
             data={entryOptions}
-            value={String(perPage)}
+            value={String(perPage === 0 ? "All" : perPage)}
             onChange={(value) => {
-              if (value) {
-                setPerPage(Number(value));
+              if (!value) return;
+              if (value.toLowerCase() === "all") {
+                setPerPage(0);
+                return;
               }
+              setPerPage(Number(value));
             }}
           />
           <Text c="#7a808a" fz="0.9rem">

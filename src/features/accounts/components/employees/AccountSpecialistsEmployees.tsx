@@ -1,5 +1,5 @@
 // src/features/accounts/components/employees/AccountSpecialistsEmployees.tsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { PageCard } from "@/components/PageCard";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
@@ -20,11 +20,15 @@ import {
 import { IconDotsVertical } from "@tabler/icons-react";
 import {
   Group as GroupIcon,
-  GroupAdd,
   Box as BoxIcon,
   License,
   RequestQuote,
   ChevronRight,
+  InboxTextPerson,
+  Sms,
+  ChangeCircle,
+  Key,
+  ToggleOff,
 } from "@nine-thirty-five/material-symbols-react/outlined";
 import { AccountSpecialistsFilters } from "./AccountSpecialistsFilters";
 import { useQuery } from "@tanstack/react-query";
@@ -53,36 +57,45 @@ export function AccountSpecialistsEmployees() {
   const [dateCreated, setDateCreated] = useState<string | null>(null);
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [perPage, setPerPage] = useState(10);
-  
-  const [page, setPage] = useState(1);        // current page
-  const [totalPages, setTotalPages] = useState(1); // total pages
+  const [page, setPage] = useState(1);
 
-  const [employees, setEmployees] = useState<AccountListItem[]>([]);
-  const [total, setTotal] = useState(0);
-
-  useEffect(() => {
-    // Example: pass filters to service
-    accountsService.getAccountsList(1, perPage).then((data) => {
-      // Later you can filter by searchQuery, dateCreated, roleFilter here
-      setEmployees(data.data);
-      setTotal(data.total);
-      setTotalPages(data.totalPages);
-    });
-  }, [perPage, searchQuery, dateCreated, roleFilter]);
+  const { data, isLoading, error } = useQuery<{
+    data: AccountListItem[];
+    total: number;
+    totalPages: number;
+  }>({
+    queryKey: ["accounts", "employees", "account-specialists", page, perPage, searchQuery, dateCreated, roleFilter],
+    queryFn: () =>
+      accountsService.getAccountSpecialistsList(page, perPage, {
+        search: searchQuery || undefined,
+        role: roleFilter === "ALL" ? undefined : roleFilter,
+        dateCreated: dateCreated ?? undefined,
+      }),
+    retry: false,
+  });
 
   const handleReset = () => {
     setSearch("");
     setSearchQuery("");
     setDateCreated(null);
     setRoleFilter("ALL");
+    setPage(1);
     setPerPage(10);
   };
 
-    // Fetch dashboard stats from API
-  const { data: stats } = useQuery({
+  // Fetch dashboard stats from API
+  const {
+    data: stats,
+    error: statsError,
+  } = useQuery({
     queryKey: ["accounts", "employees", "dashboard"],
     queryFn: () => accountsService.getAccountDashboardStats(),
+    retry: false,
   });
+
+  const employees = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
 
   const dashboardStats: AccountDashboardStats = stats ?? {
     totalEmployees: 0,
@@ -92,15 +105,22 @@ export function AccountSpecialistsEmployees() {
   };
 
   const COLUMNS: AppTableColumn<AccountListItem>[] = [
-    { key: "employeeId", label: "EMPLOYEE ID", width: "15%", render: (row) => row.id },
+    { key: "employeeId", label: "EMPLOYEE ID", width: "6%", render: (row) => row.id },
     {
       key: "employeeName",
       label: "EMPLOYEE NAME",
-      width: "15%",
+      width: "24%",
       render: (row) => (
-        <Group>
+        <Group align="center">
           <Avatar src={row.avatarUrl ?? undefined} radius="xl" size="md" />
-          <Text fw={500} lineClamp={1} size="sm">{row.name}</Text>
+          <Text
+            fw={500}
+            lineClamp={1}
+            size="sm"
+            style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}
+          >
+            {row.name}
+          </Text>
         </Group>
       ),
     },
@@ -125,17 +145,58 @@ export function AccountSpecialistsEmployees() {
       key: "",
       label: "",
       width: "3%",
-      render: () => (
+      render: (row) => (
         <Center>
-          <Menu shadow="md" width={180}>
+          <Menu shadow="md" width={240}>
             <Menu.Target>
               <ActionIcon variant="subtle" color="gray" onClick={(e) => e.stopPropagation()}>
                 <IconDotsVertical size={18} />
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item color="orange">Deactivate</Menu.Item>
-              <Menu.Item color="red">Archive</Menu.Item>
+              <Menu.Item onClick={() => console.log("View Details", row)}>
+                <Group gap="sm" align="center" style={{ whiteSpace: "nowrap" }}>
+                  <InboxTextPerson width={18} height={18} style={{ color: "#1D274E" }} />
+                  <Text>View Details</Text>
+                </Group>
+              </Menu.Item>
+              <Menu.Item onClick={() => console.log("Quotation Sent", row)}>
+                <Group gap="sm" align="center" style={{ whiteSpace: "nowrap" }}>
+                  <RequestQuote width={18} height={18} style={{ color: "#1D274E" }} />
+                  <Text>Quotation Sent</Text>
+                </Group>
+              </Menu.Item>
+              <Menu.Item onClick={() => console.log("Quotation Accepted", row)}>
+                <Group gap="sm" align="center" style={{ whiteSpace: "nowrap" }}>
+                  <RequestQuote width={18} height={18} style={{ color: "#1D274E" }} />
+                  <Text>Quotation Accepted</Text>
+                </Group>
+              </Menu.Item>
+              <Menu.Divider style={{ borderColor: "#E2E6EB" }} />
+              <Menu.Item onClick={() => console.log("Message Employee", row)}>
+                <Group gap="sm" align="center" style={{ whiteSpace: "nowrap" }}>
+                  <Sms width={18} height={18} style={{ color: "#1D274E" }} />
+                  <Text>Message Employee</Text>
+                </Group>
+              </Menu.Item>
+              <Menu.Item onClick={() => console.log("Change Role", row)}>
+                <Group gap="sm" align="center" style={{ whiteSpace: "nowrap" }}>
+                  <ChangeCircle width={18} height={18} style={{ color: "#1D274E" }} />
+                  <Text>Change Role</Text>
+                </Group>
+              </Menu.Item>
+              <Menu.Item onClick={() => console.log("Deactivate Account", row)}>
+                <Group gap="sm" align="center" style={{ whiteSpace: "nowrap" }}>
+                  <ToggleOff width={18} height={18} style={{ color: "#1D274E" }} />
+                  <Text>Deactive Account</Text>
+                </Group>
+              </Menu.Item>
+              <Menu.Item onClick={() => console.log("Reset Password", row)}>
+                <Group gap="sm" align="center" style={{ whiteSpace: "nowrap" }}>
+                  <Key width={18} height={18} style={{ color: "#1D274E" }} />
+                  <Text>Reset Password</Text>
+                </Group>
+              </Menu.Item>
             </Menu.Dropdown>
           </Menu>
         </Center>
@@ -218,9 +279,21 @@ export function AccountSpecialistsEmployees() {
                 setPerPage={setPerPage}
               />
 
+        {error ? (
+          <Text c="red" mb="md">
+            Unable to load account specialists. {error.message}
+          </Text>
+        ) : null}
+
+        {statsError ? (
+          <Text c="red" mb="md">
+            Unable to load summary stats. {statsError.message}
+          </Text>
+        ) : null}
+
         <AppTable
           columns={COLUMNS}
-          data={employees}
+          data={isLoading ? [] : employees}
           rowKey={(row) => row.id.toString()}
           perPage={perPage}
           onPerPageChange={setPerPage}

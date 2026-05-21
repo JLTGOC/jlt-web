@@ -16,19 +16,19 @@ import { IconKey } from "@tabler/icons-react"; // reset password icon
 import { useParams } from "react-router";
 import { useState, useEffect } from "react";
 import { accountsService } from "../../services/accounts.service";
-import type { AccountDetails } from "../../types/accounts.types";
+import type { EmployeeDetails } from "../../types/accounts.types";
 import { AppButton } from "@/components/ui/AppButton";
 import classes from "../AccountProfile.module.css";
 
 export function EmployeeProfile() {
   const { id } = useParams();
-  const [employee, setEmployee] = useState<AccountDetails | null>(null);
+  const [employee, setEmployee] = useState<EmployeeDetails | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (id) {
       accountsService
-        .getAccountDetails(Number(id))
+        .getEmployeeDetails(Number(id))
         .then(setEmployee)
         .catch(() => setEmployee(null));
     }
@@ -84,7 +84,7 @@ export function EmployeeProfile() {
             {isEditing ? (
               <AppButton
                 h={"2.625rem"}
-                variant="secondary"
+                variant="primary"
                 onClick={() => setIsEditing(false)}
               >
                 SAVE
@@ -92,7 +92,7 @@ export function EmployeeProfile() {
             ) : (
               <AppButton
                 h={"2.625rem"}
-                variant="secondary"
+                variant="primary"
                 onClick={() => setIsEditing(true)}
               >
                 EDIT

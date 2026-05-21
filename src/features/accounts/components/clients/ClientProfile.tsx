@@ -22,7 +22,7 @@ export function ClientProfile() {
 
   useEffect(() => {
     if (id) {
-      accountsService.getAccountDetails(Number(id)).then(setClient).catch(() => {
+      accountsService.getClientDetails(Number(id)).then(setClient).catch(() => {
         setClient(null);
       });
     }
@@ -65,7 +65,7 @@ export function ClientProfile() {
           {isEditing ? (
             <AppButton
               h={"2.625rem"}
-              variant="secondary"
+              variant="primary"
               onClick={() => setIsEditing(false)}
             >
               SAVE
@@ -73,7 +73,7 @@ export function ClientProfile() {
           ) : (
             <AppButton
               h={"2.625rem"}
-              variant="secondary"
+              variant="primary"
               onClick={() => setIsEditing(true)}
             >
               EDIT

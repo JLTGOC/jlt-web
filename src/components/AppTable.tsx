@@ -83,8 +83,14 @@ export interface AppTableProps<T> {
     tooltip?: string;
     confirmMessage?: string | ((row: T) => string);
   };
-  /** Enables the top bar (Show N entries + search) and the footer */
+  /** Enables the top bar and/or footer controls */
   withEntryControls?: boolean;
+  /** Place the entry controls in the table header, footer, or both */
+  entryControlPosition?: "top" | "bottom" | "both";
+  /** Custom entry size options in the paginator */
+  entryOptions?: string[];
+  /** Hide the top-bar search input when entry controls are enabled */
+  showSearchInTopBar?: boolean;
   perPage?: number;
   onPerPageChange?: (value: number) => void;
   total?: number;
@@ -106,7 +112,7 @@ export interface AppTableProps<T> {
   onPageChange?: (page: number) => void;
 }
 
-const ENTRY_OPTIONS = ["5", "10", "25", "50", "100"];
+const DEFAULT_ENTRY_OPTIONS = ["5", "10", "25", "50", "100"];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -120,6 +126,8 @@ export function AppTable<T>({
   withEdit,
   withDelete,
   withEntryControls = false,
+  entryControlPosition = "top",
+  entryOptions = DEFAULT_ENTRY_OPTIONS,
   perPage = 10,
   onPerPageChange,
   total,
@@ -127,6 +135,7 @@ export function AppTable<T>({
   searchValue,
   onSearchChange,
   onSearch,
+  showSearchInTopBar = true,
   showingCount: showingCountProp,
   onRowClick,
   onRowHover,
@@ -143,6 +152,9 @@ export function AppTable<T>({
   const [internalSearch, setInternalSearch] = useState("");
   const isSearchControlled = searchValue !== undefined;
   const currentSearch = isSearchControlled ? searchValue : internalSearch;
+  const showTopControls = withEntryControls && entryControlPosition !== "bottom";
+  const showBottomControls = withEntryControls && entryControlPosition !== "top";
+  const showSearchBar = showTopControls && showSearchInTopBar;
 
   const finalColumns = useMemo(() => {
     const builtColumns: AppTableColumn<T>[] = [];
@@ -310,16 +322,20 @@ export function AppTable<T>({
   return (
     <Box>
       {/* ── Top bar: Show N entries (left) + Search (right) ── */}
-      {withEntryControls && (
+      {showTopControls && (
         <Group justify="space-between" align="center" mb="0.75rem">
           <Group gap="0.4rem" align="center">
             <Text size="0.8rem" c="dimmed">
               Show
             </Text>
             <Select
-              data={ENTRY_OPTIONS}
-              value={String(perPage)}
-              onChange={(val) => val && onPerPageChange?.(Number(val))}
+              data={entryOptions}
+              value={entryOptions.includes("All") && perPage === 0 ? "All" : String(perPage)}
+              onChange={(val) => {
+                if (!val) return;
+                const parsed = val.toString().toLowerCase() === "all" ? 0 : Number(val);
+                onPerPageChange?.(parsed);
+              }}
               size="xs"
               w="4rem"
               allowDeselect={false}
@@ -338,12 +354,14 @@ export function AppTable<T>({
             </Text>
           </Group>
 
-          <SearchBar
-            placeholder={searchPlaceholder}
-            value={currentSearch}
-            onChange={handleSearchChange}
-            onSearch={onSearch}
-          />
+          {showSearchBar && (
+            <SearchBar
+              placeholder={searchPlaceholder}
+              value={currentSearch}
+              onChange={handleSearchChange}
+              onSearch={onSearch}
+            />
+          )}
         </Group>
       )}
 
@@ -457,15 +475,48 @@ export function AppTable<T>({
       </Table>
 
       {/* ── Footer ── */}
-      {(withEntryControls || hasPagination) && (
+      {(showBottomControls || hasPagination) && (
         <Group justify="space-between" align="center" mt="0.75rem">
-          <Text size="0.75rem" c="dimmed">
-            Showing {showingCount} out of {totalCount} entries
-          </Text>
+          <Group gap="0.4rem" align="center">
+            {showBottomControls && (
+              <>
+                <Text size="0.8rem" c="dimmed">
+                  Show
+                </Text>
+                <Select
+                  data={entryOptions}
+                  value={entryOptions.includes("All") && perPage === 0 ? "All" : String(perPage)}
+                  onChange={(val) => {
+                    if (!val) return;
+                    const parsed = val.toString().toLowerCase() === "all" ? 0 : Number(val);
+                    onPerPageChange?.(parsed);
+                  }}
+                  size="xs"
+                  w="4rem"
+                  allowDeselect={false}
+                  styles={{
+                    input: {
+                      textAlign: "center",
+                      fontSize: "0.75rem",
+                      height: "1.6rem",
+                      minHeight: "1.6rem",
+                      padding: "0 0.5rem",
+                    },
+                  }}
+                />
+                <Text size="0.8rem" c="dimmed">
+                  entries
+                </Text>
+              </>
+            )}
+            <Text size="0.75rem" c="dimmed">
+              Showing {showingCount} out of {totalCount} entries
+            </Text>
+          </Group>
           {hasPagination && page !== undefined && onPageChange && (
             <TablePagination
               page={page}
-              totalPages={Math.ceil(totalCount / perPage)}
+              totalPages={perPage === 0 ? 1 : Math.max(1, Math.ceil(totalCount / perPage))}
               onPageChange={onPageChange}
             />
           )}

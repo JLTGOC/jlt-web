@@ -1,9 +1,9 @@
 // src/features/accounts/components/clients/ClientsList.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { PageCard } from "@/components/PageCard";
-import type { AccountListItem, ClientDashboardStats } from "../../types/accounts.types";
+import type { AccountListItem } from "../../types/accounts.types";
 import { Group, Text, Stack, Button } from "@mantine/core";
 import { ChevronRight } from "@nine-thirty-five/material-symbols-react/rounded";
 import { accountsService } from "../../services/accounts.service";
@@ -23,16 +23,25 @@ export function ClientsList() {
   const [perPage, setPerPage] = useState(10);
   const [page, setPage] = useState(1);
 
+  useEffect(() => {
+    if (perPage === 0 && page > 1) {
+      setPage(1);
+    }
+  }, [perPage, page]);
+
   const status = subCategory ?? "all";
 
   const { data, isLoading } = useQuery({
     queryKey: ["accounts", "clients", status, searchQuery, perPage, dateCreated, clientType, page],
-    queryFn: () =>
-      accountsService.getAccountsList(page, perPage, {
+    queryFn: () => {
+      const currentPage = perPage === 0 ? 1 : page;
+      return accountsService.getClientAccountsList(currentPage, perPage, {
         search: searchQuery,
-        type: clientType,
+        type: clientType === "ALL" ? undefined : clientType,
         dateCreated: dateCreated ?? undefined,
-      }),
+      });
+    },
+    retry: false,
   });
 
   // Destructure the service return
@@ -40,26 +49,12 @@ export function ClientsList() {
   const total = data?.total ?? 0;
   const totalPages = data?.totalPages ?? 1;
 
-  // Fetch dashboard stats from API
-  const { data: stats } = useQuery({
-    queryKey: ["accounts", "clients", "dashboard"],
-    queryFn: () => accountsService.getClientDashboardStats(),
-  });
-
-  const dashboardStats: ClientDashboardStats = stats ?? {
-    totalClients: 0,
-    newClients: 0,
-    activeShipments: 0,
-    activeRegulatory: 0,
-    pendingQuotations: 0,
-  };
-
   const getProfilePath = (rowId: number) =>
-    subCategory ? `/accounts/${tab}/${subCategory}/${rowId}` : `/accounts/${tab}/${rowId}`;
+    subCategory ? `/accounts/${tab}/${subCategory}/${rowId}` : `/accounts/${tab}/${rowId}/${rowId}`;
 
   return (
     <Stack gap="xl">
-      <ClientsStatus stats={dashboardStats} />
+      <ClientsStatus />
 
       <PageCard>
         <ClientsFilters
