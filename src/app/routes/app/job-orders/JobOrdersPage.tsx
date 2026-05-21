@@ -1,7 +1,8 @@
 import { RoleGuard } from "@/components/guards/RoleGuard";
-import { JOB_ORDER_ROLES, ROLES } from "@/types/roles";
+import { ROLES } from "@/types/roles";
 import ASJobOrderListPage from "@/features/job-order/pages/account-specialist/JobOrderListPage";
 import OPSJobOrderListPage from "@/features/job-order/pages/operations/JobOrderListPage";
+import CSJobOrderListPage from "@/features/job-order/pages/client-success/JobOrderListPage";
 import JobOrderDetailPage from "@/features/job-order/pages/shared/JobOrderDetailPage";
 import { useParams } from "react-router";
 
@@ -18,7 +19,12 @@ export default function JobOrdersPage() {
   if (jobOrderId) {
     return (
       <RoleGuard
-        allowedRoles={[...JOB_ORDER_ROLES, ROLES.LEAD_ACCOUNT_SPECIALIST]}
+        allowedRoles={[
+          ROLES.LEAD_OPERATIONS,
+          ROLES.OPERATIONS,
+          ROLES.CLIENT_SUCCESS,
+          ROLES.LEAD_ACCOUNT_SPECIALIST,
+        ]}
         fallback={<></>}
       >
         <JobOrderDetailPage />
@@ -29,7 +35,10 @@ export default function JobOrdersPage() {
   return (
     <>
       {/* Operations role */}
-      <RoleGuard allowedRoles={JOB_ORDER_ROLES} fallback={<></>}>
+      <RoleGuard
+        allowedRoles={[ROLES.LEAD_OPERATIONS, ROLES.OPERATIONS]}
+        fallback={<></>}
+      >
         <OPSJobOrderListPage />
       </RoleGuard>
 
@@ -39,6 +48,14 @@ export default function JobOrdersPage() {
         fallback={<></>}
       >
         <ASJobOrderListPage />
+      </RoleGuard>
+
+       {/* CLient Success role */}
+      <RoleGuard
+        allowedRoles={[ROLES.CLIENT_SUCCESS]}
+        fallback={<></>}
+      >
+        <CSJobOrderListPage />
       </RoleGuard>
     </>
   );

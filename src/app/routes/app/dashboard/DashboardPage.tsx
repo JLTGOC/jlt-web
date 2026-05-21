@@ -4,6 +4,7 @@ import { ROLES } from "@/types/roles";
 import AccountSpecialistDashboard from "@/features/dashboard/pages/AccountSpecialistDashboard";
 import OperationsDashboard from "@/features/dashboard/pages/OperationsDashboard";
 import ClientDashboard from "@/features/dashboard/pages/ClientDashboard";
+import ClientSuccessDashboard from "@/features/dashboard/pages/ClientSuccessDashBoard";
 // import { MarketingDashboard } from "@/features/dashboard/pages/MarketingDashboard";
 // import { HRDashboard } from "@/features/dashboard/pages/HRDashboard";
 
@@ -42,9 +43,15 @@ export default function DashboardPage() {
       return <AccountSpecialistDashboard />;
 
      case ROLES.LEAD_OPERATIONS:
-      return <OperationsDashboard />;
+      return <ClientSuccessDashboard />;
     
       case ROLES.OPERATIONS:
+      return <ClientSuccessDashboard />;
+
+      case ROLES.LEAD_CLIENT_SUCCESS:
+      return <OperationsDashboard />;
+    
+      case ROLES.CLIENT_SUCCESS:
       return <OperationsDashboard />;
 
     case ROLES.MARKETING:
