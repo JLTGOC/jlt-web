@@ -71,6 +71,8 @@ function mapBillingDetails(
   issuedQuotation: IssuedQuotationResource,
 ): BillingDetailsValues {
   const sections: Record<string, ChargeRow[]> = {};
+  let currency = "";
+  let uom = "";
 
   template.billing_sections.forEach((section) => {
     sections[section.id] = [];
@@ -91,13 +93,23 @@ function mapBillingDetails(
       description: item.receipt_charge_label ?? "",
       currency: item.currency_label ?? "",
       uom: item.uom_label ?? "",
+      quantity: parseAmount(item.quantity),
+      container_size: item.container_size ?? "",
       amount: parseAmount(item.amount),
     }));
+
+    if (!currency && rows[0]?.currency) {
+      currency = rows[0].currency;
+    }
+
+    if (!uom && rows[0]?.uom) {
+      uom = rows[0].uom;
+    }
 
     sections[matchingSection.id] = rows;
   });
 
-  return { sections };
+  return { currency, uom, sections };
 }
 
 function mapTerms(issuedQuotation: IssuedQuotationResource): TermsValues {

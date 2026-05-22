@@ -1,21 +1,43 @@
-import type { ChargeRow } from "@/features/quotations/schemas/compose.schema";
 import type {
   BillingSection,
   QuotationTemplate,
 } from "@/features/quotations/types/compose.types";
 import type { BillingDetailsValues } from "@/features/quotations/schemas/compose.schema";
 
+type ChargeRowLike = {
+  description?: string;
+  currency?: string;
+  uom?: string;
+  amount?: number | "" | null | undefined;
+  quantity?: number | "" | null | undefined;
+  container_size?: string;
+};
+
 export interface BillingSectionWithRows {
   section: BillingSection;
-  rows: ChargeRow[];
+  rows: ChargeRowLike[];
 }
 
-export function hasChargeContent(row: ChargeRow): boolean {
+export function isPerContainerUom(uom?: string | null): boolean {
+  return (uom ?? "").trim().toLowerCase() === "per container";
+}
+
+function hasChargeValue(value?: string | number | null): boolean {
+  return value !== "" && value != null;
+}
+
+function toNumber(value?: number | "" | null): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+export function hasChargeContent(row: ChargeRowLike): boolean {
   return Boolean(
     row.description?.trim() ||
     row.currency?.trim() ||
     row.uom?.trim() ||
-    row.amount != null,
+    hasChargeValue(row.amount) ||
+    hasChargeValue(row.quantity) ||
+    row.container_size?.trim(),
   );
 }
 
@@ -41,15 +63,37 @@ export function getBillingSectionsWithCharges(
     .filter(({ rows }) => rows.length > 0);
 }
 
-export function getRowsTotal(rows: ChargeRow[]): number {
-  return rows.reduce((sum, row) => sum + (row.amount ?? 0), 0);
+export function getRowsTotal(rows: ChargeRowLike[]): number {
+  return rows.reduce((sum, row) => sum + toNumber(row.amount), 0);
+}
+
+export function getChargeRowTotal(
+  row: ChargeRowLike,
+  globalUom?: string | null,
+): number {
+  const amount = toNumber(row.amount);
+
+  if (!isPerContainerUom(globalUom)) {
+    return amount;
+  }
+
+  const quantity = toNumber(row.quantity);
+  return amount * quantity;
+}
+
+export function getRowsTotalWithGlobalUom(
+  rows: ChargeRowLike[],
+  globalUom?: string | null,
+): number {
+  return rows.reduce((sum, row) => sum + getChargeRowTotal(row, globalUom), 0);
 }
 
 export function getBillingGrandTotal(
   sectionsWithRows: BillingSectionWithRows[],
+  globalUom?: string | null,
 ): number {
   return sectionsWithRows.reduce(
-    (sum, { rows }) => sum + getRowsTotal(rows),
+    (sum, { rows }) => sum + getRowsTotalWithGlobalUom(rows, globalUom),
     0,
   );
 }

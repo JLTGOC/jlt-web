@@ -25,6 +25,7 @@ interface AuthorizedSignatoryModalProps {
   onClose: () => void;
   onSave: (values: ViewerSignatoryValues) => void;
   currentUserName?: string;
+  currentUserPositionTitle?: string;
   initialValues?: ViewerSignatoryValues | null;
 }
 
@@ -35,14 +36,20 @@ export function AuthorizedSignatoryModal({
   onClose,
   onSave,
   currentUserName,
+  currentUserPositionTitle,
   initialValues,
 }: AuthorizedSignatoryModalProps) {
-  const { control, handleSubmit, setValue, reset, formState } = useForm<
-    SignatoryFormInput,
-    unknown,
-    SignatoryValues
-  >({
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    setError,
+    clearErrors,
+    reset,
+    formState,
+  } = useForm<SignatoryFormInput, unknown, SignatoryValues>({
     resolver: zodResolver(signatorySchema),
+    mode: "onChange",
     defaultValues: {
       complementary_close: "",
       is_authorized_signatory: false,
@@ -59,6 +66,9 @@ export function AuthorizedSignatoryModal({
     [signatureFile],
   );
   const previewSrc = previewUrl ?? initialValues?.signature_file_url ?? null;
+  const hasSignature = Boolean(
+    signatureFile || initialValues?.signature_file_url,
+  );
 
   useEffect(() => {
     if (!opened) {
@@ -82,6 +92,12 @@ export function AuthorizedSignatoryModal({
     };
   }, [previewUrl]);
 
+  useEffect(() => {
+    if (hasSignature) {
+      clearErrors("signature_file");
+    }
+  }, [clearErrors, hasSignature]);
+
   function handleModalClose() {
     reset();
     onClose();
@@ -103,6 +119,14 @@ export function AuthorizedSignatoryModal({
   }
 
   function handleSave(values: SignatoryValues) {
+    if (!hasSignature) {
+      setError("signature_file", {
+        type: "required",
+        message: "Upload a signature before saving.",
+      });
+      return;
+    }
+
     onSave({
       ...values,
       signature_file_url: values.signature_file
@@ -143,6 +167,11 @@ export function AuthorizedSignatoryModal({
                   setValue(
                     "authorized_signatory_name",
                     checked ? (currentUserName ?? "") : "",
+                    { shouldDirty: true, shouldValidate: true },
+                  );
+                  setValue(
+                    "position_title",
+                    checked ? (currentUserPositionTitle ?? "") : "",
                     { shouldDirty: true, shouldValidate: true },
                   );
                 }}
@@ -262,6 +291,7 @@ export function AuthorizedSignatoryModal({
           type="submit"
           color="jltAccent.6"
           form="signatory-form"
+          disabled={!hasSignature || !formState.isValid}
           mt="md"
           style={{ alignSelf: "center", display: "flex", margin: "0 auto" }}
         >

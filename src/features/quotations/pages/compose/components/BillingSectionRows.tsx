@@ -1,4 +1,11 @@
-import { ActionIcon, Grid, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Autocomplete,
+  Grid,
+  NumberInput,
+  Text,
+  Tooltip,
+} from "@mantine/core";
 import {
   AddTwo,
   Delete,
@@ -10,39 +17,36 @@ import {
   useWatch,
 } from "react-hook-form";
 import * as z from "zod";
-import { SelectField } from "@/components/form/selectFields";
 import { NumberInputField } from "@/components/form/valueFields";
-import { useComposeBillingSettings } from "@/features/quotations/hooks/useComposeReferenceData";
 import { billingDetailsSchema } from "@/features/quotations/schemas/compose.schema";
 import type { BillingSection } from "@/features/quotations/types/compose.types";
-import { tableSelectStyles } from "./billingSelectStyles";
+import { getRowsTotalWithGlobalUom } from "@/features/quotations/utils/billing";
+import { formatBillingAmount } from "@/features/quotations/utils/billingPresentation";
 import { ReceiptChargeField } from "./ReceiptChargeField";
 import classes from "../BillingDetailsForm.module.css";
 
 type BillingDetailsFormInput = z.input<typeof billingDetailsSchema>;
 
-function formatPhpAmount(value: number): string {
-  return `PHP ${value.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
-}
-
 interface BillingSectionRowsProps {
   control: Control<BillingDetailsFormInput>;
   section: BillingSection;
+  globalCurrency: string;
+  globalUom: string;
+  isPerContainer: boolean;
 }
 
 export function BillingSectionRows({
   control,
   section,
+  globalCurrency,
+  globalUom,
+  isPerContainer,
 }: BillingSectionRowsProps) {
   const sectionName = `sections.${section.id}` as const;
   const fieldArray = useFieldArray({ control, name: sectionName });
   const hasRows = fieldArray.fields.length > 0;
   const rows = useWatch({ control, name: sectionName }) ?? [];
-  const total = rows.reduce((sum, row) => sum + (row?.amount ?? 0), 0);
-  const { data: billingSettings } = useComposeBillingSettings();
-
-  const currencies = billingSettings?.currencies ?? [];
-  const uoms = billingSettings?.uoms ?? [];
+  const total = getRowsTotalWithGlobalUom(rows, globalUom);
 
   return (
     <div className={classes.section}>
@@ -55,9 +59,9 @@ export function BillingSectionRows({
           onClick={() =>
             fieldArray.append({
               description: "",
-              currency: "",
-              uom: "",
               amount: null,
+              quantity: null,
+              container_size: "",
             })
           }
           aria-label={`Add ${section.title} row`}
@@ -92,66 +96,95 @@ export function BillingSectionRows({
                   }}
                 />
               </Grid.Col>
+              {isPerContainer && (
+                <Grid.Col span={{ base: 12, sm: 3 }} className={classes.cell}>
+                  <Controller
+                    control={control}
+                    name={`sections.${section.id}.${index}.quantity`}
+                    render={({ field: formField, fieldState }) => (
+                      <Tooltip
+                        label={fieldState.error?.message}
+                        disabled={!fieldState.error}
+                        color="red"
+                        withArrow
+                        position="bottom"
+                      >
+                        <NumberInput
+                          value={formField.value ?? ""}
+                          onChange={formField.onChange}
+                          onBlur={formField.onBlur}
+                          hideControls
+                          min={1}
+                          placeholder="QTY"
+                          styles={{
+                            input: {
+                              border: fieldState.error
+                                ? "1px solid var(--mantine-color-red-6)"
+                                : 0,
+                              borderRadius: 0,
+                              background: "transparent",
+                              minHeight: "2.875rem",
+                              height: "2.875rem",
+                              color: "var(--mantine-color-jltBlue-8)",
+                              fontWeight: 500,
+                              fontSize: "0.8125rem",
+                              textAlign: "center",
+                              textTransform: "uppercase",
+                            },
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+                  />
+                </Grid.Col>
+              )}
 
-              <Grid.Col span={{ base: 12, sm: 4 }} className={classes.cell}>
-                <SelectField
-                  control={control}
-                  name={`sections.${section.id}.${index}.currency`}
-                  label=""
-                  placeholder="CURRENCY"
-                  data={currencies}
-                  comboboxProps={{
-                    withinPortal: false,
-                    offset: 0,
-                    position: "bottom-start",
-                  }}
-                  styles={{
-                    input: {
-                      border: 0,
-                      borderRadius: 0,
-                      background: "transparent",
-                      minHeight: "2.875rem",
-                      height: "2.875rem",
-                      color: "var(--mantine-color-jltBlue-8)",
-                      fontWeight: 500,
-                      fontSize: "0.8125rem",
-                      textTransform: "uppercase",
-                    },
-                    ...tableSelectStyles,
-                  }}
-                />
-              </Grid.Col>
+              {isPerContainer && (
+                <Grid.Col span={{ base: 12, sm: 4 }} className={classes.cell}>
+                  <Controller
+                    control={control}
+                    name={`sections.${section.id}.${index}.container_size`}
+                    render={({ field: formField, fieldState }) => (
+                      <Tooltip
+                        label={fieldState.error?.message}
+                        disabled={!fieldState.error}
+                        color="red"
+                        withArrow
+                        position="bottom"
+                      >
+                        <Autocomplete
+                          value={formField.value ?? ""}
+                          onChange={formField.onChange}
+                          onBlur={formField.onBlur}
+                          data={["1x20", "1x40"]}
+                          placeholder="CONTAINER SIZE"
+                          error={!!fieldState.error} // red border only, no text
+                          styles={{
+                            input: {
+                              border: fieldState.error
+                                ? "1px solid var(--mantine-color-red-6)"
+                                : 0,
+                              borderRadius: 0,
+                              background: "transparent",
+                              minHeight: "2.875rem",
+                              height: "2.875rem",
+                              color: "var(--mantine-color-jltBlue-8)",
+                              fontWeight: 500,
+                              fontSize: "0.8125rem",
+                              textTransform: "uppercase",
+                            },
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+                  />
+                </Grid.Col>
+              )}
 
-              <Grid.Col span={{ base: 12, sm: 4 }} className={classes.cell}>
-                <SelectField
-                  control={control}
-                  name={`sections.${section.id}.${index}.uom`}
-                  label=""
-                  placeholder="UOM"
-                  data={uoms}
-                  comboboxProps={{
-                    withinPortal: false,
-                    offset: 0,
-                    position: "bottom-start",
-                  }}
-                  styles={{
-                    input: {
-                      border: 0,
-                      borderRadius: 0,
-                      background: "transparent",
-                      minHeight: "2.875rem",
-                      height: "2.875rem",
-                      color: "var(--mantine-color-jltBlue-8)",
-                      fontWeight: 500,
-                      fontSize: "0.8125rem",
-                      textTransform: "uppercase",
-                    },
-                    ...tableSelectStyles,
-                  }}
-                />
-              </Grid.Col>
-
-              <Grid.Col span={{ base: 20, sm: 5 }} className={classes.cell}>
+              <Grid.Col
+                span={{ base: 20, sm: isPerContainer ? 6 : 13 }}
+                className={classes.cell}
+              >
                 <div className={classes.amountCell}>
                   <NumberInputField
                     control={control}
@@ -205,8 +238,16 @@ export function BillingSectionRows({
       {hasRows && (
         <div className={classes.totalRow}>
           <Text className={classes.totalLabel}>{`Total ${section.title}`}</Text>
-          <Text className={classes.totalValue}>{formatPhpAmount(total)}</Text>
+          <Text className={classes.totalValue}>
+            {formatBillingAmount(globalCurrency, total)}
+          </Text>
         </div>
+      )}
+
+      {hasRows && isPerContainer && (
+        <Text size="xs" c="dimmed" px="sm" pb="sm" pt={6}>
+          Per container charges use quantity multiplied by the unit rate.
+        </Text>
       )}
     </div>
   );

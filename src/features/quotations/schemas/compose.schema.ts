@@ -1,5 +1,8 @@
 import * as z from "zod";
-import { hasAnyCharge } from "@/features/quotations/utils/billing";
+import {
+  hasAnyCharge,
+  isPerContainerUom,
+} from "@/features/quotations/utils/billing";
 
 export const quotationDetailsFixedSchema = z.object({
   subject: z.string().optional(),
@@ -15,29 +18,87 @@ export const quotationDetailsSchema = quotationDetailsFixedSchema.merge(
 
 export type QuotationDetailsValues = z.infer<typeof quotationDetailsSchema>;
 
+const nullableNumber = z.union([
+  z.number().nullable(),
+  z.literal("").transform((): null => null),
+]);
+
 export const chargeRowSchema = z.object({
   description: z.string().optional(),
   currency: z.string().optional(),
   uom: z.string().optional(),
-  amount: z.number().nullable().optional(),
+  amount: nullableNumber.optional(),
+  quantity: nullableNumber.optional(),
+  container_size: z.string().optional(),
 });
 
 export type ChargeRow = z.infer<typeof chargeRowSchema>;
 
 export const billingDetailsSchema = z
   .object({
+    currency: z.string().optional(),
+    uom: z.string().optional(),
     sections: z.record(z.string(), z.array(chargeRowSchema)).default({}),
   })
   .superRefine((values, context) => {
+    if (!values.currency?.trim()) {
+      context.addIssue({
+        code: "custom",
+        path: ["currency"],
+        message: "Select a currency.",
+      });
+    }
+
+    if (!values.uom?.trim()) {
+      context.addIssue({
+        code: "custom",
+        path: ["uom"],
+        message: "Select a unit of measurement.",
+      });
+    }
+
     const hasAtLeastOneCharge = hasAnyCharge(values.sections);
 
     if (!hasAtLeastOneCharge) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ["sections"],
         message: "Add at least one charge before continuing.",
       });
     }
+
+    if (!isPerContainerUom(values.uom)) {
+      return;
+    }
+
+    Object.entries(values.sections ?? {}).forEach(([sectionId, rows]) => {
+      rows.forEach((row, rowIndex) => {
+        if (
+          !row.description?.trim() &&
+          row.amount == null &&
+          row.quantity == null &&
+          !row.container_size?.trim()
+        ) {
+          return;
+        }
+
+        if (!row.quantity || row.quantity <= 0) {
+          context.addIssue({
+            code: "custom",
+            path: ["sections", sectionId, rowIndex, "quantity"],
+            message: "Quantity is required for per container.",
+          });
+        }
+
+        if (!row.container_size?.trim()) {
+          context.addIssue({
+            code: "custom",
+            path: ["sections", sectionId, rowIndex, "container_size"],
+            message: "Container size is required for per container.",
+          });
+        }
+      });
+    });
   });
 
 export type BillingDetailsValues = z.infer<typeof billingDetailsSchema>;

@@ -1,11 +1,17 @@
 import { Text, View } from "@react-pdf/renderer";
 import type { ChargeRow } from "@/features/quotations/schemas/compose.schema";
 import type { quotationPdfStyles } from "@/features/quotations/pdf/quotationPdf.styles";
-import { getBillingPresentationRows } from "@/features/quotations/utils/billingPresentation";
+import { isPerContainerUom } from "@/features/quotations/utils/billing";
+import {
+  formatBillingAmount,
+  getBillingPresentationRows,
+} from "@/features/quotations/utils/billingPresentation";
 
 interface QuotationPDFBillingSectionProps {
   sectionId: string;
   sectionTitle: string;
+  currency: string;
+  uom: string;
   rows: ChargeRow[];
   total: number;
   styles: typeof quotationPdfStyles;
@@ -15,12 +21,20 @@ interface QuotationPDFBillingSectionProps {
 export function QuotationPDFBillingSection({
   sectionId,
   sectionTitle,
+  currency,
+  uom,
   rows,
   total,
   styles,
   formatAmount,
 }: QuotationPDFBillingSectionProps) {
-  const displayRows = getBillingPresentationRows(rows, formatAmount);
+  const displayRows = getBillingPresentationRows(
+    rows,
+    currency,
+    uom,
+    formatAmount,
+  );
+  const isPerContainer = isPerContainerUom(uom);
 
   return (
     <View style={{ marginBottom: 14 }}>
@@ -38,6 +52,20 @@ export function QuotationPDFBillingSection({
           <Text style={[styles.tableCellBase, styles.colUom, styles.bold]}>
             UOM
           </Text>
+          {isPerContainer ? (
+            <Text
+              style={[styles.tableCellBase, styles.colQuantity, styles.bold]}
+            >
+              Quantity
+            </Text>
+          ) : null}
+          {isPerContainer ? (
+            <Text
+              style={[styles.tableCellBase, styles.colContainer, styles.bold]}
+            >
+              Container Size
+            </Text>
+          ) : null}
           <Text
             style={[
               styles.tableCellBase,
@@ -68,6 +96,22 @@ export function QuotationPDFBillingSection({
               {row.currency}
             </Text>
             <Text style={[styles.tableCellBase, styles.colUom]}>{row.uom}</Text>
+            {isPerContainer ? (
+              <Text
+                style={[
+                  styles.tableCellBase,
+                  styles.colQuantity,
+                  styles.tableCellRight,
+                ]}
+              >
+                {row.quantity}
+              </Text>
+            ) : null}
+            {isPerContainer ? (
+              <Text style={[styles.tableCellBase, styles.colContainer]}>
+                {row.containerSize}
+              </Text>
+            ) : null}
             <Text
               style={[
                 styles.tableCellBase,
@@ -86,10 +130,28 @@ export function QuotationPDFBillingSection({
             >
               {row.totalText}
             </Text>
+            {row.calculationText ? (
+              <Text
+                style={[
+                  styles.tableCellLast,
+                  styles.colTotal,
+                  styles.tableCellRight,
+                  styles.rowNote,
+                ]}
+              >
+                {row.calculationText}
+              </Text>
+            ) : null}
           </View>
         ))}
         <View style={styles.totalRow}>
-          <Text style={[styles.tableCellBase, styles.bold, { flex: 5.3 }]}>
+          <Text
+            style={[
+              styles.tableCellBase,
+              styles.bold,
+              { flex: isPerContainer ? 6.5 : 5.3 },
+            ]}
+          >
             {`Total ${sectionTitle}`}
           </Text>
           <Text
@@ -100,9 +162,14 @@ export function QuotationPDFBillingSection({
               styles.tableCellRight,
             ]}
           >
-            {formatAmount(total)}
+            {formatBillingAmount(currency, total)}
           </Text>
         </View>
+        {isPerContainer ? (
+          <Text style={styles.sectionNote}>
+            Per container charges use quantity multiplied by the unit rate.
+          </Text>
+        ) : null}
       </View>
     </View>
   );

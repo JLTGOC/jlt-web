@@ -13,7 +13,7 @@ import type { QuotationResource } from "@/features/quotations/types/quotations.t
 import {
   getBillingGrandTotal,
   getBillingSectionsWithCharges,
-  getRowsTotal,
+  getRowsTotalWithGlobalUom,
 } from "@/features/quotations/utils/billing";
 import {
   resolveClientInformationFields,
@@ -39,6 +39,8 @@ export interface QuotationDocumentTermsBlock {
 export interface QuotationDocumentBillingSection {
   id: string;
   title: string;
+  currency: string;
+  uom: string;
   rows: ChargeRow[];
   total: number;
 }
@@ -93,8 +95,10 @@ export function buildQuotationDocumentViewModel({
   const billingSections = billedSections.map(({ section, rows }) => ({
     id: section.id,
     title: section.title,
+    currency: billingDetails.currency?.trim() ?? "",
+    uom: billingDetails.uom?.trim() ?? "",
     rows,
-    total: getRowsTotal(rows),
+    total: getRowsTotalWithGlobalUom(rows, billingDetails.uom),
   }));
 
   const termsBlocks = TERMS_BLOCKS.flatMap(({ key, label }) => {
@@ -110,7 +114,7 @@ export function buildQuotationDocumentViewModel({
   return {
     resolvedClientInformationFields,
     billingSections,
-    grandTotal: getBillingGrandTotal(billedSections),
+    grandTotal: getBillingGrandTotal(billedSections, billingDetails.uom),
     termsBlocks,
     footer: terms.footer?.trim() ? terms.footer : null,
     signatory: {
