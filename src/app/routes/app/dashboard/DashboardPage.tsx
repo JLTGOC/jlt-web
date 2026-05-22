@@ -28,8 +28,6 @@ export default function DashboardPage() {
   const user = toUser(userResource);
   const role = getUserRole(user);
 
-  console.log("khate", role)
-
   // Route to appropriate dashboard based on role
   switch (role) {
     case ROLES.CLIENT:
@@ -41,10 +39,10 @@ export default function DashboardPage() {
     case ROLES.LEAD_ACCOUNT_SPECIALIST:
       return <AccountSpecialistDashboard />;
 
-     case ROLES.LEAD_OPERATIONS:
+    case ROLES.LEAD_OPERATIONS:
       return <OperationsDashboard />;
-    
-      case ROLES.OPERATIONS:
+
+    case ROLES.OPERATIONS:
       return <OperationsDashboard />;
 
     case ROLES.MARKETING:
