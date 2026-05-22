@@ -41,7 +41,13 @@ export function ToolDashboardTile({
       </Box>
 
       <Box className={classes.footer}>
-        <ActionIcon variant="transparent" size="lg" className={classes.arrow}>
+        <ActionIcon
+          component="span"
+          variant="transparent"
+          size="lg"
+          className={classes.arrow}
+          aria-hidden="true"
+        >
           <ArrowForward width={24} height={24} />
         </ActionIcon>
       </Box>
