@@ -6,6 +6,10 @@ import type {
 } from "@/features/quotations/schemas/compose.schema";
 import type { QuotationTemplate } from "@/features/quotations/types/compose.types";
 import { hasChargeContent } from "@/features/quotations/utils/billing";
+import {
+  isRateValidityField,
+  RATE_VALIDITY_FIELD,
+} from "@/features/quotations/utils/quotationDetailFields";
 
 interface BuildIssuedQuotationFormDataParams {
   template: QuotationTemplate;
@@ -30,11 +34,18 @@ export function buildIssuedQuotationFormData({
   formData.append("subject", quotationDetails.subject?.trim() ?? "");
   formData.append("message", quotationDetails.message?.trim() ?? "");
 
-  template.custom_fields.forEach((field, fieldIndex) => {
+  const detailFields = [
+    ...template.custom_fields.filter((field) => !isRateValidityField(field)),
+    RATE_VALIDITY_FIELD,
+  ];
+
+  detailFields.forEach((field, fieldIndex) => {
     formData.append(`detail_values[${fieldIndex}][label]`, field.label);
     formData.append(
       `detail_values[${fieldIndex}][value]`,
-      quotationDetails.custom_fields?.[field.id]?.trim() ?? "",
+      field.id === RATE_VALIDITY_FIELD.id
+        ? (quotationDetails.rate_validity?.trim() ?? "")
+        : (quotationDetails.custom_fields?.[field.id]?.trim() ?? ""),
     );
   });
 

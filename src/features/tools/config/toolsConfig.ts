@@ -1,6 +1,6 @@
 import {
-  AccountTree,
-  Description,
+  LinkedServices,
+  Chat,
   RequestQuote,
   CalendarClock
 } from "@nine-thirty-five/material-symbols-react/outlined";
@@ -23,14 +23,14 @@ export interface ToolItem {
 export const TOOL_ITEMS: ToolItem[] = [
   {
     id: "services",
-    icon: AccountTree,
+    icon: LinkedServices,
     label: "List of Services",
     description: "View and manage the complete list of services offered.",
     path: "/tools/services",
   },
   {
     id: "message-template",
-    icon: Description,
+    icon: Chat,
     label: "Message Template",
     description: "Create, edit and manage your message templates for the quotation.",
     path: "/tools/messages",

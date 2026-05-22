@@ -14,6 +14,11 @@ import type {
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
 import { formatQuotationAmount } from "@/features/quotations/utils/billingPresentation";
 import { buildQuotationDocumentViewModel } from "@/features/quotations/utils/quotationDocumentViewModel";
+import {
+  formatQuotationDetailDate,
+  isRateValidityField,
+  RATE_VALIDITY_FIELD,
+} from "@/features/quotations/utils/quotationDetailFields";
 
 interface QuotationPDFProps {
   quotation: QuotationResource;
@@ -121,7 +126,15 @@ export function QuotationPDF({
 
         {documentViewModel.resolvedClientInformationFields.length > 0 && (
           <View
-            style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 8 }}
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              marginBottom: template.custom_fields.some(
+                (field) => !isRateValidityField(field),
+              )
+                ? 8
+                : 12,
+            }}
           >
             {documentViewModel.resolvedClientInformationFields.map((field) => (
               <View
@@ -137,21 +150,40 @@ export function QuotationPDF({
           </View>
         )}
 
-        {template.custom_fields.length > 0 && (
+        {quotationDetails.rate_validity ? (
+          <View style={{ flexDirection: "row", marginBottom: 8 }}>
+            <Text style={[styles.label, { width: 80 }]}>
+              {RATE_VALIDITY_FIELD.label}:
+            </Text>
+            <Text>
+              {formatQuotationDetailDate(quotationDetails.rate_validity)}
+            </Text>
+          </View>
+        ) : null}
+
+        {template.custom_fields.some(
+          (field) => !isRateValidityField(field),
+        ) && (
           <View
             style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 12 }}
           >
-            {template.custom_fields.map((field) => (
-              <View
-                key={field.id}
-                style={{ width: "50%", flexDirection: "row", marginBottom: 4 }}
-              >
-                <Text style={[styles.label]}>{field.label}:</Text>
-                <Text style={[styles.bold, { paddingLeft: 4 }]}>
-                  {quotationDetails.custom_fields?.[field.id] ?? "—"}
-                </Text>
-              </View>
-            ))}
+            {template.custom_fields
+              .filter((field) => !isRateValidityField(field))
+              .map((field) => (
+                <View
+                  key={field.id}
+                  style={{
+                    width: "50%",
+                    flexDirection: "row",
+                    marginBottom: 4,
+                  }}
+                >
+                  <Text style={[styles.label]}>{field.label}:</Text>
+                  <Text style={[styles.bold, { paddingLeft: 4 }]}>
+                    {quotationDetails.custom_fields?.[field.id] ?? "—"}
+                  </Text>
+                </View>
+              ))}
           </View>
         )}
 

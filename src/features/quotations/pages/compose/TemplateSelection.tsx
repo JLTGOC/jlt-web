@@ -7,6 +7,7 @@ import { ComposeStepLoader } from "@/features/quotations/pages/compose/component
 import { useComposeQuotationTemplates } from "@/features/quotations/hooks/useComposeReferenceData";
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 import { fetchQuotation } from "@/features/quotations/api/quotations.api";
+import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import type { ComposeTemplateType } from "@/features/quotations/api/quotations-api/compose.api";
 
 function resolveComposeTemplateType(
@@ -53,8 +54,17 @@ export function TemplateSelection() {
   }));
 
   function handleSelect(templateId: string) {
+    if (!tab || !quotationId) {
+      return;
+    }
+
     navigate(
-      `/quotations/${tab}/client/${clientId}/${quotationId}/compose/${templateId}`,
+      quotationRoutes.composeTemplate({
+        tab,
+        clientId,
+        quotationId,
+        templateId,
+      }),
     );
   }
 

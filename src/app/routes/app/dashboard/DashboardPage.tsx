@@ -29,8 +29,6 @@ export default function DashboardPage() {
   const user = toUser(userResource);
   const role = getUserRole(user);
 
-  console.log("khate", role)
-
   // Route to appropriate dashboard based on role
   switch (role) {
     case ROLES.CLIENT:

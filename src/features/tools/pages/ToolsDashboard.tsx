@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router";
 import { Group } from "@mantine/core";
-import { FolderButton } from "@/components/FolderButton";
 import { TOOL_ITEMS } from "../config/toolsConfig";
 import { useAuthStore } from "@/stores/authStore";
 import { toUser, hasRole } from "@/lib/mappers/user.mapper";
+import { ToolDashboardTile } from "../components/ToolDashboardTile";
 
 export function ToolsDashboard() {
   const navigate = useNavigate();
@@ -17,9 +17,9 @@ export function ToolsDashboard() {
   });
 
   return (
-    <Group gap={"md"}>
+    <Group gap="sm">
       {visibleTools.map((tool) => (
-        <FolderButton
+        <ToolDashboardTile
           key={tool.id}
           icon={tool.icon}
           label={tool.label}
