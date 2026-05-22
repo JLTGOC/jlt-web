@@ -3,29 +3,14 @@ import { useAuthStore } from "@/stores/authStore";
 
 // Create axios instance
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: `${import.meta.env.VITE_API_BASE_URL}/api`,
+  withCredentials: true,
+  withXSRFToken: true,
   headers: {
     "Content-Type": "application/json",
     platform: "web",
   },
 });
-
-// Request interceptor - attach token to every request
-apiClient.interceptors.request.use(
-  (config) => {
-    // Get token from Zustand store
-    const token = useAuthStore.getState().token;
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  },
-);
 
 // Response interceptor - handle common errors
 apiClient.interceptors.response.use(

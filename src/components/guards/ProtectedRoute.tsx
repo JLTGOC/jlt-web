@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
    * Whether to fetch fresh user data from API
    * Useful if you want to ensure user data is up-to-date
    *
-   * @default false
+   * @default true
    */
   fetchUserData?: boolean;
 }
@@ -37,39 +37,40 @@ interface ProtectedRouteProps {
  * }
  */
 export function ProtectedRoute({
-  fetchUserData = false,
+  fetchUserData = true,
 }: ProtectedRouteProps = {}) {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
-  const [isLoading, setIsLoading] = useState(fetchUserData);
+  const logout = useAuthStore((state) => state.logout);
+  const [isVerifying, setIsVerifying] = useState(Boolean(user));
+  const userId = user?.id;
 
   useEffect(() => {
-    async function fetchUser() {
-      if (fetchUserData && user?.id) {
-        try {
-          const response = await userService.getById(user.id);
-          setUser(response.data);
-        } catch (error) {
-          console.error("Failed to fetch user data:", error);
-          // Continue anyway with cached user data
-        } finally {
-          setIsLoading(false);
-        }
-      }
+    if (!userId) {
+      logout();
+      setIsVerifying(false);
+      return;
     }
 
-    fetchUser();
-  }, [fetchUserData, user?.id, setUser]);
+    userService
+      .getById(userId)
+      .then((response) => {
+        setUser(response.data);
+      })
+      .catch(() => {
+        logout();
+      })
+      .finally(() => {
+        setIsVerifying(false);
+      });
+  }, [userId, setUser, logout, fetchUserData]);
 
-  // If not authenticated, redirect to login page
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (isVerifying) {
+    return <Loader size="lg" color="jltBlue" />;
   }
 
-  // If fetching user data, show loading state
-  if (isLoading) {
-    return <Loader size="lg" color="jltBlue" />;
+  if (!user) {
+    return <Navigate to="/login" replace />;
   }
 
   // If authenticated, render child routes
