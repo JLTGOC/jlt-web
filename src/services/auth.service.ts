@@ -1,4 +1,5 @@
 import { apiClient, POST } from "@/lib/api/client";
+import { getApiOriginUrl } from "@/lib/api/base-url";
 import type { LoginRequest, LoginResponse } from "@/types/api";
 
 export const authService = {
@@ -7,8 +8,7 @@ export const authService = {
    * GET /sanctum/csrf-cookie
    */
   async initCsrf(): Promise<void> {
-    const base = import.meta.env.VITE_API_BASE_URL as string;
-    const origin = base.replace(/\/api\/?$/, "");
+    const origin = getApiOriginUrl();
     await apiClient.get(`${origin}/sanctum/csrf-cookie`);
   },
 

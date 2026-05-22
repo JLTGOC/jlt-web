@@ -71,7 +71,7 @@ export function ProtectedRoute({
         <Stack gap="xs" align="center">
           <Loader size="lg" color="jltBlue" type="dots" />
           <Text size="sm" c="dimmed">
-            Verifying your session...
+            Please wait for a few seconds...
           </Text>
         </Stack>
       </Center>

@@ -1,9 +1,10 @@
 import axios, { type AxiosRequestConfig } from "axios";
 import { useAuthStore } from "@/stores/authStore";
+import { getApiBaseUrl } from "./base-url";
 
 // Create axios instance
 export const apiClient = axios.create({
-  baseURL: `${import.meta.env.VITE_API_BASE_URL}/api`,
+  baseURL: getApiBaseUrl(),
   withCredentials: true,
   withXSRFToken: true,
   headers: {
