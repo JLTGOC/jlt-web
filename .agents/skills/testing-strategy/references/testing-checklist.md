@@ -18,6 +18,7 @@ Use this checklist to implement and validate tests with consistent quality.
 
 - Assertions describe user-visible behavior and outcomes.
 - Tests avoid private implementation details where possible.
+- Prefer role/text/label queries before brittle selectors.
 - Inputs and fixtures are realistic and deterministic.
 - Flaky timing assumptions are removed.
 

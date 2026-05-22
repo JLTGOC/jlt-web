@@ -1,6 +1,6 @@
 ---
 name: project-structure
-description: "Enforce a scalable feature-first project structure with strict module boundaries, direct-import policy, and unidirectional architecture (Shared -> Features -> App). Use when requests mention folder organization, feature structure, cross-feature imports, or ESLint architecture rules."
+description: "Enforce a Bulletproof React-style feature-first structure with strict module boundaries, direct imports, absolute import conventions, and unidirectional architecture (Shared -> Features -> App). Use whenever requests mention folder organization, refactors, feature structure, import rules, or ESLint architecture boundaries."
 argument-hint: 'Provide scope and strictness, for example: "src/features/shipments standard" or "src/app strict"'
 ---
 
@@ -33,11 +33,12 @@ Use these references as the source of truth while executing this skill.
 2. Classify scope by touched paths: shared layer, feature layer, app layer, or multi-layer.
 3. Run [enforcement checklist](./references/enforcement-checklist.md) and record pass/fail for each section.
 4. Apply or verify ESLint boundary zones using [ESLint boundary zones](./references/eslint-boundary-zones.md).
-5. Enforce optimistic-mutation placement: shared mutation patterns belong in reusable hooks/API modules rather than ad hoc page-level handlers.
-6. Keep change sets minimal while correcting placement and import-direction violations, but prefer centralized fixes when a pattern recurs across modules.
-7. Run validation commands using [validation command matrix](./references/validation-command-matrix.md).
-8. If checks fail, fix touched-code regressions first, then re-run required gates.
-9. Produce final output using [result format](./references/result-format.md), including residual risk and assumptions.
+5. Confirm direct-import policy and absolute import conventions (for example `@/`) where configured.
+6. Enforce optimistic-mutation placement: shared mutation patterns belong in reusable hooks/API modules rather than ad hoc page-level handlers.
+7. Keep change sets minimal while correcting placement and import-direction violations, but prefer centralized fixes when a pattern recurs across modules.
+8. Run validation commands using [validation command matrix](./references/validation-command-matrix.md).
+9. If checks fail, fix touched-code regressions first, then re-run required gates.
+10. Produce final output using [result format](./references/result-format.md), including residual risk and assumptions.
 
 ## Operating Modes
 
@@ -51,6 +52,7 @@ Use these references as the source of truth while executing this skill.
 - Keep most domain logic inside src/features.
 - Avoid cross-feature imports unless explicitly approved.
 - Prefer direct imports over barrel files.
+- Keep file/folder naming consistent (kebab-case by default).
 - Compose features at src/app rather than coupling features together.
 - Keep patches scoped and avoid broad rewrites when extraction solves the issue.
 - Mutation UX standards (including optimistic update + rollback strategy) should be implemented through reusable feature/shared abstractions.

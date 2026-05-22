@@ -95,6 +95,14 @@ Reason:
 1. Direct imports are clearer and reduce accidental over-importing.
 2. Large barrel patterns can reduce tree-shaking effectiveness and obscure dependencies.
 
+## Absolute Imports
+
+Prefer absolute imports (for example `@/components/...`) when configured. This keeps paths stable during moves and avoids deep relative traversal.
+
+## Naming Conventions
+
+Keep file and folder names consistent (kebab-case by default) to reduce cognitive load and simplify navigation.
+
 ## ESLint Enforcement
 
 Use import/no-restricted-paths zones to enforce:

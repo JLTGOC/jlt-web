@@ -34,7 +34,8 @@ Use this checklist for any implementation, refactor, or review touching architec
 2. Features do not import from sibling features unless explicitly approved.
 3. App may import from shared and features.
 4. Direct imports are preferred over barrel-file indirection.
-5. Dependency direction remains Shared -> Features -> App.
+5. Absolute imports are used consistently when configured.
+6. Dependency direction remains Shared -> Features -> App.
 
 ## 6. ESLint Architecture Rules
 
@@ -47,6 +48,7 @@ Use this checklist for any implementation, refactor, or review touching architec
 1. Patch size remains minimal and avoids unrelated format churn.
 2. Existing behavior is preserved unless change is explicitly requested.
 3. Validation commands are run according to scope.
+4. File and folder naming remains consistent with project conventions.
 
 ## 8. Evidence Recording
 

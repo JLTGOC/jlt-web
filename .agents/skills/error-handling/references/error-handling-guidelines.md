@@ -20,12 +20,14 @@ Typical interceptor responsibilities:
 - Trigger user notifications for actionable failures.
 - Handle authentication failures (for example 401 session invalidation).
 - Optionally trigger token-refresh flow before failing requests.
+ - Map error status classes to consistent app-level categories (validation, auth, system).
 
 Guidance:
 
 - Keep transport-level concerns in the API client, not scattered in features.
 - Avoid duplicating identical error toasts in multiple call sites.
 - Do not expose raw stack traces or sensitive server details to users.
+ - Prefer a single notification policy (toast/banner) per error class to avoid noise.
 
 Repository baseline:
 
@@ -59,6 +61,7 @@ Minimum tracking expectations:
 - include release and environment metadata,
 - include browser/platform context,
 - include source maps in releases so stack traces map to source code.
+ - validate that sourcemaps are uploaded for production builds.
 
 Operational guidance:
 

@@ -33,6 +33,7 @@ Use this checklist to implement and verify robust error handling.
 - Captured events include environment/release metadata.
 - Source maps are uploaded for readable stack traces.
 - High-priority issues are alertable and triaged.
+ - Source map availability is verified in production-like builds.
 
 ## 6. Validation
 
