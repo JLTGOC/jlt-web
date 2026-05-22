@@ -2,7 +2,7 @@ import { Navigate, Outlet } from "react-router";
 import { useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/user.service";
 import { useEffect, useState } from "react";
-import { Loader } from "@mantine/core";
+import { Center, Loader, Stack, Text } from "@mantine/core";
 
 interface ProtectedRouteProps {
   /**
@@ -66,7 +66,16 @@ export function ProtectedRoute({
   }, [userId, setUser, logout, fetchUserData]);
 
   if (isVerifying) {
-    return <Loader size="lg" color="jltBlue" />;
+    return (
+      <Center mih="100vh">
+        <Stack gap="xs" align="center">
+          <Loader size="lg" color="jltBlue" type="dots" />
+          <Text size="sm" c="dimmed">
+            Verifying your session...
+          </Text>
+        </Stack>
+      </Center>
+    );
   }
 
   if (!user) {
