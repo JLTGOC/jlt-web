@@ -51,6 +51,7 @@ Use this checklist to execute and verify optimizations consistently.
 
 - Run required project validation commands for touched scope.
 - Confirm no behavior regressions in affected flows.
+- Capture after-change metrics for the same baseline category (LCP/INP/TBT, route load, bundle size).
 - Record what changed, measured impact, and remaining tradeoffs.
 - Record whether remediation was centralized or local, with rationale.
 

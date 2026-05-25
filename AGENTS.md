@@ -45,6 +45,17 @@ Use `.agents/skills/` as the primary routing mechanism:
 
 If multiple concerns apply, combine the minimum necessary set of skills and execute them in a clear sequence.
 
+## Bulletproof React Alignment
+
+Use these principles to keep skills and guidance aligned with Bulletproof React:
+
+1. Favor feature-first structure with clear boundaries and unidirectional flow (`Shared -> Features -> App`).
+2. Prefer direct imports, absolute imports when available (for example `@/`), and consistent kebab-case naming.
+3. Default to integration tests for feature behavior, add e2e for critical journeys, and keep unit tests focused on pure logic.
+4. Centralize API error policies, use localized error boundaries, and ensure production error tracking with source maps.
+5. Document token storage tradeoffs, sanitize untrusted input, and enforce route + action-level authorization checks.
+6. Use route-level code splitting, keep state local, and optimize rendering, media, and prefetching with measurable evidence.
+
 ## Final Check
 
 Do not finalize work until you have confirmed:

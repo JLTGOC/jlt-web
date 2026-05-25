@@ -14,6 +14,7 @@ import type {
   IssuedQuotationResource,
   QuotationResource,
 } from "@/features/quotations/types/quotations.types";
+import { RATE_VALIDITY_FIELD } from "@/features/quotations/utils/quotationDetailFields";
 
 interface BuildViewerStateFromIssuedQuotationParams {
   quotation: QuotationResource;
@@ -47,12 +48,20 @@ function mapQuotationDetails(
 
   const customFields: Record<string, string> = {};
   template.custom_fields.forEach((field) => {
+    if (
+      field.id === RATE_VALIDITY_FIELD.id ||
+      field.label === RATE_VALIDITY_FIELD.label
+    ) {
+      return;
+    }
+
     customFields[field.id] = detailValuesByLabel.get(field.label) ?? "";
   });
 
   return {
     subject: issuedQuotation.subject ?? "",
     message: issuedQuotation.message ?? "",
+    rate_validity: detailValuesByLabel.get(RATE_VALIDITY_FIELD.label) ?? "",
     custom_fields: customFields,
   };
 }

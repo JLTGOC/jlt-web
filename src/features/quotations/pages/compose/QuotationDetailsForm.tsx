@@ -11,6 +11,7 @@ import {
   type QuotationDetailsValues,
 } from "@/features/quotations/schemas/compose.schema";
 import type { QuotationTemplate } from "@/features/quotations/types/compose.types";
+import { RATE_VALIDITY_FIELD } from "@/features/quotations/utils/quotationDetailFields";
 
 interface QuotationDetailsFormProps {
   id: string;
@@ -57,7 +58,11 @@ export function QuotationDetailsForm({
   return (
     <form id={id} onSubmit={handleSubmit(onSubmit)} noValidate>
       <Stack gap="md" mt="md">
-        <QuotationCustomFieldsGrid template={template} control={control} />
+        <QuotationCustomFieldsGrid
+          template={template}
+          control={control}
+          fixedFields={[RATE_VALIDITY_FIELD]}
+        />
 
         <TextInputField control={control} name="subject" label="SUBJECT" />
 

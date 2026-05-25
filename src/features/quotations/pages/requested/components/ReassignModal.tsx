@@ -1,4 +1,4 @@
-import { Button, Group, Modal, Select, Text } from "@mantine/core";
+import { Button, Group, Modal, Select, Stack, Text } from "@mantine/core";
 import { CheckCircle } from "@nine-thirty-five/material-symbols-react/outlined";
 
 type Reassignprops = {
@@ -21,10 +21,10 @@ export default function ReassignModal({
   reassignModalOpen,
   setReassignModalOpen,
   setReassignAcceptModalOpen,
-  setReassignRejectModalOpen,
+  setReassignRejectModalOpen: _setReassignRejectModalOpen,
   selectedQuotation,
   reassignPersonels,
-  reassignSpecificDetails,
+  reassignSpecificDetails: _reassignSpecificDetails,
   setReassignStatus,
   reassignASId,
   setReassignASId,
@@ -55,74 +55,65 @@ export default function ReassignModal({
     <Modal
       opened={reassignModalOpen}
       onClose={onClose}
-      title="REASSIGNMENT REQUEST"
+      title="ASSIGN TO ANOTHER PERSON IN CHARGE"
       centered
-      size={600}
-      overlayProps={{ color: "#121f4a", opacity: 0.55 }}
+      size={560}
+      overlayProps={{ color: "#121f4a", opacity: 0.5 }}
       styles={{
         content: {
-          borderRadius: "0.375rem",
+          borderRadius: "0.5rem",
           overflow: "hidden",
+          background: "#f7f7f7",
         },
         header: {
-          background: "#e8e8e8",
-          borderBottom: "1px solid #d7d7d7",
-          minHeight: "3.125rem",
-          padding: "0.75rem 1.5rem",
+          background: "#e2e2e2",
+          borderBottom: "1px solid #d4d4d4",
+          minHeight: "3rem",
+          padding: "0.65rem 1.25rem",
         },
         title: {
           color: "#16345b",
-          fontSize: "1.2rem",
+          fontSize: "1.25rem",
           fontWeight: 700,
-          letterSpacing: "0.02em",
+          letterSpacing: "0.01em",
           textTransform: "uppercase",
         },
         close: {
           color: "#0f1427",
+          width: "1.8rem",
+          height: "1.8rem",
         },
         body: {
-          padding: "1.5rem",
+          padding: "1.15rem 1.25rem 1.25rem",
         },
       }}
     >
-      <Group gap={6} align="flex-start" mb={4}>
-        <Text c="#7b7b7b" fz=".9rem" w={"50%"}>
+      <Group gap={8} align="flex-start" mb={10}>
+        <Text c="#8a8a8a" fz="0.78rem" w="50%">
           Quotation Request Ref. No
         </Text>
-        <Text c="#1e3049" fz=".9rem" fw={600}>
+        <Text c="#1e3049" fz="0.8rem" fw={700}>
           {selectedQuotation?.reference_number ?? "-"}
         </Text>
       </Group>
-      <Group gap={6} align="flex-start" mb={4}>
-        <Text c="#7b7b7b" fz=".9rem" w={"50%"}>
-          From:
+
+      <Stack gap={4} mb={12}>
+        <Text c="#1f1f1f" fz="0.88rem">
+          You are about to transfer this request to another person in charge
         </Text>
-        <Text c="#1e3049" fz=".9rem" fw={500}>
-          {selectedQuotation?.account_specialist ??
-            selectedQuotation?.prepared_by ??
-            "-"}
+        <Text c="#1f1f1f" fz="0.84rem">
+          • The current assignee will lose access to this request.
         </Text>
-      </Group>
-      <Group gap={6} align="flex-start" mb={4}>
-        <Text c="#7b7b7b" fz=".9rem" w={"50%"}>
-          Reason :
+        <Text c="#1f1f1f" fz="0.84rem">
+          • The new assignee will take full ownership.
         </Text>
-        <Text c="#1e3049" fz=".9rem" fw={500}>
-          {reassignSpecificDetails?.reason ?? "-"}
-        </Text>
-      </Group>
-      <Text c="#7b7b7b" fz="1rem" mb={2}>
-        Additional Details
-      </Text>
-      <Text c="#1e3049" fz=".9rem" lh={1.4} mb="1rem">
-        {reassignSpecificDetails?.additional_details ?? "-"}
-      </Text>
+      </Stack>
 
       <Select
-        mb=".9rem"
+        mb="1.15rem"
         size="md"
-        radius="sm"
-        placeholder="Select handler"
+        radius="md"
+        placeholder="SELECT PERSON IN CHARGE"
         data={reassignOptions}
         value={reassignASId !== null ? String(reassignASId) : null}
         onChange={(val) => {
@@ -134,19 +125,44 @@ export default function ReassignModal({
         }}
         searchable
         nothingFoundMessage="No handlers found"
+        rightSection={<Text c="#7c7c7c">›</Text>}
+        styles={{
+          input: {
+            minHeight: "2.95rem",
+            borderColor: "#c9c9c9",
+            color: "#636363",
+            fontSize: "0.83rem",
+            fontWeight: 500,
+            letterSpacing: "0.01em",
+            textTransform: "uppercase",
+            background: "#fdfdfd",
+          },
+          dropdown: {
+            borderColor: "#c9c9c9",
+          },
+          option: {
+            fontSize: "0.84rem",
+          },
+        }}
       />
 
       <Group grow>
         <Button
-          h={40}
+          h={42}
           radius="md"
           leftSection={<CheckCircle width={18} />}
           styles={{
             root: {
-              background: "#4a7f72",
+              background: "#4f8277",
               "&:hover": {
-                background: "#3f6d62",
+                background: "#446f65",
               },
+            },
+            label: {
+              color: "#ffffff",
+              fontSize: "0.9rem",
+              fontWeight: 500,
+              letterSpacing: "0.01em",
             },
           }}
           tt="uppercase"
@@ -160,30 +176,28 @@ export default function ReassignModal({
           Reassign
         </Button>
         <Button
-          h={40}
+          h={42}
           radius="md"
           tt="uppercase"
           styles={{
             root: {
-              background: "#b24955",
+              background: "#e3e3e3",
               "&:hover": {
-                background: "#9e3d48",
+                background: "#d7d7d7",
               },
             },
             label: {
-                color: "#ffffff",
-                fontSize: ".9rem",
-                fontWeight: 500,
-                letterSpacing: "0.01em",
-              },
+              color: "#27324c",
+              fontSize: "0.9rem",
+              fontWeight: 500,
+              letterSpacing: "0.01em",
+            },
           }}
           onClick={() => {
-            setReassignStatus("REJECTED");
             setReassignModalOpen(false);
-            setReassignRejectModalOpen(true);
           }}
         >
-          Decline
+          Cancel
         </Button>
       </Group>
     </Modal>

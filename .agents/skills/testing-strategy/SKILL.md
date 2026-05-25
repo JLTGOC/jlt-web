@@ -1,6 +1,6 @@
 ---
 name: testing-strategy
-description: "Design and enforce an integration-first testing strategy for React and Vite applications using Vitest, Testing Library, Playwright, and MSW. Use when requests mention tests, regressions, reliability, QA coverage, integration tests, or e2e checks."
+description: "Design and enforce an integration-first testing strategy using Vitest, Testing Library, Playwright, and MSW. Use whenever a task mentions tests, regressions, reliability, QA coverage, integration tests, e2e checks, or user-flow validation, even if only implied."
 argument-hint: 'Provide scope and strictness, for example: "quotations billing standard" or "auth login strict"'
 ---
 
@@ -34,10 +34,11 @@ Use these references as the source of truth while executing this skill.
 4. Add integration tests for feature flows and component-to-component/API interaction.
 5. Add e2e tests for critical journeys that must work in production-like conditions.
 6. Use API mocking through MSW when backend contracts are unavailable or when deterministic test control is required.
-7. For mutations, test optimistic UI paths explicitly: immediate UI update, rollback on failure, and eventual cache/state reconciliation.
-8. Prefer testing shared/global fixes when behavior spans multiple surfaces; avoid regression tests that only validate one local instance of a repeated pattern.
-9. Run targeted tests first, then broader test suites.
-10. Report what is covered, what remains untested, and why.
+7. Prefer Testing Library queries that reflect user intent (role/text/label) over implementation details.
+8. For mutations, test optimistic UI paths explicitly: immediate UI update, rollback on failure, and eventual cache/state reconciliation.
+9. Prefer testing shared/global fixes when behavior spans multiple surfaces; avoid regression tests that only validate one local instance of a repeated pattern.
+10. Run targeted tests first, then broader test suites.
+11. Report what is covered, what remains untested, and why.
 
 ## Operating Modes
 

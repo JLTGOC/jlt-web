@@ -38,6 +38,14 @@ Follow these project rules for all changes in this workspace.
 - Avoid cross-feature imports.
 - Compose features at `src/app` level when combining concerns.
 - Maintain unidirectional flow: shared -> features -> app.
+- Prefer absolute imports (for example `@/components/...`) when configured.
+
+## Project Standards
+
+- Respect ESLint and Prettier conventions in the repo.
+- Prefer TypeScript-first changes; avoid weakening types.
+- Keep file and folder names consistent (kebab-case preferred).
+- Avoid introducing new barrel files or wide re-export patterns.
 
 ## API Placement
 
@@ -62,6 +70,20 @@ Follow these project rules for all changes in this workspace.
 - Keep preview/PDF derivations consistent by sharing utility logic.
 - Filter out empty charge rows and empty billing sections for document outputs.
 - Keep billing validation aligned with output rendering rules.
+
+## Error Handling
+
+- Centralize API error policies through a shared client/interceptor.
+- Use localized React error boundaries to contain runtime failures.
+- Ensure user-facing error messages are actionable and do not leak internals.
+- Track production errors and ensure source maps are available for debugging.
+
+## Security
+
+- Client-side checks improve UX, but server-side authorization remains mandatory.
+- Document token storage tradeoffs (in-memory vs localStorage vs HttpOnly cookies).
+- Sanitize untrusted content before rendering.
+- Enforce both route-level and action-level authorization checks.
 
 ## Performance
 
@@ -122,6 +144,13 @@ const [state, setState] = React.useState(() => expensiveInit());
 
 - Use route params/query params for shareable navigational state.
 - Keep temporary UI-only state out of URL unless deep-linking is needed.
+
+## Testing
+
+- Default to integration tests for feature behavior; unit tests for pure logic.
+- Use Testing Library for user-facing assertions.
+- Use Playwright for critical e2e journeys and smoke coverage.
+- Use MSW for deterministic API behavior in tests and local development.
 
 ## Safety
 

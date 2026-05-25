@@ -9,21 +9,20 @@ import {
   TextInput,
 } from "@mantine/core";
 import { Add } from "@nine-thirty-five/material-symbols-react/rounded";
-import { notifications } from "@mantine/notifications";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
 import { PageCard } from "@/components/PageCard";
 import { ToolModal } from "@/features/tools/components/ToolModal";
 import {
   subServicesService,
-  type StoreSubServiceRequest,
   type SubServiceResource,
   type SubServiceStatus,
-  type UpdateSubServiceRequest,
 } from "@/features/tools/api/sub-services.service";
 import { toolsQueryKeys } from "@/features/tools/config/queryKeys";
 import { SERVICE_TYPES } from "@/features/tools/config/servicesConfig";
+import { useSubServiceMutations } from "../hooks/useSubServiceMutations";
+import { toolNotifications } from "../utils/toolNotifications";
 
 const columns: AppTableColumn<SubServiceResource>[] = [
   {
@@ -38,7 +37,6 @@ function normalizeName(value: string) {
 }
 
 export function SubServicesPage() {
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { serviceType } = useParams();
   const [modalOpen, setModalOpen] = useState(false);
@@ -66,141 +64,8 @@ export function SubServicesPage() {
     enabled: Boolean(selectedService),
   });
 
-  const createMutation = useMutation({
-    mutationFn: (payload: StoreSubServiceRequest) =>
-      subServicesService.createSubService(payload),
-    onMutate: async (payload) => {
-      await queryClient.cancelQueries({ queryKey });
-      const previous = queryClient.getQueryData(queryKey);
-
-      queryClient.setQueryData(
-        queryKey,
-        (current: { data?: SubServiceResource[] } | undefined) => ({
-          ...current,
-          data: [
-            ...(current?.data ?? []),
-            {
-              id: Date.now(),
-              name: payload.name,
-              status: "ENABLED",
-              service_type: selectedService!.name,
-            },
-          ],
-        }),
-      );
-
-      return { previous };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-      notifications.show({
-        title: "Success",
-        message: "Sub-service created successfully",
-        color: "teal",
-      });
-      closeModal();
-    },
-    onError: (_error, _payload, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(queryKey, context.previous);
-      }
-
-      notifications.show({
-        title: "Error",
-        message: "Failed to create sub-service",
-        color: "red",
-      });
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({
-      id,
-      payload,
-    }: {
-      id: number;
-      payload: UpdateSubServiceRequest;
-    }) => subServicesService.updateSubService(id, payload),
-    onMutate: async ({ id, payload }) => {
-      await queryClient.cancelQueries({ queryKey });
-      const previous = queryClient.getQueryData(queryKey);
-
-      queryClient.setQueryData(
-        queryKey,
-        (current: { data?: SubServiceResource[] } | undefined) => ({
-          ...current,
-          data: (current?.data ?? []).map((item) =>
-            item.id === id
-              ? {
-                  ...item,
-                  name: payload.name ?? item.name,
-                  status: payload.status ?? item.status,
-                }
-              : item,
-          ),
-        }),
-      );
-
-      return { previous };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-      notifications.show({
-        title: "Success",
-        message: "Sub-service updated successfully",
-        color: "teal",
-      });
-      closeModal();
-    },
-    onError: (_error, _payload, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(queryKey, context.previous);
-      }
-
-      notifications.show({
-        title: "Error",
-        message: "Failed to update sub-service",
-        color: "red",
-      });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => subServicesService.deleteSubService(id),
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey });
-      const previous = queryClient.getQueryData(queryKey);
-
-      queryClient.setQueryData(
-        queryKey,
-        (current: { data?: SubServiceResource[] } | undefined) => ({
-          ...current,
-          data: (current?.data ?? []).filter((item) => item.id !== id),
-        }),
-      );
-
-      return { previous };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-      notifications.show({
-        title: "Success",
-        message: "Sub-service deleted successfully",
-        color: "teal",
-      });
-    },
-    onError: (_error, _payload, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(queryKey, context.previous);
-      }
-
-      notifications.show({
-        title: "Error",
-        message: "Failed to delete sub-service",
-        color: "red",
-      });
-    },
-  });
+  const { createMutation, updateMutation, deleteMutation } =
+    useSubServiceMutations(queryKey);
 
   const rows = useMemo(
     () => subServicesResponse?.data ?? [],
@@ -271,27 +136,29 @@ export function SubServicesPage() {
 
     const normalizedName = normalizeName(draftName);
     if (!normalizedName) {
-      notifications.show({
-        title: "Validation",
-        message: "Sub-service name is required",
-        color: "orange",
-      });
+      toolNotifications.warning("Sub-service name is required");
       return;
     }
 
     if (editingItem) {
-      updateMutation.mutate({
-        id: editingItem.id,
-        payload: { name: normalizedName },
-      });
+      updateMutation.mutate(
+        {
+          id: editingItem.id,
+          payload: { name: normalizedName },
+        },
+        { onSuccess: closeModal },
+      );
       return;
     }
 
-    createMutation.mutate({
-      name: normalizedName,
-      service_type_id: selectedService.id,
-      service_type: selectedService.name,
-    });
+    createMutation.mutate(
+      {
+        name: normalizedName,
+        service_type_id: selectedService.id,
+        service_type: selectedService.name,
+      },
+      { onSuccess: closeModal },
+    );
   };
 
   if (!selectedService) {

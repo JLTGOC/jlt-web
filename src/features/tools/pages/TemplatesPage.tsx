@@ -1,9 +1,8 @@
 import { useDisclosure } from "@mantine/hooks";
 import { Group, ActionIcon, Button } from "@mantine/core";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
-import { notifications } from "@mantine/notifications";
 import {
   Add,
   Settings,
@@ -15,6 +14,7 @@ import type { QuotationTemplateResource } from "@/types/templates";
 import { templatesService } from "../api/templates.service";
 import { toolsQueryKeys } from "../config/queryKeys";
 import { ToolModal } from "../components/ToolModal";
+import { useTemplateListMutations } from "../hooks/useTemplateListMutations";
 
 interface TemplateType {
   id: string;
@@ -44,7 +44,6 @@ const SETTINGS: SettingsOption[] = [
 
 export function TemplatesPage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [addModalOpened, { open: openAddModal, close: closeAddModal }] =
     useDisclosure(false);
   const [
@@ -73,29 +72,7 @@ export function TemplatesPage() {
     },
   );
 
-  const toggleMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: boolean }) =>
-      templatesService.toggleTemplateStatus(id, status),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => templatesService.deleteTemplate(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.templates });
-      notifications.show({
-        title: "Success",
-        message: "Template deleted successfully",
-        color: "teal",
-      });
-    },
-    onError: () => {
-      notifications.show({
-        title: "Error",
-        message: "Failed to delete template",
-        color: "red",
-      });
-    },
-  });
+  const { toggleMutation, deleteMutation } = useTemplateListMutations();
 
   const templates = useMemo(
     () => templatesResponse?.data ?? [],
@@ -145,23 +122,6 @@ export function TemplatesPage() {
       toggleMutation.mutate(
         { id, status: value },
         {
-          onSuccess: () => {
-            queryClient.invalidateQueries({
-              queryKey: toolsQueryKeys.templates,
-            });
-            notifications.show({
-              title: "Success",
-              message: "Template status updated",
-              color: "teal",
-            });
-          },
-          onError: () => {
-            notifications.show({
-              title: "Error",
-              message: "Failed to update template status",
-              color: "red",
-            });
-          },
           onSettled: () => {
             setPendingToggleIds((prev) =>
               prev.filter((itemId) => itemId !== id),

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatQuotationAmount,
   getBillingPresentationRows,
-} from "@/features/quotations/utils/billingPresentation";
+} from "../../src/features/quotations/utils/billingPresentation";
 
 describe("billing presentation utils", () => {
   it("formats numbers consistently for preview and PDF", () => {

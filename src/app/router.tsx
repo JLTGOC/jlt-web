@@ -42,10 +42,14 @@ const ShipmentDocumentsPage = lazy(() =>
 const JobOrdersPage = lazy(
   () => import("@/app/routes/app/job-orders/JobOrdersPage"),
 );
-const JobOrderDetailsPage = lazy(() =>
-  import("@/features/job-order/components/JobOrderDetailsPage").then((m) => ({
-    default: m.JobOrderDetailsPage,
-  })),
+const JobOrderDetailPage = lazy(
+  () => import("@/features/job-order/pages/shared/JobOrderDetailPage"),
+);
+const JobOrderClientDetailsPage = lazy(
+  () => import("@/features/job-order/pages/shared/JobOrderClientDetailPage"),
+);
+const JobOrderClientDocumentsPage = lazy(
+  () => import("@/features/job-order/pages/shared/JobOrderClientDocumentsPage"),
 );
 
 //Account imports
@@ -149,7 +153,18 @@ export const router = createBrowserRouter([
           { path: "shipments", Component: Shipments },
 
           // Job Orders routes — most specific first
-          { path: "job-orders/:jobOrderId", Component: JobOrderDetailsPage },
+          {
+            path: "job-orders/:jobOrderId/client-details",
+            Component: JobOrderClientDetailsPage,
+          },
+          {
+            path: "job-orders/:jobOrderId/client-details/documents",
+            Component: JobOrderClientDocumentsPage,
+          },
+          {
+            path: "job-orders/:jobOrderId/details",
+            Component: JobOrderDetailPage,
+          },
           { path: "job-orders", Component: JobOrdersPage },
 
           // Account routes — sidebar only links to /accounts.
@@ -178,6 +193,7 @@ export const router = createBrowserRouter([
           { path: "tools/services/:serviceType", Component: Tools },
           { path: "tools/services", Component: Tools },
           { path: "tools/messages", Component: Tools },
+          { path: "tools/planningTimeline", Component: Tools },
           { path: "tools/templates/new", Component: Tools },
           { path: "tools/templates/:templateId/edit", Component: Tools },
           { path: "tools/templates", Component: Tools },

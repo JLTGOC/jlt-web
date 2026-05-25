@@ -3,12 +3,11 @@ import type { UserResource } from "@/types/api";
 
 interface AuthState {
   user: UserResource | null;
-  token: string | null;
   isAuthenticated: boolean;
 }
 
 interface AuthActions {
-  login: (user: UserResource, token: string) => void;
+  login: (user: UserResource) => void;
   logout: () => void;
   setUser: (user: UserResource) => void;
   initAuth: () => void;
@@ -16,8 +15,26 @@ interface AuthActions {
 
 type AuthStore = AuthState & AuthActions;
 
-const TOKEN_KEY = "auth_token";
 const USER_KEY = "auth_user";
+// Cookie-based auth: persist only user snapshot for UI (no JS tokens).
+
+const readStoredUser = (): UserResource | null => {
+  const userStr = localStorage.getItem(USER_KEY);
+
+  if (!userStr) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(userStr) as UserResource;
+  } catch (error) {
+    localStorage.removeItem(USER_KEY);
+    console.error("Failed to parse stored user data:", error);
+    return null;
+  }
+};
+
+const storedUser = readStoredUser();
 
 /**
  * Authentication Store
@@ -36,9 +53,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
   // ==========================================
   // Initial State
   // ==========================================
-  user: null,
-  token: null,
-  isAuthenticated: false,
+  user: storedUser,
+  isAuthenticated: Boolean(storedUser),
 
   // ==========================================
   // Actions
@@ -50,17 +66,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
    *
    * @example
    * const response = await authService.login({ email, password });
-   * authStore.login(response.data.user, response.data.token);
+   * authStore.login(response.data.user);
    */
-  login: (user: UserResource, token: string) => {
+  login: (user: UserResource) => {
     // Save to localStorage for persistence
-    localStorage.setItem(TOKEN_KEY, token);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
 
     // Update Zustand state
     set({
       user,
-      token,
       isAuthenticated: true,
     });
   },
@@ -75,13 +89,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
    */
   logout: () => {
     // Clear localStorage
-    localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
 
     // Clear Zustand state
     set({
       user: null,
-      token: null,
       isAuthenticated: false,
     });
   },
@@ -99,44 +111,22 @@ export const useAuthStore = create<AuthStore>((set) => ({
     localStorage.setItem(USER_KEY, JSON.stringify(user));
 
     // Update Zustand state
-    set({ user });
+    set({
+      user,
+      isAuthenticated: true,
+    });
   },
 
   /**
    * Initialize auth state from localStorage
-   * MUST be called in main.tsx BEFORE rendering
-   *
-   * This hydrates the store with saved auth data on app load,
-   * preventing the "flash of login page" issue
-   *
-   * @example
-   * // main.tsx
-   * useAuthStore.getState().initAuth();
-   * createRoot(document.getElementById('root')!).render(<App />);
    */
   initAuth: () => {
-    // Read from localStorage
-    const token = localStorage.getItem(TOKEN_KEY);
-    const userStr = localStorage.getItem(USER_KEY);
+    const user = readStoredUser();
 
-    if (token && userStr) {
-      try {
-        // Parse user data
-        const user = JSON.parse(userStr) as UserResource;
-
-        // Hydrate Zustand state
-        set({
-          user,
-          token,
-          isAuthenticated: true,
-        });
-      } catch (error) {
-        // If parsing fails, clear corrupted data
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(USER_KEY);
-        console.error("Failed to parse stored user data:", error);
-      }
-    }
+    set({
+      user,
+      isAuthenticated: Boolean(user),
+    });
   },
 }));
 
@@ -172,6 +162,6 @@ export const useIsAuthenticated = () =>
  *
  * @example
  * const token = useAuthToken();
- * // Use in API calls
+ * // Cookie-based auth returns null
  */
-export const useAuthToken = () => useAuthStore((state) => state.token);
+export const useAuthToken = (): string | null => null;

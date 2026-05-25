@@ -39,6 +39,10 @@ const quotation: QuotationResource = {
   documents: "No documents available.",
   remarks: null,
   conversation_id: "conv-1",
+  person_in_charge: null,
+  qtn_created_at: null,
+  qtn_accepted_at: null,
+  qtn_status: null,
 };
 
 const template: QuotationTemplate = {

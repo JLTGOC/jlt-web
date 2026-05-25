@@ -1,15 +1,22 @@
 // JobOrderListItem and related types for the Job Order feature
 
-export type {FetchJobOrdersParams, JobOrderResponse, JobOrdersResponse, CountsResponse} from "./operations";
+import type { JobOrderHistoryItem } from "./jobOrderDetail";
+
+export type {
+  FetchJobOrdersParams,
+  JobOrderResponse,
+  JobOrdersResponse,
+  CountsResponse,
+} from "./operations";
 
 export interface JobOrderListItem {
   id: string | number;
   reference_number: string;
   client: string;
   created_at: string;
-  assignment_status: "AVAILABLE" | "ASSIGNED" | string;
-  service: string;
-  trade_type?: "Import" | "Export";
+  assignment_status: JobOrderStatus;
+  service: JobOrderServiceType;
+  trade_type?: JobOrderTradeType;
   status?: "Accepted" | "Pending";
   logistics_service?: {
     BL?: string;
@@ -23,7 +30,7 @@ export interface JobOrderListItem {
   };
   regulatory_service?: {
     application_type: string;
-    assistance_type?: string;
+    regulatory_assistance?: string;
     client_type?: JobOrderClientType;
   };
   person_in_charge?: {
@@ -50,6 +57,10 @@ export interface JobOrderQuotationDetailsResponse {
   created_at: string;
   updated_at: string;
   issued_quotation_id?: number | string | null;
+  job_order?: {
+    reference_number?: string | null;
+    person_in_charge?: string | null;
+  } | null;
   company?: {
     name: string;
     address: string;
@@ -72,8 +83,9 @@ export interface JobOrderQuotationDetailsResponse {
   shipment?: {
     origin: string;
     destination: string;
+    remarks?: string | null;
   } | null;
-  regulatory_service?: any | null;
+  regulatory_service?: Record<string, unknown> | null;
   quotation_file: Array<{
     id: number | string;
     file_name: string;
@@ -90,12 +102,36 @@ export interface JobOrderQuotationDetailsResponse {
     created_at: string;
     updated_at: string;
   }>;
+  history?: JobOrderHistoryItem[];
+  histories?: JobOrderHistoryItem[];
+  activity_logs?: JobOrderHistoryItem[];
+  activities?: JobOrderHistoryItem[];
+  timeline?: JobOrderHistoryItem[];
+  events?: JobOrderHistoryItem[];
   remarks?: string | null;
   conversation_id?: number | string | null;
 }
 
-export type JobOrderClientType = "new" | "old";
+export interface QuotationFilesIndexResponse {
+  proposal_files?: Array<{
+    id: number | string;
+    file_name: string;
+    file_url: string;
+    file_type: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+  requested_files?: Array<{
+    id: number | string;
+    file_name: string;
+    file_url: string;
+    file_type: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+};
 
+export type JobOrderClientType = "NEW" | "OLD";
 
 export type JobOrderServiceType = "Logistics" | "Regulatory";
 

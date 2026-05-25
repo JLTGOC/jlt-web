@@ -25,6 +25,11 @@ import type {
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
 import { formatQuotationAmount } from "@/features/quotations/utils/billingPresentation";
 import { buildQuotationDocumentViewModel } from "@/features/quotations/utils/quotationDocumentViewModel";
+import {
+  formatQuotationDetailDate,
+  isRateValidityField,
+  RATE_VALIDITY_FIELD,
+} from "@/features/quotations/utils/quotationDetailFields";
 import classes from "./QuotationPreview.module.css";
 
 interface QuotationPreviewProps {
@@ -183,7 +188,13 @@ export function QuotationPreview({
         {documentViewModel.resolvedClientInformationFields.length > 0 && (
           <SimpleGrid
             cols={2}
-            mb={template.custom_fields.length > 0 ? "xs" : "lg"}
+            mb={
+              template.custom_fields.some(
+                (field) => !isRateValidityField(field),
+              )
+                ? "xs"
+                : "lg"
+            }
             spacing="xs"
           >
             {documentViewModel.resolvedClientInformationFields.map((field) => (
@@ -210,23 +221,38 @@ export function QuotationPreview({
           </SimpleGrid>
         )}
 
-        {template.custom_fields.length > 0 && (
+        {quotationDetails.rate_validity ? (
+          <Group gap="xs" mb="lg">
+            <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
+              {RATE_VALIDITY_FIELD.label}:
+            </Text>
+            <Text size="xs" fw={500} className={classes.noWordBreak}>
+              {formatQuotationDetailDate(quotationDetails.rate_validity)}
+            </Text>
+          </Group>
+        ) : null}
+
+        {template.custom_fields.some(
+          (field) => !isRateValidityField(field),
+        ) && (
           <SimpleGrid cols={2} mb="lg" spacing="xs">
-            {template.custom_fields.map((field) => (
-              <Group key={field.id} gap="xs" align="flex-start">
-                <Text
-                  size="xs"
-                  c="dimmed"
-                  style={{ flexShrink: 0 }}
-                  className={classes.noWordBreak}
-                >
-                  {field.label}:
-                </Text>
-                <Text size="xs" fw={500} className={classes.noWordBreak}>
-                  {quotationDetails.custom_fields?.[field.id] ?? "—"}
-                </Text>
-              </Group>
-            ))}
+            {template.custom_fields
+              .filter((field) => !isRateValidityField(field))
+              .map((field) => (
+                <Group key={field.id} gap="xs" align="flex-start">
+                  <Text
+                    size="xs"
+                    c="dimmed"
+                    style={{ flexShrink: 0 }}
+                    className={classes.noWordBreak}
+                  >
+                    {field.label}:
+                  </Text>
+                  <Text size="xs" fw={500} className={classes.noWordBreak}>
+                    {quotationDetails.custom_fields?.[field.id] ?? "—"}
+                  </Text>
+                </Group>
+              ))}
           </SimpleGrid>
         )}
 

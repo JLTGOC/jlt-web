@@ -4,24 +4,35 @@ import { SelectField } from "@/components/form/selectFields";
 import { DateInputField } from "@/components/form/valueFields";
 import type { Control } from "react-hook-form";
 import type { QuotationDetailsValues } from "@/features/quotations/schemas/compose.schema";
-import type { QuotationTemplate } from "@/features/quotations/types/compose.types";
+import type {
+  CustomField,
+  QuotationTemplate,
+} from "@/features/quotations/types/compose.types";
+import { isRateValidityField } from "@/features/quotations/utils/quotationDetailFields";
 
 interface QuotationCustomFieldsGridProps {
   template: QuotationTemplate;
   control: Control<QuotationDetailsValues>;
+  fixedFields?: CustomField[];
 }
 
 export function QuotationCustomFieldsGrid({
   template,
   control,
+  fixedFields = [],
 }: QuotationCustomFieldsGridProps) {
-  if (template.custom_fields.length === 0) {
+  const fields = [
+    ...template.custom_fields.filter((field) => !isRateValidityField(field)),
+    ...fixedFields,
+  ];
+
+  if (fields.length === 0) {
     return null;
   }
 
   return (
     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-      {template.custom_fields.map((field) => {
+      {fields.map((field) => {
         if (field.type === "select") {
           return (
             <SelectField
@@ -40,7 +51,11 @@ export function QuotationCustomFieldsGrid({
             <DateInputField
               key={field.id}
               control={control}
-              name={`custom_fields.${field.id}`}
+              name={
+                field.id === "rate_validity"
+                  ? "rate_validity"
+                  : `custom_fields.${field.id}`
+              }
               label={field.label.toUpperCase()}
               placeholder="MM/DD/YYYY"
               valueFormat="MM/DD/YYYY"
@@ -53,7 +68,11 @@ export function QuotationCustomFieldsGrid({
           <TextInputField
             key={field.id}
             control={control}
-            name={`custom_fields.${field.id}`}
+            name={
+              field.id === "rate_validity"
+                ? "rate_validity"
+                : `custom_fields.${field.id}`
+            }
             label={field.label.toUpperCase()}
           />
         );

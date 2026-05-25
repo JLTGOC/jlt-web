@@ -18,7 +18,7 @@ export default function LoginPage() {
   const { mutate, isPending } = useMutation({
     mutationFn: (credentials: LoginRequest) => authService.login(credentials),
     onSuccess: (response) => {
-      login(response.data.user, response.data.token);
+      login(response.data.user);
       navigate("/", { replace: true });
     },
     onError: () => {
@@ -42,16 +42,16 @@ export default function LoginPage() {
         overflow: "hidden",
       }}
     >
+      <Image src={jlt} w="30%" pos="absolute" bottom={0} top={120} left={130} />
+      <Image src={wave1} w={"71.4vw"} pos="absolute" bottom={0} />
       <Image
-        src={jlt}
-        w="30%"
+        src={wave2}
+        w={"47vw"}
         pos="absolute"
         bottom={0}
-        top={120}
-        left={130}
+        right={-10}
+        style={{ zIndex: -1 }}
       />
-      <Image src={wave1} w={"71.4vw"} pos="absolute" bottom={0} />
-      <Image src={wave2} w={"47vw"} pos="absolute" bottom={0} right={-10} style={{zIndex: -1}} />
       <Image
         src={wave3}
         w={"45vw"}

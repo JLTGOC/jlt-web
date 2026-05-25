@@ -4,6 +4,7 @@ import { hasAnyCharge } from "@/features/quotations/utils/billing";
 export const quotationDetailsFixedSchema = z.object({
   subject: z.string().optional(),
   message: z.string().optional(),
+  rate_validity: z.string().optional(),
 });
 
 export const customFieldsSchema = z.record(z.string(), z.string().optional());

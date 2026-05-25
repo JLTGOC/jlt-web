@@ -7,7 +7,7 @@ interface StatusCellProps {
   id?: string | number;
 }
 
-export function StatusCell({ status, dateAccepted, id }: StatusCellProps) {
+export function StatusCell({ status, dateAccepted }: StatusCellProps) {
   if (!status)
     return (
       <Text size="sm" c="dimmed">
