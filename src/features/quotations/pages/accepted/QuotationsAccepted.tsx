@@ -1,153 +1,17 @@
-import { useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router";
-import {
-  Article,
-  Download,
-  Print,
-} from "@nine-thirty-five/material-symbols-react/outlined";
-import {
-  AppTable,
-  type AppTableAction,
-  type AppTableColumn,
-} from "@/components/AppTable";
-import { PageCard } from "@/components/PageCard";
-import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
-import {
-  fetchAcceptedQuotations,
-  fetchQuotation,
-} from "@/features/quotations/api/quotations.api";
-import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
-import type { RespondedQuotationListItem } from "@/features/quotations/types/quotations.types";
-import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
-import {
-  handlePrintProposalFile,
-  handleDownloadProposalFile,
-} from "@/features/quotations/utils/quotationFileActions";
-import { acceptedQueryKeys } from "@/features/quotations/pages/accepted/utils/acceptedQueryKeys";
-
-const COLUMNS: AppTableColumn<RespondedQuotationListItem>[] = [
-  {
-    key: "no",
-    label: "NO.",
-    width: "8%",
-    render: (_row, index) => String(index + 1).padStart(2, "0"),
-  },
-  {
-    key: "reference_number",
-    label: "REFERENCE",
-    width: "18%",
-    render: (row) => row.reference_number,
-  },
-  {
-    key: "date",
-    label: "DATE ACCEPTED",
-    width: "14%",
-    render: (row) => row.date,
-  },
-  {
-    key: "client_name",
-    label: "CLIENT NAME",
-    width: "24%",
-    render: (row) => row.client_name,
-  },
-  {
-    key: "service_type",
-    label: "SERVICE TYPE",
-    width: "14%",
-    render: (row) => row.service_type ?? "—",
-  },
-  {
-    key: "prepared_by",
-    label: "PREPARED BY",
-    width: "18%",
-    render: (row) => row.prepared_by ?? "—",
-  },
-];
+import { AcceptedQuotations } from "@/features/quotations/pages/accepted/components/AcceptedQuotations";
 
 export function QuotationsAccepted() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const {
-    search,
-    searchQuery,
-    perPage,
-    setPerPage,
-    handleSearch,
-    handleSearchChange,
-  } = useQuotationTableSearch();
-
-  const { data, isLoading } = useQuery({
-    queryKey: acceptedQueryKeys.list({ searchQuery, perPage }),
-    queryFn: () =>
-      fetchAcceptedQuotations({
-        search: searchQuery || undefined,
-        perPage,
-      }),
-  });
-
-  const rows = data?.quotations ?? [];
-  const total = data?.pagination.total ?? 0;
-  const count = data?.pagination.count ?? rows.length;
-
-  const actions = useMemo<AppTableAction<RespondedQuotationListItem>[]>(
-    () => [
-      {
-        label: "Make Job Order",
-        icon: <Article width={16} height={16} />,
-        onClick: () => {
-          // TODO: connect to accepted quotation make JO flow.
-        },
-      },
-      {
-        label: "Print",
-        icon: <Print width={16} height={16} />,
-        onClick: (row) => handlePrintProposalFile(row.id),
-      },
-      {
-        label: "Download",
-        icon: <Download width={16} height={16} />,
-        onClick: (row) => handleDownloadProposalFile(row.id),
-      },
-    ],
-    [],
-  );
-
-  const prefetchQuotationDetails = (quotationId: string) => {
-    void queryClient.prefetchQuery({
-      queryKey: quotationQueryKeys.quotationDetails(quotationId),
-      queryFn: () => fetchQuotation(quotationId),
-      staleTime: 30_000,
-    });
-  };
-
   return (
-    <PageCard title="LIST OF ACCEPTED QUOTATION">
-      <AppTable
-        columns={COLUMNS}
-        data={isLoading ? [] : rows}
-        rowKey={(row) => row.id}
-        onRowHover={(row) => prefetchQuotationDetails(row.id)}
-        onRowClick={(row) => {
-          prefetchQuotationDetails(row.id);
-          navigate(
-            quotationRoutes.details({
-              tab: "accepted",
-              quotationId: row.id,
-            }),
-          );
-        }}
-        actions={actions}
-        withEntryControls
-        perPage={perPage}
-        onPerPageChange={setPerPage}
-        total={total}
-        showingCount={count}
-        searchPlaceholder="SEARCH REFERENCE OR CLIENT"
-        searchValue={search}
-        onSearchChange={handleSearchChange}
-        onSearch={handleSearch}
-      />
-    </PageCard>
+    <AcceptedQuotations.Provider>
+      <AcceptedQuotations.Page>
+        <AcceptedQuotations.Layout>
+          <AcceptedQuotations.ClientTabs />
+          <AcceptedQuotations.Panel>
+            <AcceptedQuotations.Filters />
+            <AcceptedQuotations.Tables />
+          </AcceptedQuotations.Panel>
+        </AcceptedQuotations.Layout>
+      </AcceptedQuotations.Page>
+    </AcceptedQuotations.Provider>
   );
 }
