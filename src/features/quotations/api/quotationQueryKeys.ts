@@ -25,6 +25,7 @@ export const quotationQueryKeys = {
       params.dateFilter,
       params.statusFilter,
       params.jobFilter,
+      params.currentPage,
     ] as const,
   quotationDetails: (quotationId?: string) =>
     ["quotation", quotationId] as const,

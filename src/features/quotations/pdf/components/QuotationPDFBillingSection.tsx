@@ -88,59 +88,76 @@ export function QuotationPDFBillingSection({
           </Text>
         </View>
         {displayRows.map((row, index) => (
-          <View key={`${sectionId}-${index}`} style={styles.tableRow}>
-            <Text style={[styles.tableCellBase, styles.colDescription]}>
-              {row.description}
-            </Text>
-            <Text style={[styles.tableCellBase, styles.colCurrency]}>
-              {row.currency}
-            </Text>
-            <Text style={[styles.tableCellBase, styles.colUom]}>{row.uom}</Text>
-            {isPerContainer ? (
+          <View key={`${sectionId}-${index}`}>
+            <View style={styles.tableRow}>
+              <Text style={[styles.tableCellBase, styles.colDescription]}>
+                {row.description}
+              </Text>
+              <Text style={[styles.tableCellBase, styles.colCurrency]}>
+                {row.currency}
+              </Text>
+              <Text style={[styles.tableCellBase, styles.colUom]}>
+                {row.uom}
+              </Text>
+              {isPerContainer ? (
+                <Text
+                  style={[
+                    styles.tableCellBase,
+                    styles.colQuantity,
+                    styles.tableCellRight,
+                  ]}
+                >
+                  {row.quantity}
+                </Text>
+              ) : null}
+              {isPerContainer ? (
+                <Text style={[styles.tableCellBase, styles.colContainer]}>
+                  {row.containerSize}
+                </Text>
+              ) : null}
               <Text
                 style={[
                   styles.tableCellBase,
-                  styles.colQuantity,
+                  styles.colAmount,
                   styles.tableCellRight,
                 ]}
               >
-                {row.quantity}
+                {row.amountText}
               </Text>
-            ) : null}
-            {isPerContainer ? (
-              <Text style={[styles.tableCellBase, styles.colContainer]}>
-                {row.containerSize}
-              </Text>
-            ) : null}
-            <Text
-              style={[
-                styles.tableCellBase,
-                styles.colAmount,
-                styles.tableCellRight,
-              ]}
-            >
-              {row.amountText}
-            </Text>
-            <Text
-              style={[
-                styles.tableCellLast,
-                styles.colTotal,
-                styles.tableCellRight,
-              ]}
-            >
-              {row.totalText}
-            </Text>
-            {row.calculationText ? (
               <Text
                 style={[
                   styles.tableCellLast,
                   styles.colTotal,
                   styles.tableCellRight,
-                  styles.rowNote,
                 ]}
               >
-                {row.calculationText}
+                {row.totalText}
               </Text>
+            </View>
+            {row.calculationText ? (
+              <View
+                style={{
+                  flexDirection: "row",
+                  borderBottom: "0.5pt solid #b9b9b9",
+                }}
+              >
+                <Text
+                  style={[
+                    styles.tableCellBase,
+                    { flex: isPerContainer ? 6.5 : 5.3 },
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.tableCellLast,
+                    styles.colTotal,
+                    styles.tableCellRight,
+                    styles.rowNote,
+                  ]}
+                >
+                  {row.calculationText}
+                </Text>
+              </View>
             ) : null}
           </View>
         ))}

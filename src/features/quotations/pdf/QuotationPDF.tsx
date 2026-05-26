@@ -89,33 +89,42 @@ export function QuotationPDF({
         </Text>
 
         <View style={{ marginBottom: 8 }}>
-          <View style={{ flexDirection: "row" }}>
-            <Text style={[styles.label, { width: 40 }]}>To:</Text>
-            <Text>{quotation.client?.full_name ?? "—"}</Text>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>To:</Text>
+            <Text style={styles.fieldValue}>{quotation.client?.full_name ?? "—"}</Text>
           </View>
           {quotation.client?.company_name ? (
-            <Text style={{ marginLeft: 40 }}>
-              {quotation.client.company_name}
-            </Text>
+            <View style={styles.fieldRow}>
+              <Text style={styles.label} />
+              <Text style={styles.fieldValue}>
+                {quotation.client.company_name}
+              </Text>
+            </View>
           ) : null}
           {quotation.client?.contact_number ? (
-            <Text style={{ marginLeft: 40 }}>
-              {quotation.client.contact_number}
-            </Text>
+            <View style={styles.fieldRow}>
+              <Text style={styles.label} />
+              <Text style={styles.fieldValue}>
+                {quotation.client.contact_number}
+              </Text>
+            </View>
           ) : null}
           {quotation.client?.email ? (
-            <Text style={{ marginLeft: 40 }}>{quotation.client.email}</Text>
+            <View style={styles.fieldRow}>
+              <Text style={styles.label} />
+              <Text style={styles.fieldValue}>{quotation.client.email}</Text>
+            </View>
           ) : null}
         </View>
 
-        <View style={{ flexDirection: "row", marginBottom: 4 }}>
-          <Text style={[styles.label, { width: 80 }]}>Reference No:</Text>
-          <Text>{quotation.reference_number}</Text>
+        <View style={styles.fieldRow}>
+          <Text style={styles.label}>Reference No:</Text>
+          <Text style={styles.fieldValue}>{quotation.reference_number}</Text>
         </View>
 
-        <View style={{ flexDirection: "row", marginBottom: 10 }}>
-          <Text style={[styles.label, { width: 80 }]}>Subject:</Text>
-          <Text>{quotationDetails.subject}</Text>
+        <View style={[styles.fieldRow, { marginBottom: 10 }]}>
+          <Text style={styles.label}>Subject:</Text>
+          <Text style={styles.fieldValue}>{quotationDetails.subject}</Text>
         </View>
 
         <View style={styles.divider} />
@@ -125,37 +134,20 @@ export function QuotationPDF({
         </Text>
 
         {documentViewModel.resolvedClientInformationFields.length > 0 && (
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              marginBottom: template.custom_fields.some(
-                (field) => !isRateValidityField(field),
-              )
-                ? 8
-                : 12,
-            }}
-          >
+          <View style={styles.twoColumnFieldContainer}>
             {documentViewModel.resolvedClientInformationFields.map((field) => (
-              <View
-                key={field.id}
-                style={{ width: "50%", flexDirection: "row", marginBottom: 4 }}
-              >
+              <View key={field.id} style={styles.twoColumnField}>
                 <Text style={styles.label}>{field.label}:</Text>
-                <Text style={[styles.bold, { paddingLeft: 4 }]}>
-                  {field.value}
-                </Text>
+                <Text style={styles.fieldValue}>{field.value}</Text>
               </View>
             ))}
           </View>
         )}
 
         {quotationDetails.rate_validity ? (
-          <View style={{ flexDirection: "row", marginBottom: 8 }}>
-            <Text style={[styles.label, { width: 80 }]}>
-              {RATE_VALIDITY_FIELD.label}:
-            </Text>
-            <Text>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>{RATE_VALIDITY_FIELD.label}:</Text>
+            <Text style={styles.fieldValue}>
               {formatQuotationDetailDate(quotationDetails.rate_validity)}
             </Text>
           </View>
@@ -164,22 +156,13 @@ export function QuotationPDF({
         {template.custom_fields.some(
           (field) => !isRateValidityField(field),
         ) && (
-          <View
-            style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 12 }}
-          >
+          <View style={styles.twoColumnFieldContainer}>
             {template.custom_fields
               .filter((field) => !isRateValidityField(field))
               .map((field) => (
-                <View
-                  key={field.id}
-                  style={{
-                    width: "50%",
-                    flexDirection: "row",
-                    marginBottom: 4,
-                  }}
-                >
-                  <Text style={[styles.label]}>{field.label}:</Text>
-                  <Text style={[styles.bold, { paddingLeft: 4 }]}>
+                <View key={field.id} style={styles.twoColumnField}>
+                  <Text style={styles.label}>{field.label}:</Text>
+                  <Text style={styles.fieldValue}>
                     {quotationDetails.custom_fields?.[field.id] ?? "—"}
                   </Text>
                 </View>

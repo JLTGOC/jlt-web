@@ -33,7 +33,6 @@ interface PageCardProps {
   jobSwitchSecondaryLabel?: string;
   bgColor?: string;
   shadow?: string | false;
-
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -54,6 +53,7 @@ export function PageCard({
   jobSwitchValue = "all",
   hideBackButton,
   onJobSwitchChange,
+  jobSwitchSecondaryLabel = "MY ITEMS",
   bgColor = "#ffffff",
   shadow = "sm",
 }: PageCardProps) {
@@ -92,69 +92,79 @@ export function PageCard({
     >
       {/* ── Header ── */}
       {title && (
-      <Group
-        justify="space-between"
-        p="lg"
-        wrap="nowrap"
-        className={classes.header}
-      >
-        <Group gap="xs" wrap="nowrap">
-          {!hideBackButton && (
-            <UnstyledButton onClick={handleBack} className={classes.backButton}>
-              <ArrowBack width="1.25rem" height="1.25rem" fill="currentColor" />
-            </UnstyledButton>
-          )}
-          <div style={{ flex: 1 }}>
-            <Group gap="0.5rem" align="baseline" wrap="nowrap">
-              <Title order={5} fw={800} tt="uppercase" c="jltBlue.8">
-                {title}
-              </Title>
-              {subtext && (
-                <Text size="xs" c={subtextColor} fs="italic">
-                  ({subtext})
+        <Group
+          justify="space-between"
+          p="lg"
+          wrap="nowrap"
+          className={classes.header}
+        >
+          <Group gap="xs" wrap="nowrap">
+            {!hideBackButton && (
+              <UnstyledButton
+                onClick={handleBack}
+                className={classes.backButton}
+              >
+                <ArrowBack
+                  width="1.25rem"
+                  height="1.25rem"
+                  fill="currentColor"
+                />
+              </UnstyledButton>
+            )}
+            <div style={{ flex: 1 }}>
+              <Group gap="0.5rem" align="baseline" wrap="nowrap">
+                <Title order={5} fw={800} tt="uppercase" c="jltBlue.8">
+                  {title}
+                </Title>
+                {subtext && (
+                  <Text size="xs" c={subtextColor} fs="italic">
+                    ({subtext})
+                  </Text>
+                )}
+              </Group>
+              {subtitle && (
+                <Text
+                  size="sm"
+                  c="jltBlue.8"
+                  fw={400}
+                  style={{ overflow: "visible" }}
+                >
+                  {subtitle}
                 </Text>
               )}
-            </Group>
-            {subtitle && (
-              <Text size="sm" c="jltBlue.8" fw={400} style={{ overflow: "visible" }}>
-                {subtitle}
-              </Text>
+            </div>
+          </Group>
+
+          <Group gap="sm" wrap="nowrap">
+            {showJobSwitch && (
+              <Group gap={0} className={classes.jobSwitch} wrap="nowrap">
+                <UnstyledButton
+                  type="button"
+                  className={classes.jobSwitchOption}
+                  data-active={jobSwitchValue === "all" || undefined}
+                  aria-pressed={jobSwitchValue === "all"}
+                  onClick={() => onJobSwitchChange?.("all")}
+                >
+                  <span className={classes.jobSwitchLabel}>ALL</span>
+                </UnstyledButton>
+
+                <UnstyledButton
+                  type="button"
+                  className={classes.jobSwitchOption}
+                  data-active={jobSwitchValue === "my-items" || undefined}
+                  aria-pressed={jobSwitchValue === "my-items"}
+                  onClick={() => onJobSwitchChange?.("my-items")}
+                >
+                  <span className={classes.jobSwitchLabel}>
+                    {jobSwitchSecondaryLabel}
+                  </span>
+                </UnstyledButton>
+              </Group>
             )}
-          </div>
+
+            {action && <Box style={{ flexShrink: 0 }}>{action}</Box>}
+          </Group>
         </Group>
-
-        <Group gap="sm" wrap="nowrap">
-          {showJobSwitch && (
-            <Group gap={0} className={classes.jobSwitch} wrap="nowrap">
-              <UnstyledButton
-                type="button"
-                className={classes.jobSwitchOption}
-                data-active={jobSwitchValue === "all" || undefined}
-                aria-pressed={jobSwitchValue === "all"}
-                onClick={() => onJobSwitchChange?.("all")}
-              >
-                <span className={classes.jobSwitchLabel}>ALL</span>
-              </UnstyledButton>
-
-              <UnstyledButton
-                type="button"
-                className={classes.jobSwitchOption}
-                data-active={
-                  jobSwitchValue === "my-items" || undefined
-                }
-                aria-pressed={jobSwitchValue === "my-items"}
-                onClick={() => onJobSwitchChange?.("my-items")}
-              >
-                <span className={classes.jobSwitchLabel}>
-                  MY ITEMS
-                </span>
-              </UnstyledButton>
-            </Group>
-          )}
-
-          {action && <Box style={{ flexShrink: 0 }}>{action}</Box>}
-        </Group>
-      </Group>
       )}
 
       {showDivider && (
