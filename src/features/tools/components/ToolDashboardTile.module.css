@@ -4,8 +4,8 @@
   flex-direction: column;
   justify-content: space-between;
   width: 100%;
-  max-width: 18rem;
-  min-height: 13.5rem;
+  width: 18rem;
+  height: 15rem;
   padding: 1.25rem 1.25rem 1rem;
   border: 1px solid #e1e5eb;
   border-radius: 1rem;

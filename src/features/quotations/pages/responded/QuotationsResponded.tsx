@@ -133,19 +133,7 @@ export function QuotationsResponded() {
           />
         </Box>
 
-        <Flex justify="flex-end" align="center" mt="md">
-          {Math.ceil(total / perPage) > 1 && (
-            <Pagination
-              value={currentPage}
-              onChange={(page) => {
-                setCurrentPage(page);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              total={Math.ceil(total / perPage)}
-              size="sm"
-            />
-          )}
-        </Flex>
+        
       </Stack>
     </PageCard>
   );

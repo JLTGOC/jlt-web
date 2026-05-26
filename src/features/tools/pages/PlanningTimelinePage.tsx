@@ -1,9 +1,16 @@
 import { Text } from "@mantine/core";
+import ServiceTypeModal from "../components/planning-timeline/modals/ServiceType";
 
-export default function PlanningTimelinePage() {
+type PlanningTimelinePageProps = {
+  openServiceTypeModal: boolean;
+};
+
+export default function PlanningTimelinePage({
+  openServiceTypeModal,
+}: PlanningTimelinePageProps) {
   return (
     <>
-      <Text>Hello Marjorie Khate</Text>
+     <ServiceTypeModal></ServiceTypeModal>
     </>
   );
 }
