@@ -1,6 +1,42 @@
 import { createElement } from "react";
 import type { QuotationViewerState } from "@/features/quotations/types/compose.types";
 import { toClientFileUrl } from "@/utils/file-url";
+import { GET } from "@/lib/api/client";
+
+/**
+ * Fetches a signature file from the backend with proper JWT authentication
+ * and converts it to a base64 data URL for use in react-pdf
+ */
+async function fetchSignatureAsBase64(
+  signatureFileUrl: string,
+): Promise<string | null> {
+  if (!signatureFileUrl) return null;
+
+  try {
+    const fullUrl = toClientFileUrl(signatureFileUrl);
+    const blob = await GET<Blob>(fullUrl, { responseType: "blob" });
+
+    return new Promise<string | null>((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        resolve(base64);
+      };
+      reader.onerror = () => {
+        console.warn(
+          "Failed to convert signature blob to base64. Signature will not appear in PDF.",
+        );
+        resolve(null);
+      };
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    console.warn(
+      `Failed to fetch signature from ${signatureFileUrl}. Signature will not appear in PDF.`,
+    );
+    return null;
+  }
+}
 
 export function usePDFActions(
   state: QuotationViewerState | null,
@@ -34,10 +70,13 @@ export function usePDFActions(
 
     const hasSignatureFile = Boolean(viewerState.signatory.signature_file);
     const signatureFileUrl = viewerState.signatory.signature_file_url;
+
+    // If during compose (has actual File object), use object URL
+    // Otherwise, fetch from backend with JWT auth and convert to base64
     const signatorySignatureSrc = hasSignatureFile
       ? URL.createObjectURL(viewerState.signatory.signature_file as File)
       : signatureFileUrl
-        ? toClientFileUrl(signatureFileUrl)
+        ? await fetchSignatureAsBase64(signatureFileUrl)
         : null;
 
     try {
@@ -70,7 +109,6 @@ export function usePDFActions(
       document.body.removeChild(link);
     }, 2000);
   }
-
 
   async function handlePrint() {
     const blob = await generateBlob();
