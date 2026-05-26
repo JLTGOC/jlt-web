@@ -5,7 +5,10 @@ import type {
   TermsValues,
 } from "@/features/quotations/schemas/compose.schema";
 import type { QuotationTemplate } from "@/features/quotations/types/compose.types";
-import { hasChargeContent } from "@/features/quotations/utils/billing";
+import {
+  hasChargeContent,
+  isPerContainerUom,
+} from "@/features/quotations/utils/billing";
 import { isRateValidityField } from "@/features/quotations/utils/quotationDetailFields";
 
 interface BuildIssuedQuotationFormDataParams {
@@ -26,6 +29,7 @@ export function buildIssuedQuotationFormData({
   issuedQuotationFile,
 }: BuildIssuedQuotationFormDataParams): FormData {
   const formData = new FormData();
+  const shouldIncludeContainerFields = isPerContainerUom(billingDetails.uom);
 
   formData.append("template_id", template.id);
   formData.append("subject", quotationDetails.subject?.trim() ?? "");
@@ -34,6 +38,8 @@ export function buildIssuedQuotationFormData({
     "rate_validity",
     quotationDetails.rate_validity?.trim() ?? "",
   );
+  formData.append("uom", billingDetails.uom?.trim() ?? "");
+  formData.append("currency", billingDetails.currency?.trim() ?? "");
 
   const detailFields = template.custom_fields.filter(
     (field) => !isRateValidityField(field),
@@ -72,14 +78,16 @@ export function buildIssuedQuotationFormData({
         `charges[${sectionIndex}][items][${rowIndex}][uom_label]`,
         billingDetails.uom?.trim() ?? row.uom?.trim() ?? "",
       );
-      formData.append(
-        `charges[${sectionIndex}][items][${rowIndex}][quantity]`,
-        row.quantity == null ? "" : String(row.quantity),
-      );
-      formData.append(
-        `charges[${sectionIndex}][items][${rowIndex}][container_size]`,
-        row.container_size?.trim() ?? "",
-      );
+      if (shouldIncludeContainerFields) {
+        formData.append(
+          `charges[${sectionIndex}][items][${rowIndex}][quantity]`,
+          row.quantity == null ? "" : String(row.quantity),
+        );
+        formData.append(
+          `charges[${sectionIndex}][items][${rowIndex}][container_size]`,
+          row.container_size?.trim() ?? "",
+        );
+      }
       formData.append(
         `charges[${sectionIndex}][items][${rowIndex}][amount]`,
         row.amount == null ? "" : String(row.amount),

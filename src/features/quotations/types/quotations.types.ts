@@ -227,6 +227,9 @@ export interface IssuedQuotationResource {
   issued_by: string | null;
   subject: string;
   message: string;
+  rate_validity?: string | null;
+  uom?: string | null;
+  currency?: string | null;
   quotation_details: IssuedQuotationDetailValueResource[];
   billing_details: {
     charges: IssuedQuotationChargeResource[];
