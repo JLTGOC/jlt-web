@@ -204,7 +204,13 @@ export function AcceptedStatusCell({
   );
 }
 
-export function MyJobsStatusCell({ row }: { row: RespondedQuotationListItem }) {
+export function MyJobsStatusCell({
+  row,
+  onMakeJobOrder,
+}: {
+  row: RespondedQuotationListItem;
+  onMakeJobOrder: (row: RespondedQuotationListItem) => void;
+}) {
   const personInCharge =
     row.account_specialist ?? row.as_full_name ?? "Unassigned";
 
@@ -215,6 +221,10 @@ export function MyJobsStatusCell({ row }: { row: RespondedQuotationListItem }) {
         color="#4f657d"
         size="xs"
         leftSection={<CheckCircle width={16} />}
+        onClick={(event) => {
+          event.stopPropagation();
+          onMakeJobOrder(row);
+        }}
       >
         Make Job Order
       </Button>

@@ -43,6 +43,7 @@ export interface AcceptedQuotationsMeta {
   handleRowHover: (row: RespondedQuotationListItem) => void;
   handleViewDocuments: (row: RespondedQuotationListItem) => void;
   handleUpdateQuotation: (row: RespondedQuotationListItem) => void;
+  handleMakeJobOrder: (row: RespondedQuotationListItem) => void;
 }
 
 export interface AcceptedQuotationsContextValue {

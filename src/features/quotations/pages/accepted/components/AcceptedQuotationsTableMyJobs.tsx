@@ -87,7 +87,10 @@ export function AcceptedQuotationsMyJobsTable() {
                     <DetailsCell row={row} />
                   </Table.Td>
                   <Table.Td>
-                    <MyJobsStatusCell row={row} />
+                    <MyJobsStatusCell
+                      row={row}
+                      onMakeJobOrder={meta.handleMakeJobOrder}
+                    />
                   </Table.Td>
                   <Table.Td
                     style={{ width: "2.75rem", textAlign: "center" }}

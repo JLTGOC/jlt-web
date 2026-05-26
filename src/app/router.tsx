@@ -89,6 +89,14 @@ export const router = createBrowserRouter([
             Component: Quotations,
           },
           {
+            path: "quotations/:tab/client/:clientId/:quotationId/job-order",
+            Component: Quotations,
+          },
+          {
+            path: "quotations/:tab/:quotationId/job-order",
+            Component: Quotations,
+          },
+          {
             path: "quotations/:tab/client/:clientId/:quotationId/view/:issuedQuotationId",
             Component: QuotationViewerPage,
           },

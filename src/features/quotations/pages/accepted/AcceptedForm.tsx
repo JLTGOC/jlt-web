@@ -3,6 +3,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@mantine/core";
+import { useNavigate } from "react-router";
 
 import {
   requestSchema,
@@ -32,6 +33,7 @@ export default function AcceptedForm({
   quotation_reference_number = "RQ-LOG-05262026-017",
   job_type = "LOGISTICS"
 }: AcceptedFormProps) {
+  const navigate = useNavigate();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<RequestBody | null>(
@@ -109,7 +111,7 @@ export default function AcceptedForm({
     <>
     <FormProvider {...methods}>
       <form noValidate onSubmit={methods.handleSubmit(onSubmit)}>
-        <Header>
+        <Header onBack={() => navigate(-1)}>
           <JOInformation />
           <ClientInformation enums={acceptedEnumsData} />
           <ServiceInformation enums={acceptedEnumsData} />

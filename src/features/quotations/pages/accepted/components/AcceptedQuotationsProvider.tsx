@@ -204,6 +204,16 @@ export function AcceptedQuotationsProvider({
       handleUpdateQuotation(row) {
         navigate(`/quotations/accepted/${row.id}/compose`);
       },
+      handleMakeJobOrder: (row) => {
+        navigate(
+          quotationRoutes.jobOrder({
+            tab: "accepted",
+            quotationId: row.id,
+            referenceNumber: row.reference_number,
+            jobType: row.service,
+          }),
+        );
+      },
     }),
     [navigate, prefetchQuotationDetails],
   );
