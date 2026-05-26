@@ -6,7 +6,7 @@ import { QuotationDocuments } from "@/features/quotations/pages/shared/Quotation
 import { TemplateSelection } from "@/features/quotations/pages/compose/TemplateSelection";
 import { ComposeQuotationPage } from "@/features/quotations/pages/compose/ComposeQuotationPage";
 import { QuotationsResponded } from "@/features/quotations/pages/responded/QuotationsResponded";
-import { QuotationsAccepted } from "@/features/quotations/pages/accepted/QuotationsAccepted";
+import AcceptedForm  from "@/features/quotations/pages/accepted/AcceptedForm";
 
 export default function QuotationsPage() {
   const { tab, clientId, quotationId, template } = useParams();
@@ -39,7 +39,7 @@ export default function QuotationsPage() {
     case "responded":
       return <QuotationsResponded />;
     case "accepted":
-      return <QuotationsAccepted />;
+      return <AcceptedForm />;
     case "discarded":
       return <h1>Discarded</h1>;
     default:

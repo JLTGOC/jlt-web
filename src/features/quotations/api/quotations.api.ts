@@ -18,8 +18,8 @@ function normalizeQuotationDocument(
     typeof typedDoc.id === "number"
       ? typedDoc.id
       : typeof typedDoc.id === "string"
-      ? Number(typedDoc.id)
-      : undefined;
+        ? Number(typedDoc.id)
+        : undefined;
   const file_name =
     typeof typedDoc.file_name === "string" ? typedDoc.file_name : undefined;
 
@@ -31,15 +31,16 @@ function normalizeQuotationDocument(
     typedDoc.uploadedBy === "JLTCB" || typedDoc.uploadedBy === "Client"
       ? typedDoc.uploadedBy
       : defaultUploadedBy;
-  const uploadedByUser = typeof typedDoc.uploadedBy === "string" ? typedDoc.uploadedBy : undefined;
+  const uploadedByUser =
+    typeof typedDoc.uploadedBy === "string" ? typedDoc.uploadedBy : undefined;
   const uploadedDate =
     typeof typedDoc.uploadedDate === "string"
       ? typedDoc.uploadedDate
       : typeof typedDoc.created_at === "string"
-      ? typedDoc.created_at
-      : typeof typedDoc.updated_at === "string"
-      ? typedDoc.updated_at
-      : undefined;
+        ? typedDoc.created_at
+        : typeof typedDoc.updated_at === "string"
+          ? typedDoc.updated_at
+          : undefined;
   const uploaded_by =
     typeof typedDoc.uploaded_by === "number" ? typedDoc.uploaded_by : undefined;
   const file_type =
@@ -100,7 +101,7 @@ export {
   reassignQuotationEnums,
   reassignQuotationSpecificDetails,
   reassignQuotation,
-  reassignRequest
+  reassignRequest,
 } from "./quotations-api/requested.api";
 
 export {
@@ -108,10 +109,13 @@ export {
   type FetchRespondedQuotationsParams,
 } from "./quotations-api/responded.api";
 
-export { fetchAcceptedQuotations } from "./quotations-api/accepted.api";
+export {
+  fetchAcceptedQuotations,
+  fetchAcceptedFormEnums,
+  registerJobOrder,
+} from "./quotations-api/accepted.api";
 
 export { fetchDiscardedQuotations } from "./quotations-api/discarded.api";
-
 
 export async function fetchQuotations(
   params: FetchRequestedQuotationsParams,
@@ -171,14 +175,12 @@ export async function fetchQuotations(
   return response.data.data;
 }
 
-
 export interface FetchQuotationsParams {
   status: QuotationStatus;
   search?: string;
   perPage?: number;
   clientId?: number;
 }
-
 
 export async function fetchQuotation(
   id: string,
