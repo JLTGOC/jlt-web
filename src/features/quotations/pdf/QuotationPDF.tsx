@@ -193,6 +193,8 @@ export function QuotationPDF({
               key={section.id}
               sectionId={section.id}
               sectionTitle={section.title}
+              currency={section.currency}
+              uom={section.uom}
               rows={section.rows}
               total={section.total}
               styles={styles}

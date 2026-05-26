@@ -61,7 +61,7 @@ function mapQuotationDetails(
   return {
     subject: issuedQuotation.subject ?? "",
     message: issuedQuotation.message ?? "",
-    rate_validity: detailValuesByLabel.get(RATE_VALIDITY_FIELD.label) ?? "",
+    rate_validity: issuedQuotation.rate_validity ?? "",
     custom_fields: customFields,
   };
 }
@@ -71,6 +71,8 @@ function mapBillingDetails(
   issuedQuotation: IssuedQuotationResource,
 ): BillingDetailsValues {
   const sections: Record<string, ChargeRow[]> = {};
+  const currency = issuedQuotation.currency ?? "";
+  const uom = issuedQuotation.uom ?? "";
 
   template.billing_sections.forEach((section) => {
     sections[section.id] = [];
@@ -89,15 +91,17 @@ function mapBillingDetails(
 
     const rows: ChargeRow[] = (charge.items ?? []).map((item) => ({
       description: item.receipt_charge_label ?? "",
-      currency: item.currency_label ?? "",
-      uom: item.uom_label ?? "",
+      currency,
+      uom,
+      quantity: parseAmount(item.quantity),
+      container_size: item.container_size ?? "",
       amount: parseAmount(item.amount),
     }));
 
     sections[matchingSection.id] = rows;
   });
 
-  return { sections };
+  return { currency, uom, sections };
 }
 
 function mapTerms(issuedQuotation: IssuedQuotationResource): TermsValues {

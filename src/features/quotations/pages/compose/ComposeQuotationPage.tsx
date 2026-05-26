@@ -132,6 +132,21 @@ function toErrorMessage(error: unknown): string {
   return "Please review the compose data and try again.";
 }
 
+function isTermsComplete(terms: TermsValues | null): terms is TermsValues {
+  if (!terms) {
+    return false;
+  }
+
+  return [
+    terms.template_id,
+    terms.template_name,
+    terms.policies,
+    terms.terms_and_condition,
+    terms.banking_details,
+    terms.footer,
+  ].every((value) => Boolean(value?.trim()));
+}
+
 async function generateIssuedQuotationPdfFile({
   quotation,
   template,
@@ -203,6 +218,7 @@ export function ComposeQuotationPage() {
   const currentUserName = userResource
     ? `${userResource.first_name} ${userResource.last_name}`
     : undefined;
+  const currentUserPositionTitle = userResource?.role;
   const { template: templateId, quotationId, tab, clientId } = useParams();
   const isEditTab = tab === "responded" || tab === "accepted";
   const hasLocationPrefill = Boolean(
@@ -231,6 +247,7 @@ export function ComposeQuotationPage() {
 
   const [step, setStep] = useState(0);
   const [isStep0Valid, setIsStep0Valid] = useState(false);
+  const [isStep1Valid, setIsStep1Valid] = useState(false);
   const [quotationDetailsData, setQuotationDetailsData] =
     useState<QuotationDetailsValues | null>(initialQuotationDetails);
   const [billingDetailsData, setBillingDetailsData] =
@@ -400,6 +417,12 @@ export function ComposeQuotationPage() {
         throw new Error("Subject and message are required before sending.");
       }
 
+      if (!isTermsComplete(effectiveTermsData)) {
+        throw new Error(
+          "Complete all terms and conditions fields before sending.",
+        );
+      }
+
       const hasSignature = Boolean(
         effectiveSignatoryData.signature_file ||
         effectiveSignatoryData.signature_file_url,
@@ -566,7 +589,15 @@ export function ComposeQuotationPage() {
   }
 
   function handleStep0Change(values: QuotationDetailsValues) {
-    setQuotationDetailsData(values);
+    setQuotationDetailsData((previous) => {
+      if (!previous) {
+        return values;
+      }
+
+      return JSON.stringify(previous) === JSON.stringify(values)
+        ? previous
+        : values;
+    });
     setPreviewReady(false);
   }
 
@@ -577,7 +608,15 @@ export function ComposeQuotationPage() {
   }
 
   function handleStep1Change(values: BillingDetailsValues) {
-    setBillingDetailsData(values);
+    setBillingDetailsData((previous) => {
+      if (!previous) {
+        return values;
+      }
+
+      return JSON.stringify(previous) === JSON.stringify(values)
+        ? previous
+        : values;
+    });
     setPreviewReady(false);
   }
 
@@ -587,7 +626,7 @@ export function ComposeQuotationPage() {
   }
 
   function handleStep2Next() {
-    if (!effectiveTermsData) {
+    if (!isTermsComplete(effectiveTermsData)) {
       return;
     }
 
@@ -705,13 +744,15 @@ export function ComposeQuotationPage() {
             onStep0Change={handleStep0Change}
             onStep1Change={handleStep1Change}
             onStep0ValidityChange={setIsStep0Valid}
+            onStep1ValidityChange={setIsStep1Valid}
             onTermsChange={handleTermsChange}
           />
 
           <ComposeStepActions
             step={step}
             isStep0Valid={isStep0Valid}
-            canProceedStep2={Boolean(effectiveTermsData)}
+            isStep1Valid={isStep1Valid}
+            canProceedStep2={isTermsComplete(effectiveTermsData)}
             previewReady={previewReady}
             isSending={sendMutation.isPending}
             quotationDetailsFormId={QUOTATION_DETAILS_FORM_ID}
@@ -727,6 +768,7 @@ export function ComposeQuotationPage() {
         onClose={closeSignatory}
         onSave={handleSignatorySave}
         currentUserName={currentUserName}
+        currentUserPositionTitle={currentUserPositionTitle}
         initialValues={effectiveSignatoryData}
       />
 

@@ -15,7 +15,6 @@ export interface QuotationsPagination {
   total: number;
 }
 
-
 export interface RespondedQuotationLogisticsService {
   commodity: string;
   service_type: string;
@@ -116,7 +115,7 @@ export interface QuotationResource {
     company_name: string;
     contact_number: string;
     email: string;
-  } | null;                                                       
+  } | null;
   account_specialist: string | null;
   status: string;
   shipment_status: string;
@@ -194,6 +193,8 @@ export interface IssuedQuotationChargeItemResource {
   receipt_charge_label: string;
   currency_label: string;
   uom_label: string;
+  quantity?: number | string | null;
+  container_size?: string | null;
   amount: number | string | null;
 }
 
@@ -226,6 +227,9 @@ export interface IssuedQuotationResource {
   issued_by: string | null;
   subject: string;
   message: string;
+  rate_validity?: string | null;
+  uom?: string | null;
+  currency?: string | null;
   quotation_details: IssuedQuotationDetailValueResource[];
   billing_details: {
     charges: IssuedQuotationChargeResource[];
@@ -265,16 +269,16 @@ export type FetchRequestedQuotationsParams = {
   "filter[assignment_status]"?: string;
   "filter[created_at]"?: string;
   "filter[service]"?: string;
-  "filter[status]":string;
-}
+  "filter[status]": string;
+};
 
 export type ReassignEnumsResponse = {
   reassignment_reasons: string[];
-  account_specialists: { id: number; username: string, full_name: string }[];
-  operations: {id: number; username: string, full_name: string }[];
-}
+  account_specialists: { id: number; username: string; full_name: string }[];
+  operations: { id: number; username: string; full_name: string }[];
+};
 
-    export type ReassignQuotationSpecificDetailsResponse = {
+export type ReassignQuotationSpecificDetailsResponse = {
   id: number;
   quotation_id: number;
   job_order_id: number | null;

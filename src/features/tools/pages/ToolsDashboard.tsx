@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { Group } from "@mantine/core";
+import { SimpleGrid } from "@mantine/core";
 import { TOOL_ITEMS } from "../config/toolsConfig";
 import { useAuthStore } from "@/stores/authStore";
 import { toUser, hasRole } from "@/lib/mappers/user.mapper";
@@ -17,7 +17,7 @@ export function ToolsDashboard() {
   });
 
   return (
-    <Group gap="sm">
+    <SimpleGrid spacing={"xs"} cols={{ base: 1, sm: 2, lg: 4, xl: 5 }}>
       {visibleTools.map((tool) => (
         <ToolDashboardTile
           key={tool.id}
@@ -27,6 +27,6 @@ export function ToolsDashboard() {
           onClick={() => navigate(tool.path)}
         />
       ))}
-    </Group>
+    </SimpleGrid>
   );
 }
