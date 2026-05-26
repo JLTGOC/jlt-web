@@ -36,9 +36,9 @@ export function ClientsList() {
     queryFn: () => {
       const currentPage = perPage === 0 ? 1 : page;
       return accountsService.getClientAccountsList(currentPage, perPage, {
-        search: searchQuery,
-        type: clientType === "ALL" ? undefined : clientType,
-        dateCreated: dateCreated ?? undefined,
+        "filter[search]": searchQuery || undefined,
+        "filter[type]": clientType === "ALL" ? undefined : clientType,
+        "filter[date_created]": dateCreated ?? undefined,
       });
     },
     retry: false,

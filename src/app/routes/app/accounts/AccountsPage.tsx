@@ -6,39 +6,10 @@ import { EmployeesList } from "@/features/accounts/components/employees/Employee
 import { CompaniesList } from "@/features/accounts/components/companies/CompaniesList";
 import { AccountsProfile } from "@/features/accounts/pages/AccountsProfile";
 import { getAccountTabs } from "@/features/accounts/utils/accountTabs";
-import { ROLES } from "@/types/roles";
-import type { User } from "@/types/api";
 
 export default function AccountsPage() {
   const navigate = useNavigate();
   const { category, id } = useParams();
-
-  const user: User = {
-    id: 0,
-    firstName: "Default",
-    middleName: null,
-    lastName: "User",
-    fullName: "Default User",
-    role: ROLES.ACCOUNT_SPECIALIST,
-    email: "default@example.com",
-    company: "Default Co",
-    address: "N/A",
-    contactNumber: "N/A",
-    companyName: "Default Co",
-    imageUrl: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    tabs: {
-      dashboard: true,
-      leads: true,
-      quotations: true,
-      shipments: true,
-      accounts: true,
-      job_orders: true,
-      templates: true,
-    },
-    permissions: [],
-  };
 
   const activeTab = category ?? "clients";
 
@@ -58,7 +29,7 @@ export default function AccountsPage() {
 
   return (
     <Box style={{ width: "100%" }}>
-      {getAccountTabs(user, activeTab, handleTabChange)}
+      {getAccountTabs(activeTab, handleTabChange)}
 
       <Box style={{ width: "100%", marginTop: "1rem" }}>
         {activeTab === "clients" ? (

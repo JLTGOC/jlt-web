@@ -7,7 +7,7 @@ import { ClientsStatus } from "./details/ClientStats";
 import { ClientTables } from "./details/ClientTables";
 import { accountsService } from "../../services/accounts.service";
 import type { ClientDetails } from "@/features/accounts/types/accounts.types";
-import { MoreHoriz, MobiledataArrows, Edit as MaterialEdit, ToggleOff, ToggleOn } from "@nine-thirty-five/material-symbols-react/outlined";
+import { MoreHoriz, MobiledataArrows, Edit as MaterialEdit, ToggleOff } from "@nine-thirty-five/material-symbols-react/outlined";
 import { ArrowBack } from "@nine-thirty-five/material-symbols-react/rounded";
 import pageCardClasses from "@/components/PageCard.module.css";
 
@@ -35,7 +35,7 @@ export function ClientDetails() {
     accountsService
       .getClientFullDetails(Number(id))
       .then(setClient)
-      .catch((err) => {
+      .catch((err: unknown) => {
         console.error("Failed to load client details", err);
         setError("Unable to load client details.");
       })

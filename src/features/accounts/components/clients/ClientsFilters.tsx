@@ -28,7 +28,7 @@ export function ClientsFilters({
   perPage,
   setPerPage,
 }: ClientFilterTableProps) {
-  const entryOptions = ["10", "20", "30", "All"];
+  const entryOptions = ["10", "20", "30"];
 
   return (
     <Grid gutter="xs" mb="sm" align="end">

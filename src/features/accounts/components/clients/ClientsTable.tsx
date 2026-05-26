@@ -56,7 +56,7 @@ export function ClientsTable({
     {
       key: "name",
       label: "CLIENT NAME",
-      width: "18%",
+      width: "20%",
       render: (row) => (
         <Group>
           <Avatar src={row.avatarUrl ?? undefined} radius="xl" size="md" />
@@ -99,13 +99,13 @@ export function ClientsTable({
         );
       },
     },
-    { key: "pendingQuotations", label: "PENDING QUOTATIONS", width: "7%", render: (row) => row.client?.pendingQuotations ?? "—" },
-    { key: "activeShipment", label: "ACTIVE SHIPMENT", width: "7%", render: (row) => row.client?.activeShipment ?? "—" },
-    { key: "activeRegulatory", label: "ACTIVE REGULATORY", width: "7%", render: (row) => row.client?.activeRegulatory ?? "—" },
+    { key: "pendingQuotations", label: "PENDING QUOTATIONS", width: "5%", render: (row) => row.client?.pendingQuotations ?? "—" },
+    { key: "activeShipment", label: "ACTIVE SHIPMENT", width: "5%", render: (row) => row.client?.activeShipment ?? "—" },
+    { key: "activeRegulatory", label: "ACTIVE REGULATORY", width: "5%", render: (row) => row.client?.activeRegulatory ?? "—" },
     {
       key: "action",
       label: "ACTION",
-      width: "6%",
+      width: "3%",
       render: (row) => (
         <Center>
           <Menu shadow="md" width={200}>

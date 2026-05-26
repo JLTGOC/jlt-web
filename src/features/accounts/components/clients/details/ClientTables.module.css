@@ -34,15 +34,17 @@
   position: relative;
   background-color: #999;
   width: 200px;
+  white-space: nowrap;
 }
 
 .statusBadgeSmall {
-  padding: 0.2rem 0.4rem;
-  width: auto;
-  min-width: 140px;
-  font-size: 0.875rem;
-  line-height: 1.1;
+  padding: 0.375rem 2rem;
+  width: 200px;
+  min-width: 200px;
+  font-size: 0.8rem;
+  line-height: 1.2;
   border: none;
+  white-space: nowrap;
 }
 
 .statusBadge[data-status="Not Yet Departed"] {
@@ -63,6 +65,31 @@
 .statusBadge[data-status="Berthed"] {
   background-color: var(--status-button-color-berthed);
   color: var(--status-outline-color-berthed);
+}
+
+.statusBadge[data-status="For Evaluation"] {
+  background-color: var(--status-button-color-berthed);
+  color: var(--status-outline-color-berthed);
+}
+
+.statusBadge[data-status="In Transit"] {
+  background-color: var(--status-button-color-in-transit);
+  color: var(--status-outline-color-in-transit);
+}
+
+.statusBadge[data-status="Under Review"] {
+  background-color: var(--status-button-color-in-transit);
+  color: var(--status-outline-color-in-transit);
+}
+
+.statusBadge[data-status="Approved"] {
+  background-color: var(--status-button-color-delivered);
+  color: var(--status-outline-color-delivered);
+}
+
+.statusBadge[data-status="Soon To Expire"] {
+  background-color: #F8CAC9;
+  color: #DF292F;
 }
 
 .statusBadge[data-status="Discharged"] {

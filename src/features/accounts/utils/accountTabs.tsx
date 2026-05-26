@@ -4,11 +4,9 @@ import {
   GroupsTwo,
   Apartment,
 } from "@nine-thirty-five/material-symbols-react/outlined";
-import type { User } from "@/types/api";
 import classes from "@/app/routes/app/accounts/AccountsPage.module.css";
 
 export function getAccountTabs(
-  user: User,
   activeTab: string,
   handleTabChange: (tab: string | null) => void
 ) {

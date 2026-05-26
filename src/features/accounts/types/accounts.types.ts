@@ -169,6 +169,7 @@ export interface ClientRegulatory {
   issueDate: string;      // ISO date
   expiryDate: string;     // ISO date
   personInCharge: string;
+  pic_image_path?: string | null;
   status: string;         // e.g. "Ongoing", "Completed"
 }
 

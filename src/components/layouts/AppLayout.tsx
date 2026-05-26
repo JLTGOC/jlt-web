@@ -9,7 +9,6 @@ const SUB_ITEM_PREFIXES = [
   "/leads",
   "/shipments",
   "/quotations",
-  "/accounts",
   "/job-order",
 ];
 

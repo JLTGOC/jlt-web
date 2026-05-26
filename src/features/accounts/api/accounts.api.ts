@@ -38,7 +38,7 @@ export interface AccountsAPI {
   }>;
 
   /**
-   * GET /users/clients
+   * GET /clients
    * Fetch client list with dashboard stats.
    */
   getClientAccountsList: (

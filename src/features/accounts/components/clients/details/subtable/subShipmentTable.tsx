@@ -1,9 +1,10 @@
 import { ActionIcon, Avatar, Box, Group, Menu, Select, Stack, Table, Text } from "@mantine/core";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
 import { Anchor as IconAnchor, DirectionsBoat } from "@nine-thirty-five/material-symbols-react/outlined/filled";
 import { Box as BoxIcon, Folder } from "@nine-thirty-five/material-symbols-react/outlined";
 import { Icons } from "@/assets/icons";
+import { SearchBar } from "@/components/SearchBar";
 import type { ClientShipment } from "@/features/accounts/types/accounts.types";
 import styles from "../ClientTables.module.css";
 
@@ -50,7 +51,15 @@ export function SubShipmentTable({
   onPageChange,
   onPerPageChange,
 }: SubShipmentTableProps) {
-  const total = shipments.length;
+  const [search, setSearch] = useState("");
+  const normalizedSearch = search.trim().toLowerCase();
+
+  const filteredShipments = shipments.filter((row) => {
+    if (!normalizedSearch) return true;
+    return row.referenceNumber?.toString().toLowerCase().includes(normalizedSearch);
+  });
+
+  const total = filteredShipments.length;
   const isShowAll = perPage === 0;
   const totalPages = isShowAll ? 1 : Math.max(1, Math.ceil(total / perPage));
 
@@ -60,23 +69,20 @@ export function SubShipmentTable({
     }
   }, [page, totalPages, onPageChange]);
 
-  const visibleShipments = isShowAll ? shipments : shipments.slice((page - 1) * perPage, page * perPage);
+  const visibleShipments = isShowAll ? filteredShipments : filteredShipments.slice((page - 1) * perPage, page * perPage);
 
   return (
     <Box style={{ width: "100%", overflowX: "auto" }}>
-      <Group gap="0.4rem" align="center" mb="0.75rem">
-        <Text size="0.8rem" c="dimmed">
-          Show
-        </Text>
-        <Select
-          data={["10", "20", "30", "All"]}
-          value={String(perPage === 0 ? "All" : perPage)}
+      <Group justify="space-between" mb="0.75rem" align="center">
+        <Group gap="0.4rem" align="center">
+          <Text size="0.8rem" c="dimmed">
+            Show
+          </Text>
+          <Select
+          data={["10", "20", "30"]}
+          value={String(perPage || 10)}
           onChange={(value) => {
             if (!value) return;
-            if (value.toString().toLowerCase() === "all") {
-              onPerPageChange(0);
-              return;
-            }
             onPerPageChange(Number(value));
           }}
           size="xs"
@@ -95,6 +101,14 @@ export function SubShipmentTable({
         <Text size="0.8rem" c="dimmed">
           entries
         </Text>
+      </Group>
+
+      <SearchBar
+        placeholder="Search Reference No."
+        value={search}
+        onChange={setSearch}
+        onSearch={setSearch}
+      />
       </Group>
 
       <Table withTableBorder styles={{ table: { width: "100%" } }}>

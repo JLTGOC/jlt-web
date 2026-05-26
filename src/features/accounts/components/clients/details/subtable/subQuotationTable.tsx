@@ -1,5 +1,5 @@
 import { Anchor, Avatar, Group, Text } from "@mantine/core";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AppTable, type AppTableAction, type AppTableColumn } from "@/components/AppTable";
 import { Folder, InboxTextPerson } from "@nine-thirty-five/material-symbols-react/outlined";
 import { stripedRowProps } from "@/components/stripedRow";
@@ -104,7 +104,7 @@ const quotationColumns: AppTableColumn<ClientQuotation>[] = [
   {
     key: "quotedBy",
     label: "QUOTED BY",
-    width: "15%",
+    width: "20%",
     render: (row) => {
       const content = (
         <Group align="center">
@@ -124,7 +124,7 @@ const quotationColumns: AppTableColumn<ClientQuotation>[] = [
       );
     },
   },
-  { key: "validUntil", label: "VALID UNTIL", width: "15%", render: (row: ClientQuotation) => <Text size="xs">{formatDateShort(row.validUntil)}</Text> },
+  { key: "validUntil", label: "VALID UNTIL", width: "13%", render: (row: ClientQuotation) => <Text size="xs">{formatDateShort(row.validUntil)}</Text> },
 
   {
     key: "status",
@@ -179,10 +179,16 @@ export function SubQuotationTable({
   onPageChange,
   onPerPageChange,
 }: SubQuotationTableProps) {
+  const [search, setSearch] = useState("");
+  const normalizedSearch = search.trim().toLowerCase();
+
   // Exclude requested quotations from this subtable (they are not shown here)
   const filteredQuotations = quotations.filter((q) => {
     const s = q.status?.toString().trim().toUpperCase() ?? "";
-    return !/REQUESTED/.test(s);
+    if (/REQUESTED/.test(s)) return false;
+    if (!normalizedSearch) return true;
+
+    return q.quotationNumber?.toString().toLowerCase().includes(normalizedSearch);
   });
 
   const total = filteredQuotations.length;
@@ -205,12 +211,15 @@ export function SubQuotationTable({
         columns={quotationColumns}
         data={visibleQuotations}
         rowKey={(row) => row.quotationNumber}
-        getRowProps={(row, idx) => stripedRowProps(idx)}
+        getRowProps={(_, idx) => stripedRowProps(idx)}
         actions={quotationActions}
         withEntryControls
         entryControlPosition="top"
-        showSearchInTopBar={false}
-        entryOptions={["10", "20", "30", "All"]}
+        searchPlaceholder="Search Reference No."
+        searchValue={search}
+        onSearchChange={setSearch}
+        onSearch={setSearch}
+        entryOptions={["10", "20", "30"]}
         perPage={perPage}
         onPerPageChange={onPerPageChange}
         total={total}
