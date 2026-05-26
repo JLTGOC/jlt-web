@@ -2,7 +2,7 @@ import { AppTable, type AppTableAction, type AppTableColumn } from "@/components
 import { Folder, License } from "@nine-thirty-five/material-symbols-react/outlined";
 import { stripedRowProps } from "@/components/stripedRow";
 import { Avatar, Group, Text } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import type { ClientRegulatory } from "@/features/accounts/types/accounts.types";
 import styles from "../ClientTables.module.css";
 
@@ -41,19 +41,21 @@ const regulatoryColumns: AppTableColumn<ClientRegulatory>[] = [
   {
     key: "regulatoryNumber",
     label: "REGULATORY NO.",
+    width: "15%",
     render: (row) => (
       <Text size="xs" style={{ textDecoration: "underline", textDecorationColor: "currentColor" }}>
         {row.regulatoryNumber}
       </Text>
     ),
   },
-  { key: "applicationType", label: "APPLICATION TYPE" },
-  { key: "typeOfApplication", label: "TYPE OF APPLICATION" },
-  { key: "issueDate", label: "ISSUE DATE", render: (row) => formatDateShort(row.issueDate) },
-  { key: "expiryDate", label: "EXPIRY DATE", render: (row) => formatDateShort(row.expiryDate) },
+  { key: "applicationType", label: "APPLICATION TYPE", width: "25%" },
+  { key: "typeOfApplication", label: "TYPE OF APPLICATION", width: "10%" },
+  { key: "issueDate", label: "ISSUE DATE", width: "13%", render: (row) => formatDateShort(row.issueDate) },
+  { key: "expiryDate", label: "EXPIRY DATE", width: "15%", render: (row) => formatDateShort(row.expiryDate) },
   {
     key: "personInCharge",
     label: "PERSON IN CHARGE",
+    width: "20%",
     render: (row) => (
       <Group align="center" gap="xs">
         <Avatar
@@ -71,6 +73,7 @@ const regulatoryColumns: AppTableColumn<ClientRegulatory>[] = [
   {
     key: "status",
     label: "STATUS",
+    width: "20%",
     render: (row) => {
       const statusLabel = formatRegulatoryStatus(row.status);
       const badgeStatus = getRegulatoryBadgeStatus(statusLabel);
@@ -103,6 +106,9 @@ interface SubRegulatoryTableProps {
   regulatory: ClientRegulatory[];
   page: number;
   perPage: number;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  onSearch: (value: string) => void;
   onPageChange: (page: number) => void;
   onPerPageChange: (perPage: number) => void;
 }
@@ -111,11 +117,13 @@ export function SubRegulatoryTable({
   regulatory,
   page,
   perPage,
+  searchValue,
+  onSearchChange,
+  onSearch,
   onPageChange,
   onPerPageChange,
 }: SubRegulatoryTableProps) {
-  const [search, setSearch] = useState("");
-  const normalizedSearch = search.trim().toLowerCase();
+  const normalizedSearch = searchValue.trim().toLowerCase();
 
   const filteredRegulatory = regulatory.filter((row) => {
     if (!normalizedSearch) return true;
@@ -145,9 +153,9 @@ export function SubRegulatoryTable({
         withEntryControls
         entryControlPosition="top"
         searchPlaceholder="Search Regulatory No."
-        searchValue={search}
-        onSearchChange={setSearch}
-        onSearch={setSearch}
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
+        onSearch={onSearch}
         entryOptions={["10", "20", "30"]}
         perPage={perPage}
         onPerPageChange={onPerPageChange}

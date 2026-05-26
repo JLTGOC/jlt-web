@@ -1,5 +1,5 @@
 import { Anchor, Avatar, Group, Text } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { AppTable, type AppTableAction, type AppTableColumn } from "@/components/AppTable";
 import { Folder, InboxTextPerson } from "@nine-thirty-five/material-symbols-react/outlined";
 import { stripedRowProps } from "@/components/stripedRow";
@@ -168,6 +168,9 @@ interface SubQuotationTableProps {
   quotations: ClientQuotation[];
   page: number;
   perPage: number;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  onSearch: (value: string) => void;
   onPageChange: (page: number) => void;
   onPerPageChange: (perPage: number) => void;
 }
@@ -176,19 +179,17 @@ export function SubQuotationTable({
   quotations,
   page,
   perPage,
+  searchValue,
+  onSearchChange,
+  onSearch,
   onPageChange,
   onPerPageChange,
 }: SubQuotationTableProps) {
-  const [search, setSearch] = useState("");
-  const normalizedSearch = search.trim().toLowerCase();
-
   // Exclude requested quotations from this subtable (they are not shown here)
   const filteredQuotations = quotations.filter((q) => {
     const s = q.status?.toString().trim().toUpperCase() ?? "";
     if (/REQUESTED/.test(s)) return false;
-    if (!normalizedSearch) return true;
-
-    return q.quotationNumber?.toString().toLowerCase().includes(normalizedSearch);
+    return true;
   });
 
   const total = filteredQuotations.length;
@@ -216,9 +217,9 @@ export function SubQuotationTable({
         withEntryControls
         entryControlPosition="top"
         searchPlaceholder="Search Reference No."
-        searchValue={search}
-        onSearchChange={setSearch}
-        onSearch={setSearch}
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
+        onSearch={onSearch}
         entryOptions={["10", "20", "30"]}
         perPage={perPage}
         onPerPageChange={onPerPageChange}

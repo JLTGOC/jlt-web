@@ -102,6 +102,7 @@ export interface ClientDetails {
   position: string;
   contactNumber: string;
   email: string;
+  profileImageUrl?: string | null;
   dateCreated: string;       // ISO date string
   companyName: string;
   companyAddress: string;

@@ -70,6 +70,7 @@ interface RawClientDetailsResponse {
   position: string;
   contact_number: string;
   email: string;
+  profile_image_path?: string | null;
   date_created: string;
   company_name: string;
   company_address: string;
@@ -239,6 +240,7 @@ const mapClientDetailsResponse = (payload: RawClientDetailsResponse): ClientDeta
   position: payload.position,
   contactNumber: payload.contact_number,
   email: payload.email,
+  profileImageUrl: payload.profile_image_path ?? null,
   dateCreated: payload.date_created,
   companyName: payload.company_name,
   companyAddress: payload.company_address,

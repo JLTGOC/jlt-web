@@ -22,28 +22,56 @@ interface ClientTablesProps {
   clientId?: number;
 }
 
+type ClientTablesTab = "quotations" | "shipments" | "regulatory" | "billing";
+  type SearchableTab = Exclude<ClientTablesTab, "billing">;
+
 export function ClientTables({ client, clientId }: ClientTablesProps) {
-  const [activeTab, setActiveTab] = useState<"quotations" | "shipments" | "regulatory" | "billing">("quotations");
+  const [activeTab, setActiveTab] = useState<ClientTablesTab>("quotations");
   const idToFetch = clientId ?? client?.clientId;
 
-  const [pagination, setPagination] = useState({
+  const [pagination, setPagination] = useState<Record<ClientTablesTab, { page: number; perPage: number }>>({
     quotations: { page: 1, perPage: 10 },
     shipments: { page: 1, perPage: 10 },
     regulatory: { page: 1, perPage: 10 },
     billing: { page: 1, perPage: 10 },
   });
 
+  const [searchText, setSearchText] = useState<Record<SearchableTab, string>>({
+    quotations: "",
+    shipments: "",
+    regulatory: "",
+  });
+
+  const [searchQuery, setSearchQuery] = useState<Record<SearchableTab, string>>({
+    quotations: "",
+    shipments: "",
+    regulatory: "",
+  });
+
   const hasPrefetchedRegulatory = Array.isArray(client?.regulatory) && client.regulatory.length > 0;
 
+  const currentSearchQuery = activeTab !== "billing" ? searchQuery[activeTab] : "";
+
   const { data } = useQuery<ClientQuotation[] | ClientShipment[] | ClientRegulatory[]>({
-    queryKey: ["clients", idToFetch, activeTab, pagination[activeTab].page, pagination[activeTab].perPage],
+    queryKey: [
+      "clients",
+      idToFetch,
+      activeTab,
+      pagination[activeTab].page,
+      pagination[activeTab].perPage,
+      currentSearchQuery,
+    ],
     queryFn: async () => {
       if (!idToFetch || activeTab === "billing") {
         return [] as ClientQuotation[];
       }
 
       const { page, perPage } = pagination[activeTab];
-      const params = perPage === 0 ? { all: true } : { page, per_page: perPage };
+      const baseParams = perPage === 0 ? { all: true } : { page, per_page: perPage };
+      const params = {
+        ...baseParams,
+        "filter[search]": currentSearchQuery ? currentSearchQuery : null,
+      };
 
       switch (activeTab) {
         case "quotations":
@@ -133,6 +161,23 @@ export function ClientTables({ client, clientId }: ClientTablesProps) {
             quotations={quotations}
             page={pagination.quotations.page}
             perPage={pagination.quotations.perPage}
+            searchValue={searchText.quotations}
+            onSearchChange={(value) =>
+              setSearchText((prev) => ({
+                ...prev,
+                quotations: value,
+              }))
+            }
+            onSearch={(value) => {
+              setSearchQuery((prev) => ({
+                ...prev,
+                quotations: value,
+              }));
+              setPagination((prev) => ({
+                ...prev,
+                quotations: { ...prev.quotations, page: 1 },
+              }));
+            }}
             onPageChange={(page) =>
               setPagination((prev) => ({
                 ...prev,
@@ -153,6 +198,23 @@ export function ClientTables({ client, clientId }: ClientTablesProps) {
             shipments={shipments}
             page={pagination.shipments.page}
             perPage={pagination.shipments.perPage}
+            searchValue={searchText.shipments}
+            onSearchChange={(value) =>
+              setSearchText((prev) => ({
+                ...prev,
+                shipments: value,
+              }))
+            }
+            onSearch={(value) => {
+              setSearchQuery((prev) => ({
+                ...prev,
+                shipments: value,
+              }));
+              setPagination((prev) => ({
+                ...prev,
+                shipments: { ...prev.shipments, page: 1 },
+              }));
+            }}
             onPageChange={(page) =>
               setPagination((prev) => ({
                 ...prev,
@@ -173,6 +235,23 @@ export function ClientTables({ client, clientId }: ClientTablesProps) {
             regulatory={regulatory}
             page={pagination.regulatory.page}
             perPage={pagination.regulatory.perPage}
+            searchValue={searchText.regulatory}
+            onSearchChange={(value) =>
+              setSearchText((prev) => ({
+                ...prev,
+                regulatory: value,
+              }))
+            }
+            onSearch={(value) => {
+              setSearchQuery((prev) => ({
+                ...prev,
+                regulatory: value,
+              }));
+              setPagination((prev) => ({
+                ...prev,
+                regulatory: { ...prev.regulatory, page: 1 },
+              }));
+            }}
             onPageChange={(page) =>
               setPagination((prev) => ({
                 ...prev,

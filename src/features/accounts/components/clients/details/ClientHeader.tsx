@@ -3,6 +3,16 @@ import { Paper, Box, Grid, Stack, Text, Avatar, Group } from "@mantine/core";
 import { Person } from "@nine-thirty-five/material-symbols-react/rounded";
 import type { ClientDetails } from "@/features/accounts/types/accounts.types";
 
+function formatCreatedDate(value?: string) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  const month = date.toLocaleString("en-US", { month: "long" });
+  const day = date.getDate();
+  const year = date.getFullYear();
+  return `${month} ${day}, ${year}`;
+}
+
 interface ClientHeaderProps {
   client: ClientDetails;
 }
@@ -25,7 +35,13 @@ export function ClientHeader({ client }: ClientHeaderProps) {
         <Grid>
           <Grid.Col span={6}>
             <Group align="flex-start" gap="2rem" style={{ flex: "1 1 auto", minWidth: 0 }}>
-              <Avatar size={110} radius="10rem" color="gray" style={{ marginLeft: "1rem" }}>
+              <Avatar
+                size={110}
+                radius="10rem"
+                color="gray"
+                src={client.profileImageUrl ?? undefined}
+                style={{ marginLeft: "1rem" }}
+              >
                 <Person width={36} height={36} />
               </Avatar>
 
@@ -73,7 +89,7 @@ export function ClientHeader({ client }: ClientHeaderProps) {
                   DATE CREATED
                 </Text>
                 <Text fw={600} size="sm" style={{ minWidth: 0 }}>
-                  {client.dateCreated ?? "—"}
+                  {formatCreatedDate(client.dateCreated)}
                 </Text>
               </Group>
 

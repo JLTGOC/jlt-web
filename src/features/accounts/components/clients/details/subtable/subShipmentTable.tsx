@@ -1,5 +1,5 @@
 import { ActionIcon, Avatar, Box, Group, Menu, Select, Stack, Table, Text } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
 import { Anchor as IconAnchor, DirectionsBoat } from "@nine-thirty-five/material-symbols-react/outlined/filled";
 import { Box as BoxIcon, Folder } from "@nine-thirty-five/material-symbols-react/outlined";
@@ -12,6 +12,9 @@ interface SubShipmentTableProps {
   shipments: ClientShipment[];
   page: number;
   perPage: number;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  onSearch: (value: string) => void;
   onPageChange: (page: number) => void;
   onPerPageChange: (perPage: number) => void;
 }
@@ -48,11 +51,13 @@ export function SubShipmentTable({
   shipments,
   page,
   perPage,
+  searchValue,
+  onSearchChange,
+  onSearch,
   onPageChange,
   onPerPageChange,
 }: SubShipmentTableProps) {
-  const [search, setSearch] = useState("");
-  const normalizedSearch = search.trim().toLowerCase();
+  const normalizedSearch = searchValue.trim().toLowerCase();
 
   const filteredShipments = shipments.filter((row) => {
     if (!normalizedSearch) return true;
@@ -105,9 +110,9 @@ export function SubShipmentTable({
 
       <SearchBar
         placeholder="Search Reference No."
-        value={search}
-        onChange={setSearch}
-        onSearch={setSearch}
+        value={searchValue}
+        onChange={onSearchChange}
+        onSearch={onSearch}
       />
       </Group>
 
