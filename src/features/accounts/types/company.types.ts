@@ -115,11 +115,57 @@ export interface CompanyFullDetails {
   strategicInsight: CompanyStrategicInsight;
 }
 
+export interface CompanyBackendRequest {
+  basic_info?: CompanySummary;
+  address?: Omit<CompanyAddressSummary, "warehouseAddresses" | "deliveryAddresses">;
+  warehouse_addresses?: string[];
+  delivery_addresses?: string[];
+  primary?: CompanyContactPerson | null;
+  secondary?: CompanyContactPerson | null;
+  billing?: CompanyContactPerson | null;
+  registration?: CompanyGovernmentCompliance;
+  pricing?: CompanyCommercialInformation;
+  monitoring?: CompanyRiskIssueMonitoring;
+  operation?: CompanyOperationalInstructions;
+  insights?: CompanyStrategicInsight;
+  documents?: Array<{ name: string; url?: string | null }>;
+  attachments?: Array<{ name: string; url?: string | null }>;
+}
+
 export interface CompanyListResponse {
   data: CompanyTableRow[];
   total: number;
   totalPages: number;
 }
 
-export interface CompanyCreateRequest extends Partial<CompanyFullDetails> {}
-export interface CompanyUpdateRequest extends Partial<CompanyFullDetails> {}
+export interface CompanyCreateRequest extends Partial<CompanyBackendRequest> {}
+export interface CompanyUpdateRequest extends Partial<CompanyBackendRequest> {}
+
+const normalizeDocumentList = (
+  list?: Array<{ name: string; url?: string | null } & Record<string, unknown>>,
+): Array<{ name: string; url?: string | null }> | undefined =>
+  list?.map(({ name, url }) => ({ name, url }));
+
+export const mapCompanyFullDetailsToBackendRequest = (
+  company: CompanyFullDetails,
+): CompanyCreateRequest => {
+  const { summary, address, keyContacts, governmentCompliance, commercialInformation, operationalInstructions, riskIssueMonitoring, documentsAttachments, strategicInsight } = company;
+  const { warehouseAddresses, deliveryAddresses, ...addressFields } = address ?? {};
+
+  return {
+    basic_info: summary,
+    address: addressFields,
+    warehouse_addresses: warehouseAddresses,
+    delivery_addresses: deliveryAddresses,
+    primary: keyContacts?.primaryContact ?? null,
+    secondary: keyContacts?.secondaryContact ?? null,
+    billing: keyContacts?.billingContact ?? null,
+    registration: governmentCompliance,
+    pricing: commercialInformation,
+    monitoring: riskIssueMonitoring,
+    operation: operationalInstructions,
+    insights: strategicInsight,
+    documents: normalizeDocumentList(documentsAttachments?.documents),
+    attachments: normalizeDocumentList(documentsAttachments?.attachments),
+  };
+}

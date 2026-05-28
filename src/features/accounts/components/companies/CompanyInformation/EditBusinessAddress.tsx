@@ -62,9 +62,8 @@ export function EditBusinessAddress({ company, onChange }: EditBusinessAddressPr
       };
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(nextFormData);
-      onChange?.(toAddressSummary(nextFormData));
     }
-  }, [company, onChange]);
+  }, [company]);
 
   const handleFieldChange = (field: keyof FormData, value: string) => {
     const nextFormData = {

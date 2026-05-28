@@ -63,18 +63,8 @@ export function EditStrategicInsight({ company, onChange }: EditStrategicInsight
       setCompetitorsUsed(company.strategicInsight.competitorsUsed || "");
       setUpsellingOpportunities(company.strategicInsight.upsellingOpportunities || "");
       setNotes(company.strategicInsight.notes || "");
-      onChange?.(
-        toStrategicInsight({
-          growthOptions: company.strategicInsight.growthOptions || ["LOW", "MEDIUM", "HIGH"],
-          selectedGrowth: initialGrowth,
-          expansionPlan: company.strategicInsight.expansionPlan || "",
-          competitorsUsed: company.strategicInsight.competitorsUsed || "",
-          upsellingOpportunities: company.strategicInsight.upsellingOpportunities || "",
-          notes: company.strategicInsight.notes || "",
-        })
-      );
     }
-  }, [company, onChange]);
+  }, [company]);
 
   const emitChange = (next: FormData) => {
     onChange?.(toStrategicInsight(next));

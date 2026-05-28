@@ -43,9 +43,8 @@ export function EditCommercial({ company, onChange }: EditCommercialProps) {
       };
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(nextFormData);
-      onChange?.(toCommercialInformation(nextFormData));
     }
-  }, [company, onChange]);
+  }, [company]);
 
   const handleChange = (field: keyof FormData, value: string) => {
     const nextFormData = {

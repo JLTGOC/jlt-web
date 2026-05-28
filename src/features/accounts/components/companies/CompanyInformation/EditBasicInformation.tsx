@@ -1,7 +1,8 @@
 // src/features/accounts/components/companies/CompanyInformation/EditBasicInformation.tsx
-import { Paper, Text, TextInput, Select, Group } from "@mantine/core";
+import { Paper, Text, TextInput, Select, Group, Button } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { CalendarMonth } from "@nine-thirty-five/material-symbols-react/rounded";
 import type {
   CompanyFullDetails,
   CompanySummary,
@@ -24,7 +25,7 @@ interface FormData {
   businessType: string;
   businessRegistrationNumber: string;
   website: string;
-  yearsInOperation: string;
+  yearsInOperation: Date | null;
   dateOfActivation: Date | null;
 }
 
@@ -40,11 +41,12 @@ const toSummary = (data: FormData): CompanySummary => ({
   businessType: (data.businessType as CompanySummary["businessType"]) || null,
   businessRegistrationNumber: data.businessRegistrationNumber || null,
   website: data.website || null,
-  yearsInOperation: data.yearsInOperation || null,
+  yearsInOperation: data.yearsInOperation ? data.yearsInOperation.toISOString() : null,
   dateOfActivation: data.dateOfActivation ? data.dateOfActivation.toISOString() : null,
 });
 
-export function EditBasicInformation({ company, onChange }: EditBasicInformationProps) {
+export function EditBasicInformation({ company, onChange }: EditBasicInformationProps) {  const yearsInputRef = useRef<HTMLInputElement | null>(null);
+  const activationInputRef = useRef<HTMLInputElement | null>(null);
   const [formData, setFormData] = useState<FormData>({
     companyName: "",
     tradeName: "",
@@ -57,7 +59,7 @@ export function EditBasicInformation({ company, onChange }: EditBasicInformation
     businessType: "",
     businessRegistrationNumber: "",
     website: "",
-    yearsInOperation: "",
+    yearsInOperation: null,
     dateOfActivation: null,
   });
 
@@ -75,16 +77,17 @@ export function EditBasicInformation({ company, onChange }: EditBasicInformation
         businessType: company.summary.businessType || "",
         businessRegistrationNumber: company.summary.businessRegistrationNumber || "",
         website: company.summary.website || "",
-        yearsInOperation: company.summary.yearsInOperation || "",
+        yearsInOperation: company.summary.yearsInOperation
+          ? new Date(company.summary.yearsInOperation)
+          : null,
         dateOfActivation: company.summary.dateOfActivation
           ? new Date(company.summary.dateOfActivation)
           : null,
       };
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(nextFormData);
-      onChange?.(toSummary(nextFormData));
     }
-  }, [company, onChange]);
+  }, [company]);
 
   const handleChange = (field: keyof FormData, value: string | Date | null) => {
     const nextFormData = {
@@ -212,10 +215,28 @@ export function EditBasicInformation({ company, onChange }: EditBasicInformation
       <Group grow mb="sm">
         <div>
           <Text size="sm" fw={500}>Years in Operation</Text>
-          <TextInput
-            placeholder="Enter years"
+          <DateInput
+            placeholder="Select years in operation"
             value={formData.yearsInOperation}
-            onChange={(e) => handleChange("yearsInOperation", e.currentTarget.value)}
+            onChange={(date) => handleChange("yearsInOperation", date)}
+            rightSectionWidth={45}
+            ref={yearsInputRef}
+            rightSection={
+              <Button
+                type="button"
+                h={36}
+                w={45}
+                p={0}
+                radius="sm"
+                color="#4f657d"
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  yearsInputRef.current?.focus();
+                }}
+              >
+                <CalendarMonth width={24} height={24} fill="white" />
+              </Button>
+            }
           />
         </div>
         <div>
@@ -224,6 +245,24 @@ export function EditBasicInformation({ company, onChange }: EditBasicInformation
             placeholder="Pick date"
             value={formData.dateOfActivation}
             onChange={(date) => handleChange("dateOfActivation", date)}
+            rightSectionWidth={45}
+            ref={activationInputRef}
+            rightSection={
+              <Button
+                type="button"
+                h={36}
+                w={45}
+                p={0}
+                radius="sm"
+                color="#4f657d"
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  activationInputRef.current?.focus();
+                }}
+              >
+                <CalendarMonth width={24} height={24} fill="white" />
+              </Button>
+            }
           />
         </div>
       </Group>

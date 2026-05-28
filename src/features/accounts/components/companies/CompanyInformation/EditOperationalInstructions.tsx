@@ -53,9 +53,8 @@ export function EditOperationalInstructions({ company, onChange }: EditOperation
       };
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(nextFormData);
-      onChange?.(toOperationalInstructions(nextFormData));
     }
-  }, [company, onChange]);
+  }, [company]);
 
   const handleChange = (field: keyof FormData, value: string) => {
     const nextFormData = {

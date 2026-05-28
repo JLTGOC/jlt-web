@@ -8,6 +8,7 @@ import { notifications } from "@mantine/notifications";
 import type { ZodIssue } from "zod";
 import { companyService } from "@/features/accounts/services/company.service";
 import type { CompanyFullDetails, CompanyCreateRequest, CompanyUpdateRequest } from "@/features/accounts/types/company.types";
+import { mapCompanyFullDetailsToBackendRequest } from "@/features/accounts/types/company.types";
 import { companyFullDetailsSchema, companySummarySchema } from "@/features/accounts/schemas/company.schema";
 
 // Import sections
@@ -278,9 +279,7 @@ export function CompanyInformation() {
 
       if (isEditMode && companyId) {
         // Update existing company
-        const updatePayload: CompanyUpdateRequest = {
-          ...draftCompany,
-        };
+        const updatePayload: CompanyUpdateRequest = mapCompanyFullDetailsToBackendRequest(draftCompany);
 
         // Check for any new files in documentsAttachments to upload
         const docs = draftCompany.documentsAttachments?.documents ?? [];
@@ -302,10 +301,10 @@ export function CompanyInformation() {
               return { name: d.name, url: d.url ?? null };
             });
 
-            updatePayload.documentsAttachments = {
-              ...(draftCompany.documentsAttachments ?? {}),
-              documents: mergedDocs,
-            } as CompanyFullDetails["documentsAttachments"];
+            updatePayload.documents = mergedDocs;
+            if (draftCompany.documentsAttachments?.attachments) {
+              updatePayload.attachments = draftCompany.documentsAttachments.attachments;
+            }
           } catch (err) {
             console.error("Failed to upload documents", err);
             notifications.show({ title: "Upload Error", message: "Failed to upload documents.", color: "red" });
@@ -326,9 +325,7 @@ export function CompanyInformation() {
         navigate("/accounts/companies", { replace: true });
       } else {
         // Create new company
-        const createPayload: CompanyCreateRequest = {
-          ...draftCompany,
-        };
+        const createPayload: CompanyCreateRequest = mapCompanyFullDetailsToBackendRequest(draftCompany);
 
         // Create company first to obtain an id so we can upload files
         const created = await companyService.createCompany(createPayload);
@@ -353,10 +350,8 @@ export function CompanyInformation() {
 
             // Persist uploaded doc metadata
             await companyService.updateCompany(created.companyId, {
-              documentsAttachments: {
-                ...(draftCompany.documentsAttachments ?? {}),
-                documents: mergedDocs,
-              },
+              documents: mergedDocs,
+              attachments: draftCompany.documentsAttachments?.attachments,
             } as CompanyUpdateRequest);
           } catch (err) {
             console.error("Failed to upload documents", err);

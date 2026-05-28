@@ -41,9 +41,8 @@ export function EditRiskIssue({ company, onChange }: EditRiskIssueProps) {
       };
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(nextFormData);
-      onChange?.(toRiskIssueMonitoring(nextFormData));
     }
-  }, [company, onChange]);
+  }, [company]);
 
   const handleChange = (field: keyof FormData, value: string) => {
     const nextFormData = {

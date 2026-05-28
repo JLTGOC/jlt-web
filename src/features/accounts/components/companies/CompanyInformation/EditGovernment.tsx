@@ -102,9 +102,8 @@ export function EditGovernment({ company, onChange }: EditGovernmentProps) {
       };
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(nextFormData);
-      onChange?.(toGovernmentCompliance(nextFormData));
     }
-  }, [company, onChange]);
+  }, [company]);
 
   const emitChange = (next: FormData) => {
     onChange?.(toGovernmentCompliance(next));

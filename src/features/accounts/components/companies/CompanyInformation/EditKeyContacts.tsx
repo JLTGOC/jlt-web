@@ -54,9 +54,8 @@ export function EditKeyContacts({ company, onChange }: EditKeyContactsProps) {
       };
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(nextFormData);
-      onChange?.(toKeyContacts(nextFormData));
     }
-  }, [company, onChange]);
+  }, [company]);
 
   const handleContactChange = (
     contactType: keyof FormData,
