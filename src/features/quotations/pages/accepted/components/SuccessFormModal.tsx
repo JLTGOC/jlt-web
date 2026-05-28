@@ -7,11 +7,13 @@ import {
 type SuccessFormModalProps = {
 	opened: boolean;
 	onClose: () => void;
+	onConfirm: () => void;
 };
 
 export default function SuccessFormModal({
 	opened,
 	onClose,
+	onConfirm,
 }: SuccessFormModalProps) {
 	return (
 		<Modal
@@ -105,7 +107,7 @@ export default function SuccessFormModal({
 			<Box px="1.5rem" py="0.75rem">
 				<Group justify="center">
 					<Button
-						onClick={onClose}
+						onClick={onConfirm}
 						styles={{
 							root: {
 								color: "#1e3049",

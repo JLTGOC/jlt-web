@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@mantine/core";
 import { useNavigate } from "react-router";
@@ -13,6 +13,8 @@ import {
   fetchAcceptedFormEnums,
   registerJobOrder,
 } from "../../api/quotations.api";
+import { acceptedQueryKeys } from "./utils/acceptedQueryKeys";
+import { jobOrderRoutes } from "@/features/job-order/utils/jobOrderRoutes";
 
 import BillingInformation from "./components/BillingInformtation";
 import ClientInformation from "./components/ClientInformation";
@@ -34,6 +36,7 @@ export default function AcceptedForm({
   job_type = "LOGISTICS"
 }: AcceptedFormProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<RequestBody | null>(
@@ -107,6 +110,12 @@ export default function AcceptedForm({
     setIsConfirmModalOpen(true);
   };
 
+  const handleSuccessConfirm = () => {
+    void queryClient.invalidateQueries({ queryKey: acceptedQueryKeys.root() });
+    setIsSuccessModalOpen(false);
+    navigate(jobOrderRoutes.list());
+  };
+
   return (
     <>
     <FormProvider {...methods}>
@@ -142,6 +151,7 @@ export default function AcceptedForm({
       <SuccessFormModal
       opened={isSuccessModalOpen}
       onClose={() => setIsSuccessModalOpen(false)}
+      onConfirm={handleSuccessConfirm}
     />
     </>
   );

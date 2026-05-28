@@ -1,8 +1,22 @@
 import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { Box, Grid, List, Select, Text, TextInput, Textarea } from "@mantine/core";
-import { Dropzone, IMAGE_MIME_TYPE, type FileWithPath } from "@mantine/dropzone";
-import { IconReceipt } from "@tabler/icons-react";
+import {
+  ActionIcon,
+  Box,
+  Grid,
+  Group,
+  List,
+  Select,
+  Text,
+  TextInput,
+  Textarea,
+} from "@mantine/core";
+import {
+  Dropzone,
+  IMAGE_MIME_TYPE,
+  type FileWithPath,
+} from "@mantine/dropzone";
+import { IconReceipt, IconX } from "@tabler/icons-react";
 
 import { type RequestBody } from "@/features/quotations/schemas/acceptedForm.schema";
 import type { AcceptedFormEnumsResponse } from "@/features/quotations/types/acceptedForm.types";
@@ -22,7 +36,13 @@ export default function BillingInformation({ enums }: BillingInformationProps) {
   } = useFormContext<RequestBody>();
   const [attachedDocs, setAttachedDocs] = useState<FileWithPath[]>([]);
 
-  console.log(attachedDocs)
+  const handleRemoveDoc = (index: number) => {
+    const nextFiles = attachedDocs.filter(
+      (_, fileIndex) => fileIndex !== index,
+    );
+    setAttachedDocs(nextFiles);
+    setValue("billing.attached_docs", nextFiles);
+  };
 
   return (
     <PaperLayout title="BILLING INFORMATION" icon={<IconReceipt size={20} />}>
@@ -91,10 +111,7 @@ export default function BillingInformation({ enums }: BillingInformationProps) {
             onDrop={(files) => {
               const nextFiles = [...attachedDocs, ...files];
               setAttachedDocs(nextFiles);
-              setValue(
-                "billing.attached_docs",
-                attachedDocs,
-              );
+              setValue("billing.attached_docs", nextFiles);
             }}
           >
             <Box
@@ -104,6 +121,8 @@ export default function BillingInformation({ enums }: BillingInformationProps) {
                 display: "flex",
                 flexDirection: "column",
                 gap: 6,
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
               <Dropzone.Accept>
@@ -124,22 +143,37 @@ export default function BillingInformation({ enums }: BillingInformationProps) {
                   Or click to browse
                 </Text>
               </Dropzone.Idle>
-
-              {attachedDocs.length ? (
-                <Box mt="xs">
-                  <List spacing={4} size="sm">
-                    {attachedDocs.map((file, index) => (
-                      <List.Item key={`${file.name}-${index}`}>
-                        {file.name}
-                      </List.Item>
-                    ))}
-                  </List>
-                </Box>
-              ) : null}
             </Box>
           </Dropzone>
+
+          {attachedDocs.length ? (
+            <Box mt="xs">
+              <List spacing={4} size="sm">
+                {attachedDocs.map((file, index) => (
+                  <List.Item key={`${file.name}-${index}`}>
+                    <Group justify="space-between" gap="xs" wrap="nowrap">
+                      <Text size="sm" lineClamp={1}>
+                        {file.name}
+                      </Text>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        size="sm"
+                        aria-label={`Remove ${file.name}`}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleRemoveDoc(index);
+                        }}
+                      >
+                        <IconX size={14} />
+                      </ActionIcon>
+                    </Group>
+                  </List.Item>
+                ))}
+              </List>
+            </Box>
+          ) : null}
         </Grid.Col>
-        
       </Grid>
     </PaperLayout>
   );
