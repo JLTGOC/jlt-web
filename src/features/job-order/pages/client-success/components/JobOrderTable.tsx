@@ -350,8 +350,7 @@ export function JobOrderTable({
                         </>
                       )}
 
-                      {row.assignment_status === "ASSIGNED" &&
-                      currentUserRole === "Lead Operations" && row.generate_shipment ? (
+                      {row.assignment_status === "ASSIGNED"  && row.generate_shipment ? (
                         <Button
                           styles={{ root: { background: "#FF8800" } }}
                           leftSection={<RequestQuote width={20} />}
