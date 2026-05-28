@@ -18,7 +18,7 @@ import {
   RequestQuote,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 
-import type { RespondedQuotationListItem } from "@/features/quotations/types/quotations.types";
+import type { QuotationListItem } from "@/features/quotations/types/quotations.types";
 
 function RouteArrow() {
   return (
@@ -81,11 +81,11 @@ function getInitials(fullName: string) {
     .toUpperCase();
 }
 
-export function getRowAccentColor(row: RespondedQuotationListItem) {
+export function getRowAccentColor(row: QuotationListItem) {
   return row.client_type === "NEW" ? "#54B99B" : "#368DC4";
 }
 
-export function RequestCell({ row }: { row: RespondedQuotationListItem }) {
+export function RequestCell({ row }: { row: QuotationListItem }) {
   return (
     <Stack gap={2}>
       <Text
@@ -103,7 +103,7 @@ export function RequestCell({ row }: { row: RespondedQuotationListItem }) {
   );
 }
 
-export function DetailsCell({ row }: { row: RespondedQuotationListItem }) {
+export function DetailsCell({ row }: { row: QuotationListItem }) {
   return (
     <Stack gap={2}>
       <Text c="#2a4058" fz="0.875rem" fw={700}>
@@ -153,12 +153,8 @@ export function DetailsCell({ row }: { row: RespondedQuotationListItem }) {
   );
 }
 
-export function PersonInChargeCell({
-  row,
-}: {
-  row: RespondedQuotationListItem;
-}) {
-  const name = row.account_specialist ?? row.as_full_name ?? "Unassigned";
+export function PersonInChargeCell({ row }: { row: QuotationListItem }) {
+  const name = row.account_specialist ?? row.account_specialist ?? "Unassigned";
   const initials = getInitials(name);
 
   return (
@@ -173,11 +169,7 @@ export function PersonInChargeCell({
   );
 }
 
-export function AcceptedStatusCell({
-  row,
-}: {
-  row: RespondedQuotationListItem;
-}) {
+export function AcceptedStatusCell({ row }: { row: QuotationListItem }) {
   return (
     <Stack gap={6}>
       <Box
@@ -208,26 +200,31 @@ export function MyJobsStatusCell({
   row,
   onMakeJobOrder,
 }: {
-  row: RespondedQuotationListItem;
-  onMakeJobOrder: (row: RespondedQuotationListItem) => void;
+  row: QuotationListItem;
+  onMakeJobOrder: (row: QuotationListItem) => void;
 }) {
   const personInCharge =
-    row.account_specialist ?? row.as_full_name ?? "Unassigned";
+    row.account_specialist ?? row.account_specialist ?? "Unassigned";
 
   return (
     <Stack gap={6}>
-      <Button
-        variant="outline"
-        color="#4f657d"
-        size="xs"
-        leftSection={<CheckCircle width={16} />}
-        onClick={(event) => {
-          event.stopPropagation();
-          onMakeJobOrder(row);
-        }}
-      >
-        Make Job Order
-      </Button>
+      {row.job_order_created === true ? (
+        ""
+      ) : (
+        <Button
+          variant="outline"
+          color="#4f657d"
+          size="xs"
+          leftSection={<CheckCircle width={16} />}
+          onClick={(event) => {
+            event.stopPropagation();
+            onMakeJobOrder(row);
+          }}
+        >
+          Make Job Order
+        </Button>
+      )}
+
       <Text c="#475569" fz="0.75rem">
         PIC: {personInCharge}
       </Text>
@@ -239,11 +236,11 @@ export function MyJobsStatusCell({
 }
 
 interface ActionsMenuProps {
-  row: RespondedQuotationListItem;
-  onViewDetails: (row: RespondedQuotationListItem) => void;
-  onViewDocuments: (row: RespondedQuotationListItem) => void;
+  row: QuotationListItem;
+  onViewDetails: (row: QuotationListItem) => void;
+  onViewDocuments: (row: QuotationListItem) => void;
   actionLabel: "Discard" | "Update Quotation";
-  onAction?: (row: RespondedQuotationListItem) => void;
+  onAction?: (row: QuotationListItem) => void;
 }
 
 export function ActionsMenu({
