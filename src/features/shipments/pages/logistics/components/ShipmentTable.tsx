@@ -371,7 +371,12 @@ export function ShipmentTable({
                               <Text fz="0.813rem">Documents</Text>
                             </Group>
                           </Menu.Item>
-                          <Menu.Item>
+                          <Menu.Item
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              navigate("/shipments/logistics/planning-timeline");
+                            }}
+                          >
                             <Group gap={8}>
                               <EventNote width={20} height={20} style={{ color: "#1C213B" }} />
                               <Text fz="0.813rem">Planning & Timeline</Text>
