@@ -8,6 +8,54 @@ export type AccountStatus =
   | { state: "ACTIVE" } // currently online
   | { state: "OFFLINE"; lastSeen: Date }; // offline, show minutes/hours ago
 
+// ============================================
+// Client Dashboard Stats (for dashboard view)
+// ============================================
+
+export interface ClientDashboardStats {
+  totalClients: number;
+  newClients: number; // clients added in the last 30 days
+  activeShipments: number; // shipments currently active for this account
+  activeRegulatory: number; // regulatory cases currently active for this account
+  pendingQuotations: number; // quotations awaiting response
+}
+
+// ============================================
+// Account Dashboard Stats (for dashboard view)
+// ============================================
+
+export interface AccountDashboardStats {
+  totalEmployees: number; // total number of employees
+  activeShipments: number; // shipments currently active for this account
+  activeRegulatory: number; // regulatory cases currently active for this account
+  pendingQuotations: number; // quotations awaiting response
+}
+
+export interface AccountDetails {
+  accountInfo: {
+    fullName: string;
+    email: string;
+    contactNumber: string;
+    username: string;
+    role?: string;
+  };
+  companyInfo: {
+    companyName: string;
+    position?: string;
+    companyAddress: string;
+    businessType?: string;
+  };
+  identification: {
+    profileImageUrl?: string | null;
+    idImageUrl?: string | null;
+  };
+}
+
+export interface EmployeeDetails extends AccountDetails {
+  isLead?: boolean;
+  employeeNumber?: string;
+  status: AccountStatus;
+}
 
 // ============================================
 // Account List Types (for table view)
@@ -20,56 +68,115 @@ export interface AccountListItem {
   email: string;
   contactNumber: string;
 
-  // For employees
-  role?: string;            // e.g. "Sales", "Operations"
-  isLead?: boolean;         // true = lead ON, false = lead OFF
-  employeeNumber?: string;   // e.g. "EMP-101", "EMP-102"
+  // For employees (nested for clarity)
+  employee?: {
+    employeeNumber: string;   // e.g. "EMP-101"
+    role: string;             // e.g. "Sales", "Operations"
+    isLead: boolean;          // true = lead ON, false = lead OFF
+    requestAccepted: number;  // number of requests accepted
+    quotationSent: number;    // number of quotations sent
+    quotationAccepted: number; // number of quotations accepted
+  };
 
-  // For clients
-  companyName?: string;     // e.g. "Acme Corp"
-  position?: string;        // e.g. "Purchasing Manager"
+  // For clients (nested for clarity)
+  client?: {
+    clientName: string;       // e.g. "John Doe"
+    companyName: string;      // e.g. "Acme Corp"
+    type: "OLD" | "NEW";      // strictly only two options
+    pendingQuotations: number; // quotations awaiting response
+    activeShipment: number;    // active shipments
+    activeRegulatory: number;  // active regulatory cases
+  };
 
-  status: AccountStatus;    // online/offline with timestamp
-
+  status: AccountStatus;      // online/offline with timestamp
 }
 
 // ============================================
-// Full Account Data Types (for detail view)
+// Client Details (full view)
 // ============================================
 
-export interface AccountDetails {
-  id: number;
+export interface ClientDetails {
+  // Header Information
+  clientId: number;
+  clientName: string;
+  position: string;
+  contactNumber: string;
+  email: string;
+  profileImageUrl?: string | null;
+  dateCreated: string;       // ISO date string
+  companyName: string;
+  companyAddress: string;
+  businessType: string;
 
-  // Account Information
-  accountInfo: {
-    fullName: string;
-    username: string;
-    email: string;
-    contactNumber: string;
-    role: string
+  // Dashboard Metrics
+  quotationStats: {
+    totalQuotation: number;
+    pendingQuotation: number;
+    acceptedQuotation: number;
   };
 
-  // Security
-  security: {
-    passwordHash: string; // stored securely, not plain text
+  regulatoryStats: {
+    totalRegulatory: number;
+    ongoingRegulatory: number;
+    completedRegulatory: number;
   };
 
-  // Company Information
-  companyInfo: {
-    companyName: string;
-    position: string;
-    companyAddress: string;
-    businessType: string;
+  shipmentStats: {
+    totalShipments: number;
+    inProgressShipments: number;
+    completedShipments: number;
   };
 
-  // Identification
-  identification: {
-    idImageUrl: string | null; // path to ID image
-    profileImageUrl: string | null; // path to profile image
-  };
+  // Sub‑Tables
+  quotations: ClientQuotation[];
+  shipments: ClientShipment[];
+  regulatory: ClientRegulatory[];
+}
 
-  // Flags and lifecycle
-  isLead: boolean;                  // lead toggle
-  employeeNumber?: string; // e.g. "EMP-101", "EMP-102"
-  status: AccountStatus;             // online/offline with timestamp
+// ============================================
+// Client Sub‑Table Types
+// ============================================
+
+export interface ClientQuotation {
+  quotationNumber: string;
+  serviceType: string;
+  dateQuoted: string;     // ISO date
+  validUntil: string;     // ISO date
+  quotedBy: string;
+  quotedByAvatarUrl?: string | null;
+  quotedByUrl?: string | null;
+  status: string;         // e.g. "Pending", "Accepted"
+  alerts?: string;        // alerts message
+}
+
+export interface ClientShipment {
+  referenceNumber: string;
+  blNumber: string;       // Bill of Lading
+  serviceType: string;
+  transportMode: string;  // e.g. "Air", "Sea"
+  origin: string;
+  destination: string;
+  eta: string;            // ISO date
+  etd: string;            // ISO date
+  personInCharge: string;
+  pic_image_path?: string | null;
+  status: string;         // e.g. "In Progress", "Completed"
+}
+
+export interface ClientRegulatory {
+  regulatoryNumber: string;
+  applicationType: string;
+  typeOfApplication: string;
+  issueDate: string;      // ISO date
+  expiryDate: string;     // ISO date
+  personInCharge: string;
+  pic_image_path?: string | null;
+  status: string;         // e.g. "Ongoing", "Completed"
+}
+
+// ============================================
+// Employee Details (full view)
+// ============================================
+
+export interface EmployeeDetails {
 }

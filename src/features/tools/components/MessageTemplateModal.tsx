@@ -73,7 +73,13 @@ export function MessageTemplateModal({
   };
 
   return (
-    <ToolModal opened={opened} onClose={onClose} title={title}>
+    <ToolModal
+      opened={opened}
+      onClose={onClose}
+      title={title}
+      titleColor="jltAccent.9"
+      headerBgColor="#EBEBEB"
+    >
       <Stack gap="md">
         <TextInput
           label="Template Name"

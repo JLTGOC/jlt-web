@@ -282,6 +282,8 @@ export function TemplatesPage() {
         withCloseButton={false}
         padding={0}
         radius="md"
+        headerBgColor="#EBEBEB"
+        titleColor="jltAccent.9"
       >
         <Group>
           {TEMPLATE_TYPES.map((type, index) => (
@@ -306,6 +308,8 @@ export function TemplatesPage() {
         withCloseButton={false}
         padding={0}
         radius="md"
+        headerBgColor="#EBEBEB"
+        titleColor="jltAccent.9"
       >
         <Group>
           {SETTINGS.map((setting, index) => (

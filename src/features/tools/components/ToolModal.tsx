@@ -11,6 +11,8 @@ interface ToolModalProps {
   withCloseButton?: boolean;
   padding?: number | string;
   radius?: string;
+  headerBgColor?: string;
+  titleColor?: string;
 }
 
 export function ToolModal({
@@ -23,6 +25,8 @@ export function ToolModal({
   withCloseButton = false,
   padding = 0,
   radius = "md",
+  headerBgColor,
+  titleColor,
 }: ToolModalProps) {
   return (
     <Modal
@@ -36,18 +40,23 @@ export function ToolModal({
     >
       <Stack gap={0}>
         {/* Title */}
-        <Text
-          ta="center"
-          fw={600}
-          size="sm"
-          py="lg"
-          c="dimmed"
-          tt="uppercase"
-          lts="0.08em"
+        <Stack
+          gap={0}
+          style={headerBgColor ? { backgroundColor: headerBgColor } : undefined}
         >
-          {title}
-        </Text>
-        <Divider />
+          <Text
+            ta="center"
+            fw={600}
+            size="sm"
+            py="lg"
+            c={titleColor ?? "dimmed"}
+            tt="uppercase"
+            lts="0.08em"
+          >
+            {title}
+          </Text>
+          <Divider />
+        </Stack>
         {/* Content */}
         <Stack gap={0} p="lg">
           {children}

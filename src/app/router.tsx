@@ -52,6 +52,9 @@ const JobOrderClientDocumentsPage = lazy(
   () => import("@/features/job-order/pages/shared/JobOrderClientDocumentsPage"),
 );
 
+//Account imports
+const AccountsPage = lazy(() => import("./routes/app/accounts/AccountsPage"));
+
 //Tool imports
 const Tools = lazy(() => import("./routes/app/tools/ToolsPage"));
 
@@ -171,6 +174,14 @@ export const router = createBrowserRouter([
             Component: JobOrderDetailPage,
           },
           { path: "job-orders", Component: JobOrdersPage },
+
+          // Account routes — sidebar only links to /accounts.
+          // Tabs inside AccountsPage are used for clients and account-specialists.
+          // Other employee roles are filtered and only accessible with lead access.
+          { path: "accounts/:category/:subCategory/:id", Component: AccountsPage },
+          { path: "accounts/:category/:subCategory", Component: AccountsPage },
+          { path: "accounts/:category", Component: AccountsPage },
+          { path: "accounts", Component: AccountsPage },
 
           // ── Tools routes ──
           { path: "tools/templates/config/billing", Component: Tools },

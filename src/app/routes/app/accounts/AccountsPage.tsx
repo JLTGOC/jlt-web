@@ -1,62 +1,45 @@
 // src/features/accounts/pages/AccountsPage.tsx
-import { Navigate, useParams } from "react-router";
-import { OldClients } from "@/features/accounts/components/clients/OldClients";
-import { NewClients } from "@/features/accounts/components/clients/NewClients";
+import { useNavigate, useParams } from "react-router";
+import { Box } from "@mantine/core";
 import { ClientsList } from "@/features/accounts/components/clients/ClientsList";
-import { OperationsEmployees } from "@/features/accounts/components/employees/OperationsEmployees";
-import { AccountSpecialistsEmployees } from "@/features/accounts/components/employees/AccountSpecialistsEmployees";
-import { HumanResourcesEmployees } from "@/features/accounts/components/employees/HumanResourcesEmployees";
-import { ITEmployees } from "@/features/accounts/components/employees/ITEmployees";
-import { FinanceEmployees } from "@/features/accounts/components/employees/FinanceEmployees";
-import { MarketingEmployees } from "@/features/accounts/components/employees/MarketingEmployees";
 import { EmployeesList } from "@/features/accounts/components/employees/EmployeesList";
+import { CompaniesList } from "@/features/accounts/components/companies/CompaniesList";
 import { AccountsProfile } from "@/features/accounts/pages/AccountsProfile";
+import { getAccountTabs } from "@/features/accounts/utils/accountTabs";
 
 export default function AccountsPage() {
-  const { category, subCategory, id } = useParams();
+  const navigate = useNavigate();
+  const { category, id } = useParams();
 
-  // Default route: /accounts -> redirect to /accounts/clients
-  if (!category) {
-    return <Navigate to="/accounts/clients" replace />;
-  }
+  const activeTab = category ?? "clients";
 
-  // If an ID is present, show the profile view
+  const handleTabChange = (tab: string | null) => {
+    if (tab) navigate(`/accounts/${tab}`);
+  };
+
   if (id) {
-    return <AccountsProfile />;
+    return (
+      <Box style={{ width: "100%" }}>
+        <Box style={{ width: "100%" }}>
+          <AccountsProfile />
+        </Box>
+      </Box>
+    );
   }
 
-  // Clients routes
-  if (category === "clients") {
-    switch (subCategory) {
-      case "old":
-        return <OldClients />;
-      case "new":
-        return <NewClients />;
-      default:
-        return <ClientsList />;
-    }
-  }
+  return (
+    <Box style={{ width: "100%" }}>
+      {getAccountTabs(activeTab, handleTabChange)}
 
-  // Employees routes
-  if (category === "employees") {
-    switch (subCategory) {
-      case "account-specialists":
-        return <AccountSpecialistsEmployees />;
-      case "human-resources":
-        return <HumanResourcesEmployees />;
-      case "it":
-        return <ITEmployees />;
-      case "marketing":
-        return <MarketingEmployees />;
-      case "operations":
-        return <OperationsEmployees />;
-      case "finance":
-        return <FinanceEmployees />;
-      default:
-        return <EmployeesList />;
-    }
-  }
-
-  // Fallback: redirect to /accounts/clients
-  return <Navigate to="/accounts/clients" replace />;
+      <Box style={{ width: "100%", marginTop: "1rem" }}>
+        {activeTab === "clients" ? (
+          <ClientsList />
+        ) : activeTab === "employees" ? (
+          <EmployeesList />
+        ) : activeTab === "companies" ? (
+          <CompaniesList />
+        ) : null}
+      </Box>
+    </Box>
+  );
 }

@@ -1,0 +1,103 @@
+.menuActionIcon {
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Status Button Background Colors - customize here */
+:root {
+  --status-button-color-not-yet-departed: #E7E8EE;
+  --status-button-color-in-transit: #D1E6FD;
+  --status-button-color-arrived: #CDEEF0;
+  --status-button-color-berthed: #E1D8F6;
+  --status-button-color-discharged: #FFECBF;
+  --status-button-color-delivered: #CFEAD7;
+}
+
+/* Status Text Color & Outline - customize here */
+:root {
+  --status-outline-color-not-yet-departed: #000000;
+  --status-outline-color-in-transit: #0963E3;
+  --status-outline-color-arrived: #27A2AF;
+  --status-outline-color-berthed: #6D37C7;
+  --status-outline-color-discharged: #F5940A;
+  --status-outline-color-delivered: #0E8C42;
+}
+
+.statusBadge {
+  padding: 0.375rem 2rem;
+  border-radius: 0.375rem;
+  display: inline-block;
+  text-align: center;
+  position: relative;
+  background-color: #999;
+  width: 200px;
+  white-space: nowrap;
+}
+
+.statusBadgeSmall {
+  padding: 0.375rem 2rem;
+  width: 200px;
+  min-width: 200px;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  border: none;
+  white-space: nowrap;
+}
+
+.statusBadge[data-status="Not Yet Departed"] {
+  background-color: var(--status-button-color-not-yet-departed);
+  color: var(--status-outline-color-not-yet-departed);
+}
+
+.statusBadge[data-status="In Transit"] {
+  background-color: var(--status-button-color-in-transit);
+  color: var(--status-outline-color-in-transit);
+}
+
+.statusBadge[data-status="Arrived"] {
+  background-color: var(--status-button-color-arrived);
+  color: var(--status-outline-color-arrived);
+}
+
+.statusBadge[data-status="Berthed"] {
+  background-color: var(--status-button-color-berthed);
+  color: var(--status-outline-color-berthed);
+}
+
+.statusBadge[data-status="For Evaluation"] {
+  background-color: var(--status-button-color-berthed);
+  color: var(--status-outline-color-berthed);
+}
+
+.statusBadge[data-status="In Transit"] {
+  background-color: var(--status-button-color-in-transit);
+  color: var(--status-outline-color-in-transit);
+}
+
+.statusBadge[data-status="Under Review"] {
+  background-color: var(--status-button-color-in-transit);
+  color: var(--status-outline-color-in-transit);
+}
+
+.statusBadge[data-status="Approved"] {
+  background-color: var(--status-button-color-delivered);
+  color: var(--status-outline-color-delivered);
+}
+
+.statusBadge[data-status="Soon To Expire"] {
+  background-color: #F8CAC9;
+  color: #DF292F;
+}
+
+.statusBadge[data-status="Discharged"] {
+  background-color: var(--status-button-color-discharged);
+  color: var(--status-outline-color-discharged);
+}
+
+.statusBadge[data-status="Delivered"] {
+  background-color: var(--status-button-color-delivered);
+  color: var(--status-outline-color-delivered);
+}
