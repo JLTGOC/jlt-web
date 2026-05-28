@@ -10,12 +10,15 @@ import { Controller, type FieldValues } from "react-hook-form";
 import type { BaseFieldProps } from "./fieldTypes";
 
 export type SelectFieldProps<T extends FieldValues> = BaseFieldProps<T> &
-  Omit<SelectProps, "value" | "onChange" | "onBlur" | "error" | "name">;
+  Omit<SelectProps, "value" | "onChange" | "onBlur" | "error" | "name"> & {
+    readOnly?: boolean;
+  };
 
 export function SelectField<T extends FieldValues>({
   control,
   name,
   rules,
+  readOnly,
   ...rest
 }: SelectFieldProps<T>) {
   return (
@@ -31,7 +34,12 @@ export function SelectField<T extends FieldValues>({
               ? null
               : (field.value ?? null)
           }
-          onChange={(value) => field.onChange(value ?? "")}
+          onChange={(value) => {
+            if (readOnly) {
+              return;
+            }
+            field.onChange(value ?? "");
+          }}
           onBlur={field.onBlur}
           error={fieldState.error?.message}
         />

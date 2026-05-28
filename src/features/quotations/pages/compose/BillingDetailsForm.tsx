@@ -27,6 +27,7 @@ interface BillingDetailsFormProps {
   onSubmit: (values: BillingDetailsValues) => void;
   onChange?: (values: BillingDetailsValues) => void;
   onValidityChange?: (isValid: boolean) => void;
+  readOnly?: boolean;
 }
 
 type BillingDetailsFormInput = z.input<typeof billingDetailsSchema>;
@@ -38,6 +39,7 @@ export function BillingDetailsForm({
   onSubmit,
   onChange,
   onValidityChange,
+  readOnly,
 }: BillingDetailsFormProps) {
   const lastReportedValuesRef = useRef("");
   const { data: billingSettings } = useComposeBillingSettings();
@@ -99,6 +101,7 @@ export function BillingDetailsForm({
             data={currencies}
             searchable
             styles={tableSelectStyles}
+            readOnly={readOnly}
           />
 
           <SelectField
@@ -109,6 +112,7 @@ export function BillingDetailsForm({
             data={uoms}
             searchable
             styles={tableSelectStyles}
+            readOnly={readOnly}
           />
         </Group>
 
@@ -120,6 +124,7 @@ export function BillingDetailsForm({
             globalCurrency={currency}
             globalUom={uom}
             isPerContainer={isPerContainerUom(uom)}
+            readOnly={readOnly}
           />
         ))}
 
