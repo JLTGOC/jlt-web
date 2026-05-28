@@ -28,6 +28,9 @@ interface ShipmentTableProps {
   perPaginationPage?: number;
   setPerPaginationPage?: (page: number) => void;
   onRowClick?: (shipmentId: number) => void;
+  currentPage?: number;
+  setCurrentPage?: (page: number) => void;
+  perPage?: number;
 }
 
 function toTitleCase(value: string) {
@@ -110,12 +113,15 @@ export function ShipmentTable({
   showingCount,
   onRowClick,
   perPaginationPage = 1,
-  setPerPaginationPage,
+  setCurrentPage,
+  currentPage,
+  perPage
 }: ShipmentTableProps) {
   const navigate = useNavigate();
   const currentShowingCount = showingCount ?? rows.length;
   const currentTotal = total ?? rows.length;
-  const totalPages = Math.ceil(currentTotal / 10);
+  const pageSize = perPage ?? perPaginationPage ?? 10;
+  const totalPages = Math.ceil(currentTotal / pageSize);
 
   return (
     <>
@@ -386,7 +392,12 @@ export function ShipmentTable({
                   Showing {currentShowingCount} out of {currentTotal} entries
               </Text>
             
-              <Pagination total={totalPages || 1} value={perPaginationPage} onChange={setPerPaginationPage} size="xs" />
+              <Pagination value={currentPage}  onChange={(page) => {
+                setCurrentPage?.(page);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              total={totalPages || 1}
+              size="sm"/>
             </Group>
     </>
   );

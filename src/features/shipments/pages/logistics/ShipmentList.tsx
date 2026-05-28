@@ -150,21 +150,10 @@ export function ShipmentList() {
           total={total}
           showingCount={filteredRows.length}
           onRowClick={handleRowClick}
+          perPage={perPage}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
         />
-
-        <Flex justify="flex-end" align="center" mt="md">
-          {Math.ceil(total / perPage) > 1 && (
-            <Pagination
-              value={currentPage}
-              onChange={(page) => {
-                setCurrentPage(page);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              total={Math.ceil(total / perPage)}
-              size="sm"
-            />
-          )}
-        </Flex>
       </PageCard>
 
       <PageCard>
