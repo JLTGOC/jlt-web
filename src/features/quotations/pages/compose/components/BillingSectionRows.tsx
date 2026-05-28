@@ -17,6 +17,7 @@ import {
   useWatch,
 } from "react-hook-form";
 import * as z from "zod";
+import { useEffect } from "react";
 import { NumberInputField } from "@/components/form/valueFields";
 import { billingDetailsSchema } from "@/features/quotations/schemas/compose.schema";
 import type { BillingSection } from "@/features/quotations/types/compose.types";
@@ -33,6 +34,7 @@ interface BillingSectionRowsProps {
   globalCurrency: string;
   globalUom: string;
   isPerContainer: boolean;
+  readOnly?: boolean;
 }
 
 export function BillingSectionRows({
@@ -41,38 +43,59 @@ export function BillingSectionRows({
   globalCurrency,
   globalUom,
   isPerContainer,
+  readOnly,
 }: BillingSectionRowsProps) {
   const sectionName = `sections.${section.id}` as const;
-  const fieldArray = useFieldArray({ control, name: sectionName });
-  const hasRows = fieldArray.fields.length > 0;
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: sectionName,
+  });
+  const hasRows = fields.length > 0;
   const rows = useWatch({ control, name: sectionName }) ?? [];
   const total = getRowsTotalWithGlobalUom(rows, globalUom);
+
+  useEffect(() => {
+    if (!readOnly || fields.length > 0) {
+      return;
+    }
+    append(
+      {
+        description: "",
+        amount: null,
+        quantity: null,
+        container_size: "",
+      },
+      { shouldFocus: false },
+    );
+  }, [append, fields.length, readOnly]);
 
   return (
     <div className={classes.section}>
       <div className={classes.sectionHeader}>
         <Text className={classes.sectionTitle}>{section.title}</Text>
-        <ActionIcon
-          variant="subtle"
-          color="jltBlue.8"
-          className={classes.addButton}
-          onClick={() =>
-            fieldArray.append({
-              description: "",
-              amount: null,
-              quantity: null,
-              container_size: "",
-            })
-          }
-          aria-label={`Add ${section.title} row`}
-        >
-          <AddTwo width="1.125rem" height="1.125rem" />
-        </ActionIcon>
+        {!readOnly && (
+          <ActionIcon
+            variant="subtle"
+            color="jltBlue.8"
+            className={classes.addButton}
+            onClick={() =>
+              append({
+                description: "",
+                amount: null,
+                quantity: null,
+                container_size: "",
+              })
+            }
+            aria-label={`Add ${section.title} row`}
+          >
+            <AddTwo width="1.125rem" height="1.125rem" />
+          </ActionIcon>
+        )}
       </div>
 
       {hasRows && (
         <div className={classes.rows}>
-          {fieldArray.fields.map((field, index) => (
+          {fields.map((field, index) => (
             <Grid
               key={field.id}
               gutter={0}
@@ -91,6 +114,7 @@ export function BillingSectionRows({
                         onChange={(nextValue) => formField.onChange(nextValue)}
                         onBlur={formField.onBlur}
                         error={fieldState.error?.message}
+                        readOnly={readOnly}
                       />
                     );
                   }}
@@ -111,11 +135,17 @@ export function BillingSectionRows({
                       >
                         <NumberInput
                           value={formField.value ?? ""}
-                          onChange={formField.onChange}
+                          onChange={(nextValue) => {
+                            if (readOnly) {
+                              return;
+                            }
+                            formField.onChange(nextValue);
+                          }}
                           onBlur={formField.onBlur}
                           hideControls
                           min={1}
-                          placeholder="QTY"
+                          placeholder="Qty"
+                          readOnly={readOnly}
                           styles={{
                             input: {
                               border: fieldState.error
@@ -154,11 +184,17 @@ export function BillingSectionRows({
                       >
                         <Autocomplete
                           value={formField.value ?? ""}
-                          onChange={formField.onChange}
+                          onChange={(nextValue) => {
+                            if (readOnly) {
+                              return;
+                            }
+                            formField.onChange(nextValue);
+                          }}
                           onBlur={formField.onBlur}
                           data={["1x20", "1x40"]}
-                          placeholder="CONTAINER SIZE"
+                          placeholder="Container size"
                           error={!!fieldState.error} // red border only, no text
+                          readOnly={readOnly}
                           styles={{
                             input: {
                               border: fieldState.error
@@ -193,6 +229,7 @@ export function BillingSectionRows({
                     hideControls
                     min={0}
                     thousandSeparator=","
+                    readOnly={readOnly}
                     styles={{
                       input: {
                         border: 0,
@@ -224,7 +261,8 @@ export function BillingSectionRows({
                   variant="subtle"
                   color="red"
                   className={classes.deleteButton}
-                  onClick={() => fieldArray.remove(index)}
+                  onClick={() => remove(index)}
+                  disabled={readOnly}
                   aria-label={`Remove ${section.title} row ${index + 1}`}
                 >
                   <Delete width="1.5rem" height="1.5rem" />

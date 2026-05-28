@@ -23,12 +23,15 @@ function toDateValue(value: unknown): Date | null {
 }
 
 export type NumberInputFieldProps<T extends FieldValues> = BaseFieldProps<T> &
-  Omit<NumberInputProps, "value" | "onChange" | "onBlur" | "error" | "name">;
+  Omit<NumberInputProps, "value" | "onChange" | "onBlur" | "error" | "name"> & {
+    readOnly?: boolean;
+  };
 
 export function NumberInputField<T extends FieldValues>({
   control,
   name,
   rules,
+  readOnly,
   ...rest
 }: NumberInputFieldProps<T>) {
   return (
@@ -40,8 +43,14 @@ export function NumberInputField<T extends FieldValues>({
         <NumberInput
           {...rest}
           value={field.value ?? ""}
-          onChange={(value) => field.onChange(value)}
+          onChange={(value) => {
+            if (readOnly) {
+              return;
+            }
+            field.onChange(value);
+          }}
           onBlur={field.onBlur}
+          readOnly={readOnly}
           error={fieldState.error?.message}
         />
       )}
@@ -77,12 +86,15 @@ export function FileInputField<T extends FieldValues>({
 }
 
 export type DateInputFieldProps<T extends FieldValues> = BaseFieldProps<T> &
-  Omit<DateInputProps, "value" | "onChange" | "onBlur" | "error" | "name">;
+  Omit<DateInputProps, "value" | "onChange" | "onBlur" | "error" | "name"> & {
+    readOnly?: boolean;
+  };
 
 export function DateInputField<T extends FieldValues>({
   control,
   name,
   rules,
+  readOnly,
   ...rest
 }: DateInputFieldProps<T>) {
   return (
@@ -94,10 +106,14 @@ export function DateInputField<T extends FieldValues>({
         <DateInput
           {...rest}
           value={toDateValue(field.value)}
-          onChange={(value) =>
-            field.onChange(value ? dayjs(value).format("YYYY-MM-DD") : "")
-          }
+          onChange={(value) => {
+            if (readOnly) {
+              return;
+            }
+            field.onChange(value ? dayjs(value).format("YYYY-MM-DD") : "");
+          }}
           onBlur={field.onBlur}
+          readOnly={readOnly}
           error={fieldState.error?.message}
         />
       )}

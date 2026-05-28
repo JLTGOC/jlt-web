@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Stack } from "@mantine/core";
+import { Group, Stack, Text } from "@mantine/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch, type FieldPath } from "react-hook-form";
 import { TextInputField, TextareaField } from "@/components/form/textFields";
@@ -23,6 +23,7 @@ interface QuotationDetailsFormProps {
   onSubmit: (values: QuotationDetailsValues) => void;
   onChange?: (values: QuotationDetailsValues) => void;
   onValidityChange?: (isValid: boolean) => void;
+  readOnly?: boolean;
 }
 
 export function QuotationDetailsForm({
@@ -32,6 +33,7 @@ export function QuotationDetailsForm({
   onSubmit,
   onChange,
   onValidityChange,
+  readOnly,
 }: QuotationDetailsFormProps) {
   const lastReportedValuesRef = useRef("");
   const { data: messageTemplates = [] } = useComposeMessageTemplates();
@@ -207,36 +209,55 @@ export function QuotationDetailsForm({
           template={template}
           control={control}
           fixedFields={[RATE_VALIDITY_FIELD]}
+          readOnly={readOnly}
         />
 
-        <TextInputField control={control} name="subject" label="SUBJECT" />
+        <TextInputField
+          control={control}
+          name="subject"
+          label="SUBJECT"
+          placeholder="Enter subject"
+          withAsterisk
+          readOnly={readOnly}
+        />
 
         <div>
-          <MessageTemplateSelect
-            value={selectedMessageTemplateId}
-            onChange={(templateId) => {
-              setSelectedMessageTemplateId(templateId);
+          <Group justify="space-between" mb="xs" align="flex-start">
+            <Text size="sm" fw={500}>
+              MESSAGE <span style={{ color: "var(--mantine-color-red-6)" }}>*</span>
+            </Text>
+            <MessageTemplateSelect
+              value={selectedMessageTemplateId}
+              readOnly={readOnly}
+              onChange={(templateId) => {
+                if (readOnly) {
+                  return;
+                }
+                setSelectedMessageTemplateId(templateId);
 
-              if (!templateId) return;
+                if (!templateId) return;
 
-              const selectedTemplate = messageTemplates.find(
-                (messageTemplate) => messageTemplate.id === templateId,
-              );
+                const selectedTemplate = messageTemplates.find(
+                  (messageTemplate) => messageTemplate.id === templateId,
+                );
 
-              if (!selectedTemplate) return;
+                if (!selectedTemplate) return;
 
-              setValue("message", selectedTemplate.content, {
-                shouldDirty: true,
-                shouldValidate: true,
-              });
-            }}
-          />
+                setValue("message", selectedTemplate.content, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+              }}
+            />
+          </Group>
 
           <TextareaField
             control={control}
             name="message"
+            placeholder="Enter message"
             minRows={6}
             autosize
+            readOnly={readOnly}
           />
         </div>
       </Stack>

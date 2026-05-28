@@ -2,6 +2,7 @@ import {
   ActionIcon,
   Badge,
   Box,
+  Button,
   Checkbox,
   Divider,
   Group,
@@ -10,7 +11,11 @@ import {
   TextInput,
   Skeleton,
 } from "@mantine/core";
-import { Add, Save } from "@nine-thirty-five/material-symbols-react/rounded";
+import {
+  Add,
+  Save,
+  Visibility,
+} from "@nine-thirty-five/material-symbols-react/rounded";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -183,6 +188,7 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
     isFieldsFetching ||
     (isEditMode && isTemplateFetching);
   const modeLabel = isEditMode ? "Editing" : "Creating";
+  const canPreview = isEditMode && Boolean(templateId);
 
   const canSave =
     form.name.trim().length > 0 &&
@@ -267,6 +273,13 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
     });
   };
 
+  const handlePreview = () => {
+    if (!templateId) {
+      return;
+    }
+    navigate(`/tools/templates/${templateId}/preview`);
+  };
+
   return (
     <Stack
       gap="sm"
@@ -305,16 +318,31 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
           style={{ flex: 1 }}
           disabled={isInitialLoading || isSaving}
         />
-        <AppButton
-          onClick={handleSave}
-          disabled={!canSave || isInitialLoading}
-          loading={isSaving}
-          icon={Save}
-          w="10rem"
-          h="2.6rem"
-        >
-          SAVE
-        </AppButton>
+        <Group gap="sm">
+          {canPreview && (
+            <Button
+              variant="outline"
+              color="jltBlue.8"
+              leftSection={<Visibility width={24} />}
+              onClick={handlePreview}
+              disabled={isInitialLoading}
+              w="10rem"
+              h="2.6rem"
+            >
+              PREVIEW
+            </Button>
+          )}
+          <AppButton
+            onClick={handleSave}
+            disabled={!canSave || isInitialLoading}
+            loading={isSaving}
+            icon={Save}
+            w="10rem"
+            h="2.6rem"
+          >
+            SAVE
+          </AppButton>
+        </Group>
       </Group>
 
       <Group
