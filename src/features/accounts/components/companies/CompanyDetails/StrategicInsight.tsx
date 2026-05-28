@@ -3,21 +3,23 @@ import { Edit } from "@nine-thirty-five/material-symbols-react/outlined";
 import styles from "./CompanyDetails.module.css";
 
 interface StrategicInsightProps {
+  company?: import("../../../types/company.types").CompanyFullDetails | null;
   onEdit?: () => void;
 }
 
-const strategicFields = [
-  { label: "Growth", value: "N/A" },
-  { label: "Expansion Plans", value: "N/A" },
-  { label: "Competitors They Use", value: "N/A" },
-  { label: "Opportunities for Up-Selling", value: "N/A" },
-  { label: "CPRS Status", value: "N/A" },
-];
+export function StrategicInsight({ company, onEdit }: StrategicInsightProps) {
+  const s = company?.strategicInsight ?? {};
+  const fields = [
+    { label: "Growth", value: (s.growthOptions && s.growthOptions.join(", ")) ?? "N/A" },
+    { label: "Expansion Plans", value: s.expansionPlan ?? "N/A" },
+    { label: "Competitors They Use", value: s.competitorsUsed ?? "N/A" },
+    { label: "Opportunities for Up-Selling", value: s.upsellingOpportunities ?? "N/A" },
+    { label: "Notes / Insights", value: s.notes ?? "N/A" },
+  ];
 
-export function StrategicInsight({ onEdit }: StrategicInsightProps) {
   return (
     <Box className={styles.container}>
-      {strategicFields.map(({ label, value }) => (
+      {fields.map(({ label, value }) => (
         <Box key={label}>
           <Box className={styles.pricingRow}>
             <Text c="#7a808a" fz="0.75rem" className={styles.detailLabel}>

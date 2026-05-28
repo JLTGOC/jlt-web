@@ -38,4 +38,17 @@ export const companyService = {
     const response = await POST<ApiResponse<{ success: boolean }>>(`/companies/${id}/archive`);
     return response.data;
   },
+
+  async uploadDocuments(id: string, files: File[]): Promise<Array<{ name: string; url: string }>> {
+    const form = new FormData();
+    files.forEach((file) => form.append("files", file));
+
+    const response = await POST<ApiResponse<Array<{ name: string; url: string }>>>(
+      `/companies/${id}/documents`,
+      form,
+      { headers: { "Content-Type": "multipart/form-data" } },
+    );
+
+    return response.data;
+  },
 };

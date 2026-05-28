@@ -3,28 +3,25 @@ import { Edit, Add } from "@nine-thirty-five/material-symbols-react/outlined";
 import styles from "./CompanyDetails.module.css";
 
 interface GovernmentandComplianceDetailsProps {
+  company?: import("../../../types/company.types").CompanyFullDetails | null;
   onEdit?: () => void;
 }
 
-const complianceFields = [
-  { label: "TIN", value: "N/A" },
-  { label: "BIR Registration Number", value: "N/A" },
-  { label: "Import Accreditation Number", value: "N/A" },
-  { label: "Date Of Expiration", value: "N/A" },
-  { label: "CPRS Status", value: "N/A" },
-  { label: "Exporter Accreditation Number", value: "N/A" },
-  { label: "Date Of Expiration", value: "N/A" },
-];
+export function GovernmentandComplianceDetails({ company, onEdit }: GovernmentandComplianceDetailsProps) {
+  const gov = company?.governmentCompliance ?? {};
+  const fields = [
+    { label: "TIN", value: gov.tin ?? "N/A" },
+    { label: "BIR Registration Number", value: gov.birRegistrationNumber ?? "N/A" },
+    { label: "Importer Accreditation Number", value: gov.importerAccreditationNumber ?? "N/A" },
+    { label: "Importer Expiration Date", value: gov.importerExpirationDate ?? "N/A" },
+    { label: "CPRS Status", value: gov.cprsStatus ?? "N/A" },
+    { label: "Exporter Accreditation Number", value: gov.exporterAccreditationNumber ?? "N/A" },
+    { label: "Exporter Expiration Date", value: gov.exporterExpirationDate ?? "N/A" },
+  ];
 
-const otherFields = [
-  { label: "Special Permits (If Applicable)", value: "N/A" },
-  { label: "Compliance Risk", value: "N/A" },
-];
-
-export function GovernmentandComplianceDetails({ onEdit }: GovernmentandComplianceDetailsProps) {
   return (
     <Box className={styles.container}>
-      {complianceFields.map(({ label, value }) => (
+      {fields.map(({ label, value }) => (
         <Box key={label}>
           <Box className={styles.pricingRow}>
             <Text c="#7a808a" fz="0.75rem" className={styles.detailLabel}>
@@ -45,7 +42,9 @@ export function GovernmentandComplianceDetails({ onEdit }: GovernmentandComplian
               Authorize Representative/s
             </Text>
             <Text size="xs" fw={450} className={styles.detailValue}>
-              • N/A
+              {gov.authorizedRepresentatives && gov.authorizedRepresentatives.length > 0
+                ? `• ${gov.authorizedRepresentatives[0]}`
+                : "• N/A"}
             </Text>
           </Box>
           <Box style={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>
@@ -62,19 +61,29 @@ export function GovernmentandComplianceDetails({ onEdit }: GovernmentandComplian
         <Divider mt="xs" />
       </Box>
 
-      {otherFields.map(({ label, value }) => (
-        <Box key={label}>
-          <Box className={styles.pricingRow}>
-            <Text c="#7a808a" fz="0.75rem" className={styles.detailLabel}>
-              {label}
-            </Text>
-            <Text size="xs" fw={450} className={styles.detailValue}>
-              {value}
-            </Text>
-          </Box>
-          <Divider mt="xs" />
+      <Box>
+        <Box className={styles.pricingRow}>
+          <Text c="#7a808a" fz="0.75rem" className={styles.detailLabel}>
+            Special Permits (If Applicable)
+          </Text>
+          <Text size="xs" fw={450} className={styles.detailValue}>
+            {gov.specialPermits ?? "N/A"}
+          </Text>
         </Box>
-      ))}
+        <Divider mt="xs" />
+      </Box>
+
+      <Box>
+        <Box className={styles.pricingRow}>
+          <Text c="#7a808a" fz="0.75rem" className={styles.detailLabel}>
+            Compliance Risk
+          </Text>
+          <Text size="xs" fw={450} className={styles.detailValue}>
+            {gov.complianceRisk ?? "N/A"}
+          </Text>
+        </Box>
+        <Divider mt="xs" />
+      </Box>
 
       <Group className={styles.actions} style={{ justifyContent: "center" }}>
         <Button

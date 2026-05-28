@@ -39,6 +39,7 @@ export function CompaniesTabs() {
         onChange={(value) => value && setActiveTab(value as CompanyTabValue)}
         orientation="horizontal"
         keepMounted={false}
+        style={{ marginBottom: "-1rem" }}
       >
         <Paper shadow="false" >
           <Tabs.List grow className={styles.tabsList}>

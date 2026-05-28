@@ -3,42 +3,37 @@ import { Edit } from "@nine-thirty-five/material-symbols-react/outlined";
 import styles from "./CompanyDetails.module.css";
 
 interface BasicInformationProps {
-  companyName?: string | null;
-  classification?: string | null;
+  company?: import("../../../types/company.types").CompanyFullDetails | null;
   onEdit?: () => void;
 }
 
-const fieldRows = [
-  { label: "Trade Name", valueKey: "companyName" },
-  { label: "Transaction Type", value: "Import / Export" },
-  { label: "Client Classification", valueKey: "classification" },
-  { label: "Company Type", value: "Corporate" },
-  { label: "Industry", value: "Logistics" },
-  { label: "Business Type", value: "Services" },
-  { label: "Business Registration No. (SEC/DTI)", value: "SEC 123456" },
-  { label: "Website/Online Presence", value: "www.jltglobal.com" },
-  { label: "Years In Operation", value: "5 years" },
-  { label: "Date Of Activation", value: "01 Jan 2020" },
+const fieldRows = (summary: import("../../../types/company.types").CompanySummary) => [
+  { label: "Trade Name", value: summary.tradeName ?? summary.companyName ?? "N/A" },
+  { label: "Transaction Type", value: summary.transactionType ?? "N/A" },
+  { label: "Client Classification", value: summary.clientClassification ?? "N/A" },
+  { label: "Company Type", value: summary.companyType ?? "N/A" },
+  { label: "Industry", value: summary.industry ?? "N/A" },
+  { label: "Business Type", value: summary.businessType ?? "N/A" },
+  { label: "Business Registration No. (SEC/DTI)", value: summary.businessRegistrationNumber ?? "N/A" },
+  { label: "Website/Online Presence", value: summary.website ?? "N/A" },
+  { label: "Years In Operation", value: summary.yearsInOperation ?? "N/A" },
+  { label: "Date Of Activation", value: summary.dateOfActivation ?? "N/A" },
 ];
 
-export function BasicInformation({ companyName, classification, onEdit }: BasicInformationProps) {
+export function BasicInformation({ company, onEdit }: BasicInformationProps) {
+  const summary = company?.summary ?? ({} as import("../../../types/company.types").CompanySummary);
   return (
     <Box className={styles.container}>
-      {fieldRows.map(({ label, value, valueKey }) => {
-        const displayValue = valueKey === "companyName" ? companyName ?? "N/A" :
-          valueKey === "classification" ? classification ?? "N/A" : value;
-
-        return (
-          <Box key={label} className={styles.detailRow}>
-            <Text c="#7a808a" fz="0.75rem" className={styles.detailLabel}>
-              {label}
-            </Text>
-            <Text size="xs" fw={450} className={styles.detailValue}>
-              {displayValue}
-            </Text>
-          </Box>
-        );
-      })}
+      {fieldRows(summary).map(({ label, value }) => (
+        <Box key={label} className={styles.detailRow}>
+          <Text c="#7a808a" fz="0.75rem" className={styles.detailLabel}>
+            {label}
+          </Text>
+          <Text size="xs" fw={450} className={styles.detailValue}>
+            {value}
+          </Text>
+        </Box>
+      ))}
 
       <Group className={styles.actions} style={{ justifyContent: "center" }}>
         <Button

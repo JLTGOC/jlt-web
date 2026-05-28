@@ -3,23 +3,25 @@ import { Edit } from "@nine-thirty-five/material-symbols-react/outlined";
 import styles from "./CompanyDetails.module.css";
 
 interface OperationalInstructionsProps {
+  company?: import("../../../types/company.types").CompanyFullDetails | null;
   onEdit?: () => void;
 }
 
-const operationalFields = [
-  { label: "Preferred Communication Style", value: "N/A" },
-  { label: "Response Time Expectation", value: "N/A" },
-  { label: "Decision-Making Process", value: "N/A" },
-  { label: "Client Specific SOP", value: "N/A" },
-  { label: "Approval Workflow", value: "N/A" },
-  { label: "Required Pre-Alert Details", value: "N/A" },
-  { label: "Special Instructions", value: "N/A" },
-];
+export function OperationalInstructions({ company, onEdit }: OperationalInstructionsProps) {
+  const op = company?.operationalInstructions ?? {};
+  const fields = [
+    { label: "Preferred Communication Style", value: op.preferredCommunicationStyle ?? "N/A" },
+    { label: "Response Time Expectation", value: op.responseTimeExpectation ?? "N/A" },
+    { label: "Decision-Making Process", value: "N/A" },
+    { label: "Client Specific SOP", value: op.clientSpecificSOP ?? "N/A" },
+    { label: "Approval Workflow", value: op.approvalWorkflow ?? "N/A" },
+    { label: "Required Pre-Alert Details", value: op.requiredPreAlertDetails ?? "N/A" },
+    { label: "Special Instructions", value: op.specialInstructions ?? "N/A" },
+  ];
 
-export function OperationalInstructions({ onEdit }: OperationalInstructionsProps) {
   return (
     <Box className={styles.container}>
-      {operationalFields.map(({ label, value }) => (
+      {fields.map(({ label, value }) => (
         <Box key={label}>
           <Box className={styles.pricingRow}>
             <Text c="#7a808a" fz="0.75rem" className={styles.detailLabel}>

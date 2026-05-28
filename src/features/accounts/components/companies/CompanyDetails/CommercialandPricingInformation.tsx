@@ -3,20 +3,22 @@ import { Edit } from "@nine-thirty-five/material-symbols-react/outlined";
 import styles from "./CompanyDetails.module.css";
 
 interface CommercialandPricingInformationProps {
+  company?: import("../../../types/company.types").CompanyFullDetails | null;
   onEdit?: () => void;
 }
 
-const pricingFields = [
-  { label: "Agreed Service Rates (JLT Service Only)", value: "N/A" },
-  { label: "3PL Profit Range %", value: "N/A" },
-  { label: "Special Discounts", value: "N/A" },
-  { label: "Notes/Remarks/Reports", value: "N/A" },
-];
+export function CommercialandPricingInformation({ company, onEdit }: CommercialandPricingInformationProps) {
+  const commercial = company?.commercialInformation ?? {};
+  const fields = [
+    { label: "Agreed Service Rates (JLT Service Only)", value: commercial.agreedServiceRates ?? "N/A" },
+    { label: "3PL Profit Range %", value: commercial.profitRangePercent ?? "N/A" },
+    { label: "Special Discounts", value: commercial.specialDiscounts ?? "N/A" },
+    { label: "Notes/Remarks/Reports", value: commercial.notes ?? "N/A" },
+  ];
 
-export function CommercialandPricingInformation({ onEdit }: CommercialandPricingInformationProps) {
   return (
     <Box className={styles.container}>
-      {pricingFields.map(({ label, value }) => (
+      {fields.map(({ label, value }) => (
         <Box key={label}>
           <Box className={styles.pricingRow}>
             <Text c="#7a808a" fz="0.75rem" className={styles.detailLabel}>

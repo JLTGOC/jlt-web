@@ -4,11 +4,15 @@ import { Edit, Upload } from "@nine-thirty-five/material-symbols-react/outlined"
 import styles from "./CompanyDetails.module.css";
 
 interface DocumentsandAttachmentsProps {
+  company?: import("../../../types/company.types").CompanyFullDetails | null;
   onEdit?: () => void;
 }
 
-export function DocumentsandAttachments({ onEdit }: DocumentsandAttachmentsProps) {
+export function DocumentsandAttachments({ company, onEdit }: DocumentsandAttachmentsProps) {
   const [files, setFiles] = useState<File[]>([]);
+  const existing = company?.documentsAttachments ?? {};
+  const existingDocs = existing.documents ?? [];
+  const existingAtt = existing.attachments ?? [];
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -21,14 +25,30 @@ export function DocumentsandAttachments({ onEdit }: DocumentsandAttachmentsProps
       <Box>
         {/* Label with dynamic count */}
         <Text c="#7a808a" fz="0.75rem">
-          Uploaded Documents & Attachments ({files.length})
+          Uploaded Documents & Attachments ({existingDocs.length + existingAtt.length + files.length})
         </Text>
 
-        {/* Uploaded files list */}
+        {/* Existing uploaded files list */}
+        {(existingDocs.length > 0 || existingAtt.length > 0) && (
+          <Box mt="sm" mb="sm">
+            {existingDocs.map((doc, idx) => (
+              <Text key={`doc-${idx}`} size="xs" c="#4f657d">
+                • {doc.name}
+              </Text>
+            ))}
+            {existingAtt.map((att, idx) => (
+              <Text key={`att-${idx}`} size="xs" c="#4f657d">
+                • {att.name}
+              </Text>
+            ))}
+          </Box>
+        )}
+
+        {/* Uploaded files (new, local) */}
         {files.length > 0 && (
           <Box mt="sm" mb="sm">
             {files.map((file, idx) => (
-              <Text key={idx} size="xs" c="#4f657d">
+              <Text key={`new-${idx}`} size="xs" c="#4f657d">
                 • {file.name}
               </Text>
             ))}

@@ -24,7 +24,7 @@ import { EditStrategicInsight } from "./CompanyInformation/EditStrategicInsight"
 export function CompanyInformation() {
   const location = useLocation();
   const navigate = useNavigate();
-  const locationState = (location.state as { companyId?: string; activeStep?: number } | null) ?? null;
+  const locationState = (location.state as { companyId?: string; company?: CompanyFullDetails; activeStep?: number } | null) ?? null;
   const companyId = locationState?.companyId;
   const [activeStep, setActiveStep] = useState(locationState?.activeStep ?? 1);
   const [draftCompany, setDraftCompany] = useState<CompanyFullDetails | null>(
@@ -111,6 +111,13 @@ export function CompanyInformation() {
         documentsAttachments: {},
         strategicInsight: {},
       });
+      return;
+    }
+
+    // If the navigation state already included the full company object, use it
+    if (locationState?.company) {
+      setDraftCompany(locationState.company);
+      setIsLoading(false);
       return;
     }
 
@@ -275,6 +282,37 @@ export function CompanyInformation() {
           ...draftCompany,
         };
 
+        // Check for any new files in documentsAttachments to upload
+        const docs = draftCompany.documentsAttachments?.documents ?? [];
+        const filesToUpload = docs.filter((d: any) => d?.file) as Array<any>;
+
+        if (filesToUpload.length > 0) {
+          try {
+            const uploaded = await companyService.uploadDocuments(
+              companyId,
+              filesToUpload.map((d) => d.file as File),
+            );
+
+            // Merge uploaded urls into documents list
+            const mergedDocs = docs.map((d: any) => {
+              if (d?.file) {
+                const match = uploaded.find((u) => u.name === d.name);
+                return { name: d.name, url: match?.url ?? null };
+              }
+              return { name: d.name, url: d.url ?? null };
+            });
+
+            updatePayload.documentsAttachments = {
+              ...(draftCompany.documentsAttachments ?? {}),
+              documents: mergedDocs,
+            } as CompanyFullDetails["documentsAttachments"];
+          } catch (err) {
+            console.error("Failed to upload documents", err);
+            notifications.show({ title: "Upload Error", message: "Failed to upload documents.", color: "red" });
+            // Proceeding without uploaded files
+          }
+        }
+
         await companyService.updateCompany(companyId, updatePayload);
 
         notifications.show({
@@ -292,7 +330,39 @@ export function CompanyInformation() {
           ...draftCompany,
         };
 
-        await companyService.createCompany(createPayload);
+        // Create company first to obtain an id so we can upload files
+        const created = await companyService.createCompany(createPayload);
+
+        const docs = draftCompany.documentsAttachments?.documents ?? [];
+        const filesToUpload = docs.filter((d: any) => d?.file) as Array<any>;
+
+        if (filesToUpload.length > 0 && created?.companyId) {
+          try {
+            const uploaded = await companyService.uploadDocuments(
+              created.companyId,
+              filesToUpload.map((d) => d.file as File),
+            );
+
+            const mergedDocs = docs.map((d: any) => {
+              if (d?.file) {
+                const match = uploaded.find((u) => u.name === d.name);
+                return { name: d.name, url: match?.url ?? null };
+              }
+              return { name: d.name, url: d.url ?? null };
+            });
+
+            // Persist uploaded doc metadata
+            await companyService.updateCompany(created.companyId, {
+              documentsAttachments: {
+                ...(draftCompany.documentsAttachments ?? {}),
+                documents: mergedDocs,
+              },
+            } as CompanyUpdateRequest);
+          } catch (err) {
+            console.error("Failed to upload documents", err);
+            notifications.show({ title: "Upload Error", message: "Failed to upload documents.", color: "red" });
+          }
+        }
 
         notifications.show({
           title: "Success",

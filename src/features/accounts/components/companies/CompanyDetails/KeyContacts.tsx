@@ -3,37 +3,24 @@ import { Edit } from "@nine-thirty-five/material-symbols-react/outlined";
 import styles from "./CompanyDetails.module.css";
 
 interface KeyContactsProps {
+  company?: import("../../../types/company.types").CompanyFullDetails | null;
   onEdit?: () => void;
 }
 
-const contacts = [
-  {
-    label: "Primary Contact",
-    name: "Ana Santos",
-    position: "Account Manager",
-    phone: "+63 912 345 6789",
-    email: "ana.santos@jltglobal.com",
-  },
-  {
-    label: "Secondary Contact",
-    name: "Miguel Reyes",
-    position: "Operations Lead",
-    phone: "+63 927 654 3210",
-    email: "miguel.reyes@jltglobal.com",
-  },
-  {
-    label: "Billing Contact",
-    name: "Leila Cruz",
-    position: "Finance Officer",
-    phone: "+63 917 888 1122",
-    email: "leila.cruz@jltglobal.com",
-  },
-];
+export function KeyContacts({ company, onEdit }: KeyContactsProps) {
+  const contacts = company?.keyContacts ?? {};
+  const primary = contacts.primaryContact ?? {};
+  const secondary = contacts.secondaryContact ?? {};
+  const billing = contacts.billingContact ?? {};
+  const list = [
+    { label: "Primary Contact", ...primary },
+    { label: "Secondary Contact", ...secondary },
+    { label: "Billing Contact", ...billing },
+  ];
 
-export function KeyContacts({ onEdit }: KeyContactsProps) {
   return (
     <Box className={styles.container}>
-      {contacts.map(({ label, name, position, phone, email }) => (
+      {list.map(({ label, fullName, position, contactNumber, email }) => (
         <Box key={label} className={styles.contactBlock}>
           <Text c="#7a808a" fz="0.75rem" className={styles.detailLabel}>
             {label}
@@ -44,7 +31,7 @@ export function KeyContacts({ onEdit }: KeyContactsProps) {
                 Name
               </Text>
               <Text size="xs" fw={450} className={styles.detailValue}>
-                {name}
+                {fullName ?? "N/A"}
               </Text>
             </Box>
             <Box className={styles.nestedDetailRow}>
@@ -52,7 +39,7 @@ export function KeyContacts({ onEdit }: KeyContactsProps) {
                 Position
               </Text>
               <Text size="xs" fw={450} className={styles.detailValue}>
-                {position}
+                {position ?? "N/A"}
               </Text>
             </Box>
             <Box className={styles.nestedDetailRow}>
@@ -60,7 +47,7 @@ export function KeyContacts({ onEdit }: KeyContactsProps) {
                 Contact Number
               </Text>
               <Text size="xs" fw={450} className={styles.detailValue}>
-                {phone}
+                {contactNumber ?? "N/A"}
               </Text>
             </Box>
             <Box className={styles.nestedDetailRow}>
@@ -68,7 +55,7 @@ export function KeyContacts({ onEdit }: KeyContactsProps) {
                 Email
               </Text>
               <Text size="xs" fw={450} className={styles.detailValue}>
-                {email}
+                {email ?? "N/A"}
               </Text>
             </Box>
           </Box>

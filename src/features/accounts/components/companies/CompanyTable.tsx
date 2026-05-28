@@ -17,7 +17,7 @@ import styles from "./CompaniesList.module.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { companyService } from "../../services/company.service";
-import type { CompanyTableRow } from "../../types/company.types";
+import type { CompanyTableRow, CompanyFullDetails } from "../../types/company.types";
 
 export interface CompanyTab {
   value: string;
@@ -153,6 +153,37 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
     ? companies.find((row) => row.companyId === selectedCompanyId)
     : null;
 
+  const [selectedCompanyFull, setSelectedCompanyFull] = useState<CompanyFullDetails | null>(null);
+  const [loadingCompanyFull, setLoadingCompanyFull] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    async function loadFull() {
+      if (!selectedCompanyId) {
+        setSelectedCompanyFull(null);
+        return;
+      }
+
+      setLoadingCompanyFull(true);
+      try {
+        const data = await companyService.getCompanyById(selectedCompanyId);
+        if (!active) return;
+        setSelectedCompanyFull(data);
+      } catch (err) {
+        console.error("Failed to load full company details", err);
+        if (active) setSelectedCompanyFull(null);
+      } finally {
+        if (active) setLoadingCompanyFull(false);
+      }
+    }
+
+    loadFull();
+
+    return () => {
+      active = false;
+    };
+  }, [selectedCompanyId]);
+
   const handleEditSection = (sectionValue: string) => {
     if (!selectedCompany) {
       return;
@@ -161,6 +192,7 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
     navigate("/accounts/companies/company-information", {
       state: {
         companyId: selectedCompany.companyId,
+        company: selectedCompanyFull ?? null,
         activeStep: sectionStepMap[sectionValue] ?? 1,
       },
     });
@@ -281,30 +313,48 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
             <Divider mt="md" mb="sm" />
             {selectedTab?.value === "basic-information" ? (
               selectedCompany ? (
-                <BasicInformation
-                  companyName={selectedCompany.companyName}
-                  classification={selectedCompany.classification}
-                  onEdit={() => handleEditSection("basic-information")}
-                />
+                loadingCompanyFull ? (
+                  <Box style={{ padding: "2rem", textAlign: "center" }}>
+                    <Text>Loading company details...</Text>
+                  </Box>
+                ) : (
+                  <BasicInformation company={selectedCompanyFull} onEdit={() => handleEditSection("basic-information")} />
+                )
               ) : (
                 noCompanySelected
               )
             ) : selectedTab?.value === "key-contacts" ? (
-              selectedCompany ? <KeyContacts onEdit={() => handleEditSection("key-contacts")} /> : noCompanySelected
+              selectedCompany ? (
+                loadingCompanyFull ? noCompanySelected : <KeyContacts company={selectedCompanyFull} onEdit={() => handleEditSection("key-contacts")} />
+              ) : noCompanySelected
             ) : selectedTab?.value === "commercial-pricing" ? (
-              selectedCompany ? <CommercialandPricingInformation onEdit={() => handleEditSection("commercial-pricing")} /> : noCompanySelected
+              selectedCompany ? (
+                loadingCompanyFull ? noCompanySelected : <CommercialandPricingInformation company={selectedCompanyFull} onEdit={() => handleEditSection("commercial-pricing")} />
+              ) : noCompanySelected
             ) : selectedTab?.value === "operational-instructions" ? (
-              selectedCompany ? <OperationalInstructions onEdit={() => handleEditSection("operational-instructions")} /> : noCompanySelected
+              selectedCompany ? (
+                loadingCompanyFull ? noCompanySelected : <OperationalInstructions company={selectedCompanyFull} onEdit={() => handleEditSection("operational-instructions")} />
+              ) : noCompanySelected
             ) : selectedTab?.value === "business-address-location" ? (
-              selectedCompany ? <BusinessAddressandLocation onEdit={() => handleEditSection("business-address-location")} /> : noCompanySelected
+              selectedCompany ? (
+                loadingCompanyFull ? noCompanySelected : <BusinessAddressandLocation company={selectedCompanyFull} onEdit={() => handleEditSection("business-address-location")} />
+              ) : noCompanySelected
             ) : selectedTab?.value === "government-compliance" ? (
-              selectedCompany ? <GovernmentandComplianceDetails onEdit={() => handleEditSection("government-compliance")} /> : noCompanySelected
+              selectedCompany ? (
+                loadingCompanyFull ? noCompanySelected : <GovernmentandComplianceDetails company={selectedCompanyFull} onEdit={() => handleEditSection("government-compliance")} />
+              ) : noCompanySelected
             ) : selectedTab?.value === "risk-issue-monitoring" ? (
-              selectedCompany ? <RiskIssueandComplianceMonitoring onEdit={() => handleEditSection("risk-issue-monitoring")} /> : noCompanySelected
+              selectedCompany ? (
+                loadingCompanyFull ? noCompanySelected : <RiskIssueandComplianceMonitoring company={selectedCompanyFull} onEdit={() => handleEditSection("risk-issue-monitoring")} />
+              ) : noCompanySelected
             ) : selectedTab?.value === "documents-attachments" ? (
-              selectedCompany ? <DocumentsandAttachments onEdit={() => handleEditSection("documents-attachments")} /> : noCompanySelected
+              selectedCompany ? (
+                loadingCompanyFull ? noCompanySelected : <DocumentsandAttachments company={selectedCompanyFull} onEdit={() => handleEditSection("documents-attachments")} />
+              ) : noCompanySelected
             ) :selectedTab?.value === "strategic-insight" ? (
-              selectedCompany ? <StrategicInsight onEdit={() => handleEditSection("strategic-insight")} /> : noCompanySelected
+              selectedCompany ? (
+                loadingCompanyFull ? noCompanySelected : <StrategicInsight company={selectedCompanyFull} onEdit={() => handleEditSection("strategic-insight")} />
+              ) : noCompanySelected
             ) : selectedCompany ? (
               <Box style={{ display: "grid", gap: "0.75rem" }}>
                 <Text fw={500} size="sm">
