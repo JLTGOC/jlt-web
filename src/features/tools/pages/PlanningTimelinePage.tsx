@@ -1,4 +1,4 @@
-import { Text } from "@mantine/core";
+import { useEffect, useState } from "react";
 import ServiceTypeModal from "../components/planning-timeline/modals/ServiceType";
 
 type PlanningTimelinePageProps = {
@@ -8,9 +8,20 @@ type PlanningTimelinePageProps = {
 export default function PlanningTimelinePage({
   openServiceTypeModal,
 }: PlanningTimelinePageProps) {
+  const [isServiceTypeModalOpen, setIsServiceTypeModalOpen] = useState(
+    openServiceTypeModal,
+  );
+
+  useEffect(() => {
+    setIsServiceTypeModalOpen(openServiceTypeModal);
+  }, [openServiceTypeModal]);
+
   return (
     <>
-     <ServiceTypeModal></ServiceTypeModal>
+      <ServiceTypeModal
+        opened={isServiceTypeModalOpen}
+        onClose={() => setIsServiceTypeModalOpen(false)}
+      />
     </>
   );
 }
