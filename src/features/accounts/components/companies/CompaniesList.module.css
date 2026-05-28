@@ -1,0 +1,89 @@
+.tabsList {
+  display: flex;
+  border-bottom: 1px solid #e6e9ee;
+  margin-bottom: 0;
+}
+
+.tab {
+  flex: 1 1 0;
+  min-height: 110px;
+  padding: 0.75rem 0.5rem;
+  border-right: 1px solid #e6e9ee;
+  background: transparent;
+  color: #1d274e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tab:last-of-type {
+  border-right: none;
+}
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 90px;
+}
+
+.tabIcon {
+  color: #1d274e;
+}
+
+.tabLabel {
+  text-align: center;
+  font-size: 0.75rem;
+  max-width: 150px;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.2;
+}
+
+.selectedTabLabelContainer {
+  position: relative;
+  margin-bottom: 12px;
+  width: 100%;
+  padding-right: 40px;
+  box-sizing: border-box;
+}
+
+.selectedTabLabel {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+
+.companyRow {
+  cursor: pointer;
+  transition: outline 150ms ease, outline-offset 150ms ease;
+  outline-offset: -2px;
+}
+
+.companyRow:hover {
+  outline: 2px solid #f08c00;
+}
+
+.companyRow:hover td {
+  position: relative;
+}
+
+.hoverDisabled:hover {
+  outline: none;
+}
+
+.selectedCompanyRow {
+  outline: 2px solid #f08c00;
+  outline-offset: -2px;
+}
+
+.tabPanel {
+  padding-top: 1rem;
+}

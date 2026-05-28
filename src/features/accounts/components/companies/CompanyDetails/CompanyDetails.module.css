@@ -1,0 +1,126 @@
+.container {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.detailRow {
+  display: grid;
+  grid-template-columns: minmax(min-content, 160px) minmax(0, 1fr);
+  column-gap: 0.5rem;
+  align-items: start;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.pricingRow {
+  display: grid;
+  grid-template-columns: minmax(min-content, 160px) minmax(0, 1fr);
+  column-gap: 0.5rem;
+  align-items: start;
+  padding: 0.5rem 0;
+}
+
+.detailSectionGroup {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin: 0.75rem 0;
+}
+
+.detailLabel {
+  color: #7a808a;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  min-width: 150px;
+  width: min-content;
+}
+
+.detailValue {
+  font-size: 0.95rem;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.contactSection {
+  display: grid;
+  gap: 0.5rem;
+  padding-left: 0.75rem;
+}
+
+.contactBlock {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.contactBlock:last-child {
+  border-bottom: none;
+}
+
+.nestedDetailRow {
+  display: grid;
+  grid-template-columns: minmax(min-content, 110px) minmax(0, 1fr);
+  column-gap: 0.5rem;
+  align-items: start;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 1rem;
+}
+
+.smallEditButton {
+  border-color: #0064E0;
+  color: #0064E0;
+  background-color: white;
+  width: 6.5rem;
+  padding: 0 0.35rem;
+  height: 26px;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.smallEditButtonAR {
+  border-color: #0064E0;
+  color: #0064E0;
+  background-color: white;
+  width: 10rem;
+  padding: 0 0.35rem;
+  height: 22px;
+  font-size: 0.6rem;
+  line-height: 1;
+}
+
+.smallEditButtonARG {
+  border-color: #0064E0;
+  color: #0064E0;
+  background-color: white;
+  width: 12rem;
+  padding: 0 0.35rem;
+  height: 26px;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.editButton {
+  border-color: #0064E0;
+  color: #0064E0;
+  background-color: white;
+  width: 420px;
+}
+
+.editButtonUpload {
+  border-color: #0064E0;
+  color: #0064E0;
+  background-color: white;
+  width: 380px;
+}
