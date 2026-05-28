@@ -39,7 +39,7 @@ export function JobOrderDetailHeader({
         </Box>
       </Group>
 
-      {quotationReference &&
+      {/* {quotationReference &&
         quotationId !== null &&
         quotationId !== undefined && (
           <Box
@@ -64,7 +64,7 @@ export function JobOrderDetailHeader({
               {quotationReference}
             </Anchor>
           </Box>
-        )}
+        )} */}
     </Group>
   );
 }

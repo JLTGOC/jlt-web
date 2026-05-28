@@ -89,7 +89,13 @@ export function QuotationDetailsPage() {
             leftSection={<ButtonIcon />}
             onClick={() => {
               if (isAccepted) {
-                console.log("TODO: Make job order flow");
+                navigate(
+                  quotationRoutes.compose({
+                    tab: "accepted",
+                    clientId,
+                    quotationId: routeParams.quotationId,
+                  }),
+                );
               } else {
                 navigate(
                   quotationRoutes.compose({

@@ -46,6 +46,17 @@ export default function QuotationsPage() {
   }
   if (quotationId && template) return <ComposeQuotationPage />;
   if (quotationId && (composeRootMatch || composeFlatRootMatch)) {
+    if (tab === "accepted") {
+      return (
+        <AcceptedForm
+          quotation_reference_number={
+            searchParams.get("ref") ?? quotationId
+          }
+          job_type={searchParams.get("job_type") ?? "LOGISTICS"}
+        />
+      );
+    }
+
     return <TemplateSelection />;
   }
   if (quotationId) return <QuotationDetailsPage />;

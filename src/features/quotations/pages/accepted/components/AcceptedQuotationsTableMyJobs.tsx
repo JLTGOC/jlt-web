@@ -1,4 +1,5 @@
 import { Box, Center, Group, Loader, Table, Text } from "@mantine/core";
+import { useCurrentUserRole } from "@/stores/authStore";
 
 import { useAcceptedQuotationsContext } from "./AcceptedQuotationsContext";
 import {
@@ -11,6 +12,9 @@ import {
 
 export function AcceptedQuotationsMyJobsTable() {
   const { state, meta } = useAcceptedQuotationsContext();
+
+  // khate - papa adjust yata soon need yung role dito
+  const role = useCurrentUserRole();
   const total = state.myRows.length;
 
   return (
