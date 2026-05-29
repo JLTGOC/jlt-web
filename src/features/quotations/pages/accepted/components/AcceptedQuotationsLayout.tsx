@@ -19,7 +19,7 @@ export function AcceptedQuotationsPage({
       showJobSwitch
       jobSwitchValue={state.jobScope}
       onJobSwitchChange={actions.setJobScope}
-      jobSwitchSecondaryLabel="MY JOBS"
+      jobSwitchSecondaryLabel="MY ITEMS"
     >
       {children}
     </PageCard>
