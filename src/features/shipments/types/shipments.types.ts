@@ -123,6 +123,7 @@ export interface ShipmentListItem {
   };
   assigned_operations_id?: number;
   shipment_type?: "IMPORT" | "EXPORT";
+  job_order_id?: number;
 }
 
 export interface ShipmentsPagination {
@@ -162,10 +163,10 @@ export const SHIPMENT_STATUS_COLORS: Record<string, string> = {
 export const SHIPMENT_STATUS_DESCRIPTIONS: Record<string, string> = {
   "NOT YET DEPARTED": "Shipment not yet departed",
   "IN TRANSIT": "Shipment is on the way",
-  "ARRIVED": "Shipment has arrived at destination port",
-  "BERTHED": "Vessel berthed at the port",
-  "DISCHARGED": "Cargo discharged from vessel",
-  "DELIVERED": "Shipment Delivered",
+  ARRIVED: "Shipment has arrived at destination port",
+  BERTHED: "Vessel berthed at the port",
+  DISCHARGED: "Cargo discharged from vessel",
+  DELIVERED: "Shipment Delivered",
 };
 
 // ─── Service Level Abbreviations ──────────────────────────────────────────────
@@ -176,18 +177,18 @@ export const SERVICE_LEVEL_ABBREVIATIONS: Record<string, string> = {
   "DIRECT EXPORT": "DE",
   "IMPORT CLEARANCE": "IC",
   "CUSTOMS BROKERAGE": "CB",
-  "WAREHOUSE": "WH",
-  "DISTRIBUTION": "DIST",
+  WAREHOUSE: "WH",
+  DISTRIBUTION: "DIST",
   "LOGISTICS CONSULTING": "LC",
 };
 
 // ─── API Envelope ─────────────────────────────────────────────────────────────
 
 export interface ShipmentApiEnvelope<T> {
-  message: string;   
-  data: T;           
-  code: number;      
-  error: boolean;    
+  message: string;
+  data: T;
+  code: number;
+  error: boolean;
 }
 
 //Confirmation for details regarding Permits and Licenses is still pending, so these are just placeholders for now.

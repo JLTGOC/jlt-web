@@ -14,7 +14,7 @@ import {
   registerJobOrder,
 } from "../../api/quotations.api";
 import { acceptedQueryKeys } from "./utils/acceptedQueryKeys";
-import { jobOrderRoutes } from "@/features/job-order/utils/jobOrderRoutes";
+import { jobOrderRoutes } from "@/lib/jobOrder.routes";
 
 import BillingInformation from "./components/BillingInformtation";
 import ClientInformation from "./components/ClientInformation";
@@ -28,12 +28,12 @@ import SuccessFormModal from "./components/SuccessFormModal";
 
 type AcceptedFormProps = {
   quotation_reference_number: string;
-  job_type: string
+  job_type: string;
 };
 
 export default function AcceptedForm({
   quotation_reference_number = "RQ-LOG-05262026-017",
-  job_type = "LOGISTICS"
+  job_type = "LOGISTICS",
 }: AcceptedFormProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -48,7 +48,7 @@ export default function AcceptedForm({
       registerJobOrder(requestBody, job_type, quotation_reference_number),
     onSuccess: () => {
       setIsConfirmModalOpen(false);
-      setIsSuccessModalOpen(true)
+      setIsSuccessModalOpen(true);
       setPendingFormData(null);
     },
     onError: () => {},
@@ -118,41 +118,41 @@ export default function AcceptedForm({
 
   return (
     <>
-    <FormProvider {...methods}>
-      <form noValidate onSubmit={methods.handleSubmit(onSubmit)}>
-        <Header onBack={() => navigate(-1)}>
-          <JOInformation />
-          <ClientInformation enums={acceptedEnumsData} />
-          <ServiceInformation enums={acceptedEnumsData} />
-          <ShipmentInformation
-            autofill_data={acceptedEnumsData?.autofill_details}
-          />
-          <CommitmentInformation />
-          <BillingInformation enums={acceptedEnumsData} />
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <Button type="submit" radius="md">
-              Submit
-            </Button>
-          </div>
-        </Header>
-      </form>
-    </FormProvider>
-    <ConfirmFormModal
-      opened={isConfirmModalOpen}
-      onClose={() => setIsConfirmModalOpen(false)}
-      onConfirm={() => {
-        if (!pendingFormData) {
-          return;
-        }
-        registerJobOrderMutation.mutate({ requestBody: pendingFormData });
-      }}
-      isLoading={registerJobOrderMutation.isPending}
-    />
+      <FormProvider {...methods}>
+        <form noValidate onSubmit={methods.handleSubmit(onSubmit)}>
+          <Header onBack={() => navigate(-1)}>
+            <JOInformation />
+            <ClientInformation enums={acceptedEnumsData} />
+            <ServiceInformation enums={acceptedEnumsData} />
+            <ShipmentInformation
+              autofill_data={acceptedEnumsData?.autofill_details}
+            />
+            <CommitmentInformation />
+            <BillingInformation enums={acceptedEnumsData} />
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <Button type="submit" radius="md">
+                Submit
+              </Button>
+            </div>
+          </Header>
+        </form>
+      </FormProvider>
+      <ConfirmFormModal
+        opened={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={() => {
+          if (!pendingFormData) {
+            return;
+          }
+          registerJobOrderMutation.mutate({ requestBody: pendingFormData });
+        }}
+        isLoading={registerJobOrderMutation.isPending}
+      />
       <SuccessFormModal
-      opened={isSuccessModalOpen}
-      onClose={() => setIsSuccessModalOpen(false)}
-      onConfirm={handleSuccessConfirm}
-    />
+        opened={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+        onConfirm={handleSuccessConfirm}
+      />
     </>
   );
 }

@@ -15,7 +15,7 @@ import { toClientFileUrl } from "@/utils/file-url";
 import { useSecureFileUrl } from "@/hooks/useSecureFileUrl";
 import docClientIcon from "@/assets/icons/docClient.svg";
 import docJLTCBIcon from "@/assets/icons/docJLTCB.svg";
-import { jobOrderRoutes } from "../utils/jobOrderRoutes";
+import { jobOrderRoutes } from "@/lib/jobOrder.routes";
 import type { JobOrderDetail, JobOrderDocument } from "../types/jobOrderDetail";
 
 type JobOrderDocumentsSectionProps = {
