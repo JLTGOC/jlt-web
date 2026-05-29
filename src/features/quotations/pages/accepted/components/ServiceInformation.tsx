@@ -54,6 +54,18 @@ export default function ServiceInformation({ enums }: ServiceInformationProps) {
 
         <Grid.Col span={6}>
           <TextInput
+            label="ETD"
+            type="date"
+            placeholder=""
+            radius="md"
+            size="sm"
+            {...register("service.etd")}
+            error={errors.service?.etd?.message}
+          />
+        </Grid.Col>
+        
+        <Grid.Col span={6}>
+          <TextInput
             label="ETA"
             type="date"
             placeholder=""
@@ -64,17 +76,6 @@ export default function ServiceInformation({ enums }: ServiceInformationProps) {
           />
         </Grid.Col>
 
-        <Grid.Col span={6}>
-          <TextInput
-            label="ETD"
-            type="date"
-            placeholder=""
-            radius="md"
-            size="sm"
-            {...register("service.etd")}
-            error={errors.service?.etd?.message}
-          />
-        </Grid.Col>
       </Grid>
     </PaperLayout>
   );

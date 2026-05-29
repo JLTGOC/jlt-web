@@ -383,8 +383,6 @@ export function ShipmentTable({
                               event.stopPropagation();
                               const jobOrderId = row.job_order_id;
 
-                              console.log(jobOrderId)
-                              console.log(row)
                               if (!jobOrderId) return;
                               navigate(jobOrderRoutes.details(jobOrderId));
                             }}
