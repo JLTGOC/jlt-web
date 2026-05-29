@@ -14,26 +14,11 @@ export const companySummarySchema = z.object({
   tradeName: nullableString,
   consigneeUsed: nullableString,
   accountHandler: nullableString,
-  transactionType: z
-    .enum(["Import", "Export", "Both"])
-    .optional()
-    .nullable(),
-  clientClassification: z
-    .enum(["Regular", "VIP", "New"])
-    .optional()
-    .nullable(),
-  companyType: z
-    .enum(["Corporation", "Partnership", "Sole Proprietor"])
-    .optional()
-    .nullable(),
-  industry: z
-    .enum(["Logistics", "Manufacturing", "Retail"])
-    .optional()
-    .nullable(),
-  businessType: z
-    .enum(["Local", "International"])
-    .optional()
-    .nullable(),
+  transactionType: nullableString,
+  clientClassification: nullableString,
+  companyType: nullableString,
+  industry: nullableString,
+  businessType: nullableString,
   businessRegistrationNumber: nullableString,
   website: nullableString,
   yearsInOperation: nullableString,

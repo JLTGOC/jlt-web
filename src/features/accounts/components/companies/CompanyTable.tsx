@@ -1,4 +1,4 @@
-import { Box, Paper, Text, ActionIcon, Group, Menu, Button, Select, Divider } from "@mantine/core";
+import { Avatar, Box, Paper, Text, ActionIcon, Group, Menu, Button, Select, Divider } from "@mantine/core";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
 import { MoreVert, PersonAdd } from "@nine-thirty-five/material-symbols-react/rounded";
 import { CloseSmall, InboxTextPerson, Folder, ToggleOff, ContentCopy, HotelClass, DomainDisabled, Edit } from "@nine-thirty-five/material-symbols-react/outlined";
@@ -42,69 +42,6 @@ const sectionStepMap: Record<string, number> = {
   "strategic-insight": 9,
 };
 
-const columns: AppTableColumn<CompanyTableRow>[] = [
-  { key: "classification", label: "CLASSIFICATION" },
-  { key: "companyId", label: "COMPANY ID" },
-  { key: "companyName", label: "COMPANY NAME" },
-  { key: "consignee", label: "CONSIGNEE" },
-  { key: "accountHandler", label: "ACCOUNT HANDLER" },
-  {
-    key: "action",
-    label: "ACTION",
-    render: (_row) => (
-      <Group style={{ justifyContent: "flex-end" }}>
-        <Menu shadow="md" width={220} position="bottom-end">
-          <Menu.Target>
-            <ActionIcon variant="subtle" color="gray" onClick={(e) => e.stopPropagation()}>
-              <MoreVert width={18} height={18} />
-            </ActionIcon>
-          </Menu.Target>
-
-          <Menu.Dropdown>
-            <Menu.Item
-              leftSection={<InboxTextPerson width={18} height={18} style={{ color: "#1D274E" }} />}
-              onClick={() => undefined}
-            >
-              View Clients
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<Folder width={18} height={18} style={{ color: "#1D274E" }} />}
-              onClick={() => undefined}
-            >
-              Documents
-            </Menu.Item>
-            <Menu.Divider />
-            <Menu.Item
-              leftSection={<ToggleOff width={18} height={18} style={{ color: "#1D274E" }} />}
-              onClick={() => undefined}
-            >
-              Deactivate Account
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<HotelClass width={18} height={18} style={{ color: "#1D274E" }} />}
-              onClick={() => undefined}
-            >
-              Change Classification
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<Edit width={18} height={18} style={{ color: "#1D274E" }} />}
-              onClick={() => undefined}
-            >
-              Update Company
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<ContentCopy width={18} height={18} style={{ color: "#1D274E" }} />}
-              onClick={() => undefined}
-            >
-              Duplicate Company
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
-      </Group>
-    ),
-  },
-];
-
 export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) {
   const [searchValue, setSearchValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -128,8 +65,8 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
           return;
         }
 
-        setCompanies(response.data);
-        setTotalCount(response.total);
+        setCompanies(response.data ?? []);
+        setTotalCount(response.total ?? 0);
       } catch (error) {
         console.error("Failed to load companies", error);
         if (active) {
@@ -146,27 +83,134 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
     };
   }, [page, perPage, searchQuery]);
 
-  const pageData = companies;
+  const pageData = companies ?? [];
 
   const selectedTab = tabs.find((tab) => tab.value === activeTab);
   const selectedCompany = selectedCompanyId
     ? companies.find((row) => row.companyId === selectedCompanyId)
     : null;
 
+  const selectedCompanyRouteId = selectedCompany?.companyRouteId ?? selectedCompanyId;
+
   const [selectedCompanyFull, setSelectedCompanyFull] = useState<CompanyFullDetails | null>(null);
   const [loadingCompanyFull, setLoadingCompanyFull] = useState(false);
+
+  const handleUpdateCompany = (companyId: string) => {
+    navigate("/accounts/companies/company-information", {
+      state: {
+        companyId,
+        company: selectedCompanyId === companyId ? selectedCompanyFull ?? undefined : undefined,
+        activeStep: 1,
+      },
+    });
+  };
+
+  const columns: AppTableColumn<CompanyTableRow>[] = [
+    {
+      key: "classification",
+      label: "CLASSIFICATION",
+      render: (row) => {
+        const classification = (row.classification ?? "").toLowerCase();
+        const badgeClass =
+          classification === "vip"
+            ? styles.vipBadge
+            : classification === "vvip"
+            ? styles.vvipBadge
+            : styles.regularBadge;
+
+        return (
+          <span className={`${styles.classificationBadge} ${badgeClass}`}>
+            {row.classification}
+          </span>
+        );
+      },
+    },
+    { key: "companyId", label: "COMPANY ID" },
+    { key: "companyName", label: "COMPANY NAME" },
+    { key: "consignee", label: "CONSIGNEE" },
+    {
+      key: "accountHandler",
+      label: "ACCOUNT HANDLER",
+      render: (row) => (
+        <Group gap="sm" align="center">
+          <Avatar
+            src={row.accountHandlerImagePath ?? undefined}
+            alt={row.accountHandler}
+            radius="xl"
+            size="sm"
+          />
+          <Text size="sm">{row.accountHandler}</Text>
+        </Group>
+      ),
+    },
+    {
+      key: "action",
+      label: "ACTION",
+      render: (row) => (
+        <Group style={{ justifyContent: "flex-end" }}>
+          <Menu shadow="md" width={220} position="bottom-end">
+            <Menu.Target>
+              <ActionIcon variant="subtle" color="gray" onClick={(e) => e.stopPropagation()}>
+                <MoreVert width={18} height={18} />
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<InboxTextPerson width={18} height={18} style={{ color: "#1D274E" }} />}
+                onClick={() => undefined}
+              >
+                View Clients
+              </Menu.Item>
+              <Menu.Item
+                leftSection={<Folder width={18} height={18} style={{ color: "#1D274E" }} />}
+                onClick={() => undefined}
+              >
+                Documents
+              </Menu.Item>
+              <Menu.Divider />
+              <Menu.Item
+                leftSection={<ToggleOff width={18} height={18} style={{ color: "#1D274E" }} />}
+                onClick={() => undefined}
+              >
+                Deactivate Account
+              </Menu.Item>
+              <Menu.Item
+                leftSection={<HotelClass width={18} height={18} style={{ color: "#1D274E" }} />}
+                onClick={() => undefined}
+              >
+                Change Classification
+              </Menu.Item>
+              <Menu.Item
+                leftSection={<Edit width={18} height={18} style={{ color: "#1D274E" }} />}
+                onClick={() => handleUpdateCompany(row.companyRouteId ?? row.companyId)}
+              >
+                Update Company
+              </Menu.Item>
+              <Menu.Item
+                leftSection={<ContentCopy width={18} height={18} style={{ color: "#1D274E" }} />}
+                onClick={() => undefined}
+              >
+                Duplicate Company
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </Group>
+      ),
+    },
+  ];
 
   useEffect(() => {
     let active = true;
     async function loadFull() {
-      if (!selectedCompanyId) {
+      if (!selectedCompanyRouteId) {
         setSelectedCompanyFull(null);
         return;
       }
 
       setLoadingCompanyFull(true);
       try {
-        const data = await companyService.getCompanyById(selectedCompanyId);
+        const data = await companyService.getCompanyById(selectedCompanyRouteId);
         if (!active) return;
         setSelectedCompanyFull(data);
       } catch (err) {
@@ -182,7 +226,7 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
     return () => {
       active = false;
     };
-  }, [selectedCompanyId]);
+  }, [selectedCompanyRouteId]);
 
   const handleEditSection = (sectionValue: string) => {
     if (!selectedCompany) {

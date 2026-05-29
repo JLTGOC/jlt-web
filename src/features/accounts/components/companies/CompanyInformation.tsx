@@ -1,18 +1,18 @@
 // src/features/accounts/components/companies/CompanyInformation.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { PageCard } from "@/components/PageCard";
 import { Paper, Box, Text, Group, Button } from "@mantine/core";
-import { ArrowRightAlt, ArrowLeftAlt } from "@nine-thirty-five/material-symbols-react/outlined";
+import { ArrowLeftAlt } from "@nine-thirty-five/material-symbols-react/outlined";
 import { notifications } from "@mantine/notifications";
 import type { ZodIssue } from "zod";
 import { companyService } from "@/features/accounts/services/company.service";
 import type { CompanyFullDetails, CompanyCreateRequest, CompanyUpdateRequest } from "@/features/accounts/types/company.types";
 import { mapCompanyFullDetailsToBackendRequest } from "@/features/accounts/types/company.types";
-import { companyFullDetailsSchema, companySummarySchema } from "@/features/accounts/schemas/company.schema";
+import { companyFullDetailsSchema } from "@/features/accounts/schemas/company.schema";
 
 // Import sections
-import { EditBasicInformation } from "./CompanyInformation/EditBasicInformation";
+import { EditBasicInformation, type EditBasicInformationHandle } from "./CompanyInformation/EditBasicInformation";
 import { EditBusinessAddress } from "./CompanyInformation/EditBusinessAddress";
 import { EditKeyContacts } from "./CompanyInformation/EditKeyContacts";
 import { EditGovernment } from "./CompanyInformation/EditGovernment";
@@ -177,11 +177,14 @@ export function CompanyInformation() {
     });
   };
 
+  const basicInformationRef = useRef<EditBasicInformationHandle | null>(null);
+
   const renderStep = () => {
     switch (activeStep) {
       case 1:
         return (
           <EditBasicInformation
+            ref={basicInformationRef}
             key={`basic-${companyId ?? "new"}-${draftCompany?.summary?.companyName ?? ""}`}
             company={draftCompany}
             onChange={(summary) => updateSection("summary", summary)}
@@ -258,7 +261,7 @@ export function CompanyInformation() {
 
   const title = isEditMode ? "EDIT COMPANY" : "ADD COMPANY";
   const subtitle = isEditMode ? "Update the selected company profile" : "Fill out company details and classification";
-  const actionLabel = isEditMode ? "Update" : activeStep === steps.length ? "Finish" : "Next";
+  const addModeActionLabel = activeStep === steps.length ? "Finish" : "Next";
 
   const handleSaveCompany = async () => {
     if (!draftCompany) {
@@ -383,32 +386,12 @@ export function CompanyInformation() {
   };
 
   const handlePrimaryAction = () => {
-    if (isEditMode) {
-      // In edit mode, always save/update regardless of step
-      handleSaveCompany();
-      return;
-    }
-
-    // In add mode, validate the summary before moving past the first step.
     if (activeStep < steps.length) {
-      if (activeStep === 1 && draftCompany) {
-        const summaryValidation = companySummarySchema.safeParse(draftCompany.summary);
-        if (!summaryValidation.success) {
-          notifications.show({
-            title: "Validation Required",
-            message: "Company Name is required before continuing.",
-            color: "orange",
-            autoClose: 5000,
-          });
-          return;
-        }
-      }
       setActiveStep((s) => s + 1);
       return;
     }
 
-    // On last step in add mode, save and create
-    if (activeStep === steps.length) {
+    if (!isEditMode) {
       handleSaveCompany();
     }
   };
@@ -506,8 +489,8 @@ export function CompanyInformation() {
         )}
 
         {/* Navigation buttons */}
-        <Group justify="space-between" mt="md">
-          {activeStep !== 1 && (
+        <Group justify="space-between" mt="md" style={{ width: "100%" }}>
+          {activeStep !== 1 ? (
             <Button
               size="md"
               radius="md"
@@ -520,22 +503,39 @@ export function CompanyInformation() {
                 <span>Back</span>
               </Group>
             </Button>
+          ) : (
+            <Box style={{ minWidth: 160 }} />
           )}
 
-          <Button
-            color="#4E6174"
-            size="md"
-            radius="md"
-            style={{ minWidth: 160, marginLeft: activeStep === 1 ? "auto" : "0" }}
-            onClick={handlePrimaryAction}
-            loading={isSaving}
-            disabled={isSaving}
-          >
-            <Group gap="sm" justify="center">
-              <span>{actionLabel}</span>
-              <ArrowRightAlt width={20} height={20} />
-            </Group>
-          </Button>
+          <Group gap="xs" style={{ marginLeft: activeStep === 1 ? "auto" : "0" }}>
+            {(!isEditMode || activeStep < steps.length) && (
+              <Button
+                color="#4E6174"
+                size="md"
+                radius="md"
+                style={{ minWidth: 160 }}
+                onClick={handlePrimaryAction}
+                loading={isSaving}
+                disabled={isSaving}
+              >
+                {addModeActionLabel}
+              </Button>
+            )}
+
+            {isEditMode && (
+              <Button
+                color="#4E6174"
+                size="md"
+                radius="md"
+                style={{ minWidth: 160 }}
+                onClick={handleSaveCompany}
+                loading={isSaving}
+                disabled={isSaving}
+              >
+                Update
+              </Button>
+            )}
+          </Group>
         </Group>
       </Paper>
     </PageCard>

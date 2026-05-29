@@ -1,12 +1,23 @@
 // src/features/accounts/components/companies/CompanyInformation/EditBasicInformation.tsx
-import { Paper, Text, TextInput, Select, Group, Button } from "@mantine/core";
+import { Paper, Text, TextInput, Autocomplete, Group, Button } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
-import { useState, useEffect, useRef } from "react";
+import { forwardRef, useState, useEffect, useRef, useImperativeHandle } from "react";
 import { CalendarMonth } from "@nine-thirty-five/material-symbols-react/rounded";
 import type {
   CompanyFullDetails,
   CompanySummary,
 } from "@/features/accounts/types/company.types";
+import {
+  businessTypeOptions,
+  clientClassificationOptions,
+  companyTypeOptions,
+  industryOptions,
+  transactionTypeOptions,
+} from "./companySummaryOptions";
+
+export interface EditBasicInformationHandle {
+  commit: () => CompanySummary;
+}
 
 interface EditBasicInformationProps {
   company: CompanyFullDetails | null;
@@ -34,68 +45,121 @@ const toSummary = (data: FormData): CompanySummary => ({
   tradeName: data.tradeName || null,
   consigneeUsed: data.consigneeUsed || null,
   accountHandler: data.accountHandler || null,
-  transactionType: (data.transactionType as CompanySummary["transactionType"]) || null,
-  clientClassification: (data.clientClassification as CompanySummary["clientClassification"]) || null,
-  companyType: (data.companyType as CompanySummary["companyType"]) || null,
-  industry: (data.industry as CompanySummary["industry"]) || null,
-  businessType: (data.businessType as CompanySummary["businessType"]) || null,
+  transactionType: data.transactionType || null,
+  clientClassification: data.clientClassification || null,
+  companyType: data.companyType || null,
+  industry: data.industry || null,
+  businessType: data.businessType || null,
   businessRegistrationNumber: data.businessRegistrationNumber || null,
   website: data.website || null,
   yearsInOperation: data.yearsInOperation ? data.yearsInOperation.toISOString() : null,
   dateOfActivation: data.dateOfActivation ? data.dateOfActivation.toISOString() : null,
 });
 
-export function EditBasicInformation({ company, onChange }: EditBasicInformationProps) {  const yearsInputRef = useRef<HTMLInputElement | null>(null);
-  const activationInputRef = useRef<HTMLInputElement | null>(null);
-  const [formData, setFormData] = useState<FormData>({
-    companyName: "",
-    tradeName: "",
-    consigneeUsed: "",
-    accountHandler: "",
-    transactionType: "",
-    clientClassification: "",
-    companyType: "",
-    industry: "",
-    businessType: "",
-    businessRegistrationNumber: "",
-    website: "",
-    yearsInOperation: null,
-    dateOfActivation: null,
-  });
+export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditBasicInformationProps>(
+  ({ company, onChange }, ref) => {
+    const yearsInputRef = useRef<HTMLInputElement | null>(null);
+    const activationInputRef = useRef<HTMLInputElement | null>(null);
+    const prevCompanyIdRef = useRef<string | undefined | null>(null);
+    const [formData, setFormData] = useState<FormData>({
+      companyName: "",
+      tradeName: "",
+      consigneeUsed: "",
+      accountHandler: "",
+      transactionType: "",
+      clientClassification: "",
+      companyType: "",
+      industry: "",
+      businessType: "",
+      businessRegistrationNumber: "",
+      website: "",
+      yearsInOperation: null,
+      dateOfActivation: null,
+    });
+
+    const [transactionTypeOptionsState, setTransactionTypeOptionsState] = useState<string[]>(
+      [...transactionTypeOptions],
+    );
+    const [clientClassificationOptionsState, setClientClassificationOptionsState] =
+      useState<string[]>([...clientClassificationOptions]);
+    const [companyTypeOptionsState, setCompanyTypeOptionsState] = useState<string[]>([
+      ...companyTypeOptions,
+    ]);
+    const [industryOptionsState, setIndustryOptionsState] = useState<string[]>([
+      ...industryOptions,
+    ]);
+    const [businessTypeOptionsState, setBusinessTypeOptionsState] = useState<string[]>([
+      ...businessTypeOptions,
+    ]);
+
+    const mergeSelectedOption = (defaults: readonly string[], selected: string) =>
+      selected && !defaults.includes(selected) ? [...defaults, selected] : [...defaults];
 
   useEffect(() => {
-    if (company?.summary) {
-      const nextFormData: FormData = {
-        companyName: company.summary.companyName || "",
-        tradeName: company.summary.tradeName || "",
-        consigneeUsed: company.summary.consigneeUsed || "",
-        accountHandler: company.summary.accountHandler || "",
-        transactionType: company.summary.transactionType || "",
-        clientClassification: company.summary.clientClassification || "",
-        companyType: company.summary.companyType || "",
-        industry: company.summary.industry || "",
-        businessType: company.summary.businessType || "",
-        businessRegistrationNumber: company.summary.businessRegistrationNumber || "",
-        website: company.summary.website || "",
-        yearsInOperation: company.summary.yearsInOperation
-          ? new Date(company.summary.yearsInOperation)
-          : null,
-        dateOfActivation: company.summary.dateOfActivation
-          ? new Date(company.summary.dateOfActivation)
-          : null,
-      };
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFormData(nextFormData);
+    const companyId = company?.companyId;
+    if (!company || companyId === prevCompanyIdRef.current) {
+      return;
     }
+
+    prevCompanyIdRef.current = companyId;
+
+    const nextFormData: FormData = {
+      companyName: company.summary.companyName || "",
+      tradeName: company.summary.tradeName || "",
+      consigneeUsed: company.summary.consigneeUsed || "",
+      accountHandler: company.summary.accountHandler || "",
+      transactionType: company.summary.transactionType || "",
+      clientClassification: company.summary.clientClassification || "",
+      companyType: company.summary.companyType || "",
+      industry: company.summary.industry || "",
+      businessType: company.summary.businessType || "",
+      businessRegistrationNumber: company.summary.businessRegistrationNumber || "",
+      website: company.summary.website || "",
+      yearsInOperation: company.summary.yearsInOperation
+        ? new Date(company.summary.yearsInOperation)
+        : null,
+      dateOfActivation: company.summary.dateOfActivation
+        ? new Date(company.summary.dateOfActivation)
+        : null,
+    };
+
+    setFormData(nextFormData);
+    setTransactionTypeOptionsState(
+      mergeSelectedOption(transactionTypeOptions, nextFormData.transactionType),
+    );
+    setClientClassificationOptionsState(
+      mergeSelectedOption(clientClassificationOptions, nextFormData.clientClassification),
+    );
+    setCompanyTypeOptionsState(
+      mergeSelectedOption(companyTypeOptions, nextFormData.companyType),
+    );
+    setIndustryOptionsState(
+      mergeSelectedOption(industryOptions, nextFormData.industry),
+    );
+    setBusinessTypeOptionsState(
+      mergeSelectedOption(businessTypeOptions, nextFormData.businessType),
+    );
   }, [company]);
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      commit: () => {
+        const summary = toSummary(formData);
+        if (onChange) {
+          onChange(summary);
+        }
+        return summary;
+      },
+    }),
+    [formData, onChange],
+  );
+
   const handleChange = (field: keyof FormData, value: string | Date | null) => {
-    const nextFormData = {
-      ...formData,
+    setFormData((current) => ({
+      ...current,
       [field]: value,
-    };
-    setFormData(nextFormData);
-    onChange?.(toSummary(nextFormData));
+    }));
   };
 
   return (
@@ -144,29 +208,32 @@ export function EditBasicInformation({ company, onChange }: EditBasicInformation
       <Group grow mb="sm">
         <div>
           <Text size="sm" fw={500}>Transaction Type</Text>
-          <Select
-            data={["Import", "Export", "Both"]}
-            placeholder="Select type"
+          <Autocomplete
+            data={transactionTypeOptionsState}
+            placeholder="Select or type a transaction type"
+            clearable
             value={formData.transactionType}
-            onChange={(value) => handleChange("transactionType", value || "")}
+            onChange={(value) => handleChange("transactionType", value)}
           />
         </div>
         <div>
           <Text size="sm" fw={500}>Client Classification</Text>
-          <Select
-            data={["Regular", "VIP", "New"]}
-            placeholder="Select classification"
+          <Autocomplete
+            data={clientClassificationOptionsState}
+            placeholder="Select or type a classification"
+            clearable
             value={formData.clientClassification}
-            onChange={(value) => handleChange("clientClassification", value || "")}
+            onChange={(value) => handleChange("clientClassification", value)}
           />
         </div>
         <div>
           <Text size="sm" fw={500}>Company Type</Text>
-          <Select
-            data={["Corporation", "Partnership", "Sole Proprietor"]}
-            placeholder="Select type"
+          <Autocomplete
+            data={companyTypeOptionsState}
+            placeholder="Select or type a company type"
+            clearable
             value={formData.companyType}
-            onChange={(value) => handleChange("companyType", value || "")}
+            onChange={(value) => handleChange("companyType", value)}
           />
         </div>
       </Group>
@@ -175,20 +242,22 @@ export function EditBasicInformation({ company, onChange }: EditBasicInformation
       <Group grow mb="sm">
         <div>
           <Text size="sm" fw={500}>Industry</Text>
-          <Select
-            data={["Logistics", "Manufacturing", "Retail"]}
-            placeholder="Select industry"
+          <Autocomplete
+            data={industryOptionsState}
+            placeholder="Select or type an industry"
+            clearable
             value={formData.industry}
-            onChange={(value) => handleChange("industry", value || "")}
+            onChange={(value) => handleChange("industry", value)}
           />
         </div>
         <div>
           <Text size="sm" fw={500}>Business Type</Text>
-          <Select
-            data={["Local", "International"]}
-            placeholder="Select business type"
+          <Autocomplete
+            data={businessTypeOptionsState}
+            placeholder="Select or type a business type"
+            clearable
             value={formData.businessType}
-            onChange={(value) => handleChange("businessType", value || "")}
+            onChange={(value) => handleChange("businessType", value)}
           />
         </div>
         <div>
@@ -268,4 +337,4 @@ export function EditBasicInformation({ company, onChange }: EditBasicInformation
       </Group>
     </Paper>
   );
-}
+})

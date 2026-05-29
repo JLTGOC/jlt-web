@@ -1,7 +1,7 @@
 // Shared company types for the Accounts feature
 
 export type CompanyTransactionType = "Import" | "Export" | "Both";
-export type CompanyClassification = "Regular" | "VIP" | "New";
+export type CompanyClassification = "Regular" | "VIP" | "VVIP";
 export type CompanyType = "Corporation" | "Partnership" | "Sole Proprietor";
 export type CompanyIndustry = "Logistics" | "Manufacturing" | "Retail";
 export type CompanyBusinessType = "Local" | "International";
@@ -9,9 +9,11 @@ export type CompanyBusinessType = "Local" | "International";
 export interface CompanyTableRow {
   classification: string;
   companyId: string;
+  companyRouteId?: string;
   companyName: string;
   consignee: string;
   accountHandler: string;
+  accountHandlerImagePath?: string;
 }
 
 export interface CompanySummary {
@@ -19,11 +21,11 @@ export interface CompanySummary {
   tradeName?: string | null;
   consigneeUsed?: string | null;
   accountHandler?: string | null;
-  transactionType?: CompanyTransactionType | null;
-  clientClassification?: CompanyClassification | null;
-  companyType?: CompanyType | null;
-  industry?: CompanyIndustry | null;
-  businessType?: CompanyBusinessType | null;
+  transactionType?: string | null;
+  clientClassification?: string | null;
+  companyType?: string | null;
+  industry?: string | null;
+  businessType?: string | null;
   businessRegistrationNumber?: string | null;
   website?: string | null;
   yearsInOperation?: string | null;
