@@ -15,8 +15,8 @@ import {
   DetailsCell,
   PersonInChargeCell,
   RequestCell,
-  getRowAccentColor,
 } from "./AcceptedQuotationsCells";
+import { getRowAccentColor } from "../utils/acceptedQuotations.utils";
 
 export function AcceptedQuotationsAllTable() {
   const { state, meta, actions } = useAcceptedQuotationsContext();

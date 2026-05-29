@@ -2,6 +2,7 @@ import {
   ActionIcon,
   Avatar,
   Box,
+  Anchor,
   Button,
   Group,
   Menu,
@@ -14,11 +15,11 @@ import {
   MoreVert,
   InboxTextPerson,
   Folder,
-  Delete,
-  RequestQuote,
 } from "@nine-thirty-five/material-symbols-react/rounded";
+import { Link } from "react-router";
 
 import type { QuotationListItem } from "@/features/quotations/types/quotations.types";
+import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 
 function RouteArrow() {
   return (
@@ -81,21 +82,35 @@ function getInitials(fullName: string) {
     .toUpperCase();
 }
 
-export function getRowAccentColor(row: QuotationListItem) {
-  return row.client_type === "NEW" ? "#54B99B" : "#368DC4";
-}
-
 export function RequestCell({ row }: { row: QuotationListItem }) {
+  const quotationId = row.id == null ? null : String(row.id);
+  const viewerPath = quotationId
+    ? quotationRoutes.viewer({
+        tab: "accepted",
+        quotationId,
+        issuedQuotationId: row.issued_quotation_id ?? undefined,
+      })
+    : null;
+
   return (
     <Stack gap={2}>
-      <Text
-        c="#2a4058"
-        fz="0.875rem"
-        fw={700}
-        style={{ textDecoration: "underline" }}
-      >
-        {row.reference_number}
-      </Text>
+      {viewerPath ? (
+        <Anchor
+          component={Link}
+          to={viewerPath}
+          c="#2a4058"
+          fz="0.875rem"
+          fw={700}
+          underline="always"
+          onClick={(event) => event.stopPropagation()}
+        >
+          {row.reference_number}
+        </Anchor>
+      ) : (
+        <Text c="#2a4058" fz="0.875rem" fw={700}>
+          {row.reference_number}
+        </Text>
+      )}
       <Text c="#475569" fz="0.813rem" lh={1.45}>
         {row.client_full_name}
       </Text>
@@ -247,8 +262,8 @@ export function ActionsMenu({
   row,
   onViewDetails,
   onViewDocuments,
-  actionLabel,
-  onAction,
+  // actionLabel,
+  // onAction,
 }: ActionsMenuProps) {
   return (
     <Menu shadow="md" width={180} position="bottom-end">
@@ -270,19 +285,6 @@ export function ActionsMenu({
         >
           Documents
         </Menu.Item>
-        {/* <Menu.Item
-          color={actionLabel === "Discard" ? "red" : undefined}
-          onClick={() => onAction?.(row)}
-          leftSection={
-            actionLabel === "Discard" ? (
-              <Delete width={18} />
-            ) : (
-              <RequestQuote width={18} />
-            )
-          }
-        >
-          {actionLabel}
-        </Menu.Item> */}
       </Menu.Dropdown>
     </Menu>
   );

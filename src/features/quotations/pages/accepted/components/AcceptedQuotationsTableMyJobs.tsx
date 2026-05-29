@@ -7,8 +7,8 @@ import {
   DetailsCell,
   MyJobsStatusCell,
   RequestCell,
-  getRowAccentColor,
 } from "./AcceptedQuotationsCells";
+import { getRowAccentColor } from "../utils/acceptedQuotations.utils";
 
 export function AcceptedQuotationsMyJobsTable() {
   const { state, meta } = useAcceptedQuotationsContext();
