@@ -1,7 +1,11 @@
 import { apiClient } from "@/lib/api/client";
 import type {
-  RespondedQuotationListItem,
-  RespondedQuotationsResponse,
+  AcceptedQuotationsResponse,
+  ClientCounts,
+  QuotationListItem,
+  QuotationsPagination,
+  QuotationLogisticsService,
+  QuotationRegulatoryService,
 } from "../../types/quotations.types";
 
 import type {AcceptedFormEnumsResponse} from "../../types/acceptedForm.types";
@@ -11,9 +15,32 @@ import type { FetchRespondedQuotationsParams } from "./responded.api";
 
 export async function fetchAcceptedQuotations(
   params: FetchRespondedQuotationsParams,
-): Promise<RespondedQuotationsResponse> {
+): Promise<AcceptedQuotationsResponse> {
+  type AcceptedQuotationApiItem = {
+    id: string | number | null;
+    reference_number: string;
+    date: string;
+    client_full_name: string;
+    status?: string;
+    assignment_status?: string | null;
+    account_specialist?: string | null;
+    assigned_at?: string | null;
+    service: string;
+    logistics_service: QuotationLogisticsService | null;
+    regulatory_service?: QuotationRegulatoryService | null;
+    client_type?: "NEW" | "OLD";
+    job_order_created?: boolean | null;
+  };
+
   const response = await apiClient.get<{
-    data: RespondedQuotationsResponse | [];
+    data:
+      | {
+          counts: ClientCounts;
+          quotations: AcceptedQuotationApiItem[];
+          my_quotations?: AcceptedQuotationApiItem[];
+          pagination: QuotationsPagination;
+        }
+      | [];
   }>("/quotations", {
     params: {
       "filter[status]": params["filter[status]"] ?? "ACCEPTED",
@@ -41,7 +68,7 @@ export async function fetchAcceptedQuotations(
         old_user_quotations: 0,
         new_user_quotations: 0,
       },
-      quotations: [] as RespondedQuotationListItem[],
+      quotations: [],
       my_quotations: [],
       pagination: {
         count: 0,
@@ -53,16 +80,46 @@ export async function fetchAcceptedQuotations(
     };
   }
 
+  const mapQuotation = (
+    quotation: AcceptedQuotationApiItem,
+  ): QuotationListItem => {
+    const parsedId =
+      typeof quotation.id === "number"
+        ? quotation.id
+        : typeof quotation.id === "string"
+          ? Number(quotation.id)
+          : null;
+    const id = Number.isNaN(parsedId) ? null : parsedId;
+
+    return {
+      id,
+      reference_number: quotation.reference_number,
+      date: quotation.date,
+      client_full_name: quotation.client_full_name,
+      status: quotation.status ?? "ACCEPTED",
+      assignment_status: quotation.assignment_status ?? null,
+      account_specialist: quotation.account_specialist ?? null,
+      assigned_at: quotation.assigned_at ?? null,
+      requested_at: null,
+      service: quotation.service,
+      logistics_service: quotation.logistics_service ?? null,
+      regulatory_service: quotation.regulatory_service ?? null,
+      reassignment_request_id: null,
+      reassignment_requested_at: null,
+      conversation_id: null,
+      prepared_by: null,
+      issued_quotation_id: null,
+      as_profile_image: null,
+      client_type: quotation.client_type ?? "NEW",
+      previously_assigned_to: null,
+      job_order_created: quotation.job_order_created ?? null,
+    };
+  };
+
   return {
     ...payload,
-    quotations: payload.quotations.map((quotation) => ({
-      ...quotation,
-      qtn_status: quotation.qtn_status ?? "accepted",
-    })),
-    my_quotations: payload.my_quotations?.map((quotation) => ({
-      ...quotation,
-      qtn_status: quotation.qtn_status ?? "accepted",
-    })),
+    quotations: payload.quotations.map(mapQuotation),
+    my_quotations: payload.my_quotations?.map(mapQuotation) ?? [],
   };
 }
 

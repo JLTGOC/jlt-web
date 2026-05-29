@@ -270,8 +270,7 @@ export function ActionsMenu({
         >
           Documents
         </Menu.Item>
-        <Menu.Divider />
-        <Menu.Item
+        {/* <Menu.Item
           color={actionLabel === "Discard" ? "red" : undefined}
           onClick={() => onAction?.(row)}
           leftSection={
@@ -283,7 +282,7 @@ export function ActionsMenu({
           }
         >
           {actionLabel}
-        </Menu.Item>
+        </Menu.Item> */}
       </Menu.Dropdown>
     </Menu>
   );

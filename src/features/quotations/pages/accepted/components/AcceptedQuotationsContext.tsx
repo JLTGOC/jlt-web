@@ -2,7 +2,7 @@ import { createContext, use } from "react";
 
 import type {
   ClientCounts,
-  RespondedQuotationListItem,
+  QuotationListItem,
 } from "@/features/quotations/types/quotations.types";
 
 export type JobScope = "all" | "my-items";
@@ -17,8 +17,8 @@ export interface AcceptedQuotationsState {
   searchValue: string;
   perPage: number;
   currentPage: number;
-  rows: RespondedQuotationListItem[];
-  myRows: RespondedQuotationListItem[];
+  rows: QuotationListItem[];
+  myRows: QuotationListItem[];
   counts: ClientCounts | undefined;
   isLoading: boolean;
   allShowingCount: number;
@@ -39,11 +39,11 @@ export interface AcceptedQuotationsActions {
 }
 
 export interface AcceptedQuotationsMeta {
-  handleRowClick: (row: RespondedQuotationListItem) => void;
-  handleRowHover: (row: RespondedQuotationListItem) => void;
-  handleViewDocuments: (row: RespondedQuotationListItem) => void;
-  handleUpdateQuotation: (row: RespondedQuotationListItem) => void;
-  handleMakeJobOrder: (row: RespondedQuotationListItem) => void;
+  handleRowClick: (row: QuotationListItem) => void;
+  handleRowHover: (row: QuotationListItem) => void;
+  handleViewDocuments: (row: QuotationListItem) => void;
+  handleUpdateQuotation: (row: QuotationListItem) => void;
+  handleMakeJobOrder: (row: QuotationListItem) => void;
 }
 
 export interface AcceptedQuotationsContextValue {

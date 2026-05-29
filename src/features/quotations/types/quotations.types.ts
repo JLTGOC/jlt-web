@@ -53,6 +53,13 @@ export interface RespondedQuotationsResponse {
   pagination: QuotationsPagination;
 }
 
+export interface AcceptedQuotationsResponse {
+  counts: ClientCounts;
+  quotations: QuotationListItem[];
+  my_quotations?: QuotationListItem[];
+  pagination: QuotationsPagination;
+}
+
 export interface QuotationLogisticsService {
   commodity: string;
   service_type: string;

@@ -182,33 +182,40 @@ export function AcceptedQuotationsProvider({
   const meta = useMemo<AcceptedQuotationsMeta>(
     () => ({
       handleRowClick: (row) => {
-        prefetchQuotationDetails(row.id);
+        if (row.id == null) return;
+        const quotationId = String(row.id);
+        prefetchQuotationDetails(quotationId);
         navigate(
           quotationRoutes.details({
             tab: "accepted",
-            quotationId: row.id,
+            quotationId,
           }),
         );
       },
       handleRowHover: (row) => {
-        prefetchQuotationDetails(row.id);
+        if (row.id == null) return;
+        prefetchQuotationDetails(String(row.id));
       },
       handleViewDocuments: (row) => {
+        if (row.id == null) return;
+        const quotationId = String(row.id);
         navigate(
           quotationRoutes.documents({
             tab: "accepted",
-            quotationId: row.id,
+            quotationId,
           }),
         );
       },
       handleUpdateQuotation(row) {
+        if (row.id == null) return;
         navigate(`/quotations/accepted/${row.id}/compose`);
       },
       handleMakeJobOrder: (row) => {
+        if (row.id == null) return;
         navigate(
           quotationRoutes.jobOrder({
             tab: "accepted",
-            quotationId: row.id,
+            quotationId: String(row.id),
             referenceNumber: row.reference_number,
             jobType: row.service,
           }),

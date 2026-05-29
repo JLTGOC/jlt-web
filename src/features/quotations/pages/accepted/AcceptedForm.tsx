@@ -14,7 +14,7 @@ import {
   registerJobOrder,
 } from "../../api/quotations.api";
 import { acceptedQueryKeys } from "./utils/acceptedQueryKeys";
-import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
+import { jobOrderRoutes } from "@/features/job-order/utils/jobOrderRoutes";
 
 import BillingInformation from "./components/BillingInformtation";
 import ClientInformation from "./components/ClientInformation";
@@ -113,7 +113,7 @@ export default function AcceptedForm({
   const handleSuccessConfirm = () => {
     void queryClient.invalidateQueries({ queryKey: acceptedQueryKeys.root() });
     setIsSuccessModalOpen(false);
-    navigate(quotationRoutes.tab("accepted"));
+    navigate(jobOrderRoutes.list());
   };
 
   return (
