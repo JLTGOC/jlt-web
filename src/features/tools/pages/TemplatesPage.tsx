@@ -193,6 +193,10 @@ export function TemplatesPage() {
     navigate(`/tools/templates/${row.id}/edit`);
   };
 
+  const handleRowClick = (row: QuotationTemplateResource) => {
+    navigate(`/tools/templates/${row.id}/preview`);
+  };
+
   const handleDelete = (row: QuotationTemplateResource) => {
     deleteMutation.mutate(row.id);
   };
@@ -244,6 +248,7 @@ export function TemplatesPage() {
           data={paginatedTemplates}
           rowKey={(row) => row.id}
           withNumbering
+          onRowClick={handleRowClick}
           withToggle={{
             getValue: (row) =>
               toggleOverrides[row.id] !== undefined
