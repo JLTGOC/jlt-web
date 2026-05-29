@@ -10,6 +10,7 @@ import { useNavigate, useParams } from "react-router";
 import type { ShipmentResource } from "@/features/shipments/types/shipments.types";
 import { shipmentRoutes } from "@/features/shipments/utils/shipmentRoutes";
 import { PdfThumbnail } from "@/components/PdfThumbnail";
+import styles from "./Documents.module.css";
 
 interface ShipmentFilesProps {
   shipment: ShipmentResource;
@@ -128,10 +129,17 @@ export function ShipmentFiles({ shipment }: ShipmentFilesProps) {
               <MantineBox
                 key={index}
                 p="xs"
+                className={styles.documentCard}
+                onClick={() => {
+                  if (doc.url) {
+                    window.open(doc.url, '_blank');
+                  }
+                }}
                 style={{
                   border: "1px solid var(--mantine-color-gray-2)",
                   borderRadius: "0.375rem",
                   backgroundColor: "white",
+                  cursor: "pointer",
                 }}
               >
                 <Group align="center" gap="sm">
@@ -195,10 +203,17 @@ export function ShipmentFiles({ shipment }: ShipmentFilesProps) {
               <MantineBox
                 key={index}
                 p="sm"
+                className={styles.documentCard}
+                onClick={() => {
+                  if (invoice.url) {
+                    window.open(invoice.url, '_blank');
+                  }
+                }}
                 style={{
                   border: "1px solid var(--mantine-color-gray-2)",
                   borderRadius: "0.375rem",
                   backgroundColor: "white",
+                  cursor: "pointer",
                 }}
               >
                 <Group justify="space-between" align="flex-start">

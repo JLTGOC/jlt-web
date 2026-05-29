@@ -50,9 +50,42 @@ const COLUMNS: AppTableColumn<AccountListItem>[] = [
   },
   { key: "email", label: "EMAIL", width: "12%", render: (row) => row.email },
   { key: "contactNumber", label: "CONTACT NUMBER", width: "12%", render: (row) => row.contactNumber },
-  { key: "requestAccepted", label: "REQUEST ACCEPTED", width: "6%", render: (row) => row.employee?.requestAccepted ?? "—" },
-  { key: "quotationSent", label: "QUOTATION SENT", width: "6%", render: (row) => row.employee?.quotationSent ?? "—" },
-  { key: "quotationAccepted", label: "QT ACCEPTED BY CLIENT", width: "6%", render: (row) => row.employee?.quotationAccepted ?? "—" },
+  {
+    key: "requestAccepted",
+    label: (
+      <div style={{ whiteSpace: "normal", textAlign: "center" }}>
+        REQUEST
+        <br />
+        ACCEPTED
+      </div>
+    ) as unknown as string,
+    width: "6%",
+    render: (row) => <Center>{row.employee?.requestAccepted ?? "—"}</Center>,
+  },
+  {
+    key: "quotationSent",
+    label: (
+      <div style={{ whiteSpace: "normal", textAlign: "center" }}>
+        QUOTATION
+        <br />
+        SENT
+      </div>
+    ) as unknown as string,
+    width: "6%",
+    render: (row) => <Center>{row.employee?.quotationSent ?? "—"}</Center>,
+  },
+  {
+    key: "quotationAccepted",
+    label: (
+      <div style={{ whiteSpace: "normal", textAlign: "center" }}>
+        QT ACCEPTED
+        <br />
+        BY CLIENT
+      </div>
+    ) as unknown as string,
+    width: "6%",
+    render: (row) => <Center>{row.employee?.quotationAccepted ?? "—"}</Center>,
+  },
   {
     key: "lastActivity",
     label: "LAST ACTIVITY",

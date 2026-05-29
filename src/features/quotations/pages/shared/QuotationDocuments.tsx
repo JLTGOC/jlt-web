@@ -16,6 +16,7 @@ import { fetchQuotation } from "@/features/quotations/api/quotations.api";
 import { useQuotationRouteParams } from "@/features/quotations/hooks/useQuotationRouteParams";
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 import type { QuotationDocument } from "@/features/quotations/types/quotations.types";
+import styles from "@/features/shipments/components/details/Documents.module.css";
 
 import docClientIcon from "@/assets/icons/docClient.svg";
 import docJLTCBIcon from "@/assets/icons/docJLTCB.svg";
@@ -266,9 +267,18 @@ function DocumentDetailCard({ doc, quotationId }: DocumentDetailCardProps) {
 
   return (
     <>
-      <Box style={{ minHeight: 90, padding: "0.5rem 0.75rem", fontSize: "0.85rem" }}>
+      <div
+        className={styles.documentCard}
+        onClick={() => {
+          if (fileUrl) {
+            window.open(fileUrl, '_blank');
+          }
+        }}
+        style={{ width: "100%", minHeight: 90, padding: "0.5rem 0.75rem", fontSize: "0.85rem" }}
+      >
         <DetailCard
-          icon={
+          style={{ width: "100%" }}
+          headerLeft={
             isPdf && fileUrl ? (
               <Box style={{ width: 60, height: 80, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <PdfThumbnail url={fileUrl} />
@@ -293,12 +303,18 @@ function DocumentDetailCard({ doc, quotationId }: DocumentDetailCardProps) {
 
             <Menu position="bottom-end">
               <Menu.Target>
-                <Button variant="subtle" p={0}>
+                <Button variant="subtle" p={0} onClick={(e) => e.stopPropagation()}>
                   <MoreVert />
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item leftSection={<Download style={{ width: 16, height: 16 }} />} onClick={handleDownload}>
+                <Menu.Item
+                  leftSection={<Download style={{ width: 16, height: 16 }} />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload();
+                  }}
+                >
                   Download
                 </Menu.Item>
                 <Menu.Item leftSection={<Print style={{ width: 16, height: 16 }} />} onClick={handlePrint}>
@@ -311,7 +327,7 @@ function DocumentDetailCard({ doc, quotationId }: DocumentDetailCardProps) {
             </Menu>
           </Box>
         </DetailCard>
-      </Box>
+      </div>
       <Modal opened={renameModalOpen} onClose={() => setRenameModalOpen(false)} title="Rename Document" centered>
         <Stack gap="md">
           <TextInput

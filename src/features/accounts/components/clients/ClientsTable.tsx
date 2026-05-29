@@ -99,9 +99,48 @@ export function ClientsTable({
         );
       },
     },
-    { key: "pendingQuotations", label: "PENDING QUOTATIONS", width: "5%", render: (row) => row.client?.pendingQuotations ?? "—" },
-    { key: "activeShipment", label: "ACTIVE SHIPMENT", width: "5%", render: (row) => row.client?.activeShipment ?? "—" },
-    { key: "activeRegulatory", label: "ACTIVE REGULATORY", width: "5%", render: (row) => row.client?.activeRegulatory ?? "—" },
+    {
+      key: "pendingQuotations",
+      label: (
+        <div style={{ whiteSpace: "normal", textAlign: "center" }}>
+          PENDING
+          <br />
+          QUOTATIONS
+        </div>
+      ) as unknown as string,
+      width: "5%",
+      render: (row) => (
+        <Center>{row.client?.pendingQuotations ?? "—"}</Center>
+      ),
+    },
+    {
+      key: "activeShipment",
+      label: (
+        <div style={{ whiteSpace: "normal", textAlign: "center" }}>
+          ACTIVE
+          <br />
+          SHIPMENT
+        </div>
+      ) as unknown as string,
+      width: "5%",
+      render: (row) => (
+        <Center>{row.client?.activeShipment ?? "—"}</Center>
+      ),
+    },
+    {
+      key: "activeRegulatory",
+      label: (
+        <div style={{ whiteSpace: "normal", textAlign: "center" }}>
+          ACTIVE
+          <br />
+          REGULATORY
+        </div>
+      ) as unknown as string,
+      width: "5%",
+      render: (row) => (
+        <Center>{row.client?.activeRegulatory ?? "—"}</Center>
+      ),
+    },
     {
       key: "action",
       label: "ACTION",

@@ -4,11 +4,12 @@ import {
   Text,
   Box as MantineBox,
   Button,
+
 } from "@mantine/core";
 import {
   ChevronRight,
   Download,
-  Folder, // ✅ Material Symbols Outlined: folder
+  Folder,
 } from "@nine-thirty-five/material-symbols-react/outlined";
 import { useState, useMemo } from "react";
 import { PdfThumbnail } from "@/components/PdfThumbnail";
@@ -16,6 +17,7 @@ import docClientIcon from "@/assets/icons/docClient.svg";
 import { useNavigate, useParams } from "react-router";
 import { shipmentRoutes } from "@/features/shipments/utils/shipmentRoutes";
 import type { ShipmentDocument } from "@/features/shipments/types/shipments.types";
+import styles from "./Documents.module.css";
 
 interface DocumentsProps {
   documents?: ShipmentDocument[];
@@ -85,7 +87,7 @@ export function Documents({
             <Group gap="sm">
               <MantineBox
                 style={{
-                  color: "#1D274E", // ✅ set folder icon color
+                  color: "#1D274E",
                   display: "flex",
                   alignItems: "center",
                 }}
@@ -145,59 +147,40 @@ export function Documents({
                   {clientDocuments.map((doc) => (
                     <div
                       key={doc.id}
-                      style={{
-                        border: "1px solid #ddd",
-                        borderRadius: "0.75rem",
-                        padding: "0.75rem",
-                        backgroundColor: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.75rem",
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                      className={styles.documentCard}
+                      onClick={() => {
+                        if (doc.file_url) {
+                          window.open(doc.file_url, '_blank');
+                        }
                       }}
                     >
-                      <div
-                        style={{
-                          width: 88,
-                          height: 88,
-                          minWidth: 88,
-                          minHeight: 88,
-                          borderRadius: "0.75rem",
-                          overflow: "hidden",
-                          backgroundColor: "var(--mantine-color-gray-2)",
-                          flexShrink: 0,
-                        }}
-                      >
+                      <div className={styles.documentThumbnail}>
                         <PdfThumbnail url={doc.file_url ?? ""} />
                       </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 4 }}
-                        >
+                      <div className={styles.documentContent}>
+                        <div className={styles.documentFileName}>
                           {doc.file_name}
                         </div>
-                        <div style={{ color: "#6F7C8B", fontSize: "0.75rem" }}>
+                        <div className={styles.documentMeta}>
                           {doc.uploadedDate}
                         </div>
-                        <div style={{ color: "#6F7C8B", fontSize: "0.75rem" }}>
+                        <div className={styles.documentMeta}>
                           Uploaded by: {doc.uploadedBy}
                         </div>
                       </div>
                       <Button
-                        component="a"
-                        href={doc.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         p={0}
-                        style={{
-                          backgroundColor: "#4E6174",
-                          borderRadius: "50%",
-                          width: 32,
-                          height: 32,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
+                        className={styles.documentDownloadButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (doc.file_url) {
+                            const link = document.createElement('a');
+                            link.href = doc.file_url;
+                            link.download = doc.file_name;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }
                         }}
                       >
                         <Download

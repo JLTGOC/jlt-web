@@ -19,6 +19,7 @@ import { AddCircle } from "@nine-thirty-five/material-symbols-react/outlined";
 import docClientIcon from "@/assets/icons/docClient.svg";
 import docJLTCBIcon from "@/assets/icons/docJLTCB.svg";
 import invoiceIcon from "@/assets/icons/invoice.svg";
+import styles from "@/features/shipments/components/details/Documents.module.css";
 
 export function ShipmentDocuments() {
   const { shipmentId, clientId } = useParams<{ shipmentId: string; clientId?: string }>();
@@ -190,7 +191,11 @@ export function ShipmentDocuments() {
                   {clientDocs.length > 0 ? (
                     <Stack gap="md">
                       {clientDocs.map((doc) => (
-                        <DocumentDetailCard key={doc.id} doc={doc} shipmentId={shipmentId} />
+                        <DocumentDetailCard
+                          key={doc.id}
+                          doc={doc}
+                          shipmentId={shipmentId}
+                        />
                       ))}
                     </Stack>
                   ) : (
@@ -217,7 +222,11 @@ export function ShipmentDocuments() {
                   {jltcbDocs.length > 0 ? (
                     <Stack gap="md">
                       {jltcbDocs.map((doc) => (
-                        <DocumentDetailCard key={doc.id} doc={doc} shipmentId={shipmentId} />
+                        <DocumentDetailCard
+                          key={doc.id}
+                          doc={doc}
+                          shipmentId={shipmentId}
+                        />
                       ))}
                     </Stack>
                   ) : (
@@ -261,7 +270,7 @@ export function ShipmentDocuments() {
               withBorder
               radius="md"
               p="md"
-              style={{ width: 750, minWidth: 750, minHeight: 750, backgroundColor: "white" }}
+              style={{ width: 750, minWidth: 750, minHeight: 822, backgroundColor: "white" }}
             >
               <Group mb="md" align="center">
                 <img src={invoiceIcon} alt="Billing" style={{ width: 24, height: 24 }} />
@@ -272,7 +281,11 @@ export function ShipmentDocuments() {
               {billingDocuments.length > 0 ? (
                 <Stack gap="md">
                   {billingDocuments.map((doc) => (
-                    <DocumentDetailCard key={doc.id} doc={doc} shipmentId={shipmentId} />
+                    <DocumentDetailCard
+                      key={doc.id}
+                      doc={doc}
+                      shipmentId={shipmentId}
+                    />
                   ))}
                 </Stack>
               ) : (
@@ -390,47 +403,57 @@ function DocumentDetailCard({ doc, shipmentId }: DocumentDetailCardProps) {
 
   return (
     <>
-      <DetailCard
-        headerLeft={
-          <Box style={{ width: 62, height: 62, minWidth: 62, minHeight: 62 }}>
-            <PdfThumbnail url={doc.file_url ?? ""} />
-          </Box>
-        }
-        title={doc.file_name}
+      <div
+        className={styles.documentCard}
+        onClick={() => {
+          if (doc.file_url) {
+            window.open(doc.file_url, '_blank');
+          }
+        }}
       >
-        <Box style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <DetailCard
+          style={{ width: "100%" }}
+          headerLeft={
+            <Box style={{ width: 62, height: 62, minWidth: 62, minHeight: 62 }}>
+              <PdfThumbnail url={doc.file_url ?? ""} />
+            </Box>
+          }
+          title={doc.file_name}
+        >
+          <Box style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
 
-          <Box>
-            {doc.uploadedDate && (
+            <Box>
+              {doc.uploadedDate && (
+                <Text size="sm" c="dimmed">
+                  {new Date(doc.uploadedDate).toLocaleDateString()} at {new Date(doc.uploadedDate).toLocaleTimeString()}
+                </Text>
+              )}
               <Text size="sm" c="dimmed">
-                {new Date(doc.uploadedDate).toLocaleDateString()} at {new Date(doc.uploadedDate).toLocaleTimeString()}
+                Uploaded by: {doc.uploadedByUser || doc.uploadedBy || (doc.uploaded_by ? `User ${doc.uploaded_by}` : doc.type ?? "Unknown")}
               </Text>
-            )}
-            <Text size="sm" c="dimmed">
-              Uploaded by: {doc.uploadedByUser || doc.uploadedBy || (doc.uploaded_by ? `User ${doc.uploaded_by}` : doc.type ?? "Unknown")}
-            </Text>
-          </Box>
+            </Box>
 
-          <Menu position="bottom-end">
-            <Menu.Target>
-              <Button variant="subtle" p={0}>
-                <MoreVert />
-              </Button>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Item leftSection={<Download style={{ width: 16, height: 16 }} />} onClick={handleDownload}>
-                Download
-              </Menu.Item>
-              <Menu.Item leftSection={<Print style={{ width: 16, height: 16 }} />} onClick={handlePrint}>
-                Print
-              </Menu.Item>
-              <Menu.Item leftSection={<BorderColor style={{ width: 16, height: 16, color: "#1C213B" }} />} onClick={() => setRenameModalOpen(true)}>
-                Rename
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </Box>
-      </DetailCard>
+            <Menu position="bottom-end">
+              <Menu.Target>
+                <Button variant="subtle" p={0} onClick={(e) => e.stopPropagation()}>
+                  <MoreVert />
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item leftSection={<Download style={{ width: 16, height: 16 }} />} onClick={handleDownload}>
+                  Download
+                </Menu.Item>
+                <Menu.Item leftSection={<Print style={{ width: 16, height: 16 }} />} onClick={handlePrint}>
+                  Print
+                </Menu.Item>
+                <Menu.Item leftSection={<BorderColor style={{ width: 16, height: 16, color: "#1C213B" }} />} onClick={() => setRenameModalOpen(true)}>
+                  Rename
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </Box>
+        </DetailCard>
+      </div>
 
       <Modal opened={renameModalOpen} onClose={() => setRenameModalOpen(false)} title="Rename Document" centered>
         <Stack gap="md">

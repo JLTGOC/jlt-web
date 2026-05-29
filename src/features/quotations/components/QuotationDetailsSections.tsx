@@ -13,6 +13,7 @@ import { PdfThumbnail } from "@/components/PdfThumbnail";
 import { useNavigate } from "react-router";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import { getQuotationFileDownloadUrl } from "@/features/quotations/api/quotationFiles.api";
+import documentsStyles from "@/features/shipments/components/details/Documents.module.css";
 
 interface QuotationDetailsSectionsProps {
   quotation: QuotationResource;
@@ -100,7 +101,16 @@ export function QuotationDetailsSections({
                   <span style={{ marginLeft: "0.4rem", fontWeight: "400" }}>DOCUMENTS UPLOADED BY JLTCB</span>
                 </h4>
                 {jltcbDocs.map((doc) => (
-                  <div key={doc.id} style={{ border: "1px solid #ddd", borderRadius: "0.5rem", padding: "0.35rem 0.5rem", marginBottom: "0.4rem", backgroundColor: "#fff", display: "flex", alignItems: "center", gap: "0.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.08)", minHeight: 90 }}>
+                  <div
+                    key={doc.id}
+                    className={documentsStyles.documentCard}
+                    onClick={() => {
+                      if (doc.file_url) {
+                        window.open(doc.file_url, '_blank');
+                      }
+                    }}
+                    style={{ border: "1px solid #ddd", borderRadius: "0.5rem", padding: "0.35rem 0.5rem", marginBottom: "0.4rem", backgroundColor: "#fff", display: "flex", alignItems: "center", gap: "0.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.08)", minHeight: 90 }}
+                  >
                     <Box style={{ width: 60, height: 80, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <PdfThumbnail url={getQuotationFileDownloadUrl(doc.id)} />
                     </Box>
@@ -109,7 +119,21 @@ export function QuotationDetailsSections({
                       <div style={{ color: "#888", fontSize: "0.75rem" }}>{doc.uploadedDate}</div>
                       <div style={{ color: "#888", fontSize: "0.75rem" }}>Uploaded by: {doc.uploadedBy ?? "Unknown"}</div>
                     </div>
-                    <Button component="a" href={doc.file_url} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: "#4E6174", borderRadius: "20%", width: 28, height: 28, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Button
+                      p={0}
+                      style={{ backgroundColor: "#4E6174", borderRadius: "20%", width: 28, height: 28, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (doc.file_url) {
+                          const link = document.createElement('a');
+                          link.href = doc.file_url;
+                          link.download = doc.file_name;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }
+                      }}
+                    >
                       <Download width="1.1rem" height="1.1rem" />
                     </Button>
                   </div>
@@ -123,7 +147,16 @@ export function QuotationDetailsSections({
                   <span style={{ marginLeft: "0.4rem", fontWeight: "400" }}>DOCUMENTS UPLOADED BY CLIENT</span>
                 </h4>
                 {clientDocs.map((doc) => (
-                  <div key={doc.id} style={{ border: "1px solid #ddd", borderRadius: "0.5rem", padding: "0.35rem 0.5rem", marginBottom: "0.4rem", backgroundColor: "#fff", display: "flex", alignItems: "center", gap: "0.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.08)", minHeight: 90 }}>
+                  <div
+                    key={doc.id}
+                    className={documentsStyles.documentCard}
+                    onClick={() => {
+                      if (doc.file_url) {
+                        window.open(doc.file_url, '_blank');
+                      }
+                    }}
+                    style={{ border: "1px solid #ddd", borderRadius: "0.5rem", padding: "0.35rem 0.5rem", marginBottom: "0.4rem", backgroundColor: "#fff", display: "flex", alignItems: "center", gap: "0.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.08)", minHeight: 90 }}
+                  >
                     <Box style={{ width: 60, height: 80, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <PdfThumbnail url={getQuotationFileDownloadUrl(doc.id)} />
                     </Box>
@@ -132,7 +165,21 @@ export function QuotationDetailsSections({
                       <div style={{ color: "#888", fontSize: "0.75rem" }}>{doc.uploadedDate}</div>
                       <div style={{ color: "#888", fontSize: "0.75rem" }}>Uploaded by: {doc.uploadedBy ?? "Unknown"}</div>
                     </div>
-                    <Button component="a" href={doc.file_url} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: "#4E6174", borderRadius: "20%", width: 28, height: 28, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Button
+                      p={0}
+                      style={{ backgroundColor: "#4E6174", borderRadius: "20%", width: 28, height: 28, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (doc.file_url) {
+                          const link = document.createElement('a');
+                          link.href = doc.file_url;
+                          link.download = doc.file_name;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }
+                      }}
+                    >
                       <Download width="1.1rem" height="1.1rem" />
                     </Button>
                   </div>

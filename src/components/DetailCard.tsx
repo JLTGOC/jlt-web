@@ -1,9 +1,11 @@
 import { Box, Paper, Text } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface DetailCardProps {
+  /** Optional root style overrides for the card */
+  style?: CSSProperties;
   /**
    * Left section of the header — icon, avatar, badge, or any ReactNode.
    * Previously `icon`, renamed for flexibility.
@@ -34,6 +36,7 @@ export function DetailCard({
   headerRight,
   headerBg,
   children,
+  style,
 }: DetailCardProps) {
   return (
     <Paper
@@ -42,6 +45,7 @@ export function DetailCard({
         backgroundColor: "#fff",
         border: "1px solid var(--mantine-color-gray-2)",
         overflow: "hidden",
+        ...style,
       }}
     >
       {/* ── Header ── */}
