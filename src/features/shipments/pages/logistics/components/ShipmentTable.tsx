@@ -12,11 +12,19 @@ import {
   Pagination,
 } from "@mantine/core";
 import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
-import { Anchor, DirectionsBoat } from "@nine-thirty-five/material-symbols-react/outlined/filled";
+import {
+  Anchor,
+  DirectionsBoat,
+} from "@nine-thirty-five/material-symbols-react/outlined/filled";
 import { Icons } from "@/assets/icons";
-import { Assignment, Folder, EventNote} from "@nine-thirty-five/material-symbols-react/outlined";
+import {
+  Assignment,
+  Folder,
+  EventNote,
+} from "@nine-thirty-five/material-symbols-react/outlined";
 import { useNavigate } from "react-router";
 import { shipmentRoutes } from "@/features/shipments/utils/shipmentRoutes";
+import { jobOrderRoutes } from "@/lib/jobOrder.routes";
 import type { ShipmentListItem } from "@/features/shipments/types/shipments.types";
 import styles from "./ShipmentTable.module.css";
 
@@ -49,56 +57,56 @@ function getInitials(fullName: string | undefined): string {
 
 function getStatusColor(status: string | undefined): string {
   if (!status) return "#999";
-  
+
   // Map status to CSS variable name
   const statusMap: Record<string, string> = {
     "Not Yet Departed": "var(--status-button-color-not-yet-departed)",
     "In Transit": "var(--status-button-color-in-transit)",
-    "Arrived": "var(--status-button-color-arrived)",
-    "Berthed": "var(--status-button-color-berthed)",
-    "Discharged": "var(--status-button-color-discharged)",
-    "Delivered": "var(--status-button-color-delivered)",
+    Arrived: "var(--status-button-color-arrived)",
+    Berthed: "var(--status-button-color-berthed)",
+    Discharged: "var(--status-button-color-discharged)",
+    Delivered: "var(--status-button-color-delivered)",
   };
-  
+
   // Direct match first
   if (statusMap[status]) {
     return statusMap[status];
   }
-  
+
   // Try normalized version
   const normalized = toTitleCase(status);
   if (statusMap[normalized]) {
     return statusMap[normalized];
   }
-  
+
   // Default fallback
   return "#999";
 }
 
 function getStatusTextColor(status: string | undefined): string {
   if (!status) return "#666";
-  
+
   // Map status to CSS variable name
   const statusMap: Record<string, string> = {
     "Not Yet Departed": "var(--status-outline-color-not-yet-departed)",
     "In Transit": "var(--status-outline-color-in-transit)",
-    "Arrived": "var(--status-outline-color-arrived)",
-    "Berthed": "var(--status-outline-color-berthed)",
-    "Discharged": "var(--status-outline-color-discharged)",
-    "Delivered": "var(--status-outline-color-delivered)",
+    Arrived: "var(--status-outline-color-arrived)",
+    Berthed: "var(--status-outline-color-berthed)",
+    Discharged: "var(--status-outline-color-discharged)",
+    Delivered: "var(--status-outline-color-delivered)",
   };
-  
+
   // Direct match first
   if (statusMap[status]) {
     return statusMap[status];
   }
-  
+
   // Try normalized version
   const normalized = toTitleCase(status);
   if (statusMap[normalized]) {
     return statusMap[normalized];
   }
-  
+
   // Default fallback
   return "#666";
 }
@@ -169,21 +177,22 @@ export function ShipmentTable({
                 const statusColor = getStatusColor(row.status);
                 const statusTextColor = getStatusTextColor(row.status);
                 // Default to OLD color when undefined or explicitly OLD
-                const rowBarColor = row.client_type !== "NEW" ? "#368DC4" : "#54B99B";
+                const rowBarColor =
+                  row.client_type !== "NEW" ? "#368DC4" : "#54B99B";
 
                 return (
                   <Table.Tr
                     key={row.id}
-                    onClick={
-                      onRowClick ? () => onRowClick(row.id) : undefined
-                    }
+                    onClick={onRowClick ? () => onRowClick(row.id) : undefined}
                     style={{
                       ...(onRowClick ? { cursor: "pointer" } : {}),
                       backgroundColor: rowBackgroundColor,
                     }}
                   >
                     {/* SHIPMENT column with color bar */}
-                    <Table.Td style={{ position: "relative", paddingLeft: "16px" }}>
+                    <Table.Td
+                      style={{ position: "relative", paddingLeft: "16px" }}
+                    >
                       <Box
                         style={{
                           position: "absolute",
@@ -200,11 +209,27 @@ export function ShipmentTable({
                         <Text fw={700} c="#475569" fz="0.813rem" lineClamp={1}>
                           {row.reference_number}
                         </Text>
-                        <Text fw={500} c="#475569" fz="0.813rem" lh={1.45} lineClamp={1}>
-                          {typeof row.client === 'object' ? row.client.full_name : row.client_full_name || row.client || "—"}
+                        <Text
+                          fw={500}
+                          c="#475569"
+                          fz="0.813rem"
+                          lh={1.45}
+                          lineClamp={1}
+                        >
+                          {typeof row.client === "object"
+                            ? row.client.full_name
+                            : row.client_full_name || row.client || "—"}
                         </Text>
-                        <Text fw={500} c="#475569" fz="0.813rem" lh={1.45} lineClamp={1}>
-                          {typeof row.client === 'object' ? row.client.company_name : row.company_name || "—"}
+                        <Text
+                          fw={500}
+                          c="#475569"
+                          fz="0.813rem"
+                          lh={1.45}
+                          lineClamp={1}
+                        >
+                          {typeof row.client === "object"
+                            ? row.client.company_name
+                            : row.company_name || "—"}
                         </Text>
                       </Stack>
                     </Table.Td>
@@ -213,8 +238,7 @@ export function ShipmentTable({
                     <Table.Td>
                       <Stack gap={2}>
                         <Text c="#475569" fz="0.813rem" lh={1.45}>
-                          {row.service_type ?? "—"}{" "}
-                          ---&gt; {""}
+                          {row.service_type ?? "—"} ---&gt; {""}
                           {row.transport_mode ?? "—"}
                         </Text>
                         <Group gap={6} align="center" wrap="nowrap">
@@ -241,7 +265,7 @@ export function ShipmentTable({
                           BL: {row.bl_number || "—"}
                         </Text>
                         <Group gap="xs" align="center">
-                            {row.transport_mode?.toUpperCase() === "AIR" ? (
+                          {row.transport_mode?.toUpperCase() === "AIR" ? (
                             <img
                               src={Icons.ETA_air}
                               alt="ETA icon"
@@ -322,7 +346,12 @@ export function ShipmentTable({
                           position: "relative",
                         }}
                       >
-                        <Text fw={500} c={statusTextColor} fz="0.7rem" style={{ position: "relative", zIndex: 2 }}>
+                        <Text
+                          fw={500}
+                          c={statusTextColor}
+                          fz="0.7rem"
+                          style={{ position: "relative", zIndex: 2 }}
+                        >
                           {row.status || "—"}
                         </Text>
                       </Box>
@@ -343,9 +372,22 @@ export function ShipmentTable({
                           </ActionIcon>
                         </Menu.Target>
                         <Menu.Dropdown>
-                          <Menu.Item>
+                          <Menu.Item
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              if (row.job_order_id) {
+                                navigate(
+                                  jobOrderRoutes.details(row.job_order_id),
+                                );
+                              }
+                            }}
+                          >
                             <Group gap={8}>
-                              <Assignment width={20} height={20} style={{ color: "#1C213B" }} />
+                              <Assignment
+                                width={20}
+                                height={20}
+                                style={{ color: "#1C213B" }}
+                              />
                               <Text fz="0.813rem">Job Order</Text>
                             </Group>
                           </Menu.Item>
@@ -361,13 +403,21 @@ export function ShipmentTable({
                             }}
                           >
                             <Group gap={8}>
-                              <Folder width={20} height={20} style={{ color: "#1C213B" }} />
+                              <Folder
+                                width={20}
+                                height={20}
+                                style={{ color: "#1C213B" }}
+                              />
                               <Text fz="0.813rem">Documents</Text>
                             </Group>
                           </Menu.Item>
                           <Menu.Item>
                             <Group gap={8}>
-                              <EventNote width={20} height={20} style={{ color: "#1C213B" }} />
+                              <EventNote
+                                width={20}
+                                height={20}
+                                style={{ color: "#1C213B" }}
+                              />
                               <Text fz="0.813rem">Planning & Timeline</Text>
                             </Group>
                           </Menu.Item>
@@ -382,12 +432,17 @@ export function ShipmentTable({
         </Table>
       </Box>
       <Group align="center" justify="space-between" mt="md">
-              <Text c="#8a8f99" fz="0.813rem">
-                  Showing {currentShowingCount} out of {currentTotal} entries
-              </Text>
-            
-              <Pagination total={totalPages || 1} value={perPaginationPage} onChange={setPerPaginationPage} size="xs" />
-            </Group>
+        <Text c="#8a8f99" fz="0.813rem">
+          Showing {currentShowingCount} out of {currentTotal} entries
+        </Text>
+
+        <Pagination
+          total={totalPages || 1}
+          value={perPaginationPage}
+          onChange={setPerPaginationPage}
+          size="xs"
+        />
+      </Group>
     </>
   );
 }
