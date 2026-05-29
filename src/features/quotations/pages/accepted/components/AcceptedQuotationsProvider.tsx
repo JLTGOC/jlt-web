@@ -8,6 +8,7 @@ import {
   fetchQuotation,
 } from "@/features/quotations/api/quotations.api";
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
+import type { QuotationRouteTab } from "@/features/quotations/api/quotationQueryKeys";
 import { acceptedQueryKeys } from "@/features/quotations/pages/accepted/utils/acceptedQueryKeys";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 
@@ -71,8 +72,11 @@ export function AcceptedQuotationsProvider({
     staleTime: 30_000,
   });
 
-  const rows = data?.quotations ?? [];
-  const myRows = data?.my_quotations ?? [];
+  const rows = useMemo(() => data?.quotations ?? [], [data?.quotations]);
+  const myRows = useMemo(
+    () => data?.my_quotations ?? [],
+    [data?.my_quotations],
+  );
   const pagination = data?.pagination;
   const allShowingCount = pagination?.count ?? rows.length;
   const allTotal = pagination?.total ?? rows.length;
@@ -84,8 +88,11 @@ export function AcceptedQuotationsProvider({
   const prefetchQuotationDetails = useCallback(
     (quotationId: string) => {
       void queryClient.prefetchQuery({
-        queryKey: quotationQueryKeys.quotationDetails(quotationId),
-        queryFn: () => fetchQuotation(quotationId),
+        queryKey: quotationQueryKeys.quotationDetails(
+          quotationId,
+          "accepted" as QuotationRouteTab,
+        ),
+        queryFn: () => fetchQuotation(quotationId, "accepted"),
         staleTime: 30_000,
       });
     },
