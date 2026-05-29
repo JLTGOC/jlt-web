@@ -381,11 +381,12 @@ export function ShipmentTable({
                           <Menu.Item
                             onClick={(event) => {
                               event.stopPropagation();
-                              if (row.job_order_id) {
-                                navigate(
-                                  jobOrderRoutes.details(row.job_order_id),
-                                );
-                              }
+                              const jobOrderId = row.job_order_id;
+
+                              console.log(jobOrderId)
+                              console.log(row)
+                              if (!jobOrderId) return;
+                              navigate(jobOrderRoutes.details(jobOrderId));
                             }}
                           >
                             <Group gap={8}>
@@ -394,7 +395,7 @@ export function ShipmentTable({
                                 height={20}
                                 style={{ color: "#1C213B" }}
                               />
-                              <Text fz="0.813rem">Job Order</Text>
+                              <Text fz="0.813rem">Job Order </Text>
                             </Group>
                           </Menu.Item>
                           <Menu.Item

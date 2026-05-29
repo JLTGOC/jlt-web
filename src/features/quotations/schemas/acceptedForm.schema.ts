@@ -30,15 +30,36 @@ export const requestSchema = z.object({
     remarks: z.string(),
   }),
 
-  service: z.object({
-    service_level: z.string().min(1, "Service Level is required"),
+  service: z
+    .object({
+      service_level: z.string().min(1, "Service Level is required"),
 
-    bl_no: z.string().min(1, "BL Number is required"),
+      bl_no: z.string().min(1, "BL Number is required"),
 
-    eta: z.string().min(1, "ETA is required"),
+      eta: z.string().min(1, "ETA is required"),
 
-    etd: z.string().min(1, "ETD is required"),
-  }),
+      etd: z.string().min(1, "ETD is required"),
+    })
+    .superRefine((value, context) => {
+      if (!value.eta || !value.etd) {
+        return;
+      }
+
+      const etaDate = new Date(value.eta);
+      const etdDate = new Date(value.etd);
+
+      if (Number.isNaN(etaDate.getTime()) || Number.isNaN(etdDate.getTime())) {
+        return;
+      }
+
+      if (etaDate > etdDate) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "ETA is beyond ETD",
+          path: ["eta"],
+        });
+      }
+    }),
 
   shipment: z.object({
     // commodity: z.string(),

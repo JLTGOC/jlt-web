@@ -64,7 +64,7 @@ export default function AcceptedForm({
     resolver: zodResolver(requestSchema),
     defaultValues: {
       subject: {
-        date: "",
+        date: new Date().toISOString().slice(0, 10),
         subject: "",
         email_body: "",
       },
