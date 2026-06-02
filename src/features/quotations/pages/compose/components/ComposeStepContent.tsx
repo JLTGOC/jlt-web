@@ -89,11 +89,9 @@ export function ComposeStepContent({
     <Box
       pt="md"
       style={{
-        flex: 1,
-        minHeight: 0,
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",
+        overflow: "visible",
       }}
     >
       {step === 0 && (

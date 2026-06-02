@@ -74,11 +74,6 @@ export function QuotationPreviewBillingSection({
                   <Text size="xs" fw={600} ta="right">
                     {row.totalText}
                   </Text>
-                  {row.calculationText && (
-                    <Text size="xs" c="dimmed" ta="right">
-                      {row.calculationText}
-                    </Text>
-                  )}
                 </Box>
               </Table.Td>
             </Table.Tr>

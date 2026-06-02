@@ -12,7 +12,6 @@ export interface BillingPresentationRow {
   containerSize: string;
   amountText: string;
   totalText: string;
-  calculationText: string | null;
 }
 
 export function formatQuotationAmount(

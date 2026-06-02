@@ -134,31 +134,6 @@ export function QuotationPDFBillingSection({
                 {row.totalText}
               </Text>
             </View>
-            {row.calculationText ? (
-              <View
-                style={{
-                  flexDirection: "row",
-                  borderBottom: "0.5pt solid #b9b9b9",
-                }}
-              >
-                <Text
-                  style={[
-                    styles.tableCellBase,
-                    { flex: isPerContainer ? 6.5 : 5.3 },
-                  ]}
-                />
-                <Text
-                  style={[
-                    styles.tableCellLast,
-                    styles.colTotal,
-                    styles.tableCellRight,
-                    styles.rowNote,
-                  ]}
-                >
-                  {row.calculationText}
-                </Text>
-              </View>
-            ) : null}
           </View>
         ))}
         <View style={styles.totalRow}>
