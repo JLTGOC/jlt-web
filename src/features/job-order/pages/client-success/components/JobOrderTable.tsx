@@ -29,7 +29,7 @@ import type { JobOrderResponse } from "@/features/job-order/types/jobOrder";
 type JobOrderRow = JobOrderResponse;
 
 const tableHead = [
-  "REQUEST",
+  "PRE-ALERT",
   "DETAILS",
   "SERVICE LEVEL",
   "PERSON IN CHARGE",
