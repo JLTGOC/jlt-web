@@ -31,7 +31,9 @@ export function QuotationPreviewBillingSection({
     uom,
     formatAmount,
   );
-  const isPerContainer = isPerContainerUom(uom);
+  const hasPerContainerRows =
+    isPerContainerUom(uom) ||
+    displayRows.some((row) => isPerContainerUom(row.uom));
 
   return (
     <Box mb="lg">
@@ -54,8 +56,8 @@ export function QuotationPreviewBillingSection({
             <Table.Th>Description of Charges</Table.Th>
             <Table.Th>Currency</Table.Th>
             <Table.Th>UOM</Table.Th>
-            {isPerContainer && <Table.Th ta="right">Quantity</Table.Th>}
-            {isPerContainer && <Table.Th>Container Size</Table.Th>}
+            <Table.Th ta="right">Quantity</Table.Th>
+            <Table.Th>Container Size</Table.Th>
             <Table.Th ta="right">Amount</Table.Th>
             <Table.Th ta="right">Total Amount</Table.Th>
           </Table.Tr>
@@ -66,8 +68,8 @@ export function QuotationPreviewBillingSection({
               <Table.Td>{row.description}</Table.Td>
               <Table.Td>{row.currency}</Table.Td>
               <Table.Td>{row.uom}</Table.Td>
-              {isPerContainer && <Table.Td ta="right">{row.quantity}</Table.Td>}
-              {isPerContainer && <Table.Td>{row.containerSize}</Table.Td>}
+              <Table.Td ta="right">{row.quantity}</Table.Td>
+              <Table.Td>{row.containerSize}</Table.Td>
               <Table.Td ta="right">{row.amountText}</Table.Td>
               <Table.Td ta="right">
                 <Box>
@@ -79,17 +81,14 @@ export function QuotationPreviewBillingSection({
             </Table.Tr>
           ))}
           <Table.Tr>
-            <Table.Td
-              colSpan={isPerContainer ? 6 : 4}
-              fw={700}
-            >{`Total ${sectionTitle}`}</Table.Td>
+            <Table.Td colSpan={6} fw={700}>{`Total ${sectionTitle}`}</Table.Td>
             <Table.Td ta="right" fw={700}>
               {formatBillingAmount(currency, sectionTotal)}
             </Table.Td>
           </Table.Tr>
         </Table.Tbody>
       </Table>
-      {isPerContainer && (
+      {hasPerContainerRows && (
         <Text size="xs" c="dimmed" mt="xs">
           Per container charges use quantity multiplied by the unit rate.
         </Text>

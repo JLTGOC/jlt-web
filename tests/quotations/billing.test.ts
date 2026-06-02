@@ -34,6 +34,7 @@ describe("billing utils", () => {
     );
     expect(hasChargeContent({ description: "Customs fee" })).toBe(true);
     expect(hasChargeContent({ amount: 0 })).toBe(true);
+    expect(hasChargeContent({ uom: "Per BL" })).toBe(false);
   });
 
   it("requires at least one meaningful charge across sections", () => {
@@ -82,17 +83,22 @@ describe("billing utils", () => {
       {
         section: template.billing_sections[0],
         rows: [
-          { description: "A", amount: 1000 },
-          { description: "B", amount: 500 },
+          { description: "A", amount: 1000, uom: "Per BL" },
+          {
+            description: "B",
+            amount: 500,
+            quantity: 2,
+            uom: "Per Container",
+          },
         ],
       },
       {
         section: template.billing_sections[1],
-        rows: [{ description: "C", amount: 250 }],
+        rows: [{ description: "C", amount: 250, uom: "Per Shipment" }],
       },
     ];
 
     expect(getRowsTotal(sections[0].rows)).toBe(1500);
-    expect(getBillingGrandTotal(sections)).toBe(1750);
+    expect(getBillingGrandTotal(sections)).toBe(2250);
   });
 });

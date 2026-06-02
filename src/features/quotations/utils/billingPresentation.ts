@@ -12,6 +12,7 @@ export interface BillingPresentationRow {
   containerSize: string;
   amountText: string;
   totalText: string;
+  calculationText: string | null;
 }
 
 export function formatQuotationAmount(
@@ -42,11 +43,11 @@ export function getBillingPresentationRows(
   uom: string,
   formatAmount: (amount: number | null | undefined) => string,
 ): BillingPresentationRow[] {
-  const perContainer = isPerContainerUom(uom);
-
   return rows.map((row) => {
+    const resolvedUom = row.uom?.trim() || uom?.trim() || ""; 
+    const perContainer = isPerContainerUom(resolvedUom);
     const amountText = formatAmount(row.amount);
-    const rowTotal = getChargeRowTotal(row, uom);
+    const rowTotal = getChargeRowTotal(row);
     const totalText = formatBillingAmount(currency, rowTotal);
     const calculationText =
       perContainer && row.quantity != null && row.amount != null
@@ -56,9 +57,15 @@ export function getBillingPresentationRows(
     return {
       description: row.description?.trim() || "-",
       currency: currency.trim() || row.currency?.trim() || "-",
-      uom: uom.trim() || row.uom?.trim() || "-",
-      quantity: row.quantity == null ? "-" : String(row.quantity),
-      containerSize: row.container_size?.trim() || "-",
+      uom: resolvedUom || "-",
+      quantity:
+        perContainer && row.quantity != null
+          ? row.quantity.toLocaleString("en-PH")
+          : "-",
+      containerSize:
+        perContainer && row.container_size?.trim()
+          ? row.container_size.trim()
+          : "-",
       amountText,
       totalText,
       calculationText,
