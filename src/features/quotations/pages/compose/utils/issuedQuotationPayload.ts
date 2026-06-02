@@ -72,11 +72,7 @@ export function buildIssuedQuotationFormData({
         row.description?.trim() ?? "",
       );
       formData.append(
-        `charges[${sectionIndex}][items][${rowIndex}][currency_label]`,
-        billingDetails.currency?.trim() ?? row.currency?.trim() ?? "",
-      );
-      formData.append(
-        `charges[${sectionIndex}][items][${rowIndex}][uom_label]`,
+        `charges[${sectionIndex}][items][${rowIndex}][uom]`,
         rowUom,
       );
       if (shouldIncludeContainerFields) {

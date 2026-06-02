@@ -14,6 +14,7 @@ import {
   getBillingGrandTotal,
   getBillingSectionsWithCharges,
   getRowsTotalWithGlobalUom,
+  type ChargeRowLike,
 } from "@/features/quotations/utils/billing";
 import {
   resolveClientInformationFields,
@@ -41,7 +42,7 @@ export interface QuotationDocumentBillingSection {
   title: string;
   currency: string;
   uom: string;
-  rows: ChargeRow[];
+  rows: ChargeRowLike[];
   total: number;
 }
 

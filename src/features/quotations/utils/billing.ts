@@ -4,7 +4,7 @@ import type {
 } from "@/features/quotations/types/compose.types";
 import type { BillingDetailsValues } from "@/features/quotations/schemas/compose.schema";
 
-type ChargeRowLike = {
+export type ChargeRowLike = {
   description?: string;
   currency?: string;
   uom?: string;

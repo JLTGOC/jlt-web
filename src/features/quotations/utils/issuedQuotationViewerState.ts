@@ -92,7 +92,7 @@ function mapBillingDetails(
     const rows: ChargeRow[] = (charge.items ?? []).map((item) => ({
       description: item.receipt_charge_label ?? "",
       currency,
-      uom: item.uom_label ?? uom,
+      uom: item.uom,
       quantity: parseAmount(item.quantity),
       container_size: item.container_size ?? "",
       amount: parseAmount(item.amount),

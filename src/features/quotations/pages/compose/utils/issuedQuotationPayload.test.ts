@@ -72,7 +72,7 @@ describe("buildIssuedQuotationFormData", () => {
     );
 
     expect(formData.get("currency")?.toString()).toBe("PHP");
-    expect(formData.get("charges[0][items][0][uom_label]")?.toString()).toBe(
+    expect(formData.get("charges[0][items][0][uom]")?.toString()).toBe(
       "Per Container",
     );
     expect(formData.get("charges[0][items][0][quantity]")?.toString()).toBe(
@@ -87,7 +87,7 @@ describe("buildIssuedQuotationFormData", () => {
     const formData = buildIssuedQuotationFormData(createBaseParams("Per BL"));
 
     expect(formData.get("currency")?.toString()).toBe("PHP");
-    expect(formData.get("charges[0][items][0][uom_label]")?.toString()).toBe(
+    expect(formData.get("charges[0][items][0][uom]")?.toString()).toBe(
       "Per BL",
     );
     expect(formData.has("charges[0][items][0][quantity]")).toBe(false);

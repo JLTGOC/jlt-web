@@ -16,7 +16,6 @@ import {
 } from "@/features/quotations/utils/billing";
 import { formatBillingAmount } from "@/features/quotations/utils/billingPresentation";
 import { BillingSectionRows } from "@/features/quotations/pages/compose/components/BillingSectionRows";
-import { tableSelectStyles } from "@/features/quotations/pages/compose/components/billingSelectStyles";
 import classes from "./BillingDetailsForm.module.css";
 
 interface BillingDetailsFormProps {
