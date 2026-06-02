@@ -1,7 +1,10 @@
 import { Controller, useFormContext } from "react-hook-form";
 import { Grid, Select, TextInput } from "@mantine/core";
 import { IconTruck } from "@tabler/icons-react";
+import dayjs from "dayjs";
+import { useWatch } from "react-hook-form";
 
+import { DateInputField } from "@/components/form/valueFields";
 import type { AcceptedFormEnumsResponse } from "@/features/quotations/types/acceptedForm.types";
 import { type RequestBody } from "@/features/quotations/schemas/acceptedForm.schema";
 
@@ -17,6 +20,9 @@ export default function ServiceInformation({ enums }: ServiceInformationProps) {
     register,
     formState: { errors },
   } = useFormContext<RequestBody>();
+  const today = dayjs().startOf("day").toDate();
+  const etaValue = useWatch({ control, name: "service.eta" });
+  const etaMinDate = etaValue ? new Date(`${etaValue}T00:00:00`) : today;
 
   return (
     <PaperLayout title="SERVICE INFORMATION" icon={<IconTruck size={20} />}>
@@ -53,26 +59,26 @@ export default function ServiceInformation({ enums }: ServiceInformationProps) {
         </Grid.Col>
 
         <Grid.Col span={6}>
-          <TextInput
+          <DateInputField
+            control={control}
+            name="service.eta"
             label="ETA"
-            type="date"
-            placeholder=""
-            radius="md"
-            size="sm"
-            {...register("service.eta")}
-            error={errors.service?.eta?.message}
+            placeholder="MM/DD/YYYY"
+            valueFormat="MM/DD/YYYY"
+            clearable
+            minDate={today}
           />
         </Grid.Col>
 
         <Grid.Col span={6}>
-          <TextInput
+          <DateInputField
+            control={control}
+            name="service.etd"
             label="ETD"
-            type="date"
-            placeholder=""
-            radius="md"
-            size="sm"
-            {...register("service.etd")}
-            error={errors.service?.etd?.message}
+            placeholder="MM/DD/YYYY"
+            valueFormat="MM/DD/YYYY"
+            clearable
+            minDate={etaMinDate}
           />
         </Grid.Col>
       </Grid>

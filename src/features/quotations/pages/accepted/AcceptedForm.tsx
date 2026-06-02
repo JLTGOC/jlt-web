@@ -65,8 +65,6 @@ export default function AcceptedForm({
     defaultValues: {
       subject: {
         date: "",
-        subject: "",
-        email_body: "",
       },
       client: {
         client_type: "",

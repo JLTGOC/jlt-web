@@ -1,17 +1,16 @@
-import { TextInput, Textarea, Grid } from "@mantine/core";
+import { Grid, TextInput } from "@mantine/core";
 import { IconFileText } from "@tabler/icons-react";
+import dayjs from "dayjs";
 import { useFormContext } from "react-hook-form";
 
+import { DateInputField } from "@/components/form/valueFields";
 import { type RequestBody } from "../../../schemas/acceptedForm.schema";
 
 import PaperLayout from "./PaperLayout";
 
 export default function JOInformation() {
-  const {
-    register,
-    setValue,
-    formState: { errors },
-  } = useFormContext<RequestBody>();
+  const { control } = useFormContext<RequestBody>();
+  const today = dayjs().startOf("day").toDate();
 
   return (
     <PaperLayout title="JO INFORMATION" icon={<IconFileText size={20} />}>
@@ -27,37 +26,14 @@ export default function JOInformation() {
         </Grid.Col>
 
         <Grid.Col span={4}>
-          <TextInput
+          <DateInputField
+            control={control}
+            name="subject.date"
             label="DATE"
-             type="date"
-            placeholder=""
-            radius="md"
-            size="sm"
-            {...register("subject.date")}
-            error={errors.subject?.date?.message}
-          />
-        </Grid.Col>
-
-        <Grid.Col span={12}>
-          <TextInput
-            label="SUBJECT"
-            placeholder=""
-            radius="md"
-            size="sm"
-            {...register("subject.subject")}
-            error={errors.subject?.subject?.message}
-          />
-        </Grid.Col>
-
-        <Grid.Col span={12}>
-          <Textarea
-            label="MESSAGE"
-            placeholder=""
-            minRows={10}
-            radius="md"
-            size="sm"
-            {...register("subject.email_body")}
-            error={errors.subject?.email_body?.message}
+            placeholder="MM/DD/YYYY"
+            valueFormat="MM/DD/YYYY"
+            clearable
+            minDate={today}
           />
         </Grid.Col>
       </Grid>

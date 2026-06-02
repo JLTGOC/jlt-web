@@ -7,15 +7,15 @@ const fileSchema = z.custom<File>((value) => {
   return value instanceof File;
 });
 
+function toDateOnly(value: string): Date {
+  return new Date(`${value}T00:00:00`);
+}
+
 export type RequestBody = z.infer<typeof requestSchema>;
 
 export const requestSchema = z.object({
   subject: z.object({
     date: z.string().min(8, "Date is Required").max(10, "Date invalid"),
-
-    subject: z.string().min(1, "Subject is required"),
-
-    email_body: z.string().min(1, "Message is required"),
   }),
 
   client: z.object({
@@ -30,15 +30,29 @@ export const requestSchema = z.object({
     remarks: z.string(),
   }),
 
-  service: z.object({
-    service_level: z.string().min(1, "Service Level is required"),
+  service: z
+    .object({
+      service_level: z.string().min(1, "Service Level is required"),
 
-    bl_no: z.string().min(1, "BL Number is required"),
+      bl_no: z.string().min(1, "BL Number is required"),
 
-    eta: z.string().min(1, "ETA is required"),
+      eta: z.string().min(1, "ETA is required"),
 
-    etd: z.string().min(1, "ETD is required"),
-  }),
+      etd: z.string().min(1, "ETD is required"),
+    })
+    .superRefine((service, ctx) => {
+      if (!service.eta || !service.etd) {
+        return;
+      }
+
+      if (toDateOnly(service.etd) < toDateOnly(service.eta)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["etd"],
+          message: "ETD must be on or after ETA",
+        });
+      }
+    }),
 
   shipment: z.object({
     // commodity: z.string(),
