@@ -13,5 +13,22 @@ export default defineConfig(() => ({
   server: {
     port: 5173,
     open: true,
+    proxy: {
+      // Forward Sanctum CSRF endpoint and API requests to Laravel backend
+      '/sanctum': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
+      },
+    },
+  },
+  preview: {
+    port: 5173,
   },
 }));

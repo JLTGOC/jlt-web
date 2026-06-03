@@ -306,7 +306,7 @@ export function RespondedTable({
 
                         {/* Quoted By line */}
                         <Text c="#898989" fz="0.813rem">
-                          Quoted By: {row.account_specialist ?? row.as_full_name ?? "—"}
+                          Quoted By: {row.prepared_by ?? "—"}
                         </Text>
                       </Stack>
                     </Table.Td>

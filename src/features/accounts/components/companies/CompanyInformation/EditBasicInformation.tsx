@@ -1,5 +1,5 @@
 // src/features/accounts/components/companies/CompanyInformation/EditBasicInformation.tsx
-import { Paper, Text, TextInput, Autocomplete, Group, Button } from "@mantine/core";
+import { Paper, Text, TextInput, Autocomplete, Select, Group, Button } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { forwardRef, useState, useEffect, useRef, useImperativeHandle } from "react";
 import { CalendarMonth } from "@nine-thirty-five/material-symbols-react/rounded";
@@ -7,6 +7,8 @@ import type {
   CompanyFullDetails,
   CompanySummary,
 } from "@/features/accounts/types/company.types";
+import { userService } from "@/services/user.service";
+import type { CompanyOption } from "./companySummaryOptions";
 import {
   businessTypeOptions,
   clientClassificationOptions,
@@ -21,6 +23,7 @@ export interface EditBasicInformationHandle {
 
 interface EditBasicInformationProps {
   company: CompanyFullDetails | null;
+  errors?: Record<string, string>;
   onChange?: (summary: CompanySummary) => void;
 }
 
@@ -29,312 +32,413 @@ interface FormData {
   tradeName: string;
   consigneeUsed: string;
   accountHandler: string;
+  accountHandlerId: string;
   transactionType: string;
+  transactionTypeId: string;
   clientClassification: string;
+  clientClassificationId: string;
   companyType: string;
+  companyTypeId: string;
   industry: string;
   businessType: string;
+  businessTypeId: string;
   businessRegistrationNumber: string;
   website: string;
   yearsInOperation: Date | null;
   dateOfActivation: Date | null;
 }
 
+const formatDateValue = (v: Date | string | null): string | null => {
+  if (!v) return null;
+  const parsed = v instanceof Date ? v : new Date(v);
+  if (!Number.isFinite(parsed.getTime())) return null;
+  return parsed.toISOString().split("T")[0];
+};
+
+const getOptionValueByLabel = (options: CompanyOption[], label?: string | null): string =>
+  options.find((option) => option.label === label)?.value ?? "";
+
+const getOptionLabelByValue = (options: CompanyOption[], value?: string | null): string =>
+  options.find((option) => option.value === value)?.label ?? "";
+
 const toSummary = (data: FormData): CompanySummary => ({
   companyName: data.companyName,
   tradeName: data.tradeName || null,
   consigneeUsed: data.consigneeUsed || null,
   accountHandler: data.accountHandler || null,
+  accountHandlerId: data.accountHandlerId || null,
   transactionType: data.transactionType || null,
+  transactionTypeId: data.transactionTypeId || null,
   clientClassification: data.clientClassification || null,
+  clientClassificationId: data.clientClassificationId || null,
   companyType: data.companyType || null,
+  companyTypeId: data.companyTypeId || null,
   industry: data.industry || null,
   businessType: data.businessType || null,
+  businessTypeId: data.businessTypeId || null,
   businessRegistrationNumber: data.businessRegistrationNumber || null,
   website: data.website || null,
-  yearsInOperation: data.yearsInOperation ? data.yearsInOperation.toISOString() : null,
-  dateOfActivation: data.dateOfActivation ? data.dateOfActivation.toISOString() : null,
+  yearsInOperation: formatDateValue(data.yearsInOperation),
+  dateOfActivation: formatDateValue(data.dateOfActivation),
 });
 
 export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditBasicInformationProps>(
-  ({ company, onChange }, ref) => {
+  ({ company, errors, onChange }, ref) => {
     const yearsInputRef = useRef<HTMLInputElement | null>(null);
     const activationInputRef = useRef<HTMLInputElement | null>(null);
     const prevCompanyIdRef = useRef<string | undefined | null>(null);
+    const [accountHandlerOptionsState, setAccountHandlerOptionsState] = useState<CompanyOption[]>([]);
     const [formData, setFormData] = useState<FormData>({
       companyName: "",
       tradeName: "",
       consigneeUsed: "",
       accountHandler: "",
+      accountHandlerId: "",
       transactionType: "",
+      transactionTypeId: "",
       clientClassification: "",
+      clientClassificationId: "",
       companyType: "",
+      companyTypeId: "",
       industry: "",
       businessType: "",
+      businessTypeId: "",
       businessRegistrationNumber: "",
       website: "",
       yearsInOperation: null,
       dateOfActivation: null,
     });
 
-    const [transactionTypeOptionsState, setTransactionTypeOptionsState] = useState<string[]>(
-      [...transactionTypeOptions],
-    );
-    const [clientClassificationOptionsState, setClientClassificationOptionsState] =
-      useState<string[]>([...clientClassificationOptions]);
-    const [companyTypeOptionsState, setCompanyTypeOptionsState] = useState<string[]>([
-      ...companyTypeOptions,
-    ]);
-    const [industryOptionsState, setIndustryOptionsState] = useState<string[]>([
-      ...industryOptions,
-    ]);
-    const [businessTypeOptionsState, setBusinessTypeOptionsState] = useState<string[]>([
-      ...businessTypeOptions,
-    ]);
+    useEffect(() => {
+      let active = true;
 
-    const mergeSelectedOption = (defaults: readonly string[], selected: string) =>
-      selected && !defaults.includes(selected) ? [...defaults, selected] : [...defaults];
+      userService
+        .getAccountSpecialists()
+        .then((response) => {
+          if (!active) return;
+          setAccountHandlerOptionsState(
+            response.data.map((specialist) => ({
+              value: String(specialist.id),
+              label: specialist.full_name,
+            })),
+          );
+        })
+        .catch((error) => {
+          console.error("Failed to load account specialists", error);
+        });
 
-  useEffect(() => {
-    const companyId = company?.companyId;
-    if (!company || companyId === prevCompanyIdRef.current) {
-      return;
-    }
+      return () => {
+        active = false;
+      };
+    }, []);
 
-    prevCompanyIdRef.current = companyId;
-
-    const nextFormData: FormData = {
-      companyName: company.summary.companyName || "",
-      tradeName: company.summary.tradeName || "",
-      consigneeUsed: company.summary.consigneeUsed || "",
-      accountHandler: company.summary.accountHandler || "",
-      transactionType: company.summary.transactionType || "",
-      clientClassification: company.summary.clientClassification || "",
-      companyType: company.summary.companyType || "",
-      industry: company.summary.industry || "",
-      businessType: company.summary.businessType || "",
-      businessRegistrationNumber: company.summary.businessRegistrationNumber || "",
-      website: company.summary.website || "",
-      yearsInOperation: company.summary.yearsInOperation
-        ? new Date(company.summary.yearsInOperation)
-        : null,
-      dateOfActivation: company.summary.dateOfActivation
-        ? new Date(company.summary.dateOfActivation)
-        : null,
+    const handleAccountHandlerChange = (value: string) => {
+      const nextFormData = {
+        ...formData,
+        accountHandler: value,
+        accountHandlerId: "",
+      };
+      setFormData(nextFormData);
+      onChange?.(toSummary(nextFormData));
     };
 
-    setFormData(nextFormData);
-    setTransactionTypeOptionsState(
-      mergeSelectedOption(transactionTypeOptions, nextFormData.transactionType),
+    const handleAccountHandlerBlur = () => {
+      const trimmedValue = formData.accountHandler.trim();
+      const match = trimmedValue
+        ? accountHandlerOptionsState.find((option) => option.label === trimmedValue)
+        : undefined;
+
+      const nextFormData = {
+        ...formData,
+        accountHandlerId: match?.value ?? "",
+      };
+
+      if (nextFormData.accountHandlerId !== formData.accountHandlerId) {
+        setFormData(nextFormData);
+        onChange?.(toSummary(nextFormData));
+      }
+    };
+
+    useEffect(() => {
+      const companyId = company?.companyId;
+      if (!company || !company.summary || companyId === prevCompanyIdRef.current) {
+        return;
+      }
+
+      prevCompanyIdRef.current = companyId;
+
+      const s = company.summary;
+      const nextFormData: FormData = {
+        companyName: s.companyName ?? "",
+        tradeName: s.tradeName ?? "",
+        consigneeUsed: s.consigneeUsed ?? "",
+        accountHandler: s.accountHandler ?? "",
+        accountHandlerId: s.accountHandlerId ?? "",
+        transactionType: s.transactionType ?? "",
+        transactionTypeId: s.transactionTypeId ?? getOptionValueByLabel(transactionTypeOptions, s.transactionType),
+        clientClassification: s.clientClassification ?? "",
+        clientClassificationId: s.clientClassificationId ?? getOptionValueByLabel(clientClassificationOptions, s.clientClassification),
+        companyType: s.companyType ?? "",
+        companyTypeId: s.companyTypeId ?? getOptionValueByLabel(companyTypeOptions, s.companyType),
+        industry: s.industry ?? "",
+        businessType: s.businessType ?? "",
+        businessTypeId: s.businessTypeId ?? getOptionValueByLabel(businessTypeOptions, s.businessType),
+        businessRegistrationNumber: s.businessRegistrationNumber ?? "",
+        website: s.website ?? "",
+        yearsInOperation: s.yearsInOperation ? new Date(s.yearsInOperation) : null,
+        dateOfActivation: s.dateOfActivation ? new Date(s.dateOfActivation) : null,
+      };
+
+      setFormData(nextFormData);
+    }, [company]);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        commit: () => {
+          const summary = toSummary(formData);
+          if (onChange) {
+            onChange(summary);
+          }
+          return summary;
+        },
+      }),
+      [formData, onChange],
     );
-    setClientClassificationOptionsState(
-      mergeSelectedOption(clientClassificationOptions, nextFormData.clientClassification),
+
+    const handleChange = (field: keyof Omit<FormData, "accountHandlerId" | "transactionTypeId" | "clientClassificationId" | "companyTypeId" | "businessTypeId">, value: string | Date | null) => {
+      const nextFormData = {
+        ...formData,
+        [field]: value,
+      };
+      setFormData(nextFormData);
+      onChange?.(toSummary(nextFormData));
+    };
+
+    const handleSelectChange = (
+      field:
+        | "transactionTypeId"
+        | "clientClassificationId"
+        | "companyTypeId"
+        | "businessTypeId",
+      value: string | null,
+    ) => {
+      const normalizedValue = value ?? "";
+      const nextFormData = { ...formData, [field]: normalizedValue } as FormData;
+
+      if (field === "transactionTypeId") {
+        nextFormData.transactionType = getOptionLabelByValue(transactionTypeOptions, normalizedValue);
+      }
+
+      if (field === "clientClassificationId") {
+        nextFormData.clientClassification = getOptionLabelByValue(clientClassificationOptions, normalizedValue);
+      }
+
+      if (field === "companyTypeId") {
+        nextFormData.companyType = getOptionLabelByValue(companyTypeOptions, normalizedValue);
+      }
+
+      if (field === "businessTypeId") {
+        nextFormData.businessType = getOptionLabelByValue(businessTypeOptions, normalizedValue);
+      }
+
+      setFormData(nextFormData);
+      onChange?.(toSummary(nextFormData));
+    };
+
+    return (
+      <Paper p="lg">
+        {/* Row 1: Company Name + Trade Name */}
+        <Group grow mb="sm">
+          <div>
+            <Text size="sm" fw={500}>Company Name</Text>
+            <TextInput
+              placeholder="Enter company name"
+              value={formData.companyName}
+              onChange={(e) => handleChange("companyName", e.currentTarget.value)}
+              error={errors?.companyName}
+            />
+          </div>
+          <div>
+            <Text size="sm" fw={500}>Trade Name</Text>
+            <TextInput
+              placeholder="Enter trade name"
+              value={formData.tradeName}
+              onChange={(e) => handleChange("tradeName", e.currentTarget.value)}
+              error={errors?.tradeName}
+            />
+          </div>
+        </Group>
+
+        {/* Row 2: Consignee Used + Assign Account Handler */}
+        <Group grow mb="sm">
+          <div>
+            <Text size="sm" fw={500}>Consignee Used</Text>
+            <TextInput
+              placeholder="Enter consignee"
+              value={formData.consigneeUsed}
+              onChange={(e) => handleChange("consigneeUsed", e.currentTarget.value)}
+              error={errors?.consigneeUsed}
+            />
+          </div>
+          <div>
+            <Text size="sm" fw={500}>Assign Account Handler</Text>
+            <TextInput
+              placeholder="Enter account handler"
+              value={formData.accountHandler}
+              onChange={(e) => handleAccountHandlerChange(e.currentTarget.value)}
+              onBlur={handleAccountHandlerBlur}
+              error={errors?.accountHandler}
+            />
+          </div>
+        </Group>
+
+        {/* Row 3: Transaction Type + Client Classification + Company Type */}
+        <Group grow mb="sm">
+          <div>
+            <Text size="sm" fw={500}>Transaction Type</Text>
+            <Select
+              data={transactionTypeOptions}
+              placeholder="Select transaction type"
+              clearable
+              searchable
+              nothingFoundMessage="No matching transaction type"
+              value={formData.transactionTypeId || null}
+              onChange={(value) => handleSelectChange("transactionTypeId", value)}
+            />
+          </div>
+          <div>
+            <Text size="sm" fw={500}>Client Classification</Text>
+            <Select
+              data={clientClassificationOptions}
+              placeholder="Select classification"
+              clearable
+              searchable
+              nothingFoundMessage="No matching classification"
+              value={formData.clientClassificationId || null}
+              onChange={(value) => handleSelectChange("clientClassificationId", value)}
+            />
+          </div>
+          <div>
+            <Text size="sm" fw={500}>Company Type</Text>
+            <Select
+              data={companyTypeOptions}
+              placeholder="Select company type"
+              clearable
+              searchable
+              nothingFoundMessage="No matching company type"
+              value={formData.companyTypeId || null}
+              onChange={(value) => handleSelectChange("companyTypeId", value)}
+            />
+          </div>
+        </Group>
+
+        {/* Row 4: Industry + Business Type + Business Registration Number */}
+        <Group grow mb="sm">
+          <div>
+            <Text size="sm" fw={500}>Industry</Text>
+            <Autocomplete
+              data={industryOptions}
+              placeholder="Select or type an industry"
+              clearable
+              value={formData.industry}
+              onChange={(value) => handleChange("industry", value)}
+              error={errors?.industry}
+            />
+          </div>
+          <div>
+            <Text size="sm" fw={500}>Business Type</Text>
+            <Select
+              data={businessTypeOptions}
+              placeholder="Select business type"
+              clearable
+              searchable
+              nothingFoundMessage="No matching business type"
+              value={formData.businessTypeId || null}
+              onChange={(value) => handleSelectChange("businessTypeId", value)}
+              error={errors?.businessType}
+            />
+          </div>
+          <div>
+            <Text size="sm" fw={500}>Business Registration Number (SEC/DTI)</Text>
+            <TextInput
+              placeholder="Enter registration number"
+              value={formData.businessRegistrationNumber}
+              onChange={(e) => handleChange("businessRegistrationNumber", e.currentTarget.value)}
+              error={errors?.businessRegistrationNumber}
+            />
+          </div>
+        </Group>
+
+        {/* Row 5: Website/Online Presence */}
+        <div style={{ marginBottom: "1rem" }}>
+          <Text size="sm" fw={500}>Website / Online Presence</Text>
+          <TextInput
+            placeholder="Enter website URL"
+            value={formData.website}
+            onChange={(e) => handleChange("website", e.currentTarget.value)}
+            error={errors?.website}
+          />
+        </div>
+
+        {/* Row 6: Years in Operation + Date of Activation */}
+        <Group grow mb="sm">
+          <div>
+            <Text size="sm" fw={500}>Years in Operation</Text>
+            <DateInput
+              placeholder="Select years in operation"
+              value={formData.yearsInOperation}
+              onChange={(date) => handleChange("yearsInOperation", date)}
+              rightSectionWidth={45}
+              ref={yearsInputRef}
+              error={errors?.yearsInOperation}
+              rightSection={
+                <Button
+                  type="button"
+                  h={36}
+                  w={45}
+                  p={0}
+                  radius="sm"
+                  color="#4f657d"
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    yearsInputRef.current?.focus();
+                  }}
+                >
+                  <CalendarMonth width={24} height={24} fill="white" />
+                </Button>
+              }
+            />
+          </div>
+          <div>
+            <Text size="sm" fw={500}>Date of Activation</Text>
+            <DateInput
+              placeholder="Pick date"
+              value={formData.dateOfActivation}
+              onChange={(date) => handleChange("dateOfActivation", date)}
+              rightSectionWidth={45}
+              ref={activationInputRef}
+              error={errors?.dateOfActivation}
+              rightSection={
+                <Button
+                  type="button"
+                  h={36}
+                  w={45}
+                  p={0}
+                  radius="sm"
+                  color="#4f657d"
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    activationInputRef.current?.focus();
+                  }}
+                >
+                  <CalendarMonth width={24} height={24} fill="white" />
+                </Button>
+              }
+            />
+          </div>
+        </Group>
+      </Paper>
     );
-    setCompanyTypeOptionsState(
-      mergeSelectedOption(companyTypeOptions, nextFormData.companyType),
-    );
-    setIndustryOptionsState(
-      mergeSelectedOption(industryOptions, nextFormData.industry),
-    );
-    setBusinessTypeOptionsState(
-      mergeSelectedOption(businessTypeOptions, nextFormData.businessType),
-    );
-  }, [company]);
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      commit: () => {
-        const summary = toSummary(formData);
-        if (onChange) {
-          onChange(summary);
-        }
-        return summary;
-      },
-    }),
-    [formData, onChange],
-  );
-
-  const handleChange = (field: keyof FormData, value: string | Date | null) => {
-    setFormData((current) => ({
-      ...current,
-      [field]: value,
-    }));
-  };
-
-  return (
-    <Paper p="lg">
-      {/* Row 1: Company Name + Trade Name */}
-      <Group grow mb="sm">
-        <div>
-          <Text size="sm" fw={500}>Company Name</Text>
-          <TextInput
-            placeholder="Enter company name"
-            value={formData.companyName}
-            onChange={(e) => handleChange("companyName", e.currentTarget.value)}
-          />
-        </div>
-        <div>
-          <Text size="sm" fw={500}>Trade Name</Text>
-          <TextInput
-            placeholder="Enter trade name"
-            value={formData.tradeName}
-            onChange={(e) => handleChange("tradeName", e.currentTarget.value)}
-          />
-        </div>
-      </Group>
-
-      {/* Row 2: Consignee Used + Assign Account Handler */}
-      <Group grow mb="sm">
-        <div>
-          <Text size="sm" fw={500}>Consignee Used</Text>
-          <TextInput
-            placeholder="Enter consignee"
-            value={formData.consigneeUsed}
-            onChange={(e) => handleChange("consigneeUsed", e.currentTarget.value)}
-          />
-        </div>
-        <div>
-          <Text size="sm" fw={500}>Assign Account Handler</Text>
-          <TextInput
-            placeholder="Enter handler"
-            value={formData.accountHandler}
-            onChange={(e) => handleChange("accountHandler", e.currentTarget.value)}
-          />
-        </div>
-      </Group>
-
-      {/* Row 3: Transaction Type + Client Classification + Company Type */}
-      <Group grow mb="sm">
-        <div>
-          <Text size="sm" fw={500}>Transaction Type</Text>
-          <Autocomplete
-            data={transactionTypeOptionsState}
-            placeholder="Select or type a transaction type"
-            clearable
-            value={formData.transactionType}
-            onChange={(value) => handleChange("transactionType", value)}
-          />
-        </div>
-        <div>
-          <Text size="sm" fw={500}>Client Classification</Text>
-          <Autocomplete
-            data={clientClassificationOptionsState}
-            placeholder="Select or type a classification"
-            clearable
-            value={formData.clientClassification}
-            onChange={(value) => handleChange("clientClassification", value)}
-          />
-        </div>
-        <div>
-          <Text size="sm" fw={500}>Company Type</Text>
-          <Autocomplete
-            data={companyTypeOptionsState}
-            placeholder="Select or type a company type"
-            clearable
-            value={formData.companyType}
-            onChange={(value) => handleChange("companyType", value)}
-          />
-        </div>
-      </Group>
-
-      {/* Row 4: Industry + Business Type + Business Registration Number */}
-      <Group grow mb="sm">
-        <div>
-          <Text size="sm" fw={500}>Industry</Text>
-          <Autocomplete
-            data={industryOptionsState}
-            placeholder="Select or type an industry"
-            clearable
-            value={formData.industry}
-            onChange={(value) => handleChange("industry", value)}
-          />
-        </div>
-        <div>
-          <Text size="sm" fw={500}>Business Type</Text>
-          <Autocomplete
-            data={businessTypeOptionsState}
-            placeholder="Select or type a business type"
-            clearable
-            value={formData.businessType}
-            onChange={(value) => handleChange("businessType", value)}
-          />
-        </div>
-        <div>
-          <Text size="sm" fw={500}>Business Registration Number (SEC/DTI)</Text>
-          <TextInput
-            placeholder="Enter registration number"
-            value={formData.businessRegistrationNumber}
-            onChange={(e) => handleChange("businessRegistrationNumber", e.currentTarget.value)}
-          />
-        </div>
-      </Group>
-
-      {/* Row 5: Website/Online Presence */}
-      <div style={{ marginBottom: "1rem" }}>
-        <Text size="sm" fw={500}>Website / Online Presence</Text>
-        <TextInput
-          placeholder="Enter website URL"
-          value={formData.website}
-          onChange={(e) => handleChange("website", e.currentTarget.value)}
-        />
-      </div>
-
-      {/* Row 6: Years in Operation + Date of Activation */}
-      <Group grow mb="sm">
-        <div>
-          <Text size="sm" fw={500}>Years in Operation</Text>
-          <DateInput
-            placeholder="Select years in operation"
-            value={formData.yearsInOperation}
-            onChange={(date) => handleChange("yearsInOperation", date)}
-            rightSectionWidth={45}
-            ref={yearsInputRef}
-            rightSection={
-              <Button
-                type="button"
-                h={36}
-                w={45}
-                p={0}
-                radius="sm"
-                color="#4f657d"
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  yearsInputRef.current?.focus();
-                }}
-              >
-                <CalendarMonth width={24} height={24} fill="white" />
-              </Button>
-            }
-          />
-        </div>
-        <div>
-          <Text size="sm" fw={500}>Date of Activation</Text>
-          <DateInput
-            placeholder="Pick date"
-            value={formData.dateOfActivation}
-            onChange={(date) => handleChange("dateOfActivation", date)}
-            rightSectionWidth={45}
-            ref={activationInputRef}
-            rightSection={
-              <Button
-                type="button"
-                h={36}
-                w={45}
-                p={0}
-                radius="sm"
-                color="#4f657d"
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  activationInputRef.current?.focus();
-                }}
-              >
-                <CalendarMonth width={24} height={24} fill="white" />
-              </Button>
-            }
-          />
-        </div>
-      </Group>
-    </Paper>
-  );
-})
+  },
+);

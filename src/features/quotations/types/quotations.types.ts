@@ -34,7 +34,7 @@ export interface RespondedQuotationListItem {
   assignment_status?: string;
   as_username: string;
   as_full_name: string;
-  account_specialist?: string | null;
+  prepared_by?: string | null;
   assigned_at: string;
   service: string;
   viewed_at: string | null;

@@ -17,6 +17,7 @@ import type {
 
 interface EditStrategicInsightProps {
   company: CompanyFullDetails | null;
+  errors?: Record<string, string>;
   onChange?: (strategicInsight: CompanyStrategicInsight) => void;
 }
 
@@ -40,7 +41,7 @@ const toStrategicInsight = (
   notes: data.notes || null,
 });
 
-export function EditStrategicInsight({ company, onChange }: EditStrategicInsightProps) {
+export function EditStrategicInsight({ company, errors, onChange }: EditStrategicInsightProps) {
   const [growthOptions, setGrowthOptions] = useState(["LOW", "MEDIUM", "HIGH"]);
   const [selectedGrowth, setSelectedGrowth] = useState<string>("");
   const [expansionPlan, setExpansionPlan] = useState("");
@@ -54,8 +55,6 @@ export function EditStrategicInsight({ company, onChange }: EditStrategicInsight
 
   useEffect(() => {
     if (company?.strategicInsight) {
-      const initialGrowth =
-        company.strategicInsight.growthOptions?.[0] || "";
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setGrowthOptions(company.strategicInsight.growthOptions || ["LOW", "MEDIUM", "HIGH"]);
       setSelectedGrowth(company.strategicInsight.growthOptions?.[0] || "");
@@ -197,6 +196,7 @@ export function EditStrategicInsight({ company, onChange }: EditStrategicInsight
             placeholder="Enter expansion plan"
             value={expansionPlan}
             onChange={(e) => handleFieldUpdate("expansionPlan", e.currentTarget.value)}
+            error={errors?.expansionPlan}
           />
         </div>
       </Group>
@@ -207,6 +207,7 @@ export function EditStrategicInsight({ company, onChange }: EditStrategicInsight
           placeholder="Enter competitors"
           value={competitorsUsed}
           onChange={(e) => handleFieldUpdate("competitorsUsed", e.currentTarget.value)}
+          error={errors?.competitorsUsed}
         />
       </div>
 
@@ -216,6 +217,7 @@ export function EditStrategicInsight({ company, onChange }: EditStrategicInsight
           placeholder="Enter upselling opportunities"
           value={upsellingOpportunities}
           onChange={(e) => handleFieldUpdate("upsellingOpportunities", e.currentTarget.value)}
+          error={errors?.upsellingOpportunities}
         />
       </div>
 
@@ -225,6 +227,7 @@ export function EditStrategicInsight({ company, onChange }: EditStrategicInsight
           placeholder="Enter notes, remarks, or reports"
           value={notes}
           onChange={(e) => handleFieldUpdate("notes", e.currentTarget.value)}
+          error={errors?.notes}
           styles={{
             input: {
               minHeight: "6rem",

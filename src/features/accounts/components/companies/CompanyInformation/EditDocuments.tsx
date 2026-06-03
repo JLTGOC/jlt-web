@@ -16,6 +16,7 @@ type DocumentItem = {
 
 interface EditDocumentsProps {
   company: CompanyFullDetails | null;
+  errors?: Record<string, string>;
   onChange?: (documentsAttachments: CompanyDocumentsAttachments) => void;
 }
 

@@ -42,6 +42,29 @@ const sectionStepMap: Record<string, number> = {
   "strategic-insight": 9,
 };
 
+const tabValueToBackendSection: Record<string, string> = {
+  "basic-information": "basic_info",
+  "business-address-location": "address",
+  "key-contacts": "contacts",
+  "government-compliance": "registration",
+  "commercial-pricing": "pricing",
+  "operational-instructions": "operation",
+  "risk-issue-monitoring": "monitoring",
+  "documents-attachments": "documents",
+  "strategic-insight": "insights",
+};
+
+type CompanySection =
+  | "basic_info"
+  | "address"
+  | "contacts"
+  | "registration"
+  | "pricing"
+  | "operation"
+  | "monitoring"
+  | "documents"
+  | "insights";
+
 export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) {
   const [searchValue, setSearchValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -208,9 +231,16 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
         return;
       }
 
+      const section = selectedTab
+        ? (tabValueToBackendSection[selectedTab.value] as CompanySection)
+        : "basic_info";
+
+      console.debug(`[CompanyTable] Fetching full details for company:`, selectedCompanyRouteId, `section:`, section);
+
       setLoadingCompanyFull(true);
       try {
-        const data = await companyService.getCompanyById(selectedCompanyRouteId);
+        const data = await companyService.getCompanyById(selectedCompanyRouteId, section);
+        console.debug(`[CompanyTable] Received company details for section ${section}:`, data);
         if (!active) return;
         setSelectedCompanyFull(data);
       } catch (err) {
@@ -226,7 +256,7 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
     return () => {
       active = false;
     };
-  }, [selectedCompanyRouteId]);
+  }, [selectedCompanyRouteId, selectedTab]);
 
   const handleEditSection = (sectionValue: string) => {
     if (!selectedCompany) {
@@ -235,7 +265,7 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
 
     navigate("/accounts/companies/company-information", {
       state: {
-        companyId: selectedCompany.companyId,
+        companyId: selectedCompany.companyRouteId ?? selectedCompany.companyId,
         company: selectedCompanyFull ?? null,
         activeStep: sectionStepMap[sectionValue] ?? 1,
       },
@@ -312,10 +342,10 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
             </Group>
           </Box>
 
-          <AppTable<CompanyTableRow>
+            <AppTable<CompanyTableRow>
             columns={columns}
             data={pageData}
-            rowKey={(row) => row.companyId}
+            rowKey={(row) => row.companyRouteId ?? row.companyId}
             getRowProps={(row, idx) => {
               const baseProps = stripedRowProps(idx, {
                 className: `${styles.companyRow}${

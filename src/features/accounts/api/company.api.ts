@@ -18,8 +18,11 @@ export interface CompanyAPI {
     },
   ) => Promise<CompanyListResponse>;
 
-  /** GET /companies/:id */
-  getCompanyById: (id: string) => Promise<CompanyFullDetails>;
+  /** GET /companies/:id?section=:section */
+  getCompanyById: (
+    id: string,
+    section?: "basic_info" | "address" | "contacts" | "registration" | "pricing" | "operation" | "monitoring" | "documents" | "insights",
+  ) => Promise<CompanyFullDetails>;
 
   /** POST /companies */
   createCompany: (payload: CompanyCreateRequest) => Promise<CompanyFullDetails>;

@@ -1,6 +1,6 @@
 // src/features/accounts/components/companies/CompanyInformation/EditKeyContacts.tsx
 import { Paper, Text, TextInput, Group, Box } from "@mantine/core";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type {
   CompanyFullDetails,
   CompanyContactPerson,
@@ -9,6 +9,7 @@ import type {
 
 interface EditKeyContactsProps {
   company: CompanyFullDetails | null;
+  errors?: Record<string, string>;
   onChange?: (keyContacts: CompanyKeyContacts) => void;
 }
 
@@ -38,7 +39,7 @@ const toContactForm = (contact: CompanyContactPerson | null | undefined): Contac
   email: contact?.email || "",
 });
 
-export function EditKeyContacts({ company, onChange }: EditKeyContactsProps) {
+export function EditKeyContacts({ company, errors, onChange }: EditKeyContactsProps) {
   const [formData, setFormData] = useState<FormData>({
     primaryContact: { fullName: "", position: "", contactNumber: "", email: "" },
     secondaryContact: { fullName: "", position: "", contactNumber: "", email: "" },
@@ -57,23 +58,31 @@ export function EditKeyContacts({ company, onChange }: EditKeyContactsProps) {
     }
   }, [company]);
 
+  const localChangeRef = useRef(false);
+
   const handleContactChange = (
     contactType: keyof FormData,
     field: keyof ContactForm,
     value: string
   ) => {
-    setFormData((prev) => {
-      const nextFormData = {
-        ...prev,
-        [contactType]: {
-          ...prev[contactType],
-          [field]: value,
-        },
-      };
-      onChange?.(toKeyContacts(nextFormData));
-      return nextFormData;
-    });
+    localChangeRef.current = true;
+    setFormData((prev) => ({
+      ...prev,
+      [contactType]: {
+        ...prev[contactType],
+        [field]: value,
+      },
+    }));
   };
+
+  // Emit changes to parent after local state updates to avoid setState during render
+  // Only emit when the change originated locally to prevent parent->child echo loops
+  useEffect(() => {
+    if (localChangeRef.current) {
+      onChange?.(toKeyContacts(formData));
+      localChangeRef.current = false;
+    }
+  }, [formData, onChange]);
 
   const renderContactSection = (
     title: string,
@@ -92,6 +101,7 @@ export function EditKeyContacts({ company, onChange }: EditKeyContactsProps) {
               placeholder="Enter full name"
               value={contact.fullName}
               onChange={(e) => handleContactChange(contactType, "fullName", e.currentTarget.value)}
+              error={errors?.[`${contactType}.fullName`]}
             />
           </div>
           <div>
@@ -100,6 +110,7 @@ export function EditKeyContacts({ company, onChange }: EditKeyContactsProps) {
               placeholder="Enter position"
               value={contact.position}
               onChange={(e) => handleContactChange(contactType, "position", e.currentTarget.value)}
+              error={errors?.[`${contactType}.position`]}
             />
           </div>
         </Group>
@@ -110,6 +121,7 @@ export function EditKeyContacts({ company, onChange }: EditKeyContactsProps) {
               placeholder="Enter contact number"
               value={contact.contactNumber}
               onChange={(e) => handleContactChange(contactType, "contactNumber", e.currentTarget.value)}
+              error={errors?.[`${contactType}.contactNumber`]}
             />
           </div>
           <div>
@@ -118,6 +130,7 @@ export function EditKeyContacts({ company, onChange }: EditKeyContactsProps) {
               placeholder="Enter email"
               value={contact.email}
               onChange={(e) => handleContactChange(contactType, "email", e.currentTarget.value)}
+              error={errors?.[`${contactType}.email`]}
             />
           </div>
         </Group>

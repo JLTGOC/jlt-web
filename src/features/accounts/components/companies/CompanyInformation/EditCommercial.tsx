@@ -8,6 +8,7 @@ import type {
 
 interface EditCommercialProps {
   company: CompanyFullDetails | null;
+  errors?: Record<string, string>;
   onChange?: (commercialInformation: CompanyCommercialInformation) => void;
 }
 
@@ -25,7 +26,7 @@ const toCommercialInformation = (data: FormData): CompanyCommercialInformation =
   notes: data.notes || null,
 });
 
-export function EditCommercial({ company, onChange }: EditCommercialProps) {
+export function EditCommercial({ company, errors, onChange }: EditCommercialProps) {
   const [formData, setFormData] = useState<FormData>({
     agreedServiceRates: "",
     specialDiscounts: "",
@@ -64,6 +65,7 @@ export function EditCommercial({ company, onChange }: EditCommercialProps) {
           placeholder="Enter agreed service rates"
           value={formData.agreedServiceRates}
           onChange={(e) => handleChange("agreedServiceRates", e.currentTarget.value)}
+          error={errors?.agreedServiceRates}
         />
       </div>
 
@@ -75,6 +77,7 @@ export function EditCommercial({ company, onChange }: EditCommercialProps) {
             placeholder="Enter special discounts"
             value={formData.specialDiscounts}
             onChange={(e) => handleChange("specialDiscounts", e.currentTarget.value)}
+            error={errors?.specialDiscounts}
           />
         </div>
         <div>
@@ -83,6 +86,7 @@ export function EditCommercial({ company, onChange }: EditCommercialProps) {
             placeholder="Enter profit range %"
             value={formData.profitRangePercent}
             onChange={(e) => handleChange("profitRangePercent", e.currentTarget.value)}
+            error={errors?.profitRangePercent}
           />
         </div>
       </Group>
@@ -94,6 +98,7 @@ export function EditCommercial({ company, onChange }: EditCommercialProps) {
           placeholder="Enter notes, remarks, or reports"
           value={formData.notes}
           onChange={(e) => handleChange("notes", e.currentTarget.value)}
+          error={errors?.notes}
           styles={{
             input: {
               minHeight: "6rem",

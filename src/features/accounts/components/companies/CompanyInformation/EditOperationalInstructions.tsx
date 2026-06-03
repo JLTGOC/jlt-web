@@ -8,6 +8,7 @@ import type {
 
 interface EditOperationalInstructionsProps {
   company: CompanyFullDetails | null;
+  errors?: Record<string, string>;
   onChange?: (operationalInstructions: CompanyOperationalInstructions) => void;
 }
 
@@ -31,7 +32,7 @@ const toOperationalInstructions = (
   specialInstructions: data.specialInstructions || null,
 });
 
-export function EditOperationalInstructions({ company, onChange }: EditOperationalInstructionsProps) {
+export function EditOperationalInstructions({ company, errors, onChange }: EditOperationalInstructionsProps) {
   const [formData, setFormData] = useState<FormData>({
     preferredCommunicationStyle: "",
     responseTimeExpectation: "",
@@ -73,6 +74,7 @@ export function EditOperationalInstructions({ company, onChange }: EditOperation
           placeholder="Enter preferred communication style"
           value={formData.preferredCommunicationStyle}
           onChange={(e) => handleChange("preferredCommunicationStyle", e.currentTarget.value)}
+          error={errors?.preferredCommunicationStyle}
         />
       </div>
 
@@ -82,6 +84,7 @@ export function EditOperationalInstructions({ company, onChange }: EditOperation
           placeholder="Enter response time expectation"
           value={formData.responseTimeExpectation}
           onChange={(e) => handleChange("responseTimeExpectation", e.currentTarget.value)}
+          error={errors?.responseTimeExpectation}
         />
       </div>
 
@@ -91,6 +94,7 @@ export function EditOperationalInstructions({ company, onChange }: EditOperation
           placeholder="Enter client specific SOP"
           value={formData.clientSpecificSOP}
           onChange={(e) => handleChange("clientSpecificSOP", e.currentTarget.value)}
+          error={errors?.clientSpecificSOP}
         />
       </div>
 
@@ -100,6 +104,7 @@ export function EditOperationalInstructions({ company, onChange }: EditOperation
           placeholder="Enter approval workflow"
           value={formData.approvalWorkflow}
           onChange={(e) => handleChange("approvalWorkflow", e.currentTarget.value)}
+          error={errors?.approvalWorkflow}
         />
       </div>
 
@@ -109,6 +114,7 @@ export function EditOperationalInstructions({ company, onChange }: EditOperation
           placeholder="Enter pre-alert details"
           value={formData.requiredPreAlertDetails}
           onChange={(e) => handleChange("requiredPreAlertDetails", e.currentTarget.value)}
+          error={errors?.requiredPreAlertDetails}
         />
       </div>
 
@@ -118,6 +124,7 @@ export function EditOperationalInstructions({ company, onChange }: EditOperation
           placeholder="Enter special instructions"
           value={formData.specialInstructions}
           onChange={(e) => handleChange("specialInstructions", e.currentTarget.value)}
+          error={errors?.specialInstructions}
         />
       </div>
     </Paper>

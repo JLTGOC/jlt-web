@@ -21,11 +21,16 @@ export interface CompanySummary {
   tradeName?: string | null;
   consigneeUsed?: string | null;
   accountHandler?: string | null;
+  accountHandlerId?: string | null;
   transactionType?: string | null;
+  transactionTypeId?: string | null;
   clientClassification?: string | null;
+  clientClassificationId?: string | null;
   companyType?: string | null;
+  companyTypeId?: string | null;
   industry?: string | null;
   businessType?: string | null;
+  businessTypeId?: string | null;
   businessRegistrationNumber?: string | null;
   website?: string | null;
   yearsInOperation?: string | null;
@@ -88,6 +93,9 @@ export interface CompanyRiskIssueMonitoring {
   riskMonitoringNotes?: string | null;
   issueTrackingNotes?: string | null;
   complianceMonitoringNotes?: string | null;
+  customFlags?: string | null;
+  claims?: string | null;
+  monitoringNotes?: string | null;
 }
 
 export interface CompanyDocumentsAttachments {
@@ -118,18 +126,74 @@ export interface CompanyFullDetails {
 }
 
 export interface CompanyBackendRequest {
-  basic_info?: CompanySummary;
-  address?: Omit<CompanyAddressSummary, "warehouseAddresses" | "deliveryAddresses">;
+  basic_info?: {
+    name: string;
+    trade_name?: string | null;
+    consignee_used?: string | null;
+    account_handler_id?: string | null;
+    transaction_type?: string | null;
+    client_classification?: string | null;
+    company_type?: string | null;
+    business_type?: string | null;
+    business_registration_number?: string | null;
+    website?: string | null;
+    years_in_operation?: number | null;
+    activation_date?: string | null;
+    industry?: string[] | null;
+  };
+  address?: {
+    registered_address?: string | null;
+    office_address?: string | null;
+    usual_port?: string | null;
+    origin_country?: string | null;
+    destination_country?: string | null;
+  };
   warehouse_addresses?: string[];
   delivery_addresses?: string[];
-  primary?: CompanyContactPerson | null;
-  secondary?: CompanyContactPerson | null;
-  billing?: CompanyContactPerson | null;
-  registration?: CompanyGovernmentCompliance;
-  pricing?: CompanyCommercialInformation;
-  monitoring?: CompanyRiskIssueMonitoring;
-  operation?: CompanyOperationalInstructions;
-  insights?: CompanyStrategicInsight;
+  primary?: { full_name?: string | null; position?: string | null; contact_number?: string | null; email?: string | null } | null;
+  secondary?: { full_name?: string | null; position?: string | null; contact_number?: string | null; email?: string | null } | null;
+  billing?: { full_name?: string | null; position?: string | null; contact_number?: string | null; email?: string | null } | null;
+  registration?: {
+    tin?: string | null;
+    bir_registration_number?: string | null;
+    cprs_status?: string | null;
+    importer_accreditation_number?: string | null;
+    importer_accreditation_expiry?: string | null;
+    exporter_accreditation_number?: string | null;
+    exporter_accreditation_expiry?: string | null;
+    authorized_representatives?: string[];
+    special_permits?: string | null;
+    compliance_risk?: string | null;
+  };
+  pricing?: {
+    service_rate?: string | null;
+    special_discounts?: string | null;
+    "3pl_profit_range"?: string | null;
+    notes?: string | null;
+  };
+  monitoring?: {
+    past_issues?: string | null;
+    penalties?: string | null;
+    custom_flags?: string | null;
+    payment_delays?: string | null;
+    claims?: string | null;
+    monitoring_notes?: string | null;
+  };
+  operation?: {
+    preferred_communication_style?: string | null;
+    response_time_expectation?: string | null;
+    client_specific_sop?: string | null;
+    approval_workflow?: string | null;
+    pre_alert_details?: string | null;
+    special_instructions?: string | null;
+  };
+  insights?: {
+    growth?: string | null;
+    expansion_plan?: string | null;
+    competitors?: string | null;
+    opportunities?: string | null;
+    insight_notes?: string | null;
+  };
   documents?: Array<{ name: string; url?: string | null }>;
   attachments?: Array<{ name: string; url?: string | null }>;
 }
@@ -143,31 +207,216 @@ export interface CompanyListResponse {
 export interface CompanyCreateRequest extends Partial<CompanyBackendRequest> {}
 export interface CompanyUpdateRequest extends Partial<CompanyBackendRequest> {}
 
-const normalizeDocumentList = (
+export const normalizeDocumentList = (
   list?: Array<{ name: string; url?: string | null } & Record<string, unknown>>,
 ): Array<{ name: string; url?: string | null }> | undefined =>
-  list?.map(({ name, url }) => ({ name, url }));
+  list
+    ?.filter((item) => item && (item.url != null && item.url !== ""))
+    .map(({ name, url }) => ({ name, url }));
+
+export const isContactPersonBlank = (contact?: CompanyContactPerson | null): boolean =>
+  !contact ||
+  [contact.fullName, contact.position, contact.contactNumber, contact.email].every(
+    (value) => !value?.trim?.()?.length,
+  );
+
+export const mapContactPersonToBackend = (
+  contact?: CompanyContactPerson | null,
+): { full_name?: string | null; position?: string | null; contact_number?: string | null; email?: string | null } | null =>
+  isContactPersonBlank(contact)
+    ? null
+    : {
+        full_name: contact?.fullName?.trim() ?? null,
+        position: contact?.position?.trim() ?? null,
+        contact_number: contact?.contactNumber?.trim() ?? null,
+        email: contact?.email?.trim() ?? null,
+      };
+
+export const parseYearsInOperation = (v?: string | null): number | null => {
+  if (v == null) return null;
+  // If it's already a numeric string, parse it
+  const n = parseInt(String(v).trim(), 10);
+  if (!Number.isNaN(n)) return n;
+  // If it's a date string, compute years between that date and now
+  const d = new Date(String(v));
+  if (Number.isFinite(d.getTime())) {
+    const years = new Date().getFullYear() - d.getFullYear();
+    return years >= 0 ? years : null;
+  }
+  return null;
+};
+
+export const formatDateStringForBackend = (value?: string | null): string | null => {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime())) return null;
+  return parsed.toISOString().split("T")[0];
+};
+
+const industryNameToId: Record<string, number> = {
+  Logistics: 1,
+  Manufacturing: 2,
+  Retail: 3,
+};
+
+export const normalizeIndustryToIds = (industry?: string | string[] | null): number[] | null => {
+  if (!industry) {
+    return null;
+  }
+
+  const values = Array.isArray(industry)
+    ? industry
+    : String(industry)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+  const ids = values
+    .map((value) => industryNameToId[value])
+    .filter((id): id is number => typeof id === "number");
+
+  return ids.length > 0 ? ids : null;
+};
+
+export const mapCompanySummaryToBackend = (summary: CompanySummary) => ({
+  name: summary.companyName,
+  trade_name: summary.tradeName ?? null,
+  consignee_used: summary.consigneeUsed ?? null,
+  // Prefer explicit id when available, fall back to name otherwise.
+  account_handler_id: summary.accountHandlerId ?? null,
+  transaction_type_id: summary.transactionTypeId ?? summary.transactionType ?? null,
+  client_classification_id: summary.clientClassificationId ?? summary.clientClassification ?? null,
+  company_type_id: summary.companyTypeId ?? summary.companyType ?? null,
+  business_type_id: summary.businessTypeId ?? summary.businessType ?? null,
+  business_registration_number: summary.businessRegistrationNumber ?? null,
+  website: summary.website ?? null,
+  years_in_operation: parseYearsInOperation(summary.yearsInOperation),
+  activation_date: formatDateStringForBackend(summary.dateOfActivation),
+  // Backend expects array[string] or null — send list of industry names (comma-separated supported)
+  industry: summary.industry
+    ? String(summary.industry)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : null,
+});
+
+export const mapAddressToBackend = (address: CompanyAddressSummary) => ({
+  registered_address: address.registeredAddress ?? null,
+  office_address: address.officeAddress ?? null,
+  usual_port: address.portOfUsualEntryExit ?? null,
+  origin_country: address.countryOfOrigin ?? null,
+  destination_country: address.countryOfDestination ?? null,
+});
+
+export const mapRegistrationToBackend = (registration: CompanyGovernmentCompliance) => ({
+  tin: registration.tin ?? null,
+  bir_registration_number: registration.birRegistrationNumber ?? null,
+  cprs_status: registration.cprsStatus ?? null,
+  importer_accreditation_number: registration.importerAccreditationNumber ?? null,
+  importer_accreditation_expiry: formatDateStringForBackend(registration.importerExpirationDate),
+  exporter_accreditation_number: registration.exporterAccreditationNumber ?? null,
+  exporter_accreditation_expiry: formatDateStringForBackend(registration.exporterExpirationDate),
+  authorized_representatives: registration.authorizedRepresentatives,
+  special_permits: registration.specialPermits ?? null,
+  compliance_risk: registration.complianceRisk ?? null,
+});
+
+export const mapCommercialToBackend = (commercial: CompanyCommercialInformation) => ({
+  service_rate: commercial.agreedServiceRates ?? null,
+  special_discounts: commercial.specialDiscounts ?? null,
+  "3pl_profit_range": commercial.profitRangePercent ?? null,
+  notes: commercial.notes ?? null,
+});
+
+export const mapOperationalToBackend = (instructions: CompanyOperationalInstructions) => ({
+  preferred_communication_style: instructions.preferredCommunicationStyle ?? null,
+  response_time_expectation: instructions.responseTimeExpectation ?? null,
+  client_specific_sop: instructions.clientSpecificSOP ?? null,
+  approval_workflow: instructions.approvalWorkflow ?? null,
+  pre_alert_details: instructions.requiredPreAlertDetails ?? null,
+  special_instructions: instructions.specialInstructions ?? null,
+});
+
+export const mapMonitoringToBackend = (monitoring: CompanyRiskIssueMonitoring) => ({
+  past_issues: monitoring.riskMonitoringNotes ?? null,
+  penalties: monitoring.complianceMonitoringNotes ?? null,
+  custom_flags: monitoring.customFlags ?? null,
+  payment_delays: monitoring.issueTrackingNotes ?? null,
+  claims: monitoring.claims ?? null,
+  monitoring_notes: monitoring.monitoringNotes ?? null,
+});
+
+export const mapInsightsToBackend = (insight: CompanyStrategicInsight) => ({
+  growth: insight.growthOptions?.[0] ?? null,
+  expansion_plan: insight.expansionPlan ?? null,
+  competitors: insight.competitorsUsed ?? null,
+  opportunities: insight.upsellingOpportunities ?? null,
+  insight_notes: insight.notes ?? null,
+});
 
 export const mapCompanyFullDetailsToBackendRequest = (
   company: CompanyFullDetails,
 ): CompanyCreateRequest => {
-  const { summary, address, keyContacts, governmentCompliance, commercialInformation, operationalInstructions, riskIssueMonitoring, documentsAttachments, strategicInsight } = company;
-  const { warehouseAddresses, deliveryAddresses, ...addressFields } = address ?? {};
+  const {
+    summary,
+    address,
+    keyContacts,
+    governmentCompliance,
+    commercialInformation,
+    operationalInstructions,
+    riskIssueMonitoring,
+    documentsAttachments,
+    strategicInsight,
+  } = company;
 
   return {
-    basic_info: summary,
-    address: addressFields,
-    warehouse_addresses: warehouseAddresses,
-    delivery_addresses: deliveryAddresses,
-    primary: keyContacts?.primaryContact ?? null,
-    secondary: keyContacts?.secondaryContact ?? null,
-    billing: keyContacts?.billingContact ?? null,
-    registration: governmentCompliance,
-    pricing: commercialInformation,
-    monitoring: riskIssueMonitoring,
-    operation: operationalInstructions,
-    insights: strategicInsight,
+    basic_info: mapCompanySummaryToBackend(summary),
+    address: mapAddressToBackend(address),
+    warehouse_addresses: address?.warehouseAddresses,
+    delivery_addresses: address?.deliveryAddresses,
+    primary: mapContactPersonToBackend(keyContacts?.primaryContact),
+    secondary: mapContactPersonToBackend(keyContacts?.secondaryContact),
+    billing: mapContactPersonToBackend(keyContacts?.billingContact),
+    registration: mapRegistrationToBackend(governmentCompliance),
+    pricing: mapCommercialToBackend(commercialInformation),
+    monitoring: mapMonitoringToBackend(riskIssueMonitoring),
+    operation: mapOperationalToBackend(operationalInstructions),
+    insights: mapInsightsToBackend(strategicInsight),
     documents: normalizeDocumentList(documentsAttachments?.documents),
     attachments: normalizeDocumentList(documentsAttachments?.attachments),
   };
-}
+};
+
+export const mapCompanyFullDetailsToBackendUpdateRequest = (
+  company: CompanyFullDetails,
+): CompanyUpdateRequest => {
+  const full = mapCompanyFullDetailsToBackendRequest(company) as Record<string, any>;
+
+  const pruned: Record<string, any> = Object.keys(full).reduce((acc, key) => {
+    const val = full[key];
+
+    // Omit explicit null/undefined
+    if (val === null || val === undefined) return acc;
+
+    // Omit empty arrays
+    if (Array.isArray(val) && val.length === 0) return acc;
+
+    // For objects, omit if all nested values are null/undefined/empty
+    if (typeof val === "object" && !Array.isArray(val)) {
+      const hasValue = Object.keys(val).some((k) => {
+        const v = val[k];
+        if (v === null || v === undefined) return false;
+        if (Array.isArray(v) && v.length === 0) return false;
+        if (typeof v === "object") return Object.keys(v).length > 0;
+        return true;
+      });
+      if (!hasValue) return acc;
+    }
+
+    acc[key] = val;
+    return acc;
+  }, {} as Record<string, any>);
+
+  return pruned as CompanyUpdateRequest;
+};

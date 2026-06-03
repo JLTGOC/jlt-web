@@ -8,6 +8,7 @@ import type {
 
 interface EditRiskIssueProps {
   company: CompanyFullDetails | null;
+  errors?: Record<string, string>;
   onChange?: (riskIssueMonitoring: CompanyRiskIssueMonitoring) => void;
 }
 
@@ -25,7 +26,7 @@ const toRiskIssueMonitoring = (
   complianceMonitoringNotes: data.complianceMonitoringNotes || null,
 });
 
-export function EditRiskIssue({ company, onChange }: EditRiskIssueProps) {
+export function EditRiskIssue({ company, errors, onChange }: EditRiskIssueProps) {
   const [formData, setFormData] = useState<FormData>({
     riskMonitoringNotes: "",
     issueTrackingNotes: "",
@@ -61,6 +62,7 @@ export function EditRiskIssue({ company, onChange }: EditRiskIssueProps) {
           placeholder="Enter risk monitoring notes"
           value={formData.riskMonitoringNotes}
           onChange={(e) => handleChange("riskMonitoringNotes", e.currentTarget.value)}
+          error={errors?.riskMonitoringNotes}
           styles={{ input: { minHeight: "6rem" } }}
         />
       </div>
@@ -71,6 +73,7 @@ export function EditRiskIssue({ company, onChange }: EditRiskIssueProps) {
           placeholder="Enter issue tracking notes"
           value={formData.issueTrackingNotes}
           onChange={(e) => handleChange("issueTrackingNotes", e.currentTarget.value)}
+          error={errors?.issueTrackingNotes}
           styles={{ input: { minHeight: "6rem" } }}
         />
       </div>
@@ -81,6 +84,7 @@ export function EditRiskIssue({ company, onChange }: EditRiskIssueProps) {
           placeholder="Enter compliance monitoring notes"
           value={formData.complianceMonitoringNotes}
           onChange={(e) => handleChange("complianceMonitoringNotes", e.currentTarget.value)}
+          error={errors?.complianceMonitoringNotes}
           styles={{ input: { minHeight: "6rem" } }}
         />
       </div>

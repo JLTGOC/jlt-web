@@ -12,7 +12,7 @@ import {
   useCombobox,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
-import { Add, Check, CloseSmall } from "@nine-thirty-five/material-symbols-react/outlined";
+import { Add } from "@nine-thirty-five/material-symbols-react/outlined";
 import styles from "../CompanyDetails/CompanyDetails.module.css";
 import type {
   CompanyFullDetails,
@@ -21,6 +21,7 @@ import type {
 
 interface EditGovernmentProps {
   company: CompanyFullDetails | null;
+  errors?: Record<string, string>;
   onChange?: (governmentCompliance: CompanyGovernmentCompliance) => void;
 }
 
@@ -38,26 +39,29 @@ interface FormData {
   newAuthorizedRepresentative: string;
 }
 
+const formatDateValue = (v: Date | string | null): string | null => {
+  if (!v) return null;
+  const parsed = v instanceof Date ? v : new Date(v);
+  if (!Number.isFinite(parsed.getTime())) return null;
+  return parsed.toISOString().split("T")[0];
+};
+
 const toGovernmentCompliance = (
   data: FormData
 ): CompanyGovernmentCompliance => ({
   tin: data.tin || null,
   birRegistrationNumber: data.birRegistrationNumber || null,
   importerAccreditationNumber: data.importerAccreditationNumber || null,
-  importerExpirationDate: data.importerExpirationDate
-    ? data.importerExpirationDate.toISOString()
-    : null,
+  importerExpirationDate: formatDateValue(data.importerExpirationDate),
   exporterAccreditationNumber: data.exporterAccreditationNumber || null,
-  exporterExpirationDate: data.exporterExpirationDate
-    ? data.exporterExpirationDate.toISOString()
-    : null,
+  exporterExpirationDate: formatDateValue(data.exporterExpirationDate),
   cprsStatus: data.cprsStatus || null,
   specialPermits: data.specialPermits || null,
   complianceRisk: data.complianceRisk || null,
   authorizedRepresentatives: data.authorizedRepresentatives,
 });
 
-export function EditGovernment({ company, onChange }: EditGovernmentProps) {
+export function EditGovernment({ company, errors, onChange }: EditGovernmentProps) {
   const [formData, setFormData] = useState<FormData>({
     tin: "",
     birRegistrationNumber: "",
@@ -72,8 +76,11 @@ export function EditGovernment({ company, onChange }: EditGovernmentProps) {
     newAuthorizedRepresentative: "",
   });
 
-  const [cprsOptions, setCprsOptions] = useState(["LOW", "MEDIUM", "HIGH"]);
-  const [customCprsInput, setCustomCprsInput] = useState("");
+  const cprsOptions = [
+    "ACTIVE",
+    "INACTIVE",
+  ];
+  const [showRepresentativeInput, setShowRepresentativeInput] = useState(false);
   const cprsCombobox = useCombobox({
     onDropdownClose: () => cprsCombobox.resetSelectedOption(),
   });
@@ -115,28 +122,15 @@ export function EditGovernment({ company, onChange }: EditGovernmentProps) {
       [field]: value,
     };
     setFormData(nextFormData);
+
+    if (field === "newAuthorizedRepresentative") {
+      return;
+    }
+
     emitChange(nextFormData);
   };
 
-  const handleAddCprsOption = () => {
-    if (customCprsInput.trim() && !cprsOptions.includes(customCprsInput.trim())) {
-      const nextOptions = [...cprsOptions, customCprsInput.trim()];
-      setCprsOptions(nextOptions);
-      setCustomCprsInput("");
-      setFormData((prev) => ({
-        ...prev,
-        cprsStatus: customCprsInput.trim(),
-      }));
-      emitChange({
-        ...formData,
-        cprsStatus: customCprsInput.trim(),
-      });
-    }
-  };
-
-  const handleCancelCprsInput = () => {
-    setCustomCprsInput("");
-  };
+  // CPRS is limited to a fixed set of backend-allowed values. We don't allow free-text entries.
 
   const addAuthorizedRepresentative = () => {
     const rep = formData.newAuthorizedRepresentative.trim();
@@ -148,8 +142,14 @@ export function EditGovernment({ company, onChange }: EditGovernmentProps) {
       authorizedRepresentatives: [...formData.authorizedRepresentatives, rep],
       newAuthorizedRepresentative: "",
     };
+    setShowRepresentativeInput(false);
     setFormData(nextFormData);
     emitChange(nextFormData);
+  };
+
+  const cancelAuthorizedRepresentative = () => {
+    setFormData((prev) => ({ ...prev, newAuthorizedRepresentative: "" }));
+    setShowRepresentativeInput(false);
   };
 
   const handleRemoveRepresentative = (index: number) => {
@@ -176,6 +176,7 @@ export function EditGovernment({ company, onChange }: EditGovernmentProps) {
             placeholder="Enter TIN"
             value={formData.tin}
             onChange={(e) => handleChange("tin", e.currentTarget.value)}
+            error={errors?.tin}
           />
         </div>
         <div>
@@ -184,6 +185,7 @@ export function EditGovernment({ company, onChange }: EditGovernmentProps) {
             placeholder="Enter BIR registration number"
             value={formData.birRegistrationNumber}
             onChange={(e) => handleChange("birRegistrationNumber", e.currentTarget.value)}
+            error={errors?.birRegistrationNumber}
           />
         </div>
         <div>
@@ -191,7 +193,8 @@ export function EditGovernment({ company, onChange }: EditGovernmentProps) {
           <Combobox
             store={cprsCombobox}
             onOptionSubmit={(val) => {
-              handleChange("cprsStatus", val);
+              const selection = String(val ?? "");
+              handleChange("cprsStatus", selection);
               cprsCombobox.closeDropdown();
             }}
           >
@@ -211,39 +214,9 @@ export function EditGovernment({ company, onChange }: EditGovernmentProps) {
             </Combobox.Target>
 
             <Combobox.Dropdown>
-              <Combobox.Options>
-                {cprsOptionElements.length > 0 ? cprsOptionElements : <Combobox.Empty>Nothing found</Combobox.Empty>}
-              </Combobox.Options>
-              <Combobox.Footer>
-                <Group gap="xs" p="xs" align="center" onMouseDown={(e) => e.preventDefault()}>
-                  <TextInput
-                    placeholder="TYPE IF OTHERS"
-                    value={customCprsInput}
-                    onChange={(e) => setCustomCprsInput(e.currentTarget.value)}
-                    onKeyDown={(e) => {
-                      e.stopPropagation();
-                      if (e.key === "Enter") {
-                        handleAddCprsOption();
-                      }
-                    }}
-                    style={{ flex: 1 }}
-                    size="xs"
-                    autoFocus
-                  />
-                  <Check
-                    width={24}
-                    height={24}
-                    style={{ color: "#00960A", cursor: "pointer" }}
-                    onClick={handleAddCprsOption}
-                  />
-                  <CloseSmall
-                    width={24}
-                    height={24}
-                    style={{ color: "#FF0000", cursor: "pointer" }}
-                    onClick={handleCancelCprsInput}
-                  />
-                </Group>
-              </Combobox.Footer>
+                <Combobox.Options>
+                  {cprsOptionElements.length > 0 ? cprsOptionElements : <Combobox.Empty>Nothing found</Combobox.Empty>}
+                </Combobox.Options>
             </Combobox.Dropdown>
           </Combobox>
         </div>
@@ -295,18 +268,36 @@ export function EditGovernment({ company, onChange }: EditGovernmentProps) {
             variant="outline"
             radius="md"
             className={styles.smallEditButtonARG}
-            onClick={addAuthorizedRepresentative}
+            onClick={() => setShowRepresentativeInput(true)}
           >
             Add Representative
           </Button>
         </Box>
 
-        <TextInput
-          placeholder="Enter authorized representative name"
-          value={formData.newAuthorizedRepresentative}
-          onChange={(e) => handleChange("newAuthorizedRepresentative", e.currentTarget.value)}
-          mt="sm"
-        />
+        {showRepresentativeInput && (
+          <Group mt="sm">
+            <TextInput
+              placeholder="Enter authorized representative name"
+              value={formData.newAuthorizedRepresentative}
+              onChange={(e) => handleChange("newAuthorizedRepresentative", e.currentTarget.value)}
+              style={{ flex: 1 }}
+            />
+            <Button
+              radius="md"
+              onClick={addAuthorizedRepresentative}
+              disabled={!formData.newAuthorizedRepresentative.trim()}
+            >
+              Save
+            </Button>
+            <Button
+              variant="outline"
+              radius="md"
+              onClick={cancelAuthorizedRepresentative}
+            >
+              Cancel
+            </Button>
+          </Group>
+        )}
 
         {formData.authorizedRepresentatives.length === 0 ? (
           <Box
@@ -348,6 +339,7 @@ export function EditGovernment({ company, onChange }: EditGovernmentProps) {
             placeholder="Enter special permits"
             value={formData.specialPermits}
             onChange={(e) => handleChange("specialPermits", e.currentTarget.value)}
+            error={errors?.specialPermits}
           />
         </div>
         <div>
@@ -356,6 +348,7 @@ export function EditGovernment({ company, onChange }: EditGovernmentProps) {
             placeholder="Enter compliance risk"
             value={formData.complianceRisk}
             onChange={(e) => handleChange("complianceRisk", e.currentTarget.value)}
+            error={errors?.complianceRisk}
           />
         </div>
       </Group>

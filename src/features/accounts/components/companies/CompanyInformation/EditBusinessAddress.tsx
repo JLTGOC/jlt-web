@@ -9,6 +9,7 @@ import type {
 
 interface EditBusinessAddressProps {
   company: CompanyFullDetails | null;
+  errors?: Record<string, string>;
   onChange?: (address: CompanyAddressSummary) => void;
 }
 
@@ -34,7 +35,7 @@ const toAddressSummary = (data: FormData): CompanyAddressSummary => ({
   countryOfDestination: data.countryOfDestination || null,
 });
 
-export function EditBusinessAddress({ company, onChange }: EditBusinessAddressProps) {
+export function EditBusinessAddress({ company, errors, onChange }: EditBusinessAddressProps) {
   const [formData, setFormData] = useState<FormData>({
     registeredAddress: "",
     officeAddress: "",
@@ -46,22 +47,22 @@ export function EditBusinessAddress({ company, onChange }: EditBusinessAddressPr
     countryOfOrigin: "",
     countryOfDestination: "",
   });
+  const [showWarehouseInput, setShowWarehouseInput] = useState(false);
+  const [showDeliveryInput, setShowDeliveryInput] = useState(false);
 
   useEffect(() => {
     if (company?.address) {
-      const nextFormData: FormData = {
+      setFormData((prev) => ({
         registeredAddress: company.address.registeredAddress || "",
         officeAddress: company.address.officeAddress || "",
         warehouseAddresses: company.address.warehouseAddresses || [],
         deliveryAddresses: company.address.deliveryAddresses || [],
-        warehouseInput: "",
-        deliveryInput: "",
+        warehouseInput: prev.warehouseInput,
+        deliveryInput: prev.deliveryInput,
         portOfUsualEntryExit: company.address.portOfUsualEntryExit || "",
         countryOfOrigin: company.address.countryOfOrigin || "",
         countryOfDestination: company.address.countryOfDestination || "",
-      };
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFormData(nextFormData);
+      }));
     }
   }, [company]);
 
@@ -71,6 +72,11 @@ export function EditBusinessAddress({ company, onChange }: EditBusinessAddressPr
       [field]: value,
     };
     setFormData(nextFormData);
+
+    if (field === "warehouseInput" || field === "deliveryInput") {
+      return;
+    }
+
     onChange?.(toAddressSummary(nextFormData));
   };
 
@@ -84,6 +90,7 @@ export function EditBusinessAddress({ company, onChange }: EditBusinessAddressPr
       warehouseInput: "",
     };
     setFormData(nextFormData);
+    setShowWarehouseInput(false);
     onChange?.(toAddressSummary(nextFormData));
   };
 
@@ -97,7 +104,18 @@ export function EditBusinessAddress({ company, onChange }: EditBusinessAddressPr
       deliveryInput: "",
     };
     setFormData(nextFormData);
+    setShowDeliveryInput(false);
     onChange?.(toAddressSummary(nextFormData));
+  };
+
+  const cancelWarehouseInput = () => {
+    setFormData((prev) => ({ ...prev, warehouseInput: "" }));
+    setShowWarehouseInput(false);
+  };
+
+  const cancelDeliveryInput = () => {
+    setFormData((prev) => ({ ...prev, deliveryInput: "" }));
+    setShowDeliveryInput(false);
   };
 
   return (
@@ -109,6 +127,7 @@ export function EditBusinessAddress({ company, onChange }: EditBusinessAddressPr
             placeholder="Enter registered address"
             value={formData.registeredAddress}
             onChange={(e) => handleFieldChange("registeredAddress", e.currentTarget.value)}
+            error={errors?.registeredAddress}
           />
         </div>
         <div>
@@ -117,6 +136,7 @@ export function EditBusinessAddress({ company, onChange }: EditBusinessAddressPr
             placeholder="Enter office address"
             value={formData.officeAddress}
             onChange={(e) => handleFieldChange("officeAddress", e.currentTarget.value)}
+            error={errors?.officeAddress}
           />
         </div>
       </Group>
@@ -128,19 +148,36 @@ export function EditBusinessAddress({ company, onChange }: EditBusinessAddressPr
             leftSection={<Add width={18} height={18} style={{ color: "#0064E0" }} />}
             variant="outline"
             radius="md"
-            onClick={addWarehouseAddress}
+            onClick={() => setShowWarehouseInput(true)}
           >
             Add Warehouse
           </Button>
         </Box>
 
-        <Group mt="sm">
-          <TextInput
-            placeholder="Add warehouse address"
-            value={formData.warehouseInput}
-            onChange={(e) => handleFieldChange("warehouseInput", e.currentTarget.value)}
-          />
-        </Group>
+        {showWarehouseInput && (
+          <Group mt="sm">
+            <TextInput
+              placeholder="Add warehouse address"
+              value={formData.warehouseInput}
+              onChange={(e) => handleFieldChange("warehouseInput", e.currentTarget.value)}
+              style={{ flex: 1 }}
+            />
+            <Button
+              radius="md"
+              onClick={addWarehouseAddress}
+              disabled={!formData.warehouseInput.trim()}
+            >
+              Save
+            </Button>
+            <Button
+              variant="outline"
+              radius="md"
+              onClick={cancelWarehouseInput}
+            >
+              Cancel
+            </Button>
+          </Group>
+        )}
 
         {formData.warehouseAddresses.length === 0 ? (
           <Box
@@ -171,19 +208,36 @@ export function EditBusinessAddress({ company, onChange }: EditBusinessAddressPr
             leftSection={<Add width={18} height={18} style={{ color: "#0064E0" }} />}
             variant="outline"
             radius="md"
-            onClick={addDeliveryAddress}
+            onClick={() => setShowDeliveryInput(true)}
           >
             Add Delivery
           </Button>
         </Box>
 
-        <Group mt="sm">
-          <TextInput
-            placeholder="Add delivery address"
-            value={formData.deliveryInput}
-            onChange={(e) => handleFieldChange("deliveryInput", e.currentTarget.value)}
-          />
-        </Group>
+        {showDeliveryInput && (
+          <Group mt="sm">
+            <TextInput
+              placeholder="Add delivery address"
+              value={formData.deliveryInput}
+              onChange={(e) => handleFieldChange("deliveryInput", e.currentTarget.value)}
+              style={{ flex: 1 }}
+            />
+            <Button
+              radius="md"
+              onClick={addDeliveryAddress}
+              disabled={!formData.deliveryInput.trim()}
+            >
+              Save
+            </Button>
+            <Button
+              variant="outline"
+              radius="md"
+              onClick={cancelDeliveryInput}
+            >
+              Cancel
+            </Button>
+          </Group>
+        )}
 
         {formData.deliveryAddresses.length === 0 ? (
           <Box
