@@ -8,6 +8,7 @@ import { companyService } from "@/features/accounts/services/company.service";
 import type { CompanyFullDetails, CompanyCreateRequest, CompanyUpdateRequest } from "@/features/accounts/types/company.types";
 import { mapCompanyFullDetailsToBackendRequest } from "@/features/accounts/types/company.types";
 import { PageCard } from "@/components/PageCard";
+import { CompanyModal } from "./CompanyModal";
 import {
   companyFullDetailsSchema,
   companySummarySchema,
@@ -270,6 +271,9 @@ export function AddCompanyFlow() {
   const [showLeaveDraftModal, setShowLeaveDraftModal] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isFinishModalOpen, setIsFinishModalOpen] = useState(false);
+  const [finishModalStage, setFinishModalStage] = useState<"confirm" | "success" | "error">("confirm");
+  const [finishModalError, setFinishModalError] = useState<string | null>(null);
   const [sectionErrors, setSectionErrors] = useState<Record<CompanySection, Record<string, string>>>(
     emptySectionErrors,
   );
@@ -359,6 +363,11 @@ export function AddCompanyFlow() {
     setShowLeaveDraftModal(false);
     pendingNavigation?.proceed();
   };
+
+  const cleanNulls = (obj: any) =>
+    JSON.parse(
+      JSON.stringify(obj, (_, value) => (value === null ? undefined : value)),
+    );
 
   const updateSection = <K extends keyof Omit<CompanyFullDetails, "companyId">>(
     section: K,
@@ -490,82 +499,71 @@ export function AddCompanyFlow() {
     }
   };
 
-  const handleSaveCompany = async () => {
+  const performSaveCompany = async () => {
     if (!draftCompany) {
-      notifications.show({
-        title: "Error",
-        message: "Company details are not ready yet.",
-        color: "red",
-      });
-      return;
+      throw new Error("Company details are not ready yet.");
     }
 
     if (!validateDraftCompany(draftCompany, setActiveStep)) {
-      return;
+      throw new Error("Please fix validation errors before saving.");
     }
 
+    const createPayload: CompanyCreateRequest = mapCompanyFullDetailsToBackendRequest(draftCompany);
+    const created = await companyService.createCompany(createPayload);
+
+    const docs = draftCompany.documentsAttachments?.documents ?? [];
+    const filesToUpload = docs.filter((d: any) => d?.file) as Array<any>;
+    if (filesToUpload.length > 0 && created?.companyId) {
+      const uploaded = await companyService.uploadDocuments(
+        created.companyId,
+        filesToUpload.map((d) => d.file as File),
+      );
+
+      const mergedDocs = docs.map((d: any) => {
+        if (d?.file) {
+          const match = uploaded.find((u) => u.name === d.name);
+          return { name: d.name, url: match?.url ?? null };
+        }
+        return { name: d.name, url: d.url ?? null };
+      });
+
+      const payload = {
+        documents: mergedDocs,
+        attachments: draftCompany.documentsAttachments?.attachments,
+      } as CompanyUpdateRequest;
+      console.debug("create -> updateCompany payload (raw):", payload);
+      const cleaned = cleanNulls(payload);
+      console.debug("create -> updateCompany payload (cleaned):", cleaned);
+      await companyService.updateCompany(created.companyId, cleaned as CompanyUpdateRequest);
+    }
+
+    if (currentDraftId) {
+      const nextDrafts = removeDraftById(currentDraftId);
+      setDrafts(nextDrafts);
+      setCurrentDraftId(null);
+    }
+  };
+
+  const handleSaveCompany = async () => {
     try {
       setIsSaving(true);
-
-      const createPayload: CompanyCreateRequest = mapCompanyFullDetailsToBackendRequest(draftCompany);
-      const created = await companyService.createCompany(createPayload);
-
-      const docs = draftCompany.documentsAttachments?.documents ?? [];
-      const filesToUpload = docs.filter((d: any) => d?.file) as Array<any>;
-
-      if (filesToUpload.length > 0 && created?.companyId) {
-        try {
-          const uploaded = await companyService.uploadDocuments(
-            created.companyId,
-            filesToUpload.map((d) => d.file as File),
-          );
-
-          const mergedDocs = docs.map((d: any) => {
-            if (d?.file) {
-              const match = uploaded.find((u) => u.name === d.name);
-              return { name: d.name, url: match?.url ?? null };
-            }
-            return { name: d.name, url: d.url ?? null };
-          });
-
-          const cleanNulls = (obj: any) => JSON.parse(JSON.stringify(obj, (_, v) => (v === null ? undefined : v)));
-          const payload = {
-            documents: mergedDocs,
-            attachments: draftCompany.documentsAttachments?.attachments,
-          } as CompanyUpdateRequest;
-          console.debug("create -> updateCompany payload (raw):", payload);
-          const cleaned = cleanNulls(payload);
-          console.debug("create -> updateCompany payload (cleaned):", cleaned);
-          await companyService.updateCompany(created.companyId, cleaned as CompanyUpdateRequest);
-        } catch (err) {
-          console.error("Failed to upload documents", err);
-          notifications.show({ title: "Upload Error", message: "Failed to upload documents.", color: "red" });
-        }
-      }
-
-      notifications.show({
-        title: "Success",
-        message: "Company created successfully",
-        color: "green",
-        autoClose: 3000,
-      });
-
-      if (currentDraftId) {
-        const nextDrafts = removeDraftById(currentDraftId);
-        setDrafts(nextDrafts);
-      }
-
-      navigate("/accounts/companies", { replace: true });
+      setFinishModalError(null);
+      await performSaveCompany();
+      setFinishModalStage("success");
     } catch (error) {
       console.error("Failed to save company:", error);
-      notifications.show({
-        title: "Error",
-        message: "Failed to save company. Please try again.",
-        color: "red",
-        autoClose: 3000,
-      });
+      const message = error instanceof Error ? error.message : "An unexpected error occurred.";
+      setFinishModalError(message);
+      setFinishModalStage("error");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const closeFinishModal = () => {
+    setIsFinishModalOpen(false);
+    if (finishModalStage === "success") {
+      navigate("/accounts/companies", { replace: true });
     }
   };
 
@@ -595,8 +593,18 @@ export function AddCompanyFlow() {
       return;
     }
 
-    // On Finish, create company
-    handleSaveCompany();
+    if (!validateSection(currentSection, draftCompany, (errors) => {
+      setSectionErrors((prev) => ({
+        ...prev,
+        [currentSection]: errors,
+      }));
+    })) {
+      return;
+    }
+
+    setFinishModalStage("confirm");
+    setFinishModalError(null);
+    setIsFinishModalOpen(true);
   };
 
   return (
@@ -627,6 +635,16 @@ export function AddCompanyFlow() {
             </Button>
           </Box>
         </Modal>
+
+        <CompanyModal
+          opened={isFinishModalOpen}
+          mode="add"
+          stage={finishModalStage}
+          isLoading={isSaving}
+          errorMessage={finishModalError}
+          onConfirm={handleSaveCompany}
+          onClose={closeFinishModal}
+        />
 
         {showDraftPicker && drafts.length > 0 && (
           <Box mb="md" p="md" style={{ border: "1px solid #ced4da", borderRadius: 12, backgroundColor: "#f8f9fa" }}>

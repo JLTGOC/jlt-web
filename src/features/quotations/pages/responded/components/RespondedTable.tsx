@@ -38,6 +38,51 @@ function toTitleCase(value?: string) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function getValidUntilDate(assignedAt?: string) {
+  if (!assignedAt) return null;
+  const quotedDate = new Date(assignedAt);
+  if (!Number.isFinite(quotedDate.getTime())) return null;
+  quotedDate.setDate(quotedDate.getDate() + 7);
+  return quotedDate;
+}
+
+function formatValidUntilDate(assignedAt?: string) {
+  const validUntilDate = getValidUntilDate(assignedAt);
+  return validUntilDate
+    ? validUntilDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "-";
+}
+
+function getValidUntilStatus(assignedAt?: string) {
+  const validUntilDate = getValidUntilDate(assignedAt);
+  if (!validUntilDate) return "";
+
+  const today = new Date();
+  const diffTime = validUntilDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) return "Expired";
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "1 day left";
+  return `${diffDays} days left`;
+}
+
+function getValidUntilColor(assignedAt?: string) {
+  const validUntilDate = getValidUntilDate(assignedAt);
+  if (!validUntilDate) return "#475569";
+
+  const today = new Date();
+  const diffTime = validUntilDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 1) return "#AA4851";
+  return "#FF9933";
+}
+
 export function RespondedTable({
   rows,
   isLoading = false,
@@ -256,59 +301,18 @@ export function RespondedTable({
                               c="#000"
                               style={{ whiteSpace: "nowrap" }}
                             >
-                              {(() => {
-                                if (!row.assigned_at) return "-";
-                                const quotedDate = new Date(row.assigned_at);
-                                quotedDate.setDate(quotedDate.getDate() + 7);
-                                return quotedDate.toLocaleDateString("en-US", {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                });
-                              })()}
+                              {formatValidUntilDate(row.assigned_at)}
                             </Text>
                           </Group>
-
-                          {/* Days left */}
                           <Text
                             fw={500}
                             fz="0.813rem"
                             style={{
                               whiteSpace: "nowrap",
-                              color: (() => {
-                                if (!row.assigned_at) return "#475569";
-                                const quotedDate = new Date(row.assigned_at);
-                                quotedDate.setDate(quotedDate.getDate() + 7);
-                                const today = new Date();
-                                const diffTime =
-                                  quotedDate.getTime() - today.getTime();
-                                const diffDays = Math.ceil(
-                                  diffTime / (1000 * 60 * 60 * 24),
-                                );
-
-                                if (diffDays <= 1) {
-                                  return "#AA4851"; // today or 1 day left
-                                }
-                                return "#FF9933"; // more than 1 day left
-                              })(),
+                              color: getValidUntilColor(row.assigned_at),
                             }}
                           >
-                            {(() => {
-                              if (!row.assigned_at) return "";
-                              const quotedDate = new Date(row.assigned_at);
-                              quotedDate.setDate(quotedDate.getDate() + 7);
-                              const today = new Date();
-                              const diffTime =
-                                quotedDate.getTime() - today.getTime();
-                              const diffDays = Math.ceil(
-                                diffTime / (1000 * 60 * 60 * 24),
-                              );
-
-                              if (diffDays <= 0) return "Expired";
-                              if (diffDays === 1) return "1 day left";
-                              if (diffDays === 0) return "Today";
-                              return `${diffDays} days left`;
-                            })()}
+                            {getValidUntilStatus(row.assigned_at)}
                           </Text>
                         </Stack>
                       </Group>
@@ -377,7 +381,7 @@ export function RespondedTable({
                         {/* Quoted By line */}
                         <Text c="#898989" fz="0.813rem">
                           Quoted By:{" "}
-                          {row.account_specialist ?? row.as_full_name ?? "—"}
+                          {row.prepared_by ?? "—"}
                         </Text>
                       </Stack>
                     </Table.Td>

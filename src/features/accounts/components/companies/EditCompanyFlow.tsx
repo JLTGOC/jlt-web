@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { Paper, Box, Text, Group, Button } from "@mantine/core";
 import { ArrowLeftAlt } from "@nine-thirty-five/material-symbols-react/outlined";
 import { notifications } from "@mantine/notifications";
@@ -19,6 +19,7 @@ import {
   normalizeDocumentList,
 } from "@/features/accounts/types/company.types";
 import { PageCard } from "@/components/PageCard";
+import { CompanyModal } from "./CompanyModal";
 import {
   companyFullDetailsSchema,
   companySummarySchema,
@@ -182,6 +183,9 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
   const [draftCompany, setDraftCompany] = useState<CompanyFullDetails | null>(initialCompany ?? null);
   const [isLoading, setIsLoading] = useState(!initialCompany);
   const [isSaving, setIsSaving] = useState(false);
+  const [isFinishModalOpen, setIsFinishModalOpen] = useState(false);
+  const [finishModalStage, setFinishModalStage] = useState<"confirm" | "success" | "error">("confirm");
+  const [finishModalError, setFinishModalError] = useState<string | null>(null);
   const [sectionErrors, setSectionErrors] = useState<Record<CompanySection, Record<string, string>>>(
     emptySectionErrors,
   );
@@ -415,14 +419,9 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
     }
   };
 
-  const handleSaveCompany = async () => {
+  const performSaveCompany = async () => {
     if (!draftCompany) {
-      notifications.show({
-        title: "Error",
-        message: "Company details are not ready yet.",
-        color: "red",
-      });
-      return;
+      throw new Error("Company details are missing.");
     }
 
     if (!validateDraftCompany(draftCompany, setActiveStep)) {
@@ -610,21 +609,13 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
         throw err;
       }
 
-      notifications.show({
-        title: "Success",
-        message: "Company updated successfully",
-        color: "green",
-        autoClose: 3000,
-      });
-
-      navigate("/accounts/companies", { replace: true });
+      return;
     } catch (error: any) {
       console.error("Failed to save company:", error);
 
-      // If server returned validation details, surface them to the user
       const resp = error?.response?.data ?? error?.data ?? null;
+      let message = "Failed to save company. Please try again.";
       if (resp) {
-        let message = "";
         if (typeof resp === "string") {
           message = resp;
         } else if (resp.message) {
@@ -636,23 +627,52 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
             message = "Validation error returned by server.";
           }
         }
-
-        notifications.show({
-          title: "Validation Error",
-          message,
-          color: "orange",
-          autoClose: 8000,
-        });
-      } else {
-        notifications.show({
-          title: "Error",
-          message: "Failed to save company. Please try again.",
-          color: "red",
-          autoClose: 3000,
-        });
       }
+
+      throw new Error(message);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSaveCompany = async () => {
+    if (!draftCompany) {
+      notifications.show({
+        title: "Error",
+        message: "Company details are missing.",
+        color: "red",
+      });
+      return;
+    }
+
+    if (!validateDraftCompany(draftCompany, setActiveStep)) {
+      return;
+    }
+
+    setFinishModalStage("confirm");
+    setFinishModalError(null);
+    setIsFinishModalOpen(true);
+  };
+
+  const handleConfirmUpdate = async () => {
+    try {
+      setIsSaving(true);
+      setFinishModalError(null);
+      await performSaveCompany();
+      setFinishModalStage("success");
+    } catch (error: any) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred.";
+      setFinishModalError(message);
+      setFinishModalStage("error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const closeFinishModal = () => {
+    setIsFinishModalOpen(false);
+    if (finishModalStage === "success") {
+      navigate("/accounts/companies", { replace: true });
     }
   };
 
@@ -691,6 +711,16 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
       shadow={false}
     >
       <Paper p="lg" style={{ marginTop: "-1rem" }}>
+        <CompanyModal
+          opened={isFinishModalOpen}
+          mode="edit"
+          stage={finishModalStage}
+          isLoading={isSaving}
+          errorMessage={finishModalError}
+          onConfirm={handleConfirmUpdate}
+          onClose={closeFinishModal}
+        />
+
         {/* Stepper */}
         <Box
           style={{
