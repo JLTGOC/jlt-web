@@ -1,6 +1,7 @@
 import {
   Accordion,
   ActionIcon,
+  Anchor,
   Avatar,
   Grid,
   Stack,
@@ -17,7 +18,9 @@ import { DetailCard } from "@/components/DetailCard";
 import { DetailGrid } from "@/components/DetailGrid";
 import { JobOrderDocumentsSection } from "./JobOrderDocumentsSection";
 import { JobOrderHistorySection } from "./JobOrderHistorySection";
+import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import type { JobOrderDetail } from "../types/jobOrderDetail";
+import { Link } from "react-router";
 
 type JobOrderClientDetailSectionsProps = {
   detail: JobOrderDetail;
@@ -29,6 +32,7 @@ export default function JobOrderClientDetailSections({
   detail,
 }: JobOrderClientDetailSectionsProps) {
   const company = detail.company;
+  const quotationId = detail.quotation_id;
   const consigneeRows = [
     {
       label: "Company Name",
@@ -105,7 +109,21 @@ export default function JobOrderClientDetailSections({
                 },
                 {
                   label: "Quotation",
-                  value: detail.reference_number ?? em,
+                  value:
+                    quotationId && detail.reference_number ? (
+                      <Anchor
+                        component={Link}
+                        to={quotationRoutes.viewer({
+                          tab: "accepted",
+                          quotationId: String(quotationId),
+                        })}
+                        underline="always"
+                      >
+                        {detail.reference_number}
+                      </Anchor>
+                    ) : (
+                      detail.reference_number ?? em
+                    ),
                 },
                 {
                   label: "PIC",

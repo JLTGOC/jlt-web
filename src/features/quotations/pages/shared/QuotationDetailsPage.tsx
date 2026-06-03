@@ -91,8 +91,8 @@ export function QuotationDetailsPage() {
     buttonLabel = "MAKE QUOTATION";
     ButtonIcon = MakeQuotationIcon;
   } else if (status === "responded") {
-    buttonLabel = "UPDATE QUOTATION";
-    ButtonIcon = UpdateQuotationIcon;
+    // buttonLabel = "UPDATE QUOTATION";
+    // ButtonIcon = UpdateQuotationIcon;
   } else if (status === "accepted") {
     buttonLabel = "CREATE JOB ORDER";
     ButtonIcon = CreateJobOrderIcon;

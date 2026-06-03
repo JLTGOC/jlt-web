@@ -29,7 +29,7 @@ import type { JobOrderResponse } from "@/features/job-order/types/jobOrder";
 type JobOrderRow = JobOrderResponse;
 
 const tableHead = [
-  "REQUEST",
+  "PRE-ALERT",
   "DETAILS",
   "SERVICE LEVEL",
   "PERSON IN CHARGE",
@@ -432,7 +432,10 @@ export function JobOrderTable({
                       <Menu.Dropdown>
                         <Menu.Item
                           leftSection={<FileOpen width={16} />}
-                          onClick={() => onRowClick?.(row)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleUnderLinedRefNumberCLick?.(row);
+                          }}
                         >
                           View Details
                         </Menu.Item>

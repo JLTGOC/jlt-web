@@ -65,7 +65,7 @@ export const NAV_ITEMS: NavItem[] = [
       },
       {
         key: "job_orders",
-        label: "Job Order",
+        label: "Pre-Alert",
         path: "/job-orders",
       },
       {

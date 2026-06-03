@@ -30,7 +30,7 @@ export function JOCell({ item, detailPath }: JOCellProps) {
         {item.client}
       </Text>
       <Text size="xs" c="dimmed">
-        JO Created:{" "}
+        Pre-alert Created:{" "}
         {new Date(item.created_at).toLocaleDateString(undefined, {
           year: "numeric",
           month: "long",

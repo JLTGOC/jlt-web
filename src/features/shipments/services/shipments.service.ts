@@ -153,6 +153,7 @@ function toShipmentListItem(item: unknown): ShipmentListItem | null {  if (!item
     general_info?: {
       id?: number;
       reference_number?: string;
+      job_order_id?: number;
       client?: string;
       company_name?: string;
       destination?: string;
@@ -280,6 +281,10 @@ function toShipmentListItem(item: unknown): ShipmentListItem | null {  if (!item
   return {
     id: source.id,
     reference_number: source.reference_number,
+    job_order_id:
+      typedItem.general_info?.job_order_id ??
+      typedItem.general_info?.job_order_id ??
+      undefined,
     bl_number: typedItem.bl_number ?? shipmentInfo?.bl_number,
     im_reference: typedItem.im_reference,
     client: source.client ?? "—",
