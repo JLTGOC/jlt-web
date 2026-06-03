@@ -32,14 +32,21 @@ export function JobOrderDetailHeader({
           >
             {referenceNumber}
           </Text>
-          {!!subTitle && <Text size="sm" c="dimmed" tt="uppercase" lts="0.06em" mt="0.125rem">
-            Job Order
-          </Text>}
-          
+          {!!subTitle && (
+            <Text
+              size="sm"
+              c="dimmed"
+              tt="uppercase"
+              lts="0.06em"
+              mt="0.125rem"
+            >
+              Job Order
+            </Text>
+          )}
         </Box>
       </Group>
 
-      {/* {quotationReference &&
+      {quotationReference &&
         quotationId !== null &&
         quotationId !== undefined && (
           <Box
@@ -64,7 +71,7 @@ export function JobOrderDetailHeader({
               {quotationReference}
             </Anchor>
           </Box>
-        )} */}
+        )}
     </Group>
   );
 }

@@ -4,7 +4,7 @@ import type {
   FetchJobOrdersParams,
   JobOrdersResponse,
   JobOrderQuotationDetailsResponse,
-  QuotationFilesIndexResponse
+  QuotationFilesIndexResponse,
 } from "../types/jobOrder";
 import type { JobOrderDocument } from "../types/jobOrderDetail";
 import { fetchJobOrderDetail } from "./jobOrderQueries.api";
@@ -115,5 +115,5 @@ export async function fetchJobOrderDocuments(
 export async function generateShipment(
   reference_number: string,
 ): Promise<void> {
- await apiClient.post(`/shipments`, { reference_number });
+  await apiClient.post(`/shipments`, { reference_number });
 }

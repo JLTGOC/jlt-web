@@ -6,6 +6,7 @@ import {
   Grid,
   Stack,
   Text,
+  Image,
 } from "@mantine/core";
 import {
   Chat,
@@ -21,6 +22,7 @@ import { JobOrderHistorySection } from "./JobOrderHistorySection";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import type { JobOrderDetail } from "../types/jobOrderDetail";
 import { Link } from "react-router";
+import shipmentLogo from "@/assets/logos/ShipmentLogo.png";
 
 type JobOrderClientDetailSectionsProps = {
   detail: JobOrderDetail;
@@ -81,7 +83,7 @@ export default function JobOrderClientDetailSections({
                 <Chat width={24} height={24} />
               </ActionIcon>
             }
-            headerBg="#EFF0F4"
+            headerBg="#D4DAE0"
           >
             <DetailGrid
               rows={[
@@ -100,45 +102,62 @@ export default function JobOrderClientDetailSections({
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, md: 6 }}>
-          <DetailCard title=" " headerBg="#EFF0F4">
-            <DetailGrid
-              rows={[
-                {
-                  label: "Job Order",
-                  value: detail.job_order?.reference_number ?? em,
-                },
-                {
-                  label: "Quotation",
-                  value:
-                    quotationId && detail.reference_number ? (
-                      <Anchor
-                        component={Link}
-                        to={quotationRoutes.viewer({
-                          tab: "accepted",
-                          quotationId: String(quotationId),
-                        })}
-                        underline="always"
-                      >
-                        {detail.reference_number}
-                      </Anchor>
-                    ) : (
-                      detail.reference_number ?? em
-                    ),
-                },
-                {
-                  label: "PIC",
-                  value: detail.job_order?.person_in_charge ?? em,
-                },
-              ]}
-            />
-          </DetailCard>
+          <div
+            style={{ position: "relative", overflow: "hidden", height: "100%" }}
+          >
+            <DetailCard title=" " headerBg="#D4DAE0" h="100%" minh="78px">
+              <DetailGrid
+                rows={[
+                  {
+                    label: "Job Order",
+                    value: detail.reference_number ?? em,
+                  },
+                  {
+                    label: "Quotation",
+                    value:
+                      quotationId && detail.quotation_reference_number ? (
+                        <Anchor
+                          component={Link}
+                          to={quotationRoutes.viewer({
+                            tab: "accepted",
+                            quotationId: String(quotationId),
+                          })}
+                          underline="always"
+                        >
+                          {detail.quotation_reference_number}
+                        </Anchor>
+                      ) : (
+                        (detail.quotation_reference_number ?? em)
+                      ),
+                  },
+                  {
+                    label: "PIC",
+                    value: detail.person_in_charge?.full_name ?? em,
+                  },
+                ]}
+              />
+              <Image
+                src={shipmentLogo}
+                alt="Shipment Logo"
+                width={120}
+                height={120}
+                fit="contain"
+                style={{
+                  position: "absolute",
+                  right: "-16.5rem",
+                  bottom: "0rem",
+                  zIndex: 1,
+                }}
+              />
+            </DetailCard>
+          </div>
         </Grid.Col>
       </Grid>
 
       <Accordion variant="separated" radius="md">
         <Accordion.Item value="consignee">
           <Accordion.Control
-            bg="#EFF0F4"
+            bg="#D4DAE0"
             icon={<Inventory width={18} height={18} />}
           >
             <Text
@@ -157,7 +176,7 @@ export default function JobOrderClientDetailSections({
 
         <Accordion.Item value="shipment">
           <Accordion.Control
-            bg="#EFF0F4"
+            bg="#D4DAE0"
             icon={<LocalShipping width={18} height={18} />}
           >
             <Text
@@ -176,7 +195,7 @@ export default function JobOrderClientDetailSections({
 
         <Accordion.Item value="documents">
           <Accordion.Control
-            bg="#EFF0F4"
+            bg="#D4DAE0"
             icon={<Folder width={18} height={18} />}
           >
             <Text
@@ -195,7 +214,7 @@ export default function JobOrderClientDetailSections({
 
         <Accordion.Item value="history">
           <Accordion.Control
-            bg="#EFF0F4"
+            bg="#D4DAE0"
             icon={<History width={18} height={18} />}
           >
             <Text

@@ -44,6 +44,8 @@ export function mapJobOrderResponse(item: JobOrderResponse): JobOrderListItem {
     id: item.id,
     reference_number: item.reference_number,
     client: item.client ?? "",
+    client_type: item.client_type,
+    company_name: item.company_name,
     created_at: item.created_at ?? item.date_created ?? "",
     assignment_status: status,
     service,
@@ -76,8 +78,7 @@ export function mapJobOrderResponse(item: JobOrderResponse): JobOrderListItem {
           avatar_url: item.ops_image ?? undefined,
         }
       : undefined,
-    quotation_reference:
-      item.quotation_reference ?? item.quotation_reference_number ?? undefined,
+    quotation_reference_number: item.quotation_reference_number,
     quotation_id: item.quotation_id ?? undefined,
   };
 }
