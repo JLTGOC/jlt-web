@@ -14,12 +14,14 @@ interface QuotationCustomFieldsGridProps {
   template: QuotationTemplate;
   control: Control<QuotationDetailsValues>;
   fixedFields?: CustomField[];
+  readOnly?: boolean;
 }
 
 export function QuotationCustomFieldsGrid({
   template,
   control,
   fixedFields = [],
+  readOnly,
 }: QuotationCustomFieldsGridProps) {
   const fields = [
     ...template.custom_fields.filter((field) => !isRateValidityField(field)),
@@ -40,8 +42,10 @@ export function QuotationCustomFieldsGrid({
               control={control}
               name={`custom_fields.${field.id}`}
               label={field.label.toUpperCase()}
-              placeholder={`Select ${field.label}`}
+              placeholder={`Select ${field.label.toLowerCase()}`}
               data={field.options ?? []}
+              withAsterisk
+              readOnly={readOnly}
             />
           );
         }
@@ -57,9 +61,11 @@ export function QuotationCustomFieldsGrid({
                   : `custom_fields.${field.id}`
               }
               label={field.label.toUpperCase()}
-              placeholder="MM/DD/YYYY"
+              placeholder="mm/dd/yyyy"
               valueFormat="MM/DD/YYYY"
               clearable
+              withAsterisk
+              readOnly={readOnly}
             />
           );
         }
@@ -74,6 +80,9 @@ export function QuotationCustomFieldsGrid({
                 : `custom_fields.${field.id}`
             }
             label={field.label.toUpperCase()}
+            placeholder={`Enter ${field.label.toLowerCase()}`}
+            withAsterisk
+            readOnly={readOnly}
           />
         );
       })}

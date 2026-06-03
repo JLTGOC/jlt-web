@@ -61,7 +61,7 @@ export default function ToolsPage() {
   if (servicesMatch) return <ServicesPage />;
   if (messagesMatch) return <MessagesPage />;
   if (templatesMatch) return <TemplatesPage />;
-  if (planningTimelineMatch) return <PlanningTimelinePage />;
+  if (planningTimelineMatch) return <PlanningTimelinePage openServiceTypeModal={true}/>;
 
   return <ToolsDashboard />;
 }

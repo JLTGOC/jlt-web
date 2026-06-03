@@ -36,7 +36,9 @@ interface ComposeStepContentProps {
   onStep0Change: (values: QuotationDetailsValues) => void;
   onStep1Change: (values: BillingDetailsValues) => void;
   onStep0ValidityChange: (isValid: boolean) => void;
+  onStep1ValidityChange: (isValid: boolean) => void;
   onTermsChange: (values: TermsValues) => void;
+  readOnly?: boolean;
 }
 
 export function ComposeStepContent({
@@ -57,7 +59,9 @@ export function ComposeStepContent({
   onStep0Change,
   onStep1Change,
   onStep0ValidityChange,
+  onStep1ValidityChange,
   onTermsChange,
+  readOnly,
 }: ComposeStepContentProps) {
   const previewProps =
     quotation &&
@@ -101,6 +105,7 @@ export function ComposeStepContent({
             onSubmit={onStep0Submit}
             onChange={onStep0Change}
             onValidityChange={onStep0ValidityChange}
+            readOnly={readOnly}
           />
         </Box>
       )}
@@ -113,6 +118,8 @@ export function ComposeStepContent({
             defaultValues={billingDetailsData ?? undefined}
             onSubmit={onStep1Submit}
             onChange={onStep1Change}
+            onValidityChange={onStep1ValidityChange}
+            readOnly={readOnly}
           />
         </Box>
       )}

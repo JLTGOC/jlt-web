@@ -67,8 +67,8 @@ export function JobOrderFilterClient({
               {client === "ALL"
                 ? clientCounts?.all_job_orders
                 : client === "OLD"
-                  ? clientCounts?.old_user_job_orders
-                  : clientCounts?.new_user_job_orders}
+                  ? clientCounts?.logistics_job_orders
+                  : clientCounts?.regulatory_job_orders}
             </Text>
           </UnstyledButton>
         ))}

@@ -24,7 +24,7 @@ export default function ReassignModal({
   setReassignRejectModalOpen: _setReassignRejectModalOpen,
   selectedQuotation,
   reassignPersonels,
-  reassignSpecificDetails: _reassignSpecificDetails,
+  reassignSpecificDetails,
   setReassignStatus,
   reassignASId,
   setReassignASId,
@@ -55,62 +55,76 @@ export default function ReassignModal({
     <Modal
       opened={reassignModalOpen}
       onClose={onClose}
-      title="ASSIGN TO ANOTHER PERSON IN CHARGE"
+      title="REASSIGNMENT REQUEST"
       centered
-      size={560}
-      overlayProps={{ color: "#121f4a", opacity: 0.5 }}
+      size={620}
+      overlayProps={{ color: "#1b2348", opacity: 0.55 }}
       styles={{
         content: {
           borderRadius: "0.5rem",
           overflow: "hidden",
-          background: "#f7f7f7",
+          background: "#ffffff",
         },
         header: {
-          background: "#e2e2e2",
-          borderBottom: "1px solid #d4d4d4",
-          minHeight: "3rem",
-          padding: "0.65rem 1.25rem",
+          background: "#f0f0f0",
+          borderBottom: "1px solid #dedede",
+          minHeight: "3.2rem",
+          padding: "0.7rem 1.4rem",
         },
         title: {
           color: "#16345b",
-          fontSize: "1.25rem",
+          fontSize: "1.1rem",
           fontWeight: 700,
-          letterSpacing: "0.01em",
+          letterSpacing: "0.02em",
           textTransform: "uppercase",
         },
         close: {
-          color: "#0f1427",
-          width: "1.8rem",
-          height: "1.8rem",
+          color: "#1e243b",
+          width: "2rem",
+          height: "2rem",
         },
         body: {
-          padding: "1.15rem 1.25rem 1.25rem",
+          padding: "1.1rem 1.4rem 1.4rem",
         },
       }}
     >
-      <Group gap={8} align="flex-start" mb={10}>
-        <Text c="#8a8a8a" fz="0.78rem" w="50%">
-          Quotation Request Ref. No
-        </Text>
-        <Text c="#1e3049" fz="0.8rem" fw={700}>
-          {selectedQuotation?.reference_number ?? "-"}
-        </Text>
-      </Group>
-
-      <Stack gap={4} mb={12}>
-        <Text c="#1f1f1f" fz="0.88rem">
-          You are about to transfer this request to another person in charge
-        </Text>
-        <Text c="#1f1f1f" fz="0.84rem">
-          • The current assignee will lose access to this request.
-        </Text>
-        <Text c="#1f1f1f" fz="0.84rem">
-          • The new assignee will take full ownership.
-        </Text>
+      <Stack gap={6} mb={16}>
+        <Group gap={10} align="flex-start">
+          <Text c="#7a7a7a" fz="0.78rem" w={190}>
+            Quotation Request Ref. No
+          </Text>
+          <Text c="#1e3049" fz="0.82rem" fw={700}>
+            {selectedQuotation?.reference_number ?? "-"}
+          </Text>
+        </Group>
+        <Group gap={10} align="flex-start">
+          <Text c="#7a7a7a" fz="0.78rem" w={190}>
+            From:
+          </Text>
+          <Text c="#1e3049" fz="0.82rem" fw={600}>
+            {reassignSpecificDetails?.account_specialist ?? "-"}
+          </Text>
+        </Group>
+        <Group gap={10} align="flex-start">
+          <Text c="#7a7a7a" fz="0.78rem" w={190}>
+            Reason:
+          </Text>
+          <Text c="#1e3049" fz="0.82rem" fw={700}>
+            {reassignSpecificDetails?.reason ?? "-"}
+          </Text>
+        </Group>
+        <Group gap={10} align="flex-start">
+          <Text c="#7a7a7a" fz="0.78rem" w={190}>
+            Additional Details
+          </Text>
+          <Text c="#1e3049" fz="0.82rem" lh={1.4}>
+            {reassignSpecificDetails?.additional_details ?? "-"}
+          </Text>
+        </Group>
       </Stack>
 
       <Select
-        mb="1.15rem"
+        mb="1.2rem"
         size="md"
         radius="md"
         placeholder="SELECT PERSON IN CHARGE"
@@ -128,14 +142,14 @@ export default function ReassignModal({
         rightSection={<Text c="#7c7c7c">›</Text>}
         styles={{
           input: {
-            minHeight: "2.95rem",
+            minHeight: "2.9rem",
             borderColor: "#c9c9c9",
-            color: "#636363",
-            fontSize: "0.83rem",
-            fontWeight: 500,
+            color: "#6a6a6a",
+            fontSize: "0.82rem",
+            fontWeight: 600,
             letterSpacing: "0.01em",
             textTransform: "uppercase",
-            background: "#fdfdfd",
+            background: "#ffffff",
           },
           dropdown: {
             borderColor: "#c9c9c9",
@@ -160,8 +174,8 @@ export default function ReassignModal({
             },
             label: {
               color: "#ffffff",
-              fontSize: "0.9rem",
-              fontWeight: 500,
+              fontSize: "0.88rem",
+              fontWeight: 600,
               letterSpacing: "0.01em",
             },
           }}
@@ -181,23 +195,25 @@ export default function ReassignModal({
           tt="uppercase"
           styles={{
             root: {
-              background: "#e3e3e3",
+              background: "#b24a53",
               "&:hover": {
-                background: "#d7d7d7",
+                background: "#a0424a",
               },
             },
             label: {
-              color: "#27324c",
-              fontSize: "0.9rem",
-              fontWeight: 500,
+              color: "#ffffff",
+              fontSize: "0.88rem",
+              fontWeight: 600,
               letterSpacing: "0.01em",
             },
           }}
           onClick={() => {
+            setReassignStatus("REJECTED");
             setReassignModalOpen(false);
+            _setReassignRejectModalOpen(true);
           }}
         >
-          Cancel
+          Decline
         </Button>
       </Group>
     </Modal>

@@ -31,7 +31,7 @@ import { PageCard } from "@/components/PageCard";
 import { fetchJobOrders } from "../../api/jobOrder.api";
 import { jobOrdersQueryKeys } from "../../api/jobOrdersQueryKeys";
 import { mapJobOrderResponses } from "../../utils/jobOrderListMapper";
-import { jobOrderRoutes } from "../../utils/jobOrderRoutes";
+import { jobOrderRoutes } from "@/lib/jobOrder.routes";
 
 export default function JobOrderListPage() {
   const navigate = useNavigate();
@@ -183,7 +183,7 @@ export default function JobOrderListPage() {
   const perPageValue = pagination?.per_page ?? perPage;
 
   return (
-    <PageCard title="Job Order">
+    <PageCard title="PRE-ALERT">
       <Stack>
         <JobOrderFilterClient
           activeTab={activeTab}
@@ -235,7 +235,7 @@ export default function JobOrderListPage() {
         >
           <Table.Thead>
             <Table.Tr>
-              <Table.Th style={{ width: "16.25rem" }}>JOB ORDER</Table.Th>
+              <Table.Th style={{ width: "16.25rem" }}>PRE-ALERT</Table.Th>
               <Table.Th style={{ width: "20rem" }}>DETAILS</Table.Th>
               <Table.Th style={{ width: "14rem" }}>
                 SERVICE INFORMATION

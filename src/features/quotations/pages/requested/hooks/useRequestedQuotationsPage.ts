@@ -100,7 +100,7 @@ export function useRequestedQuotationsPage() {
       }),
   });
 
-  console.log("khate", data)
+ 
 
   const { data: reassignEnumsData } = useQuery({
     queryKey: requestedQueryKeys.requestedRoot(),
@@ -114,7 +114,7 @@ export function useRequestedQuotationsPage() {
     ],
     [reassignEnumsData],
   );
-
+ 
   const { data: reassignSpecificDetails } = useQuery({
     queryKey: [
       "reassignment-details",
@@ -126,7 +126,7 @@ export function useRequestedQuotationsPage() {
       ),
     enabled: !!selectedQuotation?.reassignment_request_id,
   });
-
+console.log("khate", reassignSpecificDetails)
   const reassignQuotationMutation = useMutation({
     mutationFn: ({
       id,
@@ -258,13 +258,13 @@ export function useRequestedQuotationsPage() {
 
   const totalPages =
     jobFilter === "all"
-      ? data?.pagination.total_pages || 0
-      : data?.my_quotations_pagination.total_pages || 0;
+      ? data?.pagination?.total_pages ?? 0
+      : data?.my_quotations_pagination?.total_pages ?? 0;
 
   const showingCount =
     jobFilter === "all"
-      ? data?.pagination.count
-      : data?.my_quotations_pagination.count;
+      ? data?.pagination?.count ?? 0
+      : data?.my_quotations_pagination?.count ?? 0;
 
   const handleMakeQuotationClick = (row: QuotationListItem) => {
     const quotationId = String(row.id);

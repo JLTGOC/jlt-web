@@ -20,7 +20,7 @@ import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys
 import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
 import type { JobOrderResponse } from "@/features/job-order/types/jobOrder";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
-import { jobOrderRoutes } from "@/features/job-order/utils/jobOrderRoutes";
+import { jobOrderRoutes } from "@/lib/jobOrder.routes";
 import { useCurrentUserRole } from "@/stores/authStore";
 
 import { jobOrdersQueryKeys } from "../utils/jobOrdersQueryKeys";
@@ -174,7 +174,7 @@ export function useJobOrderPage() {
     mutationFn: ({ reference_number }: { reference_number: string }) =>
       generateShipment(reference_number),
     onSuccess: () => {
-      setGenerateShipmentModalOpen(false)
+      setGenerateShipmentModalOpen(false);
       setGenerateShipmentConfirmModalOpen(true);
       queryClient.invalidateQueries({
         queryKey: jobOrdersQueryKeys.jobOrdersRoot,
@@ -276,7 +276,7 @@ export function useJobOrderPage() {
 
   const openGenerateShipment = (row: JobOrderResponse) => {
     setSelectedQuotation(row);
-    console.log("marjoriey")
+    console.log("marjoriey");
     setGenerateShipmentModalOpen(true);
   };
 

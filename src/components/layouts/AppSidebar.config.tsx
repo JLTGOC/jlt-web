@@ -65,7 +65,7 @@ export const NAV_ITEMS: NavItem[] = [
       },
       {
         key: "job_orders",
-        label: "Job Order",
+        label: "Pre-Alert",
         path: "/job-orders",
       },
       {
@@ -92,12 +92,12 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Accounts",
     path: "/accounts",
   },
-  {
-    id: "lorem",
-    icon: <FactCheck width="2rem" height="2rem" />,
-    label: "Lorem",
-    path: "/lorem",
-  },
+  // {
+  //   id: "lorem",
+  //   icon: <FactCheck width="2rem" height="2rem" />,
+  //   label: "Lorem",
+  //   path: "/lorem",
+  // },
   {
     id: "tools",
     icon: <Construction width="2rem" height="2rem" />,

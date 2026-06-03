@@ -26,7 +26,7 @@ export function ClientDetails() {
     }
 
     // Debug log: print the client ID being used
-    // eslint-disable-next-line no-console
+     
     console.log("Fetching client details for ID:", id, typeof id);
 
     setIsLoading(true);

@@ -262,6 +262,8 @@ export function QuotationPreview({
               key={section.id}
               sectionId={section.id}
               sectionTitle={section.title}
+              currency={section.currency}
+              uom={section.uom}
               rows={section.rows}
               sectionTotal={section.total}
               formatAmount={formatAmount}

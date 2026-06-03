@@ -20,6 +20,7 @@ interface ReceiptChargeFieldProps {
   onChange: (value: string) => void;
   onBlur: () => void;
   error?: string;
+  readOnly?: boolean;
 }
 
 export function ReceiptChargeField({
@@ -28,6 +29,7 @@ export function ReceiptChargeField({
   onChange,
   onBlur,
   error,
+  readOnly,
 }: ReceiptChargeFieldProps) {
   const [isCustomEditing, setIsCustomEditing] = useState(false);
   const [customDraft, setCustomDraft] = useState("");
@@ -67,6 +69,10 @@ export function ReceiptChargeField({
       offset={0}
       position="bottom-start"
       onOptionSubmit={(selectedValue) => {
+        if (readOnly) {
+          combobox.closeDropdown();
+          return;
+        }
         onChange(selectedValue);
         setIsCustomEditing(false);
         setCustomDraft("");
@@ -118,6 +124,7 @@ export function ReceiptChargeField({
               key={charge}
               value={charge}
               className={classes.receiptComboboxOption}
+              disabled={readOnly}
             >
               <Text
                 className={`${classes.receiptOptionLabel} ${classes.receiptOptionRow}`}
@@ -132,9 +139,10 @@ export function ReceiptChargeField({
           <button
             type="button"
             className={`${classes.customOptionLabel} ${classes.customOptionRow} ${classes.customOptionTrigger}`}
-            onClick={openCustomEditor}
+            onClick={readOnly ? undefined : openCustomEditor}
+            disabled={readOnly}
           >
-            INPUT OTHER CHARGES
+            Input other charges
           </button>
         ) : (
           <div
@@ -149,7 +157,7 @@ export function ReceiptChargeField({
             <TextInput
               value={customDraft}
               onChange={(event) => setCustomDraft(event.currentTarget.value)}
-              placeholder="INPUT OTHER CHARGES"
+              placeholder="Input other charges"
               className={classes.customOptionInput}
               autoFocus
               onKeyDown={(event) => {

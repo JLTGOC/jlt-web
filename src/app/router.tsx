@@ -24,6 +24,13 @@ const Quotations = lazy(() => import("./routes/app/quotations/QuotationsPage"));
 const QuotationViewerPage = lazy(
   () => import("./routes/app/quotations/QuotationViewerPage"),
 );
+const QuotationTemplatePreviewPage = lazy(() =>
+  import("@/features/quotations/pages/compose/QuotationTemplatePreviewPage").then(
+    (m) => ({
+      default: m.QuotationTemplatePreviewPage,
+    }),
+  ),
+);
 
 //Shipment Imports
 const Shipments = lazy(() => import("./routes/app/shipments/ShipmentsPage"));
@@ -89,6 +96,14 @@ export const router = createBrowserRouter([
           },
           {
             path: "quotations/:tab/:quotationId/documents",
+            Component: Quotations,
+          },
+          {
+            path: "quotations/:tab/client/:clientId/:quotationId/job-order",
+            Component: Quotations,
+          },
+          {
+            path: "quotations/:tab/:quotationId/job-order",
             Component: Quotations,
           },
           {
@@ -170,7 +185,10 @@ export const router = createBrowserRouter([
           // Account routes — sidebar only links to /accounts.
           // Tabs inside AccountsPage are used for clients and account-specialists.
           // Other employee roles are filtered and only accessible with lead access.
-          { path: "accounts/:category/:subCategory/:id", Component: AccountsPage },
+          {
+            path: "accounts/:category/:subCategory/:id",
+            Component: AccountsPage,
+          },
           { path: "accounts/:category/:subCategory", Component: AccountsPage },
           { path: "accounts/:category", Component: AccountsPage },
           { path: "accounts", Component: AccountsPage },
@@ -196,6 +214,10 @@ export const router = createBrowserRouter([
           { path: "tools/planningTimeline", Component: Tools },
           { path: "tools/templates/new", Component: Tools },
           { path: "tools/templates/:templateId/edit", Component: Tools },
+          {
+            path: "tools/templates/:templateId/preview",
+            Component: QuotationTemplatePreviewPage,
+          },
           { path: "tools/templates", Component: Tools },
           { path: "tools", Component: Tools },
 

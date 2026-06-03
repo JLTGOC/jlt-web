@@ -1,5 +1,20 @@
-import { ActionIcon, Menu, Box, Group, Stack, Table, Text, Center, Loader, Pagination } from "@mantine/core";
-import { MoreVert, Notifications } from "@nine-thirty-five/material-symbols-react/outlined";
+import {
+  Anchor,
+  ActionIcon,
+  Menu,
+  Box,
+  Group,
+  Stack,
+  Table,
+  Text,
+  Center,
+  Loader,
+  Pagination,
+} from "@mantine/core";
+import {
+  MoreVert,
+  Notifications,
+} from "@nine-thirty-five/material-symbols-react/outlined";
 import { useNavigate } from "react-router";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import type { RespondedQuotationListItem } from "@/features/quotations/types/quotations.types";
@@ -50,7 +65,14 @@ export function RespondedTable({
   return (
     <>
       <Box mt="sm">
-        <Table withTableBorder withColumnBorders={false} styles={{ table: { width: "100%" }, tbody: { borderTop: "none", borderBottom: "none" } }}>
+        <Table
+          withTableBorder
+          withColumnBorders={false}
+          styles={{
+            table: { width: "100%" },
+            tbody: { borderTop: "none", borderBottom: "none" },
+          }}
+        >
           <Table.Thead style={{ backgroundColor: "#17324f", color: "white" }}>
             <Table.Tr>
               <Table.Th style={{ width: "15%" }}>REF NO.</Table.Th>
@@ -85,20 +107,31 @@ export function RespondedTable({
             ) : (
               rows.map((row, index) => {
                 // Default to OLD color when undefined or explicitly OLD
-                const rowBarColor = row.client_type !== "NEW" ? "#368DC4" : "#54B99B";
-                const rowBackgroundColor = index % 2 === 0 ? "white" : "#F1F3F4";
+                const rowBarColor =
+                  row.client_type !== "NEW" ? "#368DC4" : "#54B99B";
+                const rowBackgroundColor =
+                  index % 2 === 0 ? "white" : "#F1F3F4";
 
                 return (
                   <Table.Tr
                     key={row.id}
-                    onClick={onRowClick ? () => onRowClick(String(row.id)) : undefined}
+                    onClick={
+                      onRowClick ? () => onRowClick(String(row.id)) : undefined
+                    }
                     style={{
                       ...(onRowClick ? { cursor: "pointer" } : {}),
                       backgroundColor: rowBackgroundColor,
                     }}
                   >
                     {/* REF NO. column with color bar always shown */}
-                    <Table.Td style={{ position: "relative", paddingLeft: "16px", minHeight: "80px", verticalAlign: "top" }}>
+                    <Table.Td
+                      style={{
+                        position: "relative",
+                        paddingLeft: "16px",
+                        minHeight: "80px",
+                        verticalAlign: "top",
+                      }}
+                    >
                       <Box
                         style={{
                           position: "absolute",
@@ -112,9 +145,23 @@ export function RespondedTable({
                         }}
                       />
                       <Stack gap={2}>
-                        <Text fw={700} style={{ textDecoration: "underline" }} c="#2a4058" fz="0.875rem">
+                        <Anchor
+                          fw={700}
+                          c="#2a4058"
+                          fz="0.875rem"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(
+                              quotationRoutes.viewer({
+                                tab: "responded",
+                                quotationId: String(row.id),
+                              }),
+                            );
+                          }}
+                          style={{ cursor: "pointer" }}
+                        >
                           {row.reference_number}
-                        </Text>
+                        </Anchor>
                         <Stack gap={0}>
                           <Text c="#475569" fz="0.813rem">
                             {row.client_full_name}
@@ -127,7 +174,9 @@ export function RespondedTable({
                     </Table.Td>
                     <Table.Td>
                       <Stack gap={2}>
-                        <Text fw={700} c="#2a4058" fz="0.875rem">{toTitleCase(row.service)}</Text>
+                        <Text fw={700} c="#2a4058" fz="0.875rem">
+                          {toTitleCase(row.service)}
+                        </Text>
                         {row.logistics_service ? (
                           <>
                             <Text c="#475569" fz="0.813rem">
@@ -136,7 +185,9 @@ export function RespondedTable({
                             <Text c="#475569" fz="0.813rem">
                               {toTitleCase(row.logistics_service.service_type)}{" "}
                               ---&gt; {""}
-                              {toTitleCase(row.logistics_service.transport_mode)}
+                              {toTitleCase(
+                                row.logistics_service.transport_mode,
+                              )}
                             </Text>
                             <Group gap={6} align="center" wrap="nowrap">
                               <Text c="#475569" fz="0.813rem">
@@ -151,17 +202,30 @@ export function RespondedTable({
                         ) : row.regulatory_service ? (
                           <>
                             <Text c="#475569" fz="0.813rem">
-                              {toTitleCase(row.regulatory_service.type_of_regulatory_assistance)}
+                              {toTitleCase(
+                                row.regulatory_service
+                                  .type_of_regulatory_assistance,
+                              )}
                             </Text>
                             <Text c="#475569" fz="0.813rem">
-                              Application Type: {toTitleCase(row.regulatory_service.application_type)}
+                              Application Type:{" "}
+                              {toTitleCase(
+                                row.regulatory_service.application_type,
+                              )}
                             </Text>
                             <Text c="#475569" fz="0.813rem">
-                              Business Type: {row.regulatory_service.business_type ? toTitleCase(row.regulatory_service.business_type) : "—"}
+                              Business Type:{" "}
+                              {row.regulatory_service.business_type
+                                ? toTitleCase(
+                                    row.regulatory_service.business_type,
+                                  )
+                                : "—"}
                             </Text>
                           </>
                         ) : (
-                          <Text c="#475569" fz="0.813rem">-</Text>
+                          <Text c="#475569" fz="0.813rem">
+                            -
+                          </Text>
                         )}
                       </Stack>
                     </Table.Td>
@@ -216,8 +280,11 @@ export function RespondedTable({
                                 const quotedDate = new Date(row.assigned_at);
                                 quotedDate.setDate(quotedDate.getDate() + 7);
                                 const today = new Date();
-                                const diffTime = quotedDate.getTime() - today.getTime();
-                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                const diffTime =
+                                  quotedDate.getTime() - today.getTime();
+                                const diffDays = Math.ceil(
+                                  diffTime / (1000 * 60 * 60 * 24),
+                                );
 
                                 if (diffDays <= 1) {
                                   return "#AA4851"; // today or 1 day left
@@ -231,8 +298,11 @@ export function RespondedTable({
                               const quotedDate = new Date(row.assigned_at);
                               quotedDate.setDate(quotedDate.getDate() + 7);
                               const today = new Date();
-                              const diffTime = quotedDate.getTime() - today.getTime();
-                              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                              const diffTime =
+                                quotedDate.getTime() - today.getTime();
+                              const diffDays = Math.ceil(
+                                diffTime / (1000 * 60 * 60 * 24),
+                              );
 
                               if (diffDays <= 0) return "Expired";
                               if (diffDays === 1) return "1 day left";
@@ -267,12 +337,12 @@ export function RespondedTable({
                               break;
                             case "VIEWED BY CLIENT":
                               displayLabel = "Viewed by Client";
-                              statusColor = "#D1E6FD";   // fill color
+                              statusColor = "#D1E6FD"; // fill color
                               statusTextColor = "#0963E3"; // text color
                               break;
                             default:
                               displayLabel = toTitleCase(row.status || "—");
-                              statusColor = "#9C9DA1";   // fallback gray
+                              statusColor = "#9C9DA1"; // fallback gray
                               statusTextColor = "#fff";
                               break;
                           }
@@ -306,7 +376,8 @@ export function RespondedTable({
 
                         {/* Quoted By line */}
                         <Text c="#898989" fz="0.813rem">
-                          Quoted By: {row.prepared_by ?? "—"}
+                          Quoted By:{" "}
+                          {row.account_specialist ?? row.as_full_name ?? "—"}
                         </Text>
                       </Stack>
                     </Table.Td>
@@ -351,10 +422,15 @@ export function RespondedTable({
       </Box>
       <Group align="center" justify="space-between" mt="md">
         <Text c="#8a8f99" fz="0.813rem">
-            Showing {currentShowingCount} out of {currentTotal} entries
+          Showing {currentShowingCount} out of {currentTotal} entries
         </Text>
-      
-        <Pagination total={totalPages || 1} value={perPaginationPage} onChange={setPerPaginationPage} size="xs" />
+
+        <Pagination
+          total={totalPages || 1}
+          value={perPaginationPage}
+          onChange={setPerPaginationPage}
+          size="xs"
+        />
       </Group>
     </>
   );

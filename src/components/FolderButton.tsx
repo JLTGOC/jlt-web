@@ -39,7 +39,7 @@ export function FolderButton({
         }
       }}
       w="17.5rem"
-      mih="6.5rem"
+      mih="100"
       p="1rem 1.25rem"
       bdrs="0.75rem"
       bd="1px solid #e6e8ec"

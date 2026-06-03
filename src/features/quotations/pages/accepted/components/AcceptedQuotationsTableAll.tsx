@@ -1,0 +1,139 @@
+import {
+  Box,
+  Center,
+  Group,
+  Loader,
+  Pagination,
+  Table,
+  Text,
+} from "@mantine/core";
+
+import { useAcceptedQuotationsContext } from "./AcceptedQuotationsContext";
+import {
+  AcceptedStatusCell,
+  ActionsMenu,
+  DetailsCell,
+  PersonInChargeCell,
+  RequestCell,
+} from "./AcceptedQuotationsCells";
+import { getRowAccentColor } from "../utils/acceptedQuotations.utils";
+
+export function AcceptedQuotationsAllTable() {
+  const { state, meta, actions } = useAcceptedQuotationsContext();
+
+  return (
+    <>
+      <Box mt="sm">
+        <Table
+          withTableBorder
+          withColumnBorders={false}
+          styles={{
+            table: { width: "100%" },
+            thead: { backgroundColor: "#17324f" },
+            th: {
+              color: "white",
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              letterSpacing: "0.04em",
+              padding: "0.65rem 1rem",
+              whiteSpace: "nowrap",
+            },
+            td: {
+              fontSize: "0.75rem",
+              padding: "0.65rem 1rem",
+              color: "#475569",
+              verticalAlign: "top",
+            },
+          }}
+          highlightOnHover
+        >
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th style={{ width: "12rem" }}>REQUEST</Table.Th>
+              <Table.Th style={{ width: "28rem" }}>DETAILS</Table.Th>
+              <Table.Th style={{ width: "16rem" }}>PERSON IN CHARGE</Table.Th>
+              <Table.Th style={{ width: "12rem" }}>STATUS</Table.Th>
+              <Table.Th style={{ width: "3rem" }} />
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {state.isLoading ? (
+              <Table.Tr>
+                <Table.Td colSpan={5}>
+                  <Center py="lg">
+                    <Text c="#475569" fz="0.813rem" lh={1.45} mr={10}>
+                      Loading accepted quotations...
+                    </Text>
+                    <Loader size="sm" />
+                  </Center>
+                </Table.Td>
+              </Table.Tr>
+            ) : state.rows.length === 0 ? (
+              <Table.Tr>
+                <Table.Td colSpan={5}>
+                  <Center py="lg">
+                    <Text c="#475569" fz="0.813rem" lh={1.45}>
+                      No accepted quotations found.
+                    </Text>
+                  </Center>
+                </Table.Td>
+              </Table.Tr>
+            ) : (
+              state.rows.map((row) => (
+                <Table.Tr
+                  key={row.id}
+                  onClick={() => meta.handleRowClick(row)}
+                  onMouseEnter={() => meta.handleRowHover(row)}
+                  style={{
+                    cursor: "pointer",
+                    boxShadow: `inset 6px 0 0 ${getRowAccentColor(row)}`,
+                  }}
+                >
+                  <Table.Td>
+                    <RequestCell row={row} />
+                  </Table.Td>
+                  <Table.Td>
+                    <DetailsCell row={row} />
+                  </Table.Td>
+                  <Table.Td>
+                    <PersonInChargeCell row={row} />
+                  </Table.Td>
+                  <Table.Td>
+                    <AcceptedStatusCell row={row} />
+                  </Table.Td>
+                  <Table.Td
+                    style={{ width: "2.75rem", textAlign: "center" }}
+                    onClick={(event) => event.stopPropagation()}
+                    onMouseDown={(event) => event.stopPropagation()}
+                  >
+                    <ActionsMenu
+                      row={row}
+                      onViewDetails={meta.handleRowClick}
+                      onViewDocuments={meta.handleViewDocuments}
+                      actionLabel="Discard"
+                    />
+                  </Table.Td>
+                </Table.Tr>
+              ))
+            )}
+          </Table.Tbody>
+        </Table>
+      </Box>
+
+      <Group align="center" justify="space-between" mt="md">
+        <Text c="#8a8f99" fz="0.813rem">
+          Showing {state.allShowingCount} out of {state.allTotal} entries
+        </Text>
+
+        {state.allTotalPages > 1 && (
+          <Pagination
+            total={state.allTotalPages}
+            value={state.currentPage}
+            onChange={actions.setCurrentPage}
+            size="xs"
+          />
+        )}
+      </Group>
+    </>
+  );
+}

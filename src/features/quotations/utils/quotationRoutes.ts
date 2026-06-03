@@ -12,6 +12,14 @@ interface QuotationComposeRouteParams {
   templateId: string;
 }
 
+interface QuotationJobOrderRouteParams {
+  tab: string;
+  clientId?: string;
+  quotationId: string;
+  referenceNumber: string;
+  jobType: string;
+}
+
 function quotationPath({ tab, clientId, quotationId }: QuotationRouteParams) {
   if (clientId) {
     return `/quotations/${tab}/client/${clientId}/${quotationId}`;
@@ -28,6 +36,20 @@ export const quotationRoutes = {
     quotationPath({ tab, clientId, quotationId }),
   documents: ({ tab, clientId, quotationId }: QuotationRouteParams) =>
     `${quotationPath({ tab, clientId, quotationId })}/documents`,
+  jobOrder: ({
+    tab,
+    clientId,
+    quotationId,
+    referenceNumber,
+    jobType,
+  }: QuotationJobOrderRouteParams) => {
+    const base = `${quotationPath({ tab, clientId, quotationId })}/job-order`;
+    const params = new URLSearchParams({
+      ref: referenceNumber,
+      job_type: jobType,
+    });
+    return `${base}?${params.toString()}`;
+  },
   compose: ({
     tab,
     clientId,

@@ -5,11 +5,11 @@ import type {
   TermsValues,
 } from "@/features/quotations/schemas/compose.schema";
 import type { QuotationTemplate } from "@/features/quotations/types/compose.types";
-import { hasChargeContent } from "@/features/quotations/utils/billing";
 import {
-  isRateValidityField,
-  RATE_VALIDITY_FIELD,
-} from "@/features/quotations/utils/quotationDetailFields";
+  hasChargeContent,
+  isPerContainerUom,
+} from "@/features/quotations/utils/billing";
+import { isRateValidityField } from "@/features/quotations/utils/quotationDetailFields";
 
 interface BuildIssuedQuotationFormDataParams {
   template: QuotationTemplate;
@@ -29,23 +29,27 @@ export function buildIssuedQuotationFormData({
   issuedQuotationFile,
 }: BuildIssuedQuotationFormDataParams): FormData {
   const formData = new FormData();
+  const shouldIncludeContainerFields = isPerContainerUom(billingDetails.uom);
 
   formData.append("template_id", template.id);
   formData.append("subject", quotationDetails.subject?.trim() ?? "");
   formData.append("message", quotationDetails.message?.trim() ?? "");
+  formData.append(
+    "rate_validity",
+    quotationDetails.rate_validity?.trim() ?? "",
+  );
+  formData.append("uom", billingDetails.uom?.trim() ?? "");
+  formData.append("currency", billingDetails.currency?.trim() ?? "");
 
-  const detailFields = [
-    ...template.custom_fields.filter((field) => !isRateValidityField(field)),
-    RATE_VALIDITY_FIELD,
-  ];
+  const detailFields = template.custom_fields.filter(
+    (field) => !isRateValidityField(field),
+  );
 
   detailFields.forEach((field, fieldIndex) => {
     formData.append(`detail_values[${fieldIndex}][label]`, field.label);
     formData.append(
       `detail_values[${fieldIndex}][value]`,
-      field.id === RATE_VALIDITY_FIELD.id
-        ? (quotationDetails.rate_validity?.trim() ?? "")
-        : (quotationDetails.custom_fields?.[field.id]?.trim() ?? ""),
+      quotationDetails.custom_fields?.[field.id]?.trim() ?? "",
     );
   });
 
@@ -68,12 +72,22 @@ export function buildIssuedQuotationFormData({
       );
       formData.append(
         `charges[${sectionIndex}][items][${rowIndex}][currency_label]`,
-        row.currency?.trim() ?? "",
+        billingDetails.currency?.trim() ?? row.currency?.trim() ?? "",
       );
       formData.append(
         `charges[${sectionIndex}][items][${rowIndex}][uom_label]`,
-        row.uom?.trim() ?? "",
+        billingDetails.uom?.trim() ?? row.uom?.trim() ?? "",
       );
+      if (shouldIncludeContainerFields) {
+        formData.append(
+          `charges[${sectionIndex}][items][${rowIndex}][quantity]`,
+          row.quantity == null ? "" : String(row.quantity),
+        );
+        formData.append(
+          `charges[${sectionIndex}][items][${rowIndex}][container_size]`,
+          row.container_size?.trim() ?? "",
+        );
+      }
       formData.append(
         `charges[${sectionIndex}][items][${rowIndex}][amount]`,
         row.amount == null ? "" : String(row.amount),

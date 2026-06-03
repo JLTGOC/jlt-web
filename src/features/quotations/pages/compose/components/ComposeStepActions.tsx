@@ -5,6 +5,7 @@ import { ArrowForward } from "@nine-thirty-five/material-symbols-react/rounded";
 interface ComposeStepActionsProps {
   step: number;
   isStep0Valid: boolean;
+  isStep1Valid: boolean;
   canProceedStep2: boolean;
   previewReady: boolean;
   isSending: boolean;
@@ -17,6 +18,7 @@ interface ComposeStepActionsProps {
 export function ComposeStepActions({
   step,
   isStep0Valid,
+  isStep1Valid,
   canProceedStep2,
   previewReady,
   isSending,
@@ -49,6 +51,7 @@ export function ComposeStepActions({
               variant="primary"
               type="submit"
               form={billingDetailsFormId}
+              disabled={!isStep1Valid}
               w="10rem"
               icon={ArrowForward}
             >

@@ -1,8 +1,9 @@
 import { useNavigate, useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Stack, Group, Text, Image, Button } from "@mantine/core";
+import { Stack, Group, Text, Button } from "@mantine/core";
 import { PageCard } from "@/components/PageCard";
 import { fetchQuotation } from "@/features/quotations/api/quotations.api";
+import type { QuotationRouteTab } from "@/features/quotations/api/quotationQueryKeys";
 import { QuotationDetailsSections } from "@/features/quotations/components/QuotationDetailsSections";
 import { useQuotationRouteParams } from "@/features/quotations/hooks/useQuotationRouteParams";
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
@@ -10,24 +11,34 @@ import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import { ReferenceHeader } from "@/features/quotations/components/ReferenceHeader";
 import { ReferenceHeaderSecondary } from "@/features/quotations/components/ReferenceHeaderSecondary";
 import { getQtnStatus } from "@/features/quotations/utils/quotationStatus";
-import { ContractEdit, Article, RequestQuote } from "@nine-thirty-five/material-symbols-react/outlined";
+import {
+  ContractEdit,
+  Article,
+  RequestQuote,
+} from "@nine-thirty-five/material-symbols-react/outlined";
+import { useCurrentUser, useCurrentUserRole } from "@/stores/authStore";
+import { getUserDisplayName } from "@/lib/mappers/user.mapper";
+import { ROLES } from "@/types/roles";
 
 const UpdateQuotationIcon = () => <ContractEdit width={30} height={30} />;
 
 const CreateJobOrderIcon = () => <Article width={30} height={30} />;
 
-const MakeQuotationIcon = () => <RequestQuote width={30} height={30} />
-;
-
+const MakeQuotationIcon = () => <RequestQuote width={30} height={30} />;
 export function QuotationDetailsPage() {
   const routeParams = useQuotationRouteParams(["tab", "quotationId"] as const);
   const params = useParams<{ clientId?: string }>();
   const clientId = params.clientId;
   const navigate = useNavigate();
+  const currentUser = useCurrentUser();
+  const currentUserRole = useCurrentUserRole();
   const quotationId = routeParams?.quotationId;
 
   const { data: quotation, isLoading } = useQuery({
-    queryKey: quotationQueryKeys.quotationDetails(quotationId),
+    queryKey: quotationQueryKeys.quotationDetails(
+      quotationId,
+      routeParams?.tab as QuotationRouteTab | undefined,
+    ),
     queryFn: () => {
       if (!routeParams) {
         throw new Error("Missing required route parameters.");
@@ -54,26 +65,51 @@ export function QuotationDetailsPage() {
 
   // Determine button label and icon based on quotation status (explicit checks only)
   const status = getQtnStatus(quotation);
+  const isLeadAccountSpecialist =
+    currentUserRole === ROLES.LEAD_ACCOUNT_SPECIALIST;
+  const isAssignedToCurrentUser = Boolean(
+    currentUser &&
+    quotation.account_specialist &&
+    getUserDisplayName(currentUser).trim().toLowerCase() ===
+      quotation.account_specialist.trim().toLowerCase(),
+  );
+  const canShowButton = isLeadAccountSpecialist || isAssignedToCurrentUser;
 
-  // Default to the existing "UPDATE QUOTATION" behavior when status is unknown
   let buttonLabel = "UPDATE QUOTATION";
   let ButtonIcon = UpdateQuotationIcon;
+  let buttonAction = () => {
+    navigate(
+      quotationRoutes.compose({
+        tab: routeParams.tab,
+        clientId,
+        quotationId: routeParams.quotationId,
+      }),
+    );
+  };
 
   if (status === "requested") {
     buttonLabel = "MAKE QUOTATION";
     ButtonIcon = MakeQuotationIcon;
   } else if (status === "responded") {
-    buttonLabel = "UPDATE QUOTATION";
-    ButtonIcon = UpdateQuotationIcon;
+    // buttonLabel = "UPDATE QUOTATION";
+    // ButtonIcon = UpdateQuotationIcon;
   } else if (status === "accepted") {
     buttonLabel = "CREATE JOB ORDER";
     ButtonIcon = CreateJobOrderIcon;
+    buttonAction = () => {
+      navigate(
+        quotationRoutes.jobOrder({
+          tab: "accepted",
+          clientId,
+          quotationId: routeParams.quotationId,
+          referenceNumber: quotation.reference_number,
+          jobType: quotation.service?.type ?? "",
+        }),
+      );
+    };
   }
 
   const isRequested = status === "requested";
-  const isAccepted = status === "accepted";
-
-  const canShowButton = quotation.account_specialist;
 
   return (
     <PageCard
@@ -87,19 +123,7 @@ export function QuotationDetailsPage() {
             bg="#4E6174"
             c="white"
             leftSection={<ButtonIcon />}
-            onClick={() => {
-              if (isAccepted) {
-                console.log("TODO: Make job order flow");
-              } else {
-                navigate(
-                  quotationRoutes.compose({
-                    tab: routeParams.tab,
-                    clientId,
-                    quotationId: routeParams.quotationId,
-                  }),
-                );
-              }
-            }}
+            onClick={buttonAction}
           >
             {buttonLabel}
           </Button>
