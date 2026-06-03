@@ -1,15 +1,17 @@
 export type JobOrderDetail = {
   id: number | string;
-  reference_number: string;
+  reference_number: string | null | undefined;
+  quotation_reference_number: string;
   quotation_id?: number | string | null;
   job_type?: string | null;
   service_type?: string | null;
   subject?: string | null;
   date?: string | null;
   email_body?: string | null;
-  job_order?: {
-    reference_number?: string | null;
-    person_in_charge?: string | null;
+  person_in_charge?: {
+    role: string;
+    username: string;
+    full_name: string;
   } | null;
   company?: {
     name?: string | null;

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import {
   ActionIcon,
+  Anchor,
   Box,
   Button,
   Group,
@@ -24,7 +25,10 @@ import {
   ChevronRight,
   Delete,
 } from "@nine-thirty-five/material-symbols-react/outlined";
+import { Link } from "react-router";
 import type { JobOrderResponse } from "@/features/job-order/types/jobOrder";
+import { buildAcceptedQuotationViewerPath } from "@/features/job-order/utils/jobOrderNavigation";
+import { jobOrderRoutes } from "@/features/job-order/utils/jobOrderRoutes";
 
 type JobOrderRow = JobOrderResponse;
 
@@ -48,6 +52,7 @@ interface JobOrderTableProps {
   setPerPaginationPage?: (page: number) => void;
   onRowClick?: (row: JobOrderRow) => void;
   handleUnderLinedRefNumberCLick?: (row: JobOrderRow) => void;
+  onMakeQuotationClick?: (row: JobOrderRow) => void;
   onAcceptClick?: (row: JobOrderRow) => void;
   onReassignClick?: (row: JobOrderRow) => void;
   onReassignRequestClick?: (row: JobOrderRow) => void;
@@ -67,7 +72,7 @@ function statusButtonBg(row: JobOrderRow) {
   return "#1D274E";
 }
 
-function rowBorderColor(_row: JobOrderRow) {
+function rowBorderColor() {
   // Default border color (client_type removed from response)
   return "#368DC4";
 }
@@ -168,137 +173,151 @@ export function JobOrderTable({
                 </Table.Td>
               </Table.Tr>
             ) : (
-              rows.map((row, index) => (
-                <Table.Tr
-                  key={String(row.id)}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  style={{
-                    cursor: onRowClick ? "pointer" : "default",
-                    boxShadow: `inset 6px 0 0 ${rowBorderColor(row)}`,
-                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#F1F3F4",
-                  }}
-                >
-                  <Table.Td style={{ maxWidth: "150px" }}>
-                    <Stack gap={2}>
-                      <Text
-                        component="button"
-                        type="button"
-                        c="#000000"
-                        fz="0.875rem"
-                        fw={700}
-                        style={{
-                          background: "transparent",
-                          border: 0,
-                          padding: 0,
-                          textAlign: "left",
-                          textDecoration: "underline",
-                          cursor: onRowClick ? "pointer" : "default",
-                        }}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          handleUnderLinedRefNumberCLick?.(row);
-                        }}
-                      >
-                        {row.reference_number}
-                      </Text>
-                      <Text c="#000000" fz="0.813rem" lh={1.45}>
-                        {row.client}
-                      </Text>
-                    </Stack>
-                  </Table.Td>
+              rows.map((row, index) => {
+                const quotationReference = row.quotation_reference_number;
+                const quotationViewerPath = buildAcceptedQuotationViewerPath({
+                  quotationId: row.quotation_id,
+                  issuedQuotationId: row.issued_quotation_id,
+                });
 
-                  <Table.Td style={{ maxWidth: "250px" }}>
-                    <Stack gap={2}>
-                      <Text c="#000000" fz="0.813rem" lh={1.45} fw={700}>
-                        {row.job_type ? toTitleCase(row.job_type) : "-"}
-                      </Text>
+                return (
+                  <Table.Tr
+                    key={String(row.id)}
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    style={{
+                      cursor: onRowClick ? "pointer" : "default",
+                      boxShadow: `inset 6px 0 0 ${rowBorderColor()}`,
+                      backgroundColor: index % 2 === 0 ? "#ffffff" : "#F1F3F4",
+                    }}
+                  >
+                    <Table.Td style={{ maxWidth: "150px" }}>
+                      <Stack gap={2}>
+                        <Anchor
+                          component={Link}
+                          to={jobOrderRoutes.details(row.id)}
+                          state={{ jobOrder: row }}
+                          c="#2563EB"
+                          fz="0.875rem"
+                          fw={700}
+                          style={{
+                            textAlign: "left",
+                            textDecoration: "underline",
+                          }}
+                          onClick={(event) => event.stopPropagation()}
+                          onMouseDown={(event) => event.stopPropagation()}
+                        >
+                          {row.reference_number}
+                        </Anchor>
 
-                      {row.job_type === "REGULATORY" ? (
+                        {quotationReference && quotationViewerPath ? (
+                          <Anchor
+                            component={Link}
+                            to={quotationViewerPath}
+                            c="#2563EB"
+                            fz="0.813rem"
+                            fw={700}
+                            onClick={(event) => event.stopPropagation()}
+                            onMouseDown={(event) => event.stopPropagation()}
+                          >
+                            {quotationReference}
+                          </Anchor>
+                        ) : null}
+
+                        <Text c="#000000" fz="0.813rem" lh={1.45}>
+                          {row.client}
+                        </Text>
+                        <Text c="#000000" fz="0.813rem" lh={1.45}>
+                          {row.company_name}
+                        </Text>
+                      </Stack>
+                    </Table.Td>
+
+                    <Table.Td style={{ maxWidth: "250px" }}>
+                      <Stack gap={2}>
+                        <Text c="#000000" fz="0.813rem" lh={1.45} fw={700}>
+                          {row.job_type ? toTitleCase(row.job_type) : "-"}
+                        </Text>
+
+                        {row.job_type === "REGULATORY" ? (
+                          <Group gap={6} align="center" wrap="nowrap">
+                            <Text c="#000000" fz="0.813rem" lh={1.45}>
+                              Application Type
+                            </Text>
+                            ---&gt; {""}
+                            <Text c="#000000" fz="0.813rem" lh={1.45}>
+                              {row.application_type}
+                            </Text>
+                          </Group>
+                        ) : (
+                          <>
+                            <Group gap={6} align="center" wrap="nowrap">
+                              <Text c="#000000" fz="0.813rem" lh={1.45}>
+                                {row.service_type}
+                              </Text>
+                              ---&gt; {""}
+                              <Text c="#000000" fz="0.813rem" lh={1.45}>
+                                {row.transport_mode}
+                              </Text>
+                            </Group>
+                            <Group gap={6} align="center" wrap="nowrap">
+                              <Text c="#000000" fz="0.813rem" lh={1.45}>
+                                {row.origin}
+                              </Text>
+                              ---&gt; {""}
+                              <Text c="#000000" fz="0.813rem" lh={1.45}>
+                                {row.destination}
+                              </Text>
+                            </Group>
+                          </>
+                        )}
+                      </Stack>
+                    </Table.Td>
+
+                    <Table.Td style={{ maxWidth: "200px" }}>
+                      <Stack gap={2}>
                         <Group gap={6} align="center" wrap="nowrap">
                           <Text c="#000000" fz="0.813rem" lh={1.45}>
-                            Application Type
+                            BL No.
                           </Text>
                           ---&gt; {""}
                           <Text c="#000000" fz="0.813rem" lh={1.45}>
-                            {row.application_type}
+                            {row.bl_no ?? ""}
+                          </Text>
+                        </Group>
+                      </Stack>
+                    </Table.Td>
+
+                    <Table.Td>
+                      {row.assigned_to ? (
+                        <Group>
+                          <Avatar
+                            radius="xl"
+                            size={50}
+                            src={row.ops_image ?? undefined}
+                            name={row.assigned_to}
+                            color="blue"
+                          />
+                          <Text c="#000000" fz="0.75rem" lh={1.4}>
+                            {row.assigned_to}
                           </Text>
                         </Group>
                       ) : (
-                        <>
-                          <Group gap={6} align="center" wrap="nowrap">
-                            <Text c="#000000" fz="0.813rem" lh={1.45}>
-                              {row.service_type}
-                            </Text>
-                            ---&gt; {""}
-                            <Text c="#000000" fz="0.813rem" lh={1.45}>
-                              {row.transport_mode}
-                            </Text>
-                          </Group>
-                          <Group gap={6} align="center" wrap="nowrap">
-                            <Text c="#000000" fz="0.813rem" lh={1.45}>
-                              {row.origin}
-                            </Text>
-                            ---&gt; {""}
-                            <Text c="#000000" fz="0.813rem" lh={1.45}>
-                              {row.destination}
-                            </Text>
-                          </Group>
-                        </>
+                        <Group>
+                          <Avatar radius="xl" size={50} color="gray">
+                            Un
+                          </Avatar>
+                          <Text c="#000000" fz="0.75rem" lh={1.4}>
+                            Unassigned
+                          </Text>
+                        </Group>
                       )}
-                    </Stack>
-                  </Table.Td>
+                    </Table.Td>
 
-                  <Table.Td style={{ maxWidth: "200px" }}>
-                    <Stack gap={2}>
-                      <Group gap={6} align="center" wrap="nowrap">
-                        <Text c="#000000" fz="0.813rem" lh={1.45}>
-                          BL No.
-                        </Text>
-                        ---&gt; {""}
-                        <Text c="#000000" fz="0.813rem" lh={1.45}>
-                          {row.bl_no ?? ""}
-                        </Text>
-                      </Group>
-
-                      {row.quotation_reference_number ? (
-                        <Text component="a" href="#" c="#2563EB" fz="0.813rem">
-                          {row.quotation_reference_number}
-                        </Text>
-                      ) : null}
-                    </Stack>
-                  </Table.Td>
-
-                  <Table.Td>
-                    {row.assigned_to ? (
-                      <Group>
-                        <Avatar
-                          radius="xl"
-                          size={50}
-                          src={row.ops_image ?? undefined}
-                          name={row.assigned_to}
-                          color="blue"
-                        />
-                        <Text c="#000000" fz="0.75rem" lh={1.4}>
-                          {row.assigned_to}
-                        </Text>
-                      </Group>
-                    ) : (
-                      <Group>
-                        <Avatar radius="xl" size={50} color="gray">
-                          Un
-                        </Avatar>
-                        <Text c="#000000" fz="0.75rem" lh={1.4}>
-                          Unassigned
-                        </Text>
-                      </Group>
-                    )}
-                  </Table.Td>
-
-                  <Table.Td style={{ maxWidth: "150px" }}>
-                    <Stack gap={4}>
-                      {jobFilter === "my-items" && (
-                        <>
-                          {/* <Button
+                    <Table.Td style={{ maxWidth: "150px" }}>
+                      <Stack gap={4}>
+                        {jobFilter === "my-items" && (
+                          <>
+                            {/* <Button
                             styles={{ root: { background: "#FF8800" } }}
                             leftSection={<RequestQuote width={20} />}
                             onClick={(event) => {
@@ -309,151 +328,153 @@ export function JobOrderTable({
                           >
                             Make Quotation
                           </Button> */}
-                          {row.assignment_status ===
-                          "REASSIGNMENT REQUESTED" ? (
-                            <Button
-                              disabled
-                              c={"#CD862C"}
-                              styles={{
-                                root: {
-                                  background: "#E4D8CA",
-                                },
-                              }}
-                              leftSection={<Autorenew width={20} />}
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                onReassignRequestClick?.(row);
-                              }}
-                            >
-                              Pending...
-                            </Button>
-                          ) : (
-                            <Button
-                              styles={{
-                                root: {
-                                  background:
-                                    row.assignment_status ===
-                                    "REASSIGNMENT REQUESTED"
-                                      ? "#FF8800"
-                                      : "#1D274E",
-                                },
-                              }}
-                              leftSection={<Autorenew width={20} />}
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                onReassignRequestClick?.(row);
-                              }}
-                            >
-                              Request Reassignment
-                            </Button>
-                          )}
-                        </>
-                      )}
+                            {row.assignment_status ===
+                            "REASSIGNMENT REQUESTED" ? (
+                              <Button
+                                disabled
+                                c={"#CD862C"}
+                                styles={{
+                                  root: {
+                                    background: "#E4D8CA",
+                                  },
+                                }}
+                                leftSection={<Autorenew width={20} />}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  onReassignRequestClick?.(row);
+                                }}
+                              >
+                                Pending...
+                              </Button>
+                            ) : (
+                              <Button
+                                styles={{
+                                  root: {
+                                    background:
+                                      row.assignment_status ===
+                                      "REASSIGNMENT REQUESTED"
+                                        ? "#FF8800"
+                                        : "#1D274E",
+                                  },
+                                }}
+                                leftSection={<Autorenew width={20} />}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  onReassignRequestClick?.(row);
+                                }}
+                              >
+                                Request Reassignment
+                              </Button>
+                            )}
+                          </>
+                        )}
 
-                      {row.assignment_status === "ASSIGNED"  && row.generate_shipment ? (
-                        <Button
-                          styles={{ root: { background: "#FF8800" } }}
-                          leftSection={<RequestQuote width={20} />}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            openGenerateShipment?.(row);
-                          }}
-                        >
-                          Generate Shipment
-                        </Button>
-                      ) : row.assignment_status === "ASSIGNED" ? (
-                        <Group>
-                          <CheckCircle width={20} color={"green"} />
-                          <Text>Accepted</Text>
-                        </Group>
-                      ) : row.assignment_status === "REASSIGNMENT REQUESTED" &&
-                        jobFilter === "all" ? (
-                        <>
+                        {row.assignment_status === "ASSIGNED" &&
+                        row.generate_shipment ? (
                           <Button
-                            styles={{
-                              root: { background: statusButtonBg(row) },
-                            }}
-                            leftSection={<Autorenew width={20} />}
+                            styles={{ root: { background: "#FF8800" } }}
+                            leftSection={<RequestQuote width={20} />}
                             onClick={(event) => {
                               event.stopPropagation();
-                              onReassignClick?.(row);
+                              openGenerateShipment?.(row);
                             }}
                           >
-                            Reassignment Request
+                            Generate Shipment
                           </Button>
+                        ) : row.assignment_status === "ASSIGNED" ? (
+                          <Group>
+                            <CheckCircle width={20} color={"green"} />
+                            <Text>Accepted</Text>
+                          </Group>
+                        ) : row.assignment_status ===
+                            "REASSIGNMENT REQUESTED" && jobFilter === "all" ? (
+                          <>
+                            <Button
+                              styles={{
+                                root: { background: statusButtonBg(row) },
+                              }}
+                              leftSection={<Autorenew width={20} />}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onReassignClick?.(row);
+                              }}
+                            >
+                              Reassignment Request
+                            </Button>
+                            <Text c="#1D274E" fz="0.65rem" fw={400} lh={1.4}>
+                              Accepted: {row.assigned_at ?? row.date_created}
+                            </Text>
+                          </>
+                        ) : jobFilter === "all" ? (
+                          <>
+                            <Button
+                              styles={{
+                                root: { background: statusButtonBg(row) },
+                              }}
+                              leftSection={<PanToolAlt width={20} />}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onAcceptClick?.(row);
+                              }}
+                            >
+                              Accept
+                            </Button>
+                            <Text c="#007406" fz="0.65rem" fw={400} lh={1.4}>
+                              Available
+                            </Text>
+                          </>
+                        ) : (
+                          ""
+                        )}
+
+                        {row.assignment_status === "ASSIGNED" && (
                           <Text c="#1D274E" fz="0.65rem" fw={400} lh={1.4}>
-                            Accepted: {row.assigned_at ?? row.date_created}
+                            Req. Accepted: {row.assigned_at}
                           </Text>
-                        </>
-                      ) : jobFilter === "all" ? (
-                        <>
-                          <Button
-                            styles={{
-                              root: { background: statusButtonBg(row) },
-                            }}
-                            leftSection={<PanToolAlt width={20} />}
+                        )}
+                      </Stack>
+                    </Table.Td>
+
+                    <Table.Td
+                      style={{ width: "2.75rem", textAlign: "center" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Menu position="left">
+                        <Menu.Target>
+                          <ActionIcon
+                            variant="subtle"
+                            color="#334155"
+                            aria-label="More actions"
+                          >
+                            <MoreVert width={16} />
+                          </ActionIcon>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                          <Menu.Item
+                            leftSection={<FileOpen width={16} />}
                             onClick={(event) => {
                               event.stopPropagation();
-                              onAcceptClick?.(row);
+                              handleUnderLinedRefNumberCLick?.(row);
                             }}
                           >
-                            Accept
-                          </Button>
-                          <Text c="#007406" fz="0.65rem" fw={400} lh={1.4}>
-                            Available
-                          </Text>
-                        </>
-                      ) : (
-                        ""
-                      )}
-
-                      {row.assignment_status === "ASSIGNED" && (
-                        <Text c="#1D274E" fz="0.65rem" fw={400} lh={1.4}>
-                          Req. Accepted: {row.assigned_at}
-                        </Text>
-                      )}
-                    </Stack>
-                  </Table.Td>
-
-                  <Table.Td
-                    style={{ width: "2.75rem", textAlign: "center" }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Menu position="left">
-                      <Menu.Target>
-                        <ActionIcon
-                          variant="subtle"
-                          color="#334155"
-                          aria-label="More actions"
-                        >
-                          <MoreVert width={16} />
-                        </ActionIcon>
-                      </Menu.Target>
-                      <Menu.Dropdown>
-                        <Menu.Item
-                          leftSection={<FileOpen width={16} />}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleUnderLinedRefNumberCLick?.(row);
-                          }}
-                        >
-                          View Details
-                        </Menu.Item>
-                        <Menu.Item leftSection={<FileOpen width={16} />}>
-                          Documents
-                        </Menu.Item>
-                        <Menu.Divider />
-                        <Menu.Item
-                          color="red"
-                          leftSection={<Delete width={16} />}
-                        >
-                          Discard
-                        </Menu.Item>
-                      </Menu.Dropdown>
-                    </Menu>
-                  </Table.Td>
-                </Table.Tr>
-              ))
+                            View Details
+                          </Menu.Item>
+                          <Menu.Item leftSection={<FileOpen width={16} />}>
+                            Documents
+                          </Menu.Item>
+                          <Menu.Divider />
+                          <Menu.Item
+                            color="red"
+                            leftSection={<Delete width={16} />}
+                          >
+                            Discard
+                          </Menu.Item>
+                        </Menu.Dropdown>
+                      </Menu>
+                    </Table.Td>
+                  </Table.Tr>
+                );
+              })
             )}
           </Table.Tbody>
         </Table>

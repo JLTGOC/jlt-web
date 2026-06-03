@@ -46,7 +46,6 @@ export default function JobOrderClientDetailPage() {
     <Stack gap="lg" p="lg">
       <JobOrderDetailHeader
         referenceNumber={"Client Details"}
-        quotationReference={detail.reference_number}
         quotationId={detail.quotation_id}
         onBack={() => navigate(-1)}
       />

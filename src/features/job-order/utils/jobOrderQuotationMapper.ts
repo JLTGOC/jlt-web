@@ -2,14 +2,21 @@ import type { JobOrderQuotationDetailsResponse } from "../types/jobOrder";
 import type { JobOrderDetail } from "../types/jobOrderDetail";
 
 function mapQuotationDocuments(
-  documents: JobOrderQuotationDetailsResponse["documents"],
+  documents: Array<{
+    id: number;
+    file_name: string;
+    file_url: string;
+    file_type?: string;
+    created_at: string;
+    updated_at: string;
+  }>,
   uploadedBy: "Client" | "JLTCB",
 ): NonNullable<JobOrderDetail["documents"]> {
   return (documents ?? []).map((document) => ({
     id: document.id,
     file_name: document.file_name,
     file_url: document.file_url,
-    file_type: document.file_type,
+    file_type: document.file_type ?? null,
     created_at: document.created_at,
     updated_at: document.updated_at,
     uploadedBy,
@@ -19,38 +26,25 @@ function mapQuotationDocuments(
 export function mapQuotationToJobOrderDetail(
   quotation: JobOrderQuotationDetailsResponse,
 ): JobOrderDetail {
-  const history =
-    quotation.history ??
-    quotation.histories ??
-    quotation.activity_logs ??
-    quotation.activities ??
-    quotation.timeline ??
-    quotation.events ??
-    [];
+  const history = quotation.history ?? [];
 
   return {
     id: quotation.id,
-    reference_number: quotation.reference_number,
+    reference_number: quotation.job_order?.reference_number,
+    quotation_reference_number: quotation.reference_number,
     quotation_id: quotation.id,
     subject:
       quotation.job_order?.reference_number ?? quotation.reference_number,
     date: quotation.created_at,
     email_body: quotation.remarks ?? null,
-    job_order: {
-      reference_number: quotation.job_order?.reference_number ?? null,
-      person_in_charge: quotation.job_order?.person_in_charge ?? null,
-    },
-    company: quotation.company
+    person_in_charge: quotation.job_order?.person_in_charge
       ? {
-          name: quotation.company.name,
-          address: quotation.company.address,
-          contact_person: quotation.company.contact_person,
-          contact_number: quotation.company.contact_number,
-          email: quotation.company.email,
-          position: quotation.company.position,
-          business_type: quotation.company.business_type,
+          role: "",
+          username: "",
+          full_name: quotation.job_order.person_in_charge,
         }
       : null,
+    company: quotation.company ?? null,
     client: {
       full_name: quotation.client?.full_name ?? null,
       company_name: quotation.client?.company_name ?? null,
@@ -59,13 +53,9 @@ export function mapQuotationToJobOrderDetail(
       consignee:
         quotation.client?.company_name ?? quotation.company?.name ?? null,
       client_type: null,
-      accredited:
-        quotation.client?.company_name ??
-        quotation.company?.business_type ??
-        null,
+      accredited: quotation.company?.business_type ?? null,
       shipper: quotation.client?.full_name ?? null,
-      tone_and_attitude:
-        quotation.client?.contact_number ?? quotation.company?.position ?? null,
+      tone_and_attitude: quotation.company?.position ?? null,
       remarks:
         quotation.company?.address ??
         quotation.shipment?.remarks ??
@@ -104,10 +94,5 @@ export function mapQuotationToJobOrderDetail(
       ...mapQuotationDocuments(quotation.documents, "Client"),
     ],
     history,
-    histories: quotation.histories,
-    activity_logs: quotation.activity_logs,
-    activities: quotation.activities,
-    timeline: quotation.timeline,
-    events: quotation.events,
   };
 }
