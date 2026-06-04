@@ -26,3 +26,7 @@ export async function reassignJobOrderDetails(reassignMentRequestID: number |  n
 
 return response.data.data
 }
+
+export async function rejectReassignRequest(reassignmentRequestID: number): Promise<void> {
+  await apiClient.post(`reassignment-requests/${reassignmentRequestID}/cancel`)
+}

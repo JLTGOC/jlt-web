@@ -258,6 +258,7 @@ export function useJobOrderPage() {
     setReassignOPS("");
     setReassignStatus("");
   };
+    console.log(selectedQuotation)
 
   const openAcceptModal = (row: JobOrderResponse) => {
     setSelectedQuotation(row);

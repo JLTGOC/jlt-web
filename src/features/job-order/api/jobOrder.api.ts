@@ -14,6 +14,7 @@ export {
   reassignRequestJobOrder,
   reassignJobOrder,
   reassignJobOrderDetails,
+  rejectReassignRequest
 } from "./operations.api";
 
 export async function fetchJobOrders(
