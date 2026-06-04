@@ -38,16 +38,20 @@ function toTitleCase(value?: string) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function getValidUntilDate(assignedAt?: string) {
-  if (!assignedAt) return null;
-  const quotedDate = new Date(assignedAt);
-  if (!Number.isFinite(quotedDate.getTime())) return null;
-  quotedDate.setDate(quotedDate.getDate() + 7);
-  return quotedDate;
+function getQuotedDate(row: RespondedQuotationListItem) {
+  return row.assigned_at || row.date || "";
 }
 
-function formatValidUntilDate(assignedAt?: string) {
-  const validUntilDate = getValidUntilDate(assignedAt);
+function getValidUntilDate(quotedDate?: string) {
+  if (!quotedDate) return null;
+  const parsedDate = new Date(quotedDate);
+  if (!Number.isFinite(parsedDate.getTime())) return null;
+  parsedDate.setDate(parsedDate.getDate() + 7);
+  return parsedDate;
+}
+
+function formatValidUntilDate(quotedDate?: string) {
+  const validUntilDate = getValidUntilDate(quotedDate);
   return validUntilDate
     ? validUntilDate.toLocaleDateString("en-US", {
         year: "numeric",
@@ -57,8 +61,8 @@ function formatValidUntilDate(assignedAt?: string) {
     : "-";
 }
 
-function getValidUntilStatus(assignedAt?: string) {
-  const validUntilDate = getValidUntilDate(assignedAt);
+function getValidUntilStatus(quotedDate?: string) {
+  const validUntilDate = getValidUntilDate(quotedDate);
   if (!validUntilDate) return "";
 
   const today = new Date();
@@ -287,7 +291,7 @@ export function RespondedTable({
                               c="#000"
                               style={{ whiteSpace: "nowrap" }}
                             >
-                              {row.assigned_at}
+                              {getQuotedDate(row)}
                             </Text>
                           </Group>
 
@@ -301,7 +305,7 @@ export function RespondedTable({
                               c="#000"
                               style={{ whiteSpace: "nowrap" }}
                             >
-                              {formatValidUntilDate(row.assigned_at)}
+                              {formatValidUntilDate(getQuotedDate(row))}
                             </Text>
                           </Group>
                           <Text
@@ -309,7 +313,7 @@ export function RespondedTable({
                             fz="0.813rem"
                             style={{
                               whiteSpace: "nowrap",
-                              color: getValidUntilColor(row.assigned_at),
+                              color: getValidUntilColor(getQuotedDate(row)),
                             }}
                           >
                             {getValidUntilStatus(row.assigned_at)}

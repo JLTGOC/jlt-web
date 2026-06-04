@@ -75,23 +75,24 @@ export function CompanyModal({
       centered
       closeOnClickOutside={false}
       closeOnEscape={false}
-      title={null}
-      size="lg"
-      styles={{ content: { maxWidth: 520, width: "100%" } }}
-    >
-      <Box
-        style={{
-          backgroundColor: "#EBEBEB",
-          borderRadius: 5,
-          padding: "1rem 1.25rem",
-          textAlign: "center",
-        }}
-      >
-        <Text size="lg" fw={700}>
+      title={
+        <Text size="lg" fw={700} style={{ width: "100%", textAlign: "center" }}>
           {config.headerTitle}
         </Text>
-      </Box>
-
+      }
+      size="lg"
+      styles={{
+        content: { maxWidth: 520, width: "100%" },
+        header: {
+          backgroundColor: "#EBEBEB",
+          borderRadius: "8px 8px 0 0",
+          padding: "1rem 1.25rem",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        },
+      }}
+    >
       <Box style={{ marginTop: 24, textAlign: "center" }}>
         {isConfirm && confirmIcon}
         {isSuccess && successIcon}

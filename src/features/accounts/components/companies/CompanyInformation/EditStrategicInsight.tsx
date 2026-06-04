@@ -42,7 +42,8 @@ const toStrategicInsight = (
 });
 
 export function EditStrategicInsight({ company, errors, onChange }: EditStrategicInsightProps) {
-  const [growthOptions, setGrowthOptions] = useState(["LOW", "MEDIUM", "HIGH"]);
+  const defaultGrowthOptions = ["LOW", "MEDIUM", "HIGH"];
+  const [growthOptions, setGrowthOptions] = useState(defaultGrowthOptions);
   const [selectedGrowth, setSelectedGrowth] = useState<string>("");
   const [expansionPlan, setExpansionPlan] = useState("");
   const [competitorsUsed, setCompetitorsUsed] = useState("");
@@ -55,9 +56,13 @@ export function EditStrategicInsight({ company, errors, onChange }: EditStrategi
 
   useEffect(() => {
     if (company?.strategicInsight) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setGrowthOptions(company.strategicInsight.growthOptions || ["LOW", "MEDIUM", "HIGH"]);
-      setSelectedGrowth(company.strategicInsight.growthOptions?.[0] || "");
+      const incomingGrowthOptions = company.strategicInsight.growthOptions ?? [];
+      const mergedGrowthOptions = Array.from(
+        new Set([...incomingGrowthOptions, ...defaultGrowthOptions]),
+      );
+
+      setGrowthOptions(mergedGrowthOptions);
+      setSelectedGrowth(incomingGrowthOptions?.[0] || defaultGrowthOptions[0]);
       setExpansionPlan(company.strategicInsight.expansionPlan || "");
       setCompetitorsUsed(company.strategicInsight.competitorsUsed || "");
       setUpsellingOpportunities(company.strategicInsight.upsellingOpportunities || "");
@@ -67,6 +72,11 @@ export function EditStrategicInsight({ company, errors, onChange }: EditStrategi
 
   const emitChange = (next: FormData) => {
     onChange?.(toStrategicInsight(next));
+  };
+
+  const reorderGrowthOptions = (selected: string, options: string[]) => {
+    const others = options.filter((option) => option !== selected);
+    return [selected, ...others];
   };
 
   const handleAddOption = () => {
@@ -131,10 +141,12 @@ export function EditStrategicInsight({ company, errors, onChange }: EditStrategi
           <Combobox
             store={combobox}
             onOptionSubmit={(val) => {
+              const nextGrowthOptions = reorderGrowthOptions(val, growthOptions);
+              setGrowthOptions(nextGrowthOptions);
               setSelectedGrowth(val);
               combobox.closeDropdown();
               emitChange({
-                growthOptions,
+                growthOptions: nextGrowthOptions,
                 selectedGrowth: val,
                 expansionPlan,
                 competitorsUsed,

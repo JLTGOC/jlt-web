@@ -6,7 +6,7 @@ import { notifications } from "@mantine/notifications";
 import type { ZodIssue } from "zod";
 import { companyService } from "@/features/accounts/services/company.service";
 import type { CompanyFullDetails, CompanyCreateRequest, CompanyUpdateRequest } from "@/features/accounts/types/company.types";
-import { mapCompanyFullDetailsToBackendRequest } from "@/features/accounts/types/company.types";
+import { mapCompanyFullDetailsToBackendRequest, prepareDocumentPayload } from "@/features/accounts/types/company.types";
 import { PageCard } from "@/components/PageCard";
 import { CompanyModal } from "./CompanyModal";
 import {
@@ -54,6 +54,19 @@ const createDraftId = () =>
   typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
     ? crypto.randomUUID()
     : `draft-${Date.now()}`;
+
+const emptyCompanyDraft: CompanyFullDetails = {
+  companyId: undefined,
+  summary: { companyName: "" },
+  address: {},
+  keyContacts: {},
+  governmentCompliance: {},
+  commercialInformation: {},
+  operationalInstructions: {},
+  riskIssueMonitoring: {},
+  documentsAttachments: {},
+  strategicInsight: {},
+};
 
 const sanitizeDraftCompany = (company: CompanyFullDetails): CompanyFullDetails => ({
   ...company,
@@ -253,18 +266,7 @@ const validateDraftCompany = (company: CompanyFullDetails, setActiveStep: (step:
 export function AddCompanyFlow() {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(1);
-  const [draftCompany, setDraftCompany] = useState<CompanyFullDetails>({
-    companyId: undefined,
-    summary: { companyName: "" },
-    address: {},
-    keyContacts: {},
-    governmentCompliance: {},
-    commercialInformation: {},
-    operationalInstructions: {},
-    riskIssueMonitoring: {},
-    documentsAttachments: {},
-    strategicInsight: {},
-  });
+  const [draftCompany, setDraftCompany] = useState<CompanyFullDetails>(emptyCompanyDraft);
   const [drafts, setDrafts] = useState<CompanyDraftItem[]>([]);
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
   const [showDraftPicker, setShowDraftPicker] = useState(false);
@@ -511,30 +513,19 @@ export function AddCompanyFlow() {
     const createPayload: CompanyCreateRequest = mapCompanyFullDetailsToBackendRequest(draftCompany);
     const created = await companyService.createCompany(createPayload);
 
-    const docs = draftCompany.documentsAttachments?.documents ?? [];
-    const filesToUpload = docs.filter((d: any) => d?.file) as Array<any>;
-    if (filesToUpload.length > 0 && created?.companyId) {
-      const uploaded = await companyService.uploadDocuments(
-        created.companyId,
-        filesToUpload.map((d) => d.file as File),
-      );
-
-      const mergedDocs = docs.map((d: any) => {
-        if (d?.file) {
-          const match = uploaded.find((u) => u.name === d.name);
-          return { name: d.name, url: match?.url ?? null };
-        }
-        return { name: d.name, url: d.url ?? null };
-      });
-
-      const payload = {
-        documents: mergedDocs,
-        attachments: draftCompany.documentsAttachments?.attachments,
-      } as CompanyUpdateRequest;
-      console.debug("create -> updateCompany payload (raw):", payload);
-      const cleaned = cleanNulls(payload);
-      console.debug("create -> updateCompany payload (cleaned):", cleaned);
-      await companyService.updateCompany(created.companyId, cleaned as CompanyUpdateRequest);
+    if (created?.companyId) {
+      const documents = await prepareDocumentPayload(draftCompany.documentsAttachments?.documents);
+      const attachments = await prepareDocumentPayload(draftCompany.documentsAttachments?.attachments);
+      if ((documents?.length ?? 0) > 0 || (attachments?.length ?? 0) > 0) {
+        const payload = {
+          documents,
+          attachments,
+        } as CompanyUpdateRequest;
+        console.debug("create -> updateCompany payload (raw):", payload);
+        const cleaned = cleanNulls(payload);
+        console.debug("create -> updateCompany payload (cleaned):", cleaned);
+        await companyService.updateCompany(created.companyId, cleaned as CompanyUpdateRequest);
+      }
     }
 
     if (currentDraftId) {
@@ -550,6 +541,13 @@ export function AddCompanyFlow() {
       setFinishModalError(null);
       await performSaveCompany();
       setFinishModalStage("success");
+      setIsFinishModalOpen(false);
+      setDraftCompany(emptyCompanyDraft);
+      setCurrentDraftId(null);
+      if (blocker.state === "blocked") {
+        blocker.reset();
+      }
+      navigate("/accounts/companies", { replace: true });
     } catch (error) {
       console.error("Failed to save company:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred.";

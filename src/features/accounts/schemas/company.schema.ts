@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { supportedIndustryIds } from "../types/company.types";
 
 const nullableString = z.string().trim().optional().nullable();
 const optionalStringArray = z.array(z.string().trim()).optional();
@@ -22,6 +23,13 @@ export const companySummarySchema = z.object({
   companyType: nullableString,
   companyTypeId: nullableString,
   industry: nullableString,
+  industryIds: z.array(z.string().trim()).optional().refine(
+    (ids) => ids == null || ids.every((id) => supportedIndustryIds.includes(id as typeof supportedIndustryIds[number])),
+    {
+      message: "Invalid industry selected",
+    },
+  ),
+  industryId: nullableString,
   businessType: nullableString,
   businessTypeId: nullableString,
   businessRegistrationNumber: nullableString,

@@ -7,7 +7,7 @@ import type {
 } from "../types/company.types";
 
 export interface CompanyAPI {
-  /** GET /companies */
+  /** GET http://localhost:8000/api/companies */
   getCompaniesList: (
     page?: number,
     perPage?: number,
@@ -18,18 +18,18 @@ export interface CompanyAPI {
     },
   ) => Promise<CompanyListResponse>;
 
-  /** GET /companies/:id?section=:section */
+  /** GET http://localhost:8000/api/companies/{company}?section=:section */
   getCompanyById: (
     id: string,
     section?: "basic_info" | "address" | "contacts" | "registration" | "pricing" | "operation" | "monitoring" | "documents" | "insights",
   ) => Promise<CompanyFullDetails>;
 
-  /** POST /companies */
+  /** POST http://localhost:8000/api/companies */
   createCompany: (payload: CompanyCreateRequest) => Promise<CompanyFullDetails>;
 
-  /** PUT /companies/:id */
+  /** PUT http://localhost:8000/api/companies/{company} */
   updateCompany: (id: string, payload: CompanyUpdateRequest) => Promise<CompanyFullDetails>;
 
-  /** POST /companies/:id/archive */
+  /** POST http://localhost:8000/api/companies/{company}/archive */
   archiveCompany: (id: string) => Promise<{ success: boolean }>;
 }

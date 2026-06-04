@@ -6,13 +6,10 @@ import { notifications } from "@mantine/notifications";
 import type {
   CompanyFullDetails,
   CompanyDocumentsAttachments,
+  CompanyDocumentPayload,
 } from "@/features/accounts/types/company.types";
 
-type DocumentItem = {
-  name: string;
-  url?: string | null;
-  file?: File;
-};
+type DocumentItem = CompanyDocumentPayload;
 
 interface EditDocumentsProps {
   company: CompanyFullDetails | null;
@@ -29,7 +26,7 @@ export function EditDocuments({ company, onChange }: EditDocumentsProps) {
     setDocuments(company?.documentsAttachments?.documents ?? []);
   }, [company]);
 
-  const emitChange = (nextDocuments: Array<{ name: string; url?: string | null }>) => {
+  const emitChange = (nextDocuments: DocumentItem[]) => {
     onChange?.({
       documents: nextDocuments,
       attachments: company?.documentsAttachments?.attachments ?? [],

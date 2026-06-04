@@ -1,5 +1,5 @@
 // src/features/accounts/components/companies/CompanyInformation/EditBasicInformation.tsx
-import { Paper, Text, TextInput, Autocomplete, Select, Group, Button } from "@mantine/core";
+import { Paper, Text, TextInput, Select, MultiSelect, Group, Button } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { forwardRef, useState, useEffect, useRef, useImperativeHandle } from "react";
 import { CalendarMonth } from "@nine-thirty-five/material-symbols-react/rounded";
@@ -7,7 +7,6 @@ import type {
   CompanyFullDetails,
   CompanySummary,
 } from "@/features/accounts/types/company.types";
-import { userService } from "@/services/user.service";
 import type { CompanyOption } from "./companySummaryOptions";
 import {
   businessTypeOptions,
@@ -40,6 +39,7 @@ interface FormData {
   companyType: string;
   companyTypeId: string;
   industry: string;
+  industryIds: string[];
   businessType: string;
   businessTypeId: string;
   businessRegistrationNumber: string;
@@ -74,6 +74,8 @@ const toSummary = (data: FormData): CompanySummary => ({
   companyType: data.companyType || null,
   companyTypeId: data.companyTypeId || null,
   industry: data.industry || null,
+  industryIds: data.industryIds.length > 0 ? data.industryIds : null,
+  industryId: data.industryIds[0] ?? null,
   businessType: data.businessType || null,
   businessTypeId: data.businessTypeId || null,
   businessRegistrationNumber: data.businessRegistrationNumber || null,
@@ -87,7 +89,6 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
     const yearsInputRef = useRef<HTMLInputElement | null>(null);
     const activationInputRef = useRef<HTMLInputElement | null>(null);
     const prevCompanyIdRef = useRef<string | undefined | null>(null);
-    const [accountHandlerOptionsState, setAccountHandlerOptionsState] = useState<CompanyOption[]>([]);
     const [formData, setFormData] = useState<FormData>({
       companyName: "",
       tradeName: "",
@@ -101,6 +102,7 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
       companyType: "",
       companyTypeId: "",
       industry: "",
+      industryIds: [],
       businessType: "",
       businessTypeId: "",
       businessRegistrationNumber: "",
@@ -109,54 +111,14 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
       dateOfActivation: null,
     });
 
-    useEffect(() => {
-      let active = true;
-
-      userService
-        .getAccountSpecialists()
-        .then((response) => {
-          if (!active) return;
-          setAccountHandlerOptionsState(
-            response.data.map((specialist) => ({
-              value: String(specialist.id),
-              label: specialist.full_name,
-            })),
-          );
-        })
-        .catch((error) => {
-          console.error("Failed to load account specialists", error);
-        });
-
-      return () => {
-        active = false;
-      };
-    }, []);
-
     const handleAccountHandlerChange = (value: string) => {
       const nextFormData = {
         ...formData,
         accountHandler: value,
-        accountHandlerId: "",
+        accountHandlerId: value,
       };
       setFormData(nextFormData);
       onChange?.(toSummary(nextFormData));
-    };
-
-    const handleAccountHandlerBlur = () => {
-      const trimmedValue = formData.accountHandler.trim();
-      const match = trimmedValue
-        ? accountHandlerOptionsState.find((option) => option.label === trimmedValue)
-        : undefined;
-
-      const nextFormData = {
-        ...formData,
-        accountHandlerId: match?.value ?? "",
-      };
-
-      if (nextFormData.accountHandlerId !== formData.accountHandlerId) {
-        setFormData(nextFormData);
-        onChange?.(toSummary(nextFormData));
-      }
     };
 
     useEffect(() => {
@@ -168,12 +130,20 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
       prevCompanyIdRef.current = companyId;
 
       const s = company.summary;
-      const nextFormData: FormData = {
+      const industryLabels = s.industry
+      ? String(s.industry)
+          .split(",")
+          .map((label) => label.trim())
+          .filter(Boolean)
+      : [];
+    const industryIds = s.industryIds ?? industryLabels.map((label) => getOptionValueByLabel(industryOptions, label)).filter(Boolean);
+
+    const nextFormData: FormData = {
         companyName: s.companyName ?? "",
         tradeName: s.tradeName ?? "",
         consigneeUsed: s.consigneeUsed ?? "",
         accountHandler: s.accountHandler ?? "",
-        accountHandlerId: s.accountHandlerId ?? "",
+        accountHandlerId: s.accountHandlerId ?? s.accountHandler ?? "",
         transactionType: s.transactionType ?? "",
         transactionTypeId: s.transactionTypeId ?? getOptionValueByLabel(transactionTypeOptions, s.transactionType),
         clientClassification: s.clientClassification ?? "",
@@ -181,6 +151,7 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
         companyType: s.companyType ?? "",
         companyTypeId: s.companyTypeId ?? getOptionValueByLabel(companyTypeOptions, s.companyType),
         industry: s.industry ?? "",
+        industryIds,
         businessType: s.businessType ?? "",
         businessTypeId: s.businessTypeId ?? getOptionValueByLabel(businessTypeOptions, s.businessType),
         businessRegistrationNumber: s.businessRegistrationNumber ?? "",
@@ -206,7 +177,7 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
       [formData, onChange],
     );
 
-    const handleChange = (field: keyof Omit<FormData, "accountHandlerId" | "transactionTypeId" | "clientClassificationId" | "companyTypeId" | "businessTypeId">, value: string | Date | null) => {
+    const handleChange = (field: keyof Omit<FormData, "accountHandlerId" | "transactionTypeId" | "clientClassificationId" | "companyTypeId" | "businessTypeId" | "industryIds">, value: string | Date | null) => {
       const nextFormData = {
         ...formData,
         [field]: value,
@@ -287,7 +258,6 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
               placeholder="Enter account handler"
               value={formData.accountHandler}
               onChange={(e) => handleAccountHandlerChange(e.currentTarget.value)}
-              onBlur={handleAccountHandlerBlur}
               error={errors?.accountHandler}
             />
           </div>
@@ -337,12 +307,25 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
         <Group grow mb="sm">
           <div>
             <Text size="sm" fw={500}>Industry</Text>
-            <Autocomplete
+            <MultiSelect
               data={industryOptions}
-              placeholder="Select or type an industry"
+              placeholder="Select industries"
               clearable
-              value={formData.industry}
-              onChange={(value) => handleChange("industry", value)}
+              searchable
+              nothingFoundMessage="No matching industry"
+              value={formData.industryIds}
+              onChange={(value) => {
+                const nextFormData = {
+                  ...formData,
+                  industryIds: value,
+                  industry: value
+                    .map((industryId) => getOptionLabelByValue(industryOptions, industryId))
+                    .filter(Boolean)
+                    .join(", "),
+                };
+                setFormData(nextFormData);
+                onChange?.(toSummary(nextFormData));
+              }}
               error={errors?.industry}
             />
           </div>

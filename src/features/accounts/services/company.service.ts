@@ -1,9 +1,11 @@
-import { GET, POST, PUT } from "@/lib/api/client";
+import { GET, POST } from "@/lib/api/client";
+import { getApiBaseUrl } from "@/lib/api/base-url";
 import type { ApiResponse } from "@/types/api";
 import type {
   CompanyListResponse,
   CompanyFullDetails,
   CompanyCreateRequest,
+  CompanyDocumentPayload,
   CompanyUpdateRequest,
   CompanyTableRow,
 } from "../types/company.types";
@@ -26,6 +28,96 @@ type CompanySection =
   | "monitoring"
   | "documents"
   | "insights";
+
+const companyApiPath = `${getApiBaseUrl()}/companies`;
+
+const isFileValue = (value: unknown): value is File => value instanceof File;
+
+const objectToFormData = (
+  obj: Record<string, unknown> | Array<unknown>,
+  form: FormData = new FormData(),
+  namespace = "",
+): FormData => {
+  if (Array.isArray(obj)) {
+    obj.forEach((value, index) => {
+      const formKey = namespace ? `${namespace}[${index}]` : String(index);
+      if (typeof value === "object" && value !== null && !isFileValue(value)) {
+        objectToFormData(value as Record<string, unknown>, form, formKey);
+      } else if (value !== undefined && value !== null) {
+        form.append(formKey, value as Blob | string);
+      }
+    });
+    return form;
+  }
+
+  Object.keys(obj).forEach((key) => {
+    const value = obj[key];
+    const formKey = namespace ? `${namespace}[${key}]` : key;
+
+    if (value === undefined || value === null) {
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      objectToFormData(value, form, formKey);
+      return;
+    }
+
+    if (isFileValue(value)) {
+      form.append(formKey, value);
+      return;
+    }
+
+    if (typeof value === "object") {
+      objectToFormData(value as Record<string, unknown>, form, formKey);
+      return;
+    }
+
+    form.append(formKey, String(value));
+  });
+
+  return form;
+};
+
+const containsFile = (payload: unknown): boolean => {
+  if (isFileValue(payload)) return true;
+  if (Array.isArray(payload)) return payload.some(containsFile);
+  if (payload && typeof payload === "object") {
+    return Object.values(payload).some(containsFile);
+  }
+  return false;
+};
+
+const normalizeAddressPayload = (payload: Record<string, unknown>): Record<string, unknown> => {
+  const normalized = { ...payload };
+
+  if (normalized.address && typeof normalized.address === "object" && !Array.isArray(normalized.address)) {
+    const address = normalized.address as Record<string, unknown>;
+    const normalizeArray = (value: unknown) => {
+      if (!Array.isArray(value)) {
+        return value;
+      }
+      return value
+        .map((item) => {
+          if (typeof item === "string") return item;
+          if (item && typeof item === "object" && "address" in item) {
+            const nested = (item as Record<string, unknown>).address;
+            return typeof nested === "string" ? nested : undefined;
+          }
+          return undefined;
+        })
+        .filter((item): item is string => typeof item === "string");
+    };
+
+    normalized.address = {
+      ...address,
+      warehouse_addresses: normalizeArray(address.warehouse_addresses),
+      delivery_addresses: normalizeArray(address.delivery_addresses),
+    };
+  }
+
+  return normalized;
+};
 
 // Backend response for a single section (API only returns one section at a time)
 type CompanyBackendDetails = {
@@ -129,7 +221,7 @@ const getString = (...values: Array<string | undefined | null>): string | null =
 const mapBackendCompanyToFullDetails = (backend: CompanyBackendDetails | any): CompanyFullDetails => {
   // Some sections return an array of objects (pricing, operation, monitoring, documents, insights).
   // If an array is returned, use its first item as the source for mapping.
-  const data = Array.isArray(backend) ? backend[0] : backend;
+  const data = Array.isArray(backend) ? backend[0] ?? {} : backend ?? {};
 
   return {
     companyId: data.id?.toString(),
@@ -231,27 +323,31 @@ const mapBackendCompanyToFullDetails = (backend: CompanyBackendDetails | any): C
     // Cases:
     // 1) The unwrapped payload is an array of file objects (e.g. [{file_name,...}, ...])
     // 2) The payload is an object with documents and/or attachments arrays
-    const docs: Array<{ name: string; url?: string | null }> = [];
-    const atts: Array<{ name: string; url?: string | null }> = [];
+    const docs: Array<CompanyDocumentPayload> = [];
+    const atts: Array<CompanyDocumentPayload> = [];
+
+    const mapBackendFileItem = (item: any): CompanyDocumentPayload => ({
+      id: item?.id != null ? item.id : undefined,
+      filepath: getString(item?.filepath, item?.file_path, item?.filePath) ?? null,
+      file_type: getString(item?.file_type, item?.fileType) ?? null,
+      name: getString(item?.file_name, item?.name) ?? "",
+      url: getString(item?.file_url, item?.url) ?? null,
+    });
 
     if (Array.isArray(backend) && backend.length > 0) {
-    const first = backend[0] as any;
-    // Heuristic: if items look like file objects, map the whole array into documents
-    if (first && (first.file_name || first.file_url || first.name || first.url)) {
-    backend.forEach((doc: any) => {
-    docs.push({ name: doc.file_name ?? doc.name ?? "", url: doc.file_url ?? doc.url ?? null });
-    });
-    return { documents: docs, attachments: atts };
-    }
+      const first = backend[0] as any;
+      // Heuristic: if items look like file objects, map the whole array into documents
+      if (first && (first.file_name || first.file_url || first.name || first.url)) {
+        backend.forEach((doc: any) => {
+          docs.push(mapBackendFileItem(doc));
+        });
+        return { documents: docs, attachments: atts };
+      }
     }
 
     // Fallback: read documents/attachments from the data object (if present)
-    (data.documents ?? []).forEach((doc: any) =>
-    docs.push({ name: doc.file_name ?? doc.name ?? "", url: doc.file_url ?? doc.url ?? null }),
-    );
-    (data.attachments ?? []).forEach((att: any) =>
-    atts.push({ name: att.file_name ?? att.name ?? "", url: att.file_url ?? att.url ?? null }),
-    );
+    (data.documents ?? []).forEach((doc: any) => docs.push(mapBackendFileItem(doc)));
+    (data.attachments ?? []).forEach((att: any) => atts.push(mapBackendFileItem(att)));
 
     return { documents: docs, attachments: atts };
     })(),
@@ -272,11 +368,22 @@ export const companyService = {
     perPage = 10,
     filters?: Record<string, unknown>,
   ): Promise<CompanyListResponse> {
-    const response = await GET<ApiResponse<CompanyListBackendItem[]>>("/companies", {
+    const response = await GET<ApiResponse<unknown>>(`${companyApiPath}`, {
       params: { page, per_page: perPage, ...filters },
     });
 
-    const rows: CompanyTableRow[] = (response.data ?? []).map((company) => ({
+    const payload = response.data as any;
+    const listPayload = payload?.data ?? payload;
+
+    const companiesData: CompanyListBackendItem[] = Array.isArray(listPayload)
+      ? listPayload
+      : Array.isArray(listPayload.companies)
+      ? listPayload.companies
+      : Array.isArray(listPayload.data)
+      ? listPayload.data
+      : [];
+
+    const rows: CompanyTableRow[] = companiesData.map((company) => ({
       companyId: company.id,
       companyRouteId: company.id,
       companyName: company.name,
@@ -286,10 +393,24 @@ export const companyService = {
       accountHandlerImagePath: company.account_handler?.image_path ?? undefined,
     }));
 
+    const total =
+      typeof listPayload?.total === "number"
+        ? listPayload.total
+        : typeof listPayload?.pagination?.total === "number"
+        ? listPayload.pagination.total
+        : rows.length;
+
+    const totalPages =
+      typeof listPayload?.totalPages === "number"
+        ? listPayload.totalPages
+        : typeof listPayload?.pagination?.total_pages === "number"
+        ? listPayload.pagination.total_pages
+        : Math.max(1, Math.ceil(total / perPage));
+
     return {
       data: rows,
-      total: rows.length,
-      totalPages: 1,
+      total,
+      totalPages,
     };
   },
 
@@ -299,9 +420,9 @@ export const companyService = {
     const params: Record<string, number> = {};
     if (section) params[section] = 1;
 
-    console.debug(`[companyService] Fetching company: /companies/${id} with params`, params);
+    console.debug(`[companyService] Fetching company: ${companyApiPath}/${id} with params`, params);
 
-    const response = await GET<ApiResponse<CompanyBackendDetails>>(`/companies/${id}`, {
+    const response = await GET<ApiResponse<CompanyBackendDetails>>(`${companyApiPath}/${id}`, {
       params,
     });
 
@@ -310,7 +431,8 @@ export const companyService = {
 
     // Some backend endpoints return an ApiResponse wrapper with a `data` field
     // that contains the actual section payload (sometimes as an array).
-    const payload = (response.data && (response.data as any).data) ? (response.data as any).data : response.data;
+    const payloadCandidate = (response.data && (response.data as any).data) ? (response.data as any).data : response.data;
+    const payload = Array.isArray(payloadCandidate) && payloadCandidate.length === 0 ? {} : payloadCandidate;
 
     console.debug(`[companyService] Unwrapped payload:`, payload);
 
@@ -318,22 +440,92 @@ export const companyService = {
   },
 
   async createCompany(payload: CompanyCreateRequest): Promise<CompanyFullDetails> {
-    const response = await POST<ApiResponse<CompanyBackendDetails>>("/companies", payload);
+    const normalizedPayload = normalizeAddressPayload(payload as Record<string, unknown>);
+    const hasFile = containsFile(normalizedPayload);
+    const requestData = hasFile ? objectToFormData(normalizedPayload) : normalizedPayload;
+    const config = hasFile ? { headers: { "Content-Type": undefined } } : undefined;
+    const response = await POST<ApiResponse<CompanyBackendDetails>>(`${companyApiPath}`, requestData, config);
     const payloadData = (response && (response as any).data) ? (response as any).data : response;
     return mapBackendCompanyToFullDetails(payloadData ?? {});
   },
 
-  async updateCompany(id: string, payload: CompanyUpdateRequest): Promise<CompanyFullDetails> {
-    // Clean nulls/undefined from payload so backend doesn't receive explicit `null` values
-    const cleanNulls = (obj: any) => JSON.parse(JSON.stringify(obj, (_, v) => (v === null ? undefined : v)));
+  async updateCompany(id: string, payload: CompanyUpdateRequest | FormData): Promise<CompanyFullDetails> {
+    const cleanNulls = (obj: any): any => {
+      if (obj === null || obj === undefined) return undefined;
+      if (isFileValue(obj)) return obj;
+      if (Array.isArray(obj)) {
+        const cleanedArray = obj.map(cleanNulls).filter((item) => item !== undefined);
+        return cleanedArray;
+      }
+      if (typeof obj === "object") {
+        const cleanedObject: Record<string, unknown> = {};
+        Object.entries(obj).forEach(([key, value]) => {
+          const cleanedValue = cleanNulls(value);
+          if (cleanedValue !== undefined) {
+            cleanedObject[key] = cleanedValue;
+          }
+        });
+        return Object.keys(cleanedObject).length > 0 ? cleanedObject : undefined;
+      }
+      return obj;
+    };
+
+    const formDataFromObject = (obj: Record<string, unknown>, form: FormData = new FormData(), namespace = ""): FormData => {
+      Object.entries(obj).forEach(([key, value]) => {
+        if (value === undefined || value === null) {
+          return;
+        }
+
+        const formKey = namespace ? `${namespace}[${key}]` : key;
+
+        if (Array.isArray(value)) {
+          value.forEach((item, index) => {
+            if (item === undefined || item === null) return;
+            if (item instanceof File) {
+              form.append(`${formKey}[${index}][file]`, item);
+            } else if (typeof item === "object") {
+              formDataFromObject(item as Record<string, unknown>, form, `${formKey}[${index}]`);
+            } else {
+              form.append(`${formKey}[${index}]`, String(item));
+            }
+          });
+          return;
+        }
+
+        if (isFileValue(value)) {
+          form.append(formKey, value);
+          return;
+        }
+
+        if (typeof value === "object") {
+          formDataFromObject(value as Record<string, unknown>, form, formKey);
+          return;
+        }
+
+        form.append(formKey, String(value));
+      });
+
+      return form;
+    };
+
     try {
-      const cleaned = cleanNulls(payload);
-      console.debug(`[companyService] updateCompany payload (cleaned) for id=${id}:`, cleaned);
-      const response = await PUT<ApiResponse<CompanyBackendDetails>>(`/companies/${id}`, cleaned);
+      let requestData: FormData;
+      if (payload instanceof FormData) {
+        requestData = payload;
+      } else {
+        const normalizedPayload = normalizeAddressPayload(payload as Record<string, unknown>);
+        const cleaned = cleanNulls(normalizedPayload) ?? {};
+        console.debug(`[companyService] updateCompany payload (cleaned) for id=${id}:`, cleaned);
+        requestData = formDataFromObject(cleaned as Record<string, unknown>);
+        requestData.append("_method", "PUT");
+      }
+
+      const config = { headers: { "Content-Type": undefined } };
+      const response = await POST<ApiResponse<CompanyBackendDetails>>(`${companyApiPath}/${id}`, requestData, config);
       const payloadData = (response && (response as any).data) ? (response as any).data : response;
       return mapBackendCompanyToFullDetails(payloadData ?? {});
     } catch (err: any) {
-      // Log raw payload for debugging if cleaning/PUT fails
+      // Log raw payload for debugging if cleaning/POST fails
       console.error(`[companyService] updateCompany failed for id=${id}. Raw payload:`, payload);
       // If axios style response exists, log status and data
       if (err?.response) {
@@ -349,20 +541,46 @@ export const companyService = {
   },
 
   async archiveCompany(id: string): Promise<{ success: boolean }> {
-    const response = await POST<ApiResponse<{ success: boolean }>>(`/companies/${id}/archive`);
+    const response = await POST<ApiResponse<{ success: boolean }>>(`${companyApiPath}/${id}/archive`);
     return response.data;
   },
 
   async uploadDocuments(id: string, files: File[]): Promise<Array<{ name: string; url: string }>> {
-    const form = new FormData();
-    files.forEach((file) => form.append("files", file));
+    const endpoints = [
+      `${companyApiPath}/${id}/documents`,
+      `${companyApiPath}/${id}/attachments`,
+      `${companyApiPath}/documents/${id}`,
+      `${companyApiPath}/document/${id}`,
+    ];
 
-    const response = await POST<ApiResponse<Array<{ name: string; url: string }>>>(
-      `/companies/${id}/documents`,
-      form,
-      { headers: { "Content-Type": "multipart/form-data" } },
-    );
+    const config = { headers: { "Content-Type": undefined } };
+    let lastError: unknown = null;
 
-    return response.data;
+    for (const endpoint of endpoints) {
+      try {
+        const uploads: Array<{ name: string; url: string }> = [];
+
+        for (const file of files) {
+          const form = new FormData();
+          form.append("file", file);
+          const response = await POST<ApiResponse<{ name: string; url: string }>>(
+            endpoint,
+            form,
+            config,
+          );
+          uploads.push(response.data);
+        }
+
+        return uploads;
+      } catch (error: any) {
+        lastError = error;
+        if (error?.response?.status === 404) {
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    throw lastError ?? new Error("Company document upload endpoint not found.");
   },
 };

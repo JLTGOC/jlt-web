@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { Paper, Box, Text, Group, Button } from "@mantine/core";
-import { ArrowLeftAlt } from "@nine-thirty-five/material-symbols-react/outlined";
 import { notifications } from "@mantine/notifications";
 import type { ZodIssue } from "zod";
 import { companyService } from "@/features/accounts/services/company.service";
-import type { CompanyFullDetails, CompanyUpdateRequest } from "@/features/accounts/types/company.types";
+import type { CompanyFullDetails } from "@/features/accounts/types/company.types";
 import {
   mapCompanyFullDetailsToBackendUpdateRequest,
   mapCompanySummaryToBackend,
@@ -16,12 +15,11 @@ import {
   mapOperationalToBackend,
   mapMonitoringToBackend,
   mapInsightsToBackend,
-  normalizeDocumentList,
+  prepareDocumentPayload,
 } from "@/features/accounts/types/company.types";
 import { PageCard } from "@/components/PageCard";
 import { CompanyModal } from "./CompanyModal";
 import {
-  companyFullDetailsSchema,
   companySummarySchema,
   companyAddressSchema,
   companyKeyContactsSchema,
@@ -139,47 +137,41 @@ const getDuplicateContactEmails = (
   );
 };
 
-const validateDraftCompany = (company: CompanyFullDetails, setActiveStep: (step: number) => void) => {
-  const duplicateEmails = getDuplicateContactEmails(company.keyContacts);
-  if (duplicateEmails.length > 0) {
-    setActiveStep(3);
-    notifications.show({
-      title: "Duplicate contact emails",
-      message: `Each key contact must use a unique email address. Duplicate email(s): ${duplicateEmails.join(", ")}`,
-      color: "orange",
-      autoClose: 7000,
-    });
+
+const validateCurrentSection = (
+  company: CompanyFullDetails,
+  section: CompanySection,
+  onError: (errors: Record<string, string>) => void,
+): boolean => {
+  if (!validateSection(section, company, onError)) {
     return false;
   }
 
-  const validationResult = companyFullDetailsSchema.safeParse(company);
-  if (validationResult.success) {
-    return true;
+  if (section === "contacts") {
+    const duplicateEmails = getDuplicateContactEmails(company.keyContacts);
+    if (duplicateEmails.length > 0) {
+      notifications.show({
+        title: "Duplicate contact emails",
+        message: `Each key contact must use a unique email address. Duplicate email(s): ${duplicateEmails.join(", ")}`,
+        color: "orange",
+        autoClose: 7000,
+      });
+      return false;
+    }
   }
 
-  const validationMessage = validationResult.error.issues
-    .map((issue) => issue.message)
-    .join(". ");
-
-  setActiveStep(1);
-  notifications.show({
-    title: "Validation Error",
-    message: validationMessage,
-    color: "orange",
-    autoClose: 5000,
-  });
-
-  return false;
+  return true;
 };
 
 interface EditCompanyFlowProps {
   companyId: string;
   initialCompany?: CompanyFullDetails;
+  initialStep?: number;
 }
 
-export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowProps) {
+export function EditCompanyFlow({ companyId, initialCompany, initialStep }: EditCompanyFlowProps) {
   const navigate = useNavigate();
-  const [activeStep, setActiveStep] = useState(1);
+  const [activeStep, setActiveStep] = useState(initialStep ?? 1);
   const [draftCompany, setDraftCompany] = useState<CompanyFullDetails | null>(initialCompany ?? null);
   const [isLoading, setIsLoading] = useState(!initialCompany);
   const [isSaving, setIsSaving] = useState(false);
@@ -190,17 +182,11 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
     emptySectionErrors,
   );
 
-  const steps = [
-    "Basic Information",
-    "Business Address &\nLocation",
-    "Key Contacts",
-    "Government &\nCompliance Details",
-    "Commercial &\nPricing Information",
-    "Operational Instructions",
-    "Risk, Issue And\nCompliance Monitoring",
-    "Documents &\nAttachments",
-    "Strategic Insight",
-  ];
+  useEffect(() => {
+    if (typeof initialStep !== "undefined") {
+      setActiveStep(initialStep);
+    }
+  }, [initialStep]);
 
   const getStepSection = (step: number): CompanySection => {
     const sectionMap: Record<number, CompanySection> = {
@@ -419,127 +405,106 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
     }
   };
 
-  const performSaveCompany = async () => {
+  const performSaveCompany = async (): Promise<CompanyFullDetails> => {
     if (!draftCompany) {
       throw new Error("Company details are missing.");
     }
 
-    if (!validateDraftCompany(draftCompany, setActiveStep)) {
-      return;
+    const section = getStepSection(activeStep);
+    if (!validateCurrentSection(draftCompany, section, (errors) => {
+      setSectionErrors((prev) => ({
+        ...prev,
+        [section]: errors,
+      }));
+    })) {
+      throw new Error("Validation failed for the current section.");
     }
 
     try {
       setIsSaving(true);
 
-      // Determine which section to update based on current activeStep
-      const section = getStepSection(activeStep);
-
-      // Helpful debug: log validation issues for the full company object
+      // Helpful debug: log validation issues for the current section
       try {
-        const validation = companyFullDetailsSchema.safeParse(draftCompany);
+        const validation = sectionSchemaMap[section].safeParse(sectionDataMap(draftCompany)[section]);
         if (!validation.success) {
-          console.warn("Zod validation issues for company before update:", validation.error.issues);
+          console.warn(`Zod validation issues for section ${section} before update:`, validation.error.issues);
         }
       } catch (err) {
         console.warn("Failed to run zod validation for debug:", err);
       }
 
-      const cleanNulls = (obj: any) => JSON.parse(JSON.stringify(obj, (_, v) => (v === null ? undefined : v)));
+      const cleanNulls = (obj: any) => JSON.parse(JSON.stringify(obj, (_, v) => {
+        if (v === null) return undefined;
+        return v;
+      }));
 
       // Build a section-specific payload
       let sectionPayload: Record<string, any> = {};
+      const addressPayload = {
+        address: mapAddressToBackend(draftCompany.address),
+      };
+
       switch (section) {
         case "basic_info":
-          sectionPayload = { basic_info: mapCompanySummaryToBackend(draftCompany.summary) };
+          sectionPayload = {
+            basic_info: mapCompanySummaryToBackend(draftCompany.summary),
+            ...addressPayload,
+          };
           break;
         case "address":
-          sectionPayload = {
-            address: mapAddressToBackend(draftCompany.address),
-            warehouse_addresses: draftCompany.address?.warehouseAddresses,
-            delivery_addresses: draftCompany.address?.deliveryAddresses,
-          };
+          sectionPayload = addressPayload;
           break;
         case "contacts":
           sectionPayload = {
             primary: mapContactPersonToBackend(draftCompany.keyContacts?.primaryContact),
             secondary: mapContactPersonToBackend(draftCompany.keyContacts?.secondaryContact),
             billing: mapContactPersonToBackend(draftCompany.keyContacts?.billingContact),
+            ...addressPayload,
           };
           break;
         case "registration":
-          sectionPayload = { registration: mapRegistrationToBackend(draftCompany.governmentCompliance) };
+          sectionPayload = {
+            registration: mapRegistrationToBackend(draftCompany.governmentCompliance),
+            ...addressPayload,
+          };
           break;
         case "pricing":
-          sectionPayload = { pricing: mapCommercialToBackend(draftCompany.commercialInformation) };
+          sectionPayload = {
+            pricing: mapCommercialToBackend(draftCompany.commercialInformation),
+            ...addressPayload,
+          };
           break;
         case "operation":
-          sectionPayload = { operation: mapOperationalToBackend(draftCompany.operationalInstructions) };
+          sectionPayload = {
+            operation: mapOperationalToBackend(draftCompany.operationalInstructions),
+            ...addressPayload,
+          };
           break;
         case "monitoring":
-          sectionPayload = { monitoring: mapMonitoringToBackend(draftCompany.riskIssueMonitoring) };
+          sectionPayload = {
+            monitoring: mapMonitoringToBackend(draftCompany.riskIssueMonitoring),
+            ...addressPayload,
+          };
           break;
         case "documents":
           sectionPayload = {
-            documents: normalizeDocumentList(draftCompany.documentsAttachments?.documents),
-            attachments: normalizeDocumentList(draftCompany.documentsAttachments?.attachments),
+            documents: await prepareDocumentPayload(draftCompany.documentsAttachments?.documents),
+            attachments: await prepareDocumentPayload(draftCompany.documentsAttachments?.attachments),
+            ...addressPayload,
           };
           break;
         case "insights":
-          sectionPayload = { insights: mapInsightsToBackend(draftCompany.strategicInsight) };
+          sectionPayload = {
+            insights: mapInsightsToBackend(draftCompany.strategicInsight),
+            ...addressPayload,
+          };
           break;
         default:
           sectionPayload = mapCompanyFullDetailsToBackendUpdateRequest(draftCompany) as Record<string, any>;
       }
 
-      console.log("sectionPayload (raw):", sectionPayload);
-      let cleanedPayload = cleanNulls(sectionPayload);
-      console.log("sectionPayload (cleaned):", cleanedPayload);
-
-      // Analyze cleaned payload for nulls/empty objects/arrays to aid backend validation debugging
-      const analyzePayload = (obj: any, path = "") => {
-        const nullPaths: string[] = [];
-        const emptyObjectPaths: string[] = [];
-        const emptyArrayPaths: string[] = [];
-        const typeMap: Record<string, string> = {};
-
-        const walk = (value: any, curPath: string) => {
-          const p = curPath || "root";
-          if (value === null) {
-            nullPaths.push(p);
-            typeMap[p] = "null";
-            return;
-          }
-          if (value === undefined) {
-            typeMap[p] = "undefined";
-            return;
-          }
-          const t = Object.prototype.toString.call(value);
-          if (t === "[object Array]") {
-            typeMap[p] = "array";
-            if ((value as any[]).length === 0) emptyArrayPaths.push(p);
-            (value as any[]).forEach((v, i) => walk(v, `${p}[${i}]`));
-            return;
-          }
-          if (t === "[object Object]") {
-            const keys = Object.keys(value);
-            typeMap[p] = "object";
-            if (keys.length === 0) {
-              emptyObjectPaths.push(p);
-              return;
-            }
-            keys.forEach((k) => walk(value[k], curPath ? `${curPath}.${k}` : k));
-            return;
-          }
-          typeMap[p] = typeof value;
-        };
-
-        walk(obj, path);
-
-        return { nullPaths, emptyObjectPaths, emptyArrayPaths, typeMap };
-      };
-
-      const analysis = analyzePayload(cleanedPayload);
-      console.log("payload analysis:", analysis);
+      const { documents, attachments, ...restOfPayload } = sectionPayload;
+      let cleanedPayload = cleanNulls(restOfPayload);
 
       // Detect keys that backend expects to be objects but are null/incorrectly typed
       const expectedObjectKeys = [
@@ -572,44 +537,125 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
         console.warn("Payload object-type issues (expected object, found null/incorrect type):", objectTypeIssues);
       }
 
-      // If we're updating documents section, handle file uploads first and then update payload
-      if (section === "documents") {
-        const docs = draftCompany.documentsAttachments?.documents ?? [];
-        const filesToUpload = docs.filter((d: any) => d?.file) as Array<any>;
-
-        if (filesToUpload.length > 0) {
-          try {
-            const uploaded = await companyService.uploadDocuments(
-              companyId,
-              filesToUpload.map((d) => d.file as File),
-            );
-
-            const mergedDocs = docs.map((d: any) => {
-              if (d?.file) {
-                const match = uploaded.find((u) => u.name === d.name);
-                return { name: d.name, url: match?.url ?? null };
-              }
-              return { name: d.name, url: d.url ?? null };
-            });
-
-            cleanedPayload = cleanNulls({ ...cleanedPayload, documents: mergedDocs, attachments: normalizeDocumentList(draftCompany.documentsAttachments?.attachments) });
-          } catch (err) {
-            console.error("Failed to upload documents", err);
-            notifications.show({ title: "Upload Error", message: "Failed to upload documents.", color: "red" });
-          }
+      const formDataFromObject = (obj: any, form: FormData = new FormData(), namespace = ""): FormData => {
+        if (obj === null || obj === undefined) {
+          return form;
         }
-      }
 
-      console.log("update payload (stringified):", JSON.stringify(cleanedPayload));
+        if (obj instanceof File) {
+          if (!namespace) {
+            throw new Error("Cannot append File without a form field name.");
+          }
+          form.append(namespace, obj);
+          return form;
+        }
+
+        if (Array.isArray(obj)) {
+          obj.forEach((value, index) => {
+            if (value === undefined || value === null) {
+              return;
+            }
+            const formKey = `${namespace}[${index}]`;
+            if (value instanceof File) {
+              form.append(`${formKey}[file]`, value);
+            } else if (typeof value === "object") {
+              formDataFromObject(value, form, formKey);
+            } else {
+              form.append(formKey, String(value));
+            }
+          });
+          return form;
+        }
+
+        if (typeof obj === "object") {
+          Object.entries(obj).forEach(([key, value]) => {
+            if (value === undefined || value === null) {
+              return;
+            }
+            const formKey = namespace ? `${namespace}[${key}]` : key;
+            if (value instanceof File) {
+              form.append(formKey, value);
+            } else if (Array.isArray(value) || typeof value === "object") {
+              formDataFromObject(value, form, formKey);
+            } else {
+              form.append(formKey, String(value));
+            }
+          });
+          return form;
+        }
+
+        if (!namespace) {
+          throw new Error("Cannot append primitive value without a form field name.");
+        }
+
+        form.append(namespace, String(obj));
+        return form;
+      };
+
+      const appendDocumentArray = (
+        form: FormData,
+        items: any[] | undefined,
+        fieldName: string,
+      ) => {
+        if (!Array.isArray(items) || items.length === 0) {
+          return;
+        }
+
+        items.forEach((doc, index) => {
+          const isNewFile = doc.file instanceof File;
+          const isExistingFile = doc.id != null;
+
+          if (!isNewFile && !isExistingFile) {
+            return;
+          }
+
+          const prefix = `${fieldName}[${index}]`;
+
+          if (doc.id != null) {
+            form.append(`${prefix}[id]`, String(doc.id));
+          }
+          if (doc.name != null) {
+            form.append(`${prefix}[name]`, String(doc.name));
+          }
+          if (doc.filepath != null) {
+            form.append(`${prefix}[filepath]`, String(doc.filepath));
+          }
+          if (doc.file_type != null) {
+            form.append(`${prefix}[file_type]`, String(doc.file_type));
+          }
+          if (doc.url != null) {
+            form.append(`${prefix}[url]`, String(doc.url));
+          }
+          if (isNewFile) {
+            form.append(`${prefix}[file]`, doc.file);
+          }
+        });
+      };
+
+      const requestFormData = new FormData();
+      const copyPayload = { ...cleanedPayload };
+      formDataFromObject(copyPayload, requestFormData);
+      appendDocumentArray(requestFormData, documents, "documents");
+      appendDocumentArray(requestFormData, attachments, "attachments");
+      requestFormData.append("_method", "PUT");
+
+      let updatedCompany: CompanyFullDetails;
       try {
-        await companyService.updateCompany(companyId, cleanedPayload as CompanyUpdateRequest);
+        await companyService.updateCompany(companyId, requestFormData);
+
+        if (section === "documents") {
+          updatedCompany = await companyService.getCompanyById(companyId, "documents");
+        } else {
+          updatedCompany = await companyService.getCompanyById(companyId, section);
+        }
       } catch (err: any) {
         // Surface server response details for easier debugging
         console.error("Update failed. Server response:", err?.response?.status, err?.response?.data);
         throw err;
       }
 
-      return;
+      setDraftCompany(updatedCompany);
+      return updatedCompany;
     } catch (error: any) {
       console.error("Failed to save company:", error);
 
@@ -645,7 +691,13 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
       return;
     }
 
-    if (!validateDraftCompany(draftCompany, setActiveStep)) {
+    const currentSection = getStepSection(activeStep);
+    if (!validateCurrentSection(draftCompany, currentSection, (errors) => {
+      setSectionErrors((prev) => ({
+        ...prev,
+        [currentSection]: errors,
+      }));
+    })) {
       return;
     }
 
@@ -658,7 +710,10 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
     try {
       setIsSaving(true);
       setFinishModalError(null);
-      await performSaveCompany();
+      const updatedCompany = await performSaveCompany();
+      if (updatedCompany) {
+        setDraftCompany(updatedCompany);
+      }
       setFinishModalStage("success");
     } catch (error: any) {
       const message = error instanceof Error ? error.message : "An unexpected error occurred.";
@@ -676,32 +731,6 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
     }
   };
 
-  const handlePrimaryAction = () => {
-    const currentSection = getStepSection(activeStep);
-
-    if (activeStep === 1 && basicInformationRef.current?.commit) {
-      try {
-        const summary = basicInformationRef.current.commit();
-        updateSection("summary", summary as any);
-      } catch (err) {
-        console.error("Failed to commit basic information before navigating:", err);
-      }
-    }
-
-    if (activeStep < steps.length) {
-      if (!validateSection(currentSection, draftCompany, (errors) => {
-        setSectionErrors((prev) => ({
-          ...prev,
-          [currentSection]: errors,
-        }));
-      })) {
-        return;
-      }
-
-      setActiveStep((s) => s + 1);
-      return;
-    }
-  };
 
   return (
     <PageCard
@@ -721,81 +750,7 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
           onClose={closeFinishModal}
         />
 
-        {/* Stepper */}
-        <Box
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginTop: "1rem",
-            marginBottom: "0.5rem",
-            width: "100%",
-          }}
-        >
-          {steps.map((label, index) => {
-            const isActive = index + 1 <= activeStep;
-            const isLineActive = index + 1 < activeStep;
-
-            return (
-              <Box
-                key={index}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  position: "relative",
-                  flex: 1,
-                }}
-              >
-                <Box
-                  w={32}
-                  h={32}
-                  style={{
-                    borderRadius: "50%",
-                    backgroundColor: isActive ? "#0064E0" : "#dee2e6",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    position: "relative",
-                  }}
-                >
-                  <Text c="white" size="sm">
-                    {index + 1}
-                  </Text>
-
-                  {index < steps.length - 1 && (
-                    <Box
-                      style={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "100%",
-                        height: "2px",
-                        width: "170px",
-                        backgroundColor: isLineActive ? "#0064E0" : "#adb5bd",
-                        transform: "translateY(-50%)",
-                      }}
-                    />
-                  )}
-                </Box>
-
-                <Text
-                  size="sm"
-                  fw={300}
-                  c="black"
-                  style={{
-                    whiteSpace: "pre-line",
-                    marginTop: 6,
-                    textAlign: "center",
-                  }}
-                >
-                  {label}
-                </Text>
-              </Box>
-            );
-          })}
-        </Box>
-
-        {/* Current step form */}
+        {/* Current section form */}
         {isLoading ? (
           <Box style={{ padding: "2rem", textAlign: "center" }}>
             <Text>Loading company details...</Text>
@@ -804,52 +759,18 @@ export function EditCompanyFlow({ companyId, initialCompany }: EditCompanyFlowPr
           renderStep()
         )}
 
-        {/* Navigation buttons */}
-        <Group justify="space-between" mt="md" style={{ width: "100%" }}>
-          {activeStep !== 1 ? (
-            <Button
-              size="md"
-              radius="md"
-              style={{ minWidth: 160, backgroundColor: "#EAEAEA", color: "#4E6174" }}
-              onClick={() => setActiveStep((s) => s - 1)}
-              disabled={isSaving}
-            >
-              <Group gap="sm" justify="center">
-                <ArrowLeftAlt width={20} height={20} style={{ color: "#4E6174" }} />
-                <span>Back</span>
-              </Group>
-            </Button>
-          ) : (
-            <Box style={{ minWidth: 160 }} />
-          )}
-
-          <Group gap="xs" style={{ marginLeft: activeStep === 1 ? "auto" : "0" }}>
-            {activeStep < steps.length && (
-              <Button
-                color="#4E6174"
-                size="md"
-                radius="md"
-                style={{ minWidth: 160 }}
-                onClick={handlePrimaryAction}
-                loading={isSaving}
-                disabled={isSaving}
-              >
-                Next
-              </Button>
-            )}
-
-            <Button
-              color="#4E6174"
-              size="md"
-              radius="md"
-              style={{ minWidth: 160 }}
-              onClick={handleSaveCompany}
-              loading={isSaving}
-              disabled={isSaving}
-            >
-              Update
-            </Button>
-          </Group>
+        <Group justify="flex-end" mt="md" style={{ width: "100%" }}>
+          <Button
+            color="#4E6174"
+            size="md"
+            radius="md"
+            style={{ minWidth: 160 }}
+            onClick={handleSaveCompany}
+            loading={isSaving}
+            disabled={isSaving}
+          >
+            Update
+          </Button>
         </Group>
       </Paper>
     </PageCard>

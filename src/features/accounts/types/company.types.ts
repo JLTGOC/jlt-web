@@ -16,6 +16,10 @@ export interface CompanyTableRow {
   accountHandlerImagePath?: string;
 }
 
+export const supportedIndustryIds = ["1", "2", "3", "4", "5", "6"] as const;
+
+export type SupportedIndustryId = (typeof supportedIndustryIds)[number];
+
 export interface CompanySummary {
   companyName: string;
   tradeName?: string | null;
@@ -29,6 +33,8 @@ export interface CompanySummary {
   companyType?: string | null;
   companyTypeId?: string | null;
   industry?: string | null;
+  industryIds?: string[] | null;
+  industryId?: string | null;
   businessType?: string | null;
   businessTypeId?: string | null;
   businessRegistrationNumber?: string | null;
@@ -98,9 +104,18 @@ export interface CompanyRiskIssueMonitoring {
   monitoringNotes?: string | null;
 }
 
+export interface CompanyDocumentPayload {
+  id?: number | string;
+  filepath?: string | null;
+  file_type?: string | null;
+  name: string;
+  url?: string | null;
+  file?: File | string | null;
+}
+
 export interface CompanyDocumentsAttachments {
-  documents?: Array<{ name: string; url?: string | null }>;
-  attachments?: Array<{ name: string; url?: string | null }>;
+  documents?: CompanyDocumentPayload[];
+  attachments?: CompanyDocumentPayload[];
 }
 
 export interface CompanyStrategicInsight {
@@ -147,9 +162,9 @@ export interface CompanyBackendRequest {
     usual_port?: string | null;
     origin_country?: string | null;
     destination_country?: string | null;
+    warehouse_addresses?: string[];
+    delivery_addresses?: string[];
   };
-  warehouse_addresses?: string[];
-  delivery_addresses?: string[];
   primary?: { full_name?: string | null; position?: string | null; contact_number?: string | null; email?: string | null } | null;
   secondary?: { full_name?: string | null; position?: string | null; contact_number?: string | null; email?: string | null } | null;
   billing?: { full_name?: string | null; position?: string | null; contact_number?: string | null; email?: string | null } | null;
@@ -162,6 +177,7 @@ export interface CompanyBackendRequest {
     exporter_accreditation_number?: string | null;
     exporter_accreditation_expiry?: string | null;
     authorized_representatives?: string[];
+    representatives?: string[];
     special_permits?: string | null;
     compliance_risk?: string | null;
   };
@@ -192,10 +208,11 @@ export interface CompanyBackendRequest {
     expansion_plan?: string | null;
     competitors?: string | null;
     opportunities?: string | null;
+    notes?: string | null;
     insight_notes?: string | null;
   };
-  documents?: Array<{ name: string; url?: string | null }>;
-  attachments?: Array<{ name: string; url?: string | null }>;
+  documents?: CompanyDocumentPayload[];
+  attachments?: CompanyDocumentPayload[];
 }
 
 export interface CompanyListResponse {
@@ -208,11 +225,74 @@ export interface CompanyCreateRequest extends Partial<CompanyBackendRequest> {}
 export interface CompanyUpdateRequest extends Partial<CompanyBackendRequest> {}
 
 export const normalizeDocumentList = (
-  list?: Array<{ name: string; url?: string | null } & Record<string, unknown>>,
-): Array<{ name: string; url?: string | null }> | undefined =>
+  list?: Array<CompanyDocumentPayload>,
+): Array<CompanyDocumentPayload> | undefined =>
   list
-    ?.filter((item) => item && (item.url != null && item.url !== ""))
-    .map(({ name, url }) => ({ name, url }));
+    ?.filter(
+      (item) =>
+        item &&
+        ((item.url != null && item.url !== "") || item.file != null || item.id != null),
+    )
+    .map(({ id, filepath, file_type, name, url, file }) => ({ id, filepath, file_type, name, url, file }));
+
+export const fileToBinaryString = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const arrayBuffer = reader.result as ArrayBuffer;
+      const bytes = new Uint8Array(arrayBuffer);
+      let binary = "";
+      for (let i = 0; i < bytes.length; i += 1) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      resolve(binary);
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsArrayBuffer(file);
+  });
+
+export const prepareDocumentPayload = async (
+  list?: Array<CompanyDocumentPayload>,
+): Promise<Array<CompanyDocumentPayload> | undefined> => {
+  const items = list ?? [];
+  const payload: Array<CompanyDocumentPayload> = [];
+
+  for (const item of items) {
+    if (!item?.name?.trim()) continue;
+
+    const payloadItem: CompanyDocumentPayload = {
+      id: item.id,
+      filepath: item.filepath,
+      file_type: item.file_type,
+      name: item.name,
+      url: item.url ?? null,
+    };
+
+    if (item.file instanceof File) {
+      payloadItem.file = item.file;
+      payload.push(payloadItem);
+      continue;
+    }
+
+    if (typeof item.file === "string" && item.file.trim() !== "") {
+      payloadItem.file = item.file;
+      payload.push(payloadItem);
+      continue;
+    }
+
+    if (item.id != null) {
+      payload.push(payloadItem);
+      continue;
+    }
+
+    if (item.url && (item.file === null || item.file === undefined)) {
+      // Do not include legacy URL-only documents in create/update payloads.
+      continue;
+    }
+  }
+
+  return payload.length > 0 ? payload : undefined;
+};
 
 export const isContactPersonBlank = (contact?: CompanyContactPerson | null): boolean =>
   !contact ||
@@ -257,6 +337,9 @@ const industryNameToId: Record<string, number> = {
   Logistics: 1,
   Manufacturing: 2,
   Retail: 3,
+  Agriculture: 4,
+  Construction: 5,
+  Healthcare: 6,
 };
 
 export const normalizeIndustryToIds = (industry?: string | string[] | null): number[] | null => {
@@ -278,28 +361,39 @@ export const normalizeIndustryToIds = (industry?: string | string[] | null): num
   return ids.length > 0 ? ids : null;
 };
 
-export const mapCompanySummaryToBackend = (summary: CompanySummary) => ({
-  name: summary.companyName,
-  trade_name: summary.tradeName ?? null,
-  consignee_used: summary.consigneeUsed ?? null,
-  // Prefer explicit id when available, fall back to name otherwise.
-  account_handler_id: summary.accountHandlerId ?? null,
-  transaction_type_id: summary.transactionTypeId ?? summary.transactionType ?? null,
-  client_classification_id: summary.clientClassificationId ?? summary.clientClassification ?? null,
-  company_type_id: summary.companyTypeId ?? summary.companyType ?? null,
-  business_type_id: summary.businessTypeId ?? summary.businessType ?? null,
-  business_registration_number: summary.businessRegistrationNumber ?? null,
-  website: summary.website ?? null,
-  years_in_operation: parseYearsInOperation(summary.yearsInOperation),
-  activation_date: formatDateStringForBackend(summary.dateOfActivation),
-  // Backend expects array[string] or null — send list of industry names (comma-separated supported)
-  industry: summary.industry
-    ? String(summary.industry)
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-    : null,
-});
+export const mapCompanySummaryToBackend = (summary: CompanySummary) => {
+  const validIndustryIds = summary.industryIds?.filter((id) =>
+    supportedIndustryIds.includes(id as SupportedIndustryId),
+  ) ?? [];
+
+  const fallbackIndustryId = supportedIndustryIds.includes(summary.industryId as SupportedIndustryId)
+    ? summary.industryId
+    : undefined;
+
+  return {
+    name: summary.companyName,
+    trade_name: summary.tradeName ?? null,
+    consignee_used: summary.consigneeUsed ?? null,
+    // Prefer explicit id when available, fall back to name otherwise.
+    account_handler_id: summary.accountHandlerId ?? summary.accountHandler ?? null,
+    transaction_type_id: summary.transactionTypeId ?? summary.transactionType ?? null,
+    client_classification_id: summary.clientClassificationId ?? summary.clientClassification ?? null,
+    company_type_id: summary.companyTypeId ?? summary.companyType ?? null,
+    business_type_id: summary.businessTypeId ?? summary.businessType ?? null,
+    business_registration_number: summary.businessRegistrationNumber ?? null,
+    website: summary.website ?? null,
+    years_in_operation: parseYearsInOperation(summary.yearsInOperation),
+    activation_date: formatDateStringForBackend(summary.dateOfActivation),
+    // Backend expects array[string] or null — send list of ID strings or fallback labels.
+    industry: validIndustryIds.length > 0
+      ? validIndustryIds
+      : fallbackIndustryId
+        ? [fallbackIndustryId]
+        : summary.industry
+          ? normalizeIndustryToIds(summary.industry)?.map(String) ?? null
+          : null,
+  };
+};
 
 export const mapAddressToBackend = (address: CompanyAddressSummary) => ({
   registered_address: address.registeredAddress ?? null,
@@ -307,6 +401,8 @@ export const mapAddressToBackend = (address: CompanyAddressSummary) => ({
   usual_port: address.portOfUsualEntryExit ?? null,
   origin_country: address.countryOfOrigin ?? null,
   destination_country: address.countryOfDestination ?? null,
+  warehouse_addresses: address.warehouseAddresses ?? [],
+  delivery_addresses: address.deliveryAddresses ?? [],
 });
 
 export const mapRegistrationToBackend = (registration: CompanyGovernmentCompliance) => ({
@@ -318,6 +414,7 @@ export const mapRegistrationToBackend = (registration: CompanyGovernmentComplian
   exporter_accreditation_number: registration.exporterAccreditationNumber ?? null,
   exporter_accreditation_expiry: formatDateStringForBackend(registration.exporterExpirationDate),
   authorized_representatives: registration.authorizedRepresentatives,
+  representatives: registration.authorizedRepresentatives,
   special_permits: registration.specialPermits ?? null,
   compliance_risk: registration.complianceRisk ?? null,
 });
@@ -352,7 +449,7 @@ export const mapInsightsToBackend = (insight: CompanyStrategicInsight) => ({
   expansion_plan: insight.expansionPlan ?? null,
   competitors: insight.competitorsUsed ?? null,
   opportunities: insight.upsellingOpportunities ?? null,
-  insight_notes: insight.notes ?? null,
+  notes: insight.notes ?? null,
 });
 
 export const mapCompanyFullDetailsToBackendRequest = (
@@ -366,15 +463,12 @@ export const mapCompanyFullDetailsToBackendRequest = (
     commercialInformation,
     operationalInstructions,
     riskIssueMonitoring,
-    documentsAttachments,
     strategicInsight,
   } = company;
 
   return {
     basic_info: mapCompanySummaryToBackend(summary),
     address: mapAddressToBackend(address),
-    warehouse_addresses: address?.warehouseAddresses,
-    delivery_addresses: address?.deliveryAddresses,
     primary: mapContactPersonToBackend(keyContacts?.primaryContact),
     secondary: mapContactPersonToBackend(keyContacts?.secondaryContact),
     billing: mapContactPersonToBackend(keyContacts?.billingContact),
@@ -383,8 +477,6 @@ export const mapCompanyFullDetailsToBackendRequest = (
     monitoring: mapMonitoringToBackend(riskIssueMonitoring),
     operation: mapOperationalToBackend(operationalInstructions),
     insights: mapInsightsToBackend(strategicInsight),
-    documents: normalizeDocumentList(documentsAttachments?.documents),
-    attachments: normalizeDocumentList(documentsAttachments?.attachments),
   };
 };
 

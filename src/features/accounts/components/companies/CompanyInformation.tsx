@@ -16,7 +16,13 @@ export function CompanyInformation() {
   const isEditMode = Boolean(companyId);
 
   if (isEditMode && companyId) {
-    return <EditCompanyFlow companyId={companyId} initialCompany={locationState?.company} />;
+    return (
+      <EditCompanyFlow
+        companyId={companyId}
+        initialCompany={locationState?.company}
+        initialStep={locationState?.activeStep}
+      />
+    );
   }
 
   return <AddCompanyFlow />;

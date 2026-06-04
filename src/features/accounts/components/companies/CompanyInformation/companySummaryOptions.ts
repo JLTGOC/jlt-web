@@ -20,7 +20,14 @@ export const companyTypeOptions: CompanyOption[] = [
   { value: "3", label: "Trader" },
 ];
 
-export const industryOptions = ["Logistics", "Manufacturing", "Retail"] as const;
+export const industryOptions: CompanyOption[] = [
+  { value: "1", label: "Logistics" },
+  { value: "2", label: "Manufacturing" },
+  { value: "3", label: "Retail" },
+  { value: "4", label: "Agriculture" },
+  { value: "5", label: "Construction" },
+  { value: "6", label: "Healthcare" },
+];
 
 export const businessTypeOptions: CompanyOption[] = [
   { value: "1", label: "Sole Proprietorship" },
