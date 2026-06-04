@@ -1,27 +1,38 @@
 import { useEffect, useState } from "react";
-import ServiceTypeModal from "../components/planning-timeline/modals/ServiceType";
+import { useLocation } from "react-router";
+import { Text } from "@mantine/core";
+import LogisticsTemplates from "../components/planning-timeline/components/LogisticsTemplates";
+import TemplatesConfiguration from "../components/planning-timeline/components/TemplatesConfiguration";
 
-type PlanningTimelinePageProps = {
-  openServiceTypeModal: boolean;
-};
+type ServiceType = "REGULATORY" | "LOGISTICS";
 
-export default function PlanningTimelinePage({
-  openServiceTypeModal,
-}: PlanningTimelinePageProps) {
-  const [isServiceTypeModalOpen, setIsServiceTypeModalOpen] = useState(
-    openServiceTypeModal,
-  );
+type PlanningTimelinePageProps = {};
+
+export default function PlanningTimelinePage({}: PlanningTimelinePageProps) {
+  const [serviceType, setServiceType] = useState<ServiceType | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
-    setIsServiceTypeModalOpen(openServiceTypeModal);
-  }, [openServiceTypeModal]);
+    const stateServiceType = (
+      location.state as { serviceType?: ServiceType } | null | undefined
+    )?.serviceType;
+
+    if (stateServiceType) {
+      setServiceType(stateServiceType);
+    }
+  }, [location.state]);
+
+  console.log(serviceType);
 
   return (
     <>
-      <ServiceTypeModal
-        opened={isServiceTypeModalOpen}
-        onClose={() => setIsServiceTypeModalOpen(false)}
-      />
+      {serviceType === "LOGISTICS" ? (
+        <>
+          <LogisticsTemplates/> 
+        </>
+      ) : (
+        <Text>UNDER-CONSTRUCTION</Text>
+      )}
     </>
   );
 }
