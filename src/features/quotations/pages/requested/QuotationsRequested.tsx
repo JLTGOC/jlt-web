@@ -20,6 +20,7 @@ export function QuotationsRequested() {
     clientCounts,
     clientFilter,
     closeModal,
+    currentUserRole,
     dateFilter,
     handleAcceptConfirm,
     handleJobSwitchChange,
@@ -129,6 +130,7 @@ export function QuotationsRequested() {
                 isLoading={isLoading || isFetching}
                 showingCount={showingCount}
                 total={totalQuotations}
+                currentUserRole={currentUserRole}
                 onAcceptClick={openAcceptModal}
                 onReassignClick={openReassignModal}
                 onReassignRequestClick={openReassignRequestModal}

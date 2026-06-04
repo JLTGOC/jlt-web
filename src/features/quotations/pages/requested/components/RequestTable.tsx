@@ -21,6 +21,7 @@ import {
   Delete,
 } from "@nine-thirty-five/material-symbols-react/outlined";
 import type { QuotationListItem } from "@/features/quotations/types/quotations.types";
+import { ROLES } from "@/types/roles";
 
 type QuotationRow = QuotationListItem;
 
@@ -40,6 +41,7 @@ interface RequestTableProps {
   totalPages?: number;
   jobFilter?: "all" | "my-items";
   perPaginationPage?: number;
+  currentUserRole?: string | null;
   setPerPaginationPage?: (page: number) => void;
   onRowClick?: (row: QuotationRow) => void;
   onAcceptClick?: (row: QuotationRow) => void;
@@ -78,6 +80,7 @@ export function RequestTable({
   jobFilter,
   totalPages,
   perPaginationPage,
+  currentUserRole,
   setPerPaginationPage,
   onRowClick,
   onAcceptClick,
@@ -87,6 +90,8 @@ export function RequestTable({
 }: RequestTableProps) {
   const currentShowingCount = showingCount ?? rows.length;
   const currentTotal = total ?? rows.length;
+  const isLeadAccountSpecialist =
+    currentUserRole === ROLES.LEAD_ACCOUNT_SPECIALIST;
 
   return (
     <>
@@ -234,7 +239,7 @@ export function RequestTable({
                             Make Quotation
                           </Button>
                           {row.assignment_status ===
-                          "REASSIGNMENT REQUESTED" ? (
+                          "REASSIGNMENT REQUESTED" && currentUserRole !== "Lead Account Specialist"? (
                             <Button
                               c={"#CD862C"}
                               styles={{ root: { background: "#E4D8CA" } }}
@@ -243,7 +248,11 @@ export function RequestTable({
                               }
                               onClick={(event) => {
                                 event.stopPropagation();
-                                onReassignRequestClick?.(row);
+                                if (isLeadAccountSpecialist) {
+                                  onReassignClick?.(row);
+                                } else {
+                                  onReassignRequestClick?.(row);
+                                }
                               }}
                             >
                               Pending...
@@ -254,10 +263,16 @@ export function RequestTable({
                               leftSection={<ChangeCircle width={20} />}
                               onClick={(event) => {
                                 event.stopPropagation();
-                                onReassignRequestClick?.(row);
+                                if (isLeadAccountSpecialist) {
+                                  onReassignClick?.(row);
+                                } else {
+                                  onReassignRequestClick?.(row);
+                                }
                               }}
                             >
-                              Request Reassignment
+                              {isLeadAccountSpecialist
+                                ? "Reassign"
+                                : "Request Reassignment"}
                             </Button>
                           )}
                         </>
