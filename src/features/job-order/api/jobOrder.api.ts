@@ -34,7 +34,7 @@ export async function fetchJobOrders(
           : {}),
         ...(params.search ? { search: params.search } : {}),
         ...(params.ops_search ? { ops_search: params.ops_search } : {}),
-        // ...(params.client_type ? { client_type: params.client_type } : {}),
+        ...(params.client_type ? { client_type: params.client_type } : {}),
         ...(params.per_page ? { per_page: params.per_page } : {}),
         ...(params.my_per_page ? { my_per_page: params.my_per_page } : {}),
         ...(params.page ? { page: params.page } : {}),

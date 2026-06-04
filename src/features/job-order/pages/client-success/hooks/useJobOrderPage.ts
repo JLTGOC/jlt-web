@@ -95,7 +95,7 @@ export function useJobOrderPage() {
       fetchJobOrders({
         "filter[assignment_status]":
           statusFilter === "ALL" ? undefined : statusFilter,
-        "filter[service]": serviceFilter === "ALL" ? undefined : serviceFilter,
+        "filter[service]": clientFilter === "ALL" ? undefined : clientFilter,
         search: searchQuery || undefined,
         // client_type: clientFilter === "ALL" ? undefined : clientFilter,
         per_page: perPage,
