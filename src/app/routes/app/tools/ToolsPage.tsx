@@ -6,10 +6,14 @@ import { SubServicesPage } from "@/features/tools/pages/SubServicesPage";
 import MessagesPage from "@/features/tools/pages/MessageTemplatePage";
 import { DetailsConfigurationPage } from "@/features/tools/pages/DetailsConfigurationPage";
 import { BillingConfigurationPage } from "@/features/tools/pages/BillingConfigurationPage";
-import PlanningTimelinePage from "@/features/tools/pages/PlanningTimelinePage";
 import { StandardQuotationTemplatePage } from "@/features/tools/pages/StandardQuotationTemplatePage";
 import { StandardQuotationTemplateFormPage } from "@/features/tools/pages/StandardQuotationTemplateFormPage";
 import { TemplateFormPage } from "@/features/tools/pages/TemplateFormPage";
+
+// Logistics
+import PlanningTimelinePage from "@/features/tools/pages/PlanningTimelinePage";
+import TemplatesConfiguration from "@/features/tools/components/planning-timeline/components/TemplatesConfiguration";
+import SelectPhase from "@/features/tools/components/planning-timeline/components/SelectPhase";
 
 export default function ToolsPage() {
   const location = useLocation();
@@ -30,7 +34,11 @@ export default function ToolsPage() {
   const servicesMatch = useMatch("/tools/services");
   const messagesMatch = useMatch("/tools/messages");
   const templatesMatch = useMatch("/tools/templates");
-  const planningTimelineMatch = useMatch("/tools/planningTimeline");
+
+  // logictics
+  const planningTimelineMatch = useMatch("/tools/planning-timeline")
+  const TemplateConfigurationMatch = useMatch("/tools/planning-timeline/templates-configuration")
+  const SelectPhaseMatch = useMatch("/tools/planning-timeline/add-template")
 
   if (detailsConfigMatch) return <DetailsConfigurationPage />;
   if (billingConfigMatch) return <BillingConfigurationPage />;
@@ -61,7 +69,16 @@ export default function ToolsPage() {
   if (servicesMatch) return <ServicesPage />;
   if (messagesMatch) return <MessagesPage />;
   if (templatesMatch) return <TemplatesPage />;
-  if (planningTimelineMatch) return <PlanningTimelinePage openServiceTypeModal={true}/>;
+
+  if (planningTimelineMatch) {
+    return <PlanningTimelinePage />;
+  }
+  if(TemplateConfigurationMatch) {
+    return <TemplatesConfiguration/>
+  }
+  if(SelectPhaseMatch) {
+    return <SelectPhase/>
+  }
 
   return <ToolsDashboard />;
 }
