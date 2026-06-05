@@ -65,6 +65,15 @@ const AccountsPage = lazy(() => import("./routes/app/accounts/AccountsPage"));
 //Tool imports
 const Tools = lazy(() => import("./routes/app/tools/ToolsPage"));
 
+const SelectProcess = lazy(
+  () =>
+    import("@/features/tools/components/planning-timeline/components/SelectProcess"),
+);
+const SelectTask = lazy(
+  () =>
+    import("@/features/tools/components/planning-timeline/components/SelectTask"),
+);
+
 export const router = createBrowserRouter([
   // ==========================================
   // GUEST ROUTES
@@ -211,7 +220,20 @@ export const router = createBrowserRouter([
           { path: "tools/services/:serviceType", Component: Tools },
           { path: "tools/services", Component: Tools },
           { path: "tools/messages", Component: Tools },
-          { path: "tools/planningTimeline", Component: Tools },
+          { path: "tools/planning-timeline", Component: Tools },
+          {
+            path: "tools/planning-timeline/templates-configuration",
+            Component: Tools,
+          },
+          { path: "tools/planning-timeline/add-template", Component: Tools },
+          {
+            path: "tools/planning-timeline/add-template/process",
+            Component: SelectProcess,
+          },
+          {
+            path: "tools/planning-timeline/add-template/task",
+            Component: SelectTask,
+          },
           { path: "tools/templates/new", Component: Tools },
           { path: "tools/templates/:templateId/edit", Component: Tools },
           {

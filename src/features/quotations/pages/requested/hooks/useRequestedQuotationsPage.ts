@@ -294,6 +294,7 @@ console.log("khate", reassignSpecificDetails)
     clientCounts: data?.counts,
     clientFilter,
     closeModal,
+    currentUserRole,
     dateFilter,
     handleAcceptConfirm,
     handleJobSwitchChange,

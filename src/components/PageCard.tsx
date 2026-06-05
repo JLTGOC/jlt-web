@@ -5,9 +5,15 @@ import {
   Text,
   Title,
   UnstyledButton,
+  Button,
   Divider,
 } from "@mantine/core";
-import { ArrowBack } from "@nine-thirty-five/material-symbols-react/rounded";
+import {
+  ArrowBack,
+  Settings,
+  ArrowForward,
+  Add,
+} from "@nine-thirty-five/material-symbols-react/rounded";
 import { useNavigate } from "react-router";
 import classes from "./PageCard.module.css";
 
@@ -23,6 +29,11 @@ interface PageCardProps {
   children?: React.ReactNode;
   onBack?: () => void;
   showDivider?: boolean;
+  showNextButton?: boolean;
+  inLogisticsTemplate?: boolean;
+  logisticsSettingIconAction?: () => void;
+  logisticsAddTemplateAction?: () => void;
+  nextButtonAction?: () => void;
   hideBackButton?: boolean;
   bodyPx?: string | number;
   bodyPy?: string | number;
@@ -45,6 +56,11 @@ export function PageCard({
   action,
   fullHeight = false,
   showDivider = false,
+  showNextButton = false,
+  inLogisticsTemplate = false,
+  logisticsSettingIconAction,
+  logisticsAddTemplateAction,
+  nextButtonAction,
   children,
   onBack,
   bodyPx = "xl",
@@ -136,6 +152,47 @@ export function PageCard({
           </Group>
 
           <Group gap="sm" wrap="nowrap">
+            {inLogisticsTemplate && (
+              <Group wrap="nowrap">
+                <Button
+                  style={{
+                    width: "2.5rem",
+                    height: "2.3rem",
+                    minWidth: "2.5rem",
+                    padding: 0,
+                    borderRadius: "10px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  onClick={logisticsSettingIconAction}
+                >
+                  <Settings />
+                </Button>
+                <Button
+                  onClick={logisticsAddTemplateAction}
+                  leftSection={
+                    <Add width="1.25rem" height="1.25rem" fill="currentColor" />
+                  }
+                >
+                ADD TEMPLATE
+                </Button>
+              </Group>
+            )}
+            {showNextButton && (
+              <Button
+                onClick={nextButtonAction}
+                rightSection={
+                  <ArrowForward
+                    width="1.25rem"
+                    height="1.25rem"
+                    fill="currentColor"
+                  />
+                }
+              >
+                NEXT
+              </Button>
+            )}
             {showJobSwitch && (
               <Group gap={0} className={classes.jobSwitch} wrap="nowrap">
                 <UnstyledButton

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { UserResource } from "@/types/api";
+import { queryClient } from "@/lib/queryClient";
 
 interface AuthState {
   user: UserResource | null;
@@ -90,6 +91,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
   logout: () => {
     // Clear localStorage
     localStorage.removeItem(USER_KEY);
+
+    queryClient.clear();
 
     // Clear Zustand state
     set({
