@@ -1,6 +1,7 @@
 // src/features/accounts/components/companies/CompanyInformation/EditCommercial.tsx
 import { Paper, Text, TextInput, Group } from "@mantine/core";
 import { useState, useEffect } from "react";
+import styles from "../CompanyDetails/CompanyDetails.module.css";
 import type {
   CompanyFullDetails,
   CompanyCommercialInformation,
@@ -33,6 +34,22 @@ export function EditCommercial({ company, errors, onChange }: EditCommercialProp
     profitRangePercent: "",
     notes: "",
   });
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors ?? {});
+
+  useEffect(() => {
+    setLocalErrors(errors ?? {});
+  }, [errors]);
+
+  const clearFieldError = (field: string) => {
+    if (!localErrors[field]) {
+      return;
+    }
+    setLocalErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (company?.commercialInformation) {
@@ -53,6 +70,7 @@ export function EditCommercial({ company, errors, onChange }: EditCommercialProp
       [field]: value,
     };
     setFormData(nextFormData);
+    clearFieldError(field);
     onChange?.(toCommercialInformation(nextFormData));
   };
 
@@ -65,7 +83,11 @@ export function EditCommercial({ company, errors, onChange }: EditCommercialProp
           placeholder="Enter agreed service rates"
           value={formData.agreedServiceRates}
           onChange={(e) => handleChange("agreedServiceRates", e.currentTarget.value)}
-          error={errors?.agreedServiceRates}
+          error={localErrors.agreedServiceRates}
+          classNames={{
+            input: localErrors.agreedServiceRates ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
         />
       </div>
 
@@ -77,7 +99,11 @@ export function EditCommercial({ company, errors, onChange }: EditCommercialProp
             placeholder="Enter special discounts"
             value={formData.specialDiscounts}
             onChange={(e) => handleChange("specialDiscounts", e.currentTarget.value)}
-            error={errors?.specialDiscounts}
+            error={localErrors.specialDiscounts}
+            classNames={{
+              input: localErrors.specialDiscounts ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
         <div>
@@ -86,7 +112,11 @@ export function EditCommercial({ company, errors, onChange }: EditCommercialProp
             placeholder="Enter profit range %"
             value={formData.profitRangePercent}
             onChange={(e) => handleChange("profitRangePercent", e.currentTarget.value)}
-            error={errors?.profitRangePercent}
+            error={localErrors.profitRangePercent}
+            classNames={{
+              input: localErrors.profitRangePercent ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
       </Group>
@@ -98,7 +128,11 @@ export function EditCommercial({ company, errors, onChange }: EditCommercialProp
           placeholder="Enter notes, remarks, or reports"
           value={formData.notes}
           onChange={(e) => handleChange("notes", e.currentTarget.value)}
-          error={errors?.notes}
+          error={localErrors.notes}
+          classNames={{
+            input: localErrors.notes ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
           styles={{
             input: {
               minHeight: "6rem",

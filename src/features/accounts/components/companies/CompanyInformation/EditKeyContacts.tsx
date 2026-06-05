@@ -1,6 +1,7 @@
 // src/features/accounts/components/companies/CompanyInformation/EditKeyContacts.tsx
 import { Paper, Text, TextInput, Group, Box } from "@mantine/core";
 import { useState, useEffect, useRef } from "react";
+import styles from "../CompanyDetails/CompanyDetails.module.css";
 import type {
   CompanyFullDetails,
   CompanyContactPerson,
@@ -45,6 +46,22 @@ export function EditKeyContacts({ company, errors, onChange }: EditKeyContactsPr
     secondaryContact: { fullName: "", position: "", contactNumber: "", email: "" },
     billingContact: { fullName: "", position: "", contactNumber: "", email: "" },
   });
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors ?? {});
+
+  useEffect(() => {
+    setLocalErrors(errors ?? {});
+  }, [errors]);
+
+  const clearFieldError = (field: string) => {
+    if (!localErrors[field]) {
+      return;
+    }
+    setLocalErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (company?.keyContacts) {
@@ -66,6 +83,7 @@ export function EditKeyContacts({ company, errors, onChange }: EditKeyContactsPr
     value: string
   ) => {
     localChangeRef.current = true;
+    clearFieldError(`${contactType}.${field}`);
     setFormData((prev) => ({
       ...prev,
       [contactType]: {
@@ -101,7 +119,11 @@ export function EditKeyContacts({ company, errors, onChange }: EditKeyContactsPr
               placeholder="Enter full name"
               value={contact.fullName}
               onChange={(e) => handleContactChange(contactType, "fullName", e.currentTarget.value)}
-              error={errors?.[`${contactType}.fullName`]}
+              error={localErrors?.[`${contactType}.fullName`]}
+              classNames={{
+                input: localErrors?.[`${contactType}.fullName`] ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
           <div>
@@ -110,7 +132,11 @@ export function EditKeyContacts({ company, errors, onChange }: EditKeyContactsPr
               placeholder="Enter position"
               value={contact.position}
               onChange={(e) => handleContactChange(contactType, "position", e.currentTarget.value)}
-              error={errors?.[`${contactType}.position`]}
+              error={localErrors?.[`${contactType}.position`]}
+              classNames={{
+                input: localErrors?.[`${contactType}.position`] ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
         </Group>
@@ -121,7 +147,11 @@ export function EditKeyContacts({ company, errors, onChange }: EditKeyContactsPr
               placeholder="Enter contact number"
               value={contact.contactNumber}
               onChange={(e) => handleContactChange(contactType, "contactNumber", e.currentTarget.value)}
-              error={errors?.[`${contactType}.contactNumber`]}
+              error={localErrors?.[`${contactType}.contactNumber`]}
+              classNames={{
+                input: localErrors?.[`${contactType}.contactNumber`] ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
           <div>
@@ -130,7 +160,11 @@ export function EditKeyContacts({ company, errors, onChange }: EditKeyContactsPr
               placeholder="Enter email"
               value={contact.email}
               onChange={(e) => handleContactChange(contactType, "email", e.currentTarget.value)}
-              error={errors?.[`${contactType}.email`]}
+              error={localErrors?.[`${contactType}.email`]}
+              classNames={{
+                input: localErrors?.[`${contactType}.email`] ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
         </Group>

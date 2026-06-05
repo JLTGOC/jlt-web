@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Paper, Text, TextInput, Group, Button, Box } from "@mantine/core";
 import { Add } from "@nine-thirty-five/material-symbols-react/outlined";
+import styles from "../CompanyDetails/CompanyDetails.module.css";
 import type {
   CompanyFullDetails,
   CompanyAddressSummary,
@@ -49,6 +50,22 @@ export function EditBusinessAddress({ company, errors, onChange }: EditBusinessA
   });
   const [showWarehouseInput, setShowWarehouseInput] = useState(false);
   const [showDeliveryInput, setShowDeliveryInput] = useState(false);
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors ?? {});
+
+  useEffect(() => {
+    setLocalErrors(errors ?? {});
+  }, [errors]);
+
+  const clearFieldError = (field: string) => {
+    if (!localErrors[field]) {
+      return;
+    }
+    setLocalErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (company?.address) {
@@ -77,6 +94,7 @@ export function EditBusinessAddress({ company, errors, onChange }: EditBusinessA
       return;
     }
 
+    clearFieldError(field);
     onChange?.(toAddressSummary(nextFormData));
   };
 
@@ -127,7 +145,11 @@ export function EditBusinessAddress({ company, errors, onChange }: EditBusinessA
             placeholder="Enter registered address"
             value={formData.registeredAddress}
             onChange={(e) => handleFieldChange("registeredAddress", e.currentTarget.value)}
-            error={errors?.registeredAddress}
+            error={localErrors.registeredAddress}
+            classNames={{
+              input: localErrors.registeredAddress ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
         <div>
@@ -136,7 +158,11 @@ export function EditBusinessAddress({ company, errors, onChange }: EditBusinessA
             placeholder="Enter office address"
             value={formData.officeAddress}
             onChange={(e) => handleFieldChange("officeAddress", e.currentTarget.value)}
-            error={errors?.officeAddress}
+            error={localErrors.officeAddress}
+            classNames={{
+              input: localErrors.officeAddress ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
       </Group>
@@ -268,6 +294,11 @@ export function EditBusinessAddress({ company, errors, onChange }: EditBusinessA
             placeholder="Enter port"
             value={formData.portOfUsualEntryExit}
             onChange={(e) => handleFieldChange("portOfUsualEntryExit", e.currentTarget.value)}
+            error={localErrors.portOfUsualEntryExit}
+            classNames={{
+              input: localErrors.portOfUsualEntryExit ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
         <div>
@@ -276,6 +307,11 @@ export function EditBusinessAddress({ company, errors, onChange }: EditBusinessA
             placeholder="Enter country of origin"
             value={formData.countryOfOrigin}
             onChange={(e) => handleFieldChange("countryOfOrigin", e.currentTarget.value)}
+            error={localErrors.countryOfOrigin}
+            classNames={{
+              input: localErrors.countryOfOrigin ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
         <div>
@@ -284,6 +320,11 @@ export function EditBusinessAddress({ company, errors, onChange }: EditBusinessA
             placeholder="Enter country of destination"
             value={formData.countryOfDestination}
             onChange={(e) => handleFieldChange("countryOfDestination", e.currentTarget.value)}
+            error={localErrors.countryOfDestination}
+            classNames={{
+              input: localErrors.countryOfDestination ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
       </Group>

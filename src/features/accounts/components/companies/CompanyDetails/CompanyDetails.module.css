@@ -152,3 +152,33 @@
   background-color: white;
   width: 380px;
 }
+
+.formField {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.fieldLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #2f3a48;
+}
+
+.fieldLabelError {
+  color: #fa5252;
+}
+
+.requiredMark {
+  color: #fa5252;
+}
+
+.textInputError {
+  border-color: #fa5252 !important;
+  box-shadow: 0 0 0 1px rgba(250, 82, 82, 0.2) !important;
+}
+
+.errorMessage {
+  color: #fa5252;
+  font-size: 0.75rem;
+}

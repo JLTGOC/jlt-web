@@ -1,9 +1,9 @@
-import { Avatar, Box, Paper, Text, ActionIcon, Group, Menu, Button, Select, Divider } from "@mantine/core";
+import { Avatar, Box, Paper, Text, ActionIcon, Group, Menu, Divider } from "@mantine/core";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
-import { MoreVert, PersonAdd } from "@nine-thirty-five/material-symbols-react/rounded";
+import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
 import { CloseSmall, InboxTextPerson, Folder, ToggleOff, ContentCopy, HotelClass, DomainDisabled, Edit } from "@nine-thirty-five/material-symbols-react/outlined";
-import { SearchBar } from "@/components/SearchBar";
 import { BasicInformation } from "./CompanyDetails/BasicInformation";
+import { CompanyTableFilters } from "./CompanyTableFilters";
 import { BusinessAddressandLocation } from "./CompanyDetails/BusinessAddressandLocation";
 import { GovernmentandComplianceDetails } from "./CompanyDetails/GovernmentandComplianceDetails";
 import { KeyContacts } from "./CompanyDetails/KeyContacts";
@@ -67,7 +67,8 @@ type CompanySection =
 
 export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) {
   const [searchValue, setSearchValue] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [asSearchValue, setAsSearchValue] = useState("");
+  const [searchFilters, setSearchFilters] = useState<Record<string, string> | undefined>(undefined);
   const [perPage, setPerPage] = useState(10);
   const [page, setPage] = useState(1);
   const [companies, setCompanies] = useState<CompanyTableRow[]>([]);
@@ -80,9 +81,7 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
 
     async function loadCompanies() {
       try {
-        const response = await companyService.getCompaniesList(page, perPage, {
-          search: searchQuery,
-        });
+        const response = await companyService.getCompaniesList(page, perPage, searchFilters);
 
         if (!active) {
           return;
@@ -104,7 +103,7 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
     return () => {
       active = false;
     };
-  }, [page, perPage, searchQuery]);
+  }, [page, perPage, searchFilters]);
 
   const pageData = companies ?? [];
 
@@ -180,18 +179,11 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
 
             <Menu.Dropdown>
               <Menu.Item
-                leftSection={<InboxTextPerson width={18} height={18} style={{ color: "#1D274E" }} />}
-                onClick={() => undefined}
-              >
-                View Clients
-              </Menu.Item>
-              <Menu.Item
                 leftSection={<Folder width={18} height={18} style={{ color: "#1D274E" }} />}
                 onClick={() => undefined}
               >
                 Documents
               </Menu.Item>
-              <Menu.Divider />
               <Menu.Item
                 leftSection={<ToggleOff width={18} height={18} style={{ color: "#1D274E" }} />}
                 onClick={() => undefined}
@@ -302,69 +294,65 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
       <Box style={{ flex: 1, minWidth: selectedTab ? 0 : "100%" }}>
         <Paper shadow="xs" radius="md" p="md">
           <Box mb="md">
-          <Group justify="space-between" align="flex-end" style={{ flexWrap: "wrap", gap: "1rem" }}>
-            <SearchBar
-              placeholder="SEARCH COMPANIES"
-              value={searchValue}
-              onChange={setSearchValue}
-              onSearch={() => {
-                setSearchQuery(searchValue);
+            <CompanyTableFilters
+              companySearchValue={searchValue}
+              onCompanySearchChange={setSearchValue}
+              onCompanySearch={() => {
+                const trimmedValue = searchValue.trim();
+                setSearchValue(trimmedValue);
+                setSearchFilters(trimmedValue ? { company_name: trimmedValue } : undefined);
+                setPage(1);
+              }}
+              asSearchValue={asSearchValue}
+              onAsSearchChange={setAsSearchValue}
+              onAsSearch={() => {
+                const trimmedValue = asSearchValue.trim();
+                setAsSearchValue(trimmedValue);
+                setSearchFilters(trimmedValue ? { as_search: trimmedValue } : undefined);
+                setPage(1);
+              }}
+              onReset={() => {
+                setSearchValue("");
+                setAsSearchValue("");
+                setSearchFilters(undefined);
+                setPage(1);
+              }}
+              onAddCompany={() => navigate("/accounts/companies/company-information")}
+              perPage={perPage}
+              setPerPage={(nextPerPage) => {
+                setPerPage(nextPerPage);
                 setPage(1);
               }}
             />
-            <Button variant="outline" bg="#4f657d" color="white" onClick={() => navigate("/accounts/companies/company-information")}>
-              <PersonAdd width={20} height={20} style={{ marginRight: 6 }} />
-                ADD COMPANY
-              </Button>
-            </Group>
-
-            <Divider my="md" />
-
-            <Group gap="xs" align="center" mt="xs">
-              <Text c="#7a808a" fz="0.9rem">
-                Show
-              </Text>
-              <Select
-                w={70}
-                size="xs"
-                data={["10", "20", "30"]}
-                value={String(perPage)}
-                onChange={(value) => {
-                  if (!value) return;
-                  const next = Number(value);
-                  setPerPage(next);
-                  setPage(1);
-                }}
-              />
-              <Text c="#7a808a" fz="0.9rem">
-                entries
-              </Text>
-            </Group>
           </Box>
 
-            <AppTable<CompanyTableRow>
+          <AppTable<CompanyTableRow>
             columns={columns}
             data={pageData}
-            rowKey={(row) => row.companyRouteId ?? row.companyId}
-            getRowProps={(row, idx) => {
-              const baseProps = stripedRowProps(idx, {
-                className: `${styles.companyRow}${
-                  selectedTab ? "" : ` ${styles.hoverDisabled}`
-                }${
-                  selectedTab && row.companyId === selectedCompanyId ? ` ${styles.selectedCompanyRow}` : ""
-                }`,
-              });
+              rowKey={(row) => row.companyRouteId ?? row.companyId}
+              getRowProps={(row, idx) => {
+                const baseProps = stripedRowProps(idx, {
+                  className: `${styles.companyRow}${
+                    selectedTab ? "" : ` ${styles.hoverDisabled}`
+                  }${
+                    selectedTab && row.companyId === selectedCompanyId ? ` ${styles.selectedCompanyRow}` : ""
+                  }`,
+                });
 
-              return baseProps;
-            }}
-            onRowClick={selectedTab ? (row) => setSelectedCompanyId(row.companyId) : undefined}
-            perPage={perPage}
-            onPerPageChange={() => undefined}
-            page={page}
-            onPageChange={(nextPage) => setPage(nextPage)}
-            total={totalCount}
-            showingCount={pageData.length}
-          />
+                return baseProps;
+              }}
+              onRowClick={selectedTab ? (row) => setSelectedCompanyId(row.companyId) : undefined}
+              perPage={perPage}
+              onPerPageChange={(nextPerPage) => {
+                setPerPage(nextPerPage);
+                setPage(1);
+              }}
+              page={page}
+              onPageChange={(nextPage) => setPage(nextPage)}
+              total={totalCount}
+              showingCount={pageData.length}
+              entryOptions={["10", "20", "30"]}
+            />
         </Paper>
       </Box>
 

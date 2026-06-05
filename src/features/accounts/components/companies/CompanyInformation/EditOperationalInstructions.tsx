@@ -1,6 +1,7 @@
 // src/features/accounts/components/companies/CompanyInformation/EditOperationalInstructions.tsx
 import { Paper, Text, TextInput } from "@mantine/core";
 import { useState, useEffect } from "react";
+import styles from "../CompanyDetails/CompanyDetails.module.css";
 import type {
   CompanyFullDetails,
   CompanyOperationalInstructions,
@@ -41,6 +42,22 @@ export function EditOperationalInstructions({ company, errors, onChange }: EditO
     requiredPreAlertDetails: "",
     specialInstructions: "",
   });
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors ?? {});
+
+  useEffect(() => {
+    setLocalErrors(errors ?? {});
+  }, [errors]);
+
+  const clearFieldError = (field: string) => {
+    if (!localErrors[field]) {
+      return;
+    }
+    setLocalErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (company?.operationalInstructions) {
@@ -63,6 +80,7 @@ export function EditOperationalInstructions({ company, errors, onChange }: EditO
       [field]: value,
     };
     setFormData(nextFormData);
+    clearFieldError(field);
     onChange?.(toOperationalInstructions(nextFormData));
   };
 
@@ -74,7 +92,11 @@ export function EditOperationalInstructions({ company, errors, onChange }: EditO
           placeholder="Enter preferred communication style"
           value={formData.preferredCommunicationStyle}
           onChange={(e) => handleChange("preferredCommunicationStyle", e.currentTarget.value)}
-          error={errors?.preferredCommunicationStyle}
+          error={localErrors.preferredCommunicationStyle}
+          classNames={{
+            input: localErrors.preferredCommunicationStyle ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
         />
       </div>
 
@@ -84,7 +106,11 @@ export function EditOperationalInstructions({ company, errors, onChange }: EditO
           placeholder="Enter response time expectation"
           value={formData.responseTimeExpectation}
           onChange={(e) => handleChange("responseTimeExpectation", e.currentTarget.value)}
-          error={errors?.responseTimeExpectation}
+          error={localErrors.responseTimeExpectation}
+          classNames={{
+            input: localErrors.responseTimeExpectation ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
         />
       </div>
 
@@ -94,7 +120,11 @@ export function EditOperationalInstructions({ company, errors, onChange }: EditO
           placeholder="Enter client specific SOP"
           value={formData.clientSpecificSOP}
           onChange={(e) => handleChange("clientSpecificSOP", e.currentTarget.value)}
-          error={errors?.clientSpecificSOP}
+          error={localErrors.clientSpecificSOP}
+          classNames={{
+            input: localErrors.clientSpecificSOP ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
         />
       </div>
 
@@ -104,7 +134,11 @@ export function EditOperationalInstructions({ company, errors, onChange }: EditO
           placeholder="Enter approval workflow"
           value={formData.approvalWorkflow}
           onChange={(e) => handleChange("approvalWorkflow", e.currentTarget.value)}
-          error={errors?.approvalWorkflow}
+          error={localErrors.approvalWorkflow}
+          classNames={{
+            input: localErrors.approvalWorkflow ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
         />
       </div>
 
@@ -114,7 +148,11 @@ export function EditOperationalInstructions({ company, errors, onChange }: EditO
           placeholder="Enter pre-alert details"
           value={formData.requiredPreAlertDetails}
           onChange={(e) => handleChange("requiredPreAlertDetails", e.currentTarget.value)}
-          error={errors?.requiredPreAlertDetails}
+          error={localErrors.requiredPreAlertDetails}
+          classNames={{
+            input: localErrors.requiredPreAlertDetails ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
         />
       </div>
 
@@ -124,7 +162,11 @@ export function EditOperationalInstructions({ company, errors, onChange }: EditO
           placeholder="Enter special instructions"
           value={formData.specialInstructions}
           onChange={(e) => handleChange("specialInstructions", e.currentTarget.value)}
-          error={errors?.specialInstructions}
+          error={localErrors.specialInstructions}
+          classNames={{
+            input: localErrors.specialInstructions ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
         />
       </div>
     </Paper>

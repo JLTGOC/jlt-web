@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Paper, Box, Text, Group, Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -30,7 +30,7 @@ import {
   companyDocumentsAttachmentsSchema,
   companyStrategicInsightSchema,
 } from "@/features/accounts/schemas/company.schema";
-import { EditBasicInformation, type EditBasicInformationHandle } from "./CompanyInformation/EditBasicInformation";
+import { EditBasicInformation } from "./CompanyInformation/EditBasicInformation";
 import { EditBusinessAddress } from "./CompanyInformation/EditBusinessAddress";
 import { EditKeyContacts } from "./CompanyInformation/EditKeyContacts";
 import { EditGovernment } from "./CompanyInformation/EditGovernment";
@@ -88,7 +88,7 @@ const sectionDataMap = (company: CompanyFullDetails | null) => ({
 });
 
 const normalizeIssueField = (issue: ZodIssue): string => {
-  return issue.path.slice(1).join(".") || "_form";
+  return issue.path.join(".") || "_form";
 };
 
 const validateSection = (
@@ -181,6 +181,38 @@ export function EditCompanyFlow({ companyId, initialCompany, initialStep }: Edit
   const [sectionErrors, setSectionErrors] = useState<Record<CompanySection, Record<string, string>>>(
     emptySectionErrors,
   );
+
+  const lastStep = 9;
+
+  const validateAllSections = (company: CompanyFullDetails): boolean => {
+    let isValid = true;
+    const nextSectionErrors: Record<CompanySection, Record<string, string>> = {
+      ...emptySectionErrors,
+    };
+
+    (Object.keys(sectionSchemaMap) as CompanySection[]).forEach((section) => {
+      validateSection(section, company, (errors) => {
+        if (Object.keys(errors).length > 0) {
+          isValid = false;
+        }
+        nextSectionErrors[section] = errors;
+      });
+    });
+
+    const duplicateEmails = getDuplicateContactEmails(company.keyContacts);
+    if (duplicateEmails.length > 0) {
+      notifications.show({
+        title: "Duplicate contact emails",
+        message: `Each key contact must use a unique email address. Duplicate email(s): ${duplicateEmails.join(", ")}`,
+        color: "orange",
+        autoClose: 7000,
+      });
+      isValid = false;
+    }
+
+    setSectionErrors(nextSectionErrors);
+    return isValid;
+  };
 
   useEffect(() => {
     if (typeof initialStep !== "undefined") {
@@ -314,14 +346,11 @@ export function EditCompanyFlow({ companyId, initialCompany, initialStep }: Edit
     });
   };
 
-  const basicInformationRef = useRef<EditBasicInformationHandle | null>(null);
-
   const renderStep = () => {
     switch (activeStep) {
       case 1:
         return (
           <EditBasicInformation
-            ref={basicInformationRef}
             key={`basic-${companyId}`}
             company={draftCompany}
             errors={sectionErrors.basic_info}
@@ -492,6 +521,7 @@ export function EditCompanyFlow({ companyId, initialCompany, initialStep }: Edit
             attachments: await prepareDocumentPayload(draftCompany.documentsAttachments?.attachments),
             documents_to_delete: draftCompany.documentsAttachments?.documentsToDelete,
             documents_to_rename: draftCompany.documentsAttachments?.documentsToRename,
+            documents_to_replace: draftCompany.documentsAttachments?.documentsToReplace,
             ...addressPayload,
           };
           break;
@@ -695,7 +725,11 @@ export function EditCompanyFlow({ companyId, initialCompany, initialStep }: Edit
     }
 
     const currentSection = getStepSection(activeStep);
-    if (!validateCurrentSection(draftCompany, currentSection, (errors) => {
+    if (activeStep === lastStep) {
+      if (!validateAllSections(draftCompany)) {
+        return;
+      }
+    } else if (!validateCurrentSection(draftCompany, currentSection, (errors) => {
       setSectionErrors((prev) => ({
         ...prev,
         [currentSection]: errors,

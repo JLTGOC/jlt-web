@@ -1,6 +1,7 @@
 // src/features/accounts/components/companies/CompanyInformation/EditRiskIssue.tsx
 import { Paper, Text, TextInput } from "@mantine/core";
 import { useState, useEffect } from "react";
+import styles from "../CompanyDetails/CompanyDetails.module.css";
 import type {
   CompanyFullDetails,
   CompanyRiskIssueMonitoring,
@@ -32,6 +33,22 @@ export function EditRiskIssue({ company, errors, onChange }: EditRiskIssueProps)
     issueTrackingNotes: "",
     complianceMonitoringNotes: "",
   });
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors ?? {});
+
+  useEffect(() => {
+    setLocalErrors(errors ?? {});
+  }, [errors]);
+
+  const clearFieldError = (field: string) => {
+    if (!localErrors[field]) {
+      return;
+    }
+    setLocalErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (company?.riskIssueMonitoring) {
@@ -51,6 +68,7 @@ export function EditRiskIssue({ company, errors, onChange }: EditRiskIssueProps)
       [field]: value,
     };
     setFormData(nextFormData);
+    clearFieldError(field);
     onChange?.(toRiskIssueMonitoring(nextFormData));
   };
 
@@ -62,7 +80,11 @@ export function EditRiskIssue({ company, errors, onChange }: EditRiskIssueProps)
           placeholder="Enter risk monitoring notes"
           value={formData.riskMonitoringNotes}
           onChange={(e) => handleChange("riskMonitoringNotes", e.currentTarget.value)}
-          error={errors?.riskMonitoringNotes}
+          error={localErrors.riskMonitoringNotes}
+          classNames={{
+            input: localErrors.riskMonitoringNotes ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
           styles={{ input: { minHeight: "6rem" } }}
         />
       </div>
@@ -73,7 +95,11 @@ export function EditRiskIssue({ company, errors, onChange }: EditRiskIssueProps)
           placeholder="Enter issue tracking notes"
           value={formData.issueTrackingNotes}
           onChange={(e) => handleChange("issueTrackingNotes", e.currentTarget.value)}
-          error={errors?.issueTrackingNotes}
+          error={localErrors.issueTrackingNotes}
+          classNames={{
+            input: localErrors.issueTrackingNotes ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
           styles={{ input: { minHeight: "6rem" } }}
         />
       </div>
@@ -84,7 +110,11 @@ export function EditRiskIssue({ company, errors, onChange }: EditRiskIssueProps)
           placeholder="Enter compliance monitoring notes"
           value={formData.complianceMonitoringNotes}
           onChange={(e) => handleChange("complianceMonitoringNotes", e.currentTarget.value)}
-          error={errors?.complianceMonitoringNotes}
+          error={localErrors.complianceMonitoringNotes}
+          classNames={{
+            input: localErrors.complianceMonitoringNotes ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
           styles={{ input: { minHeight: "6rem" } }}
         />
       </div>

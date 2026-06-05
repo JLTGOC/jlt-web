@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { Box, Text, Divider, Button, Group, Stack } from "@mantine/core";
-import { Edit, Upload } from "@nine-thirty-five/material-symbols-react/outlined";
+import { Edit } from "@nine-thirty-five/material-symbols-react/outlined";
 import { PdfThumbnail } from "@/components/PdfThumbnail";
 import styles from "./CompanyDetails.module.css";
 
@@ -20,7 +19,6 @@ export function DocumentsandAttachments({ company, onEdit }: DocumentsandAttachm
     created_at?: string;
   };
 
-  const [files, setFiles] = useState<File[]>([]);
   const existingRaw: unknown = company?.documentsAttachments ?? {};
 
   // Normalize backend shapes:
@@ -41,18 +39,12 @@ export function DocumentsandAttachments({ company, onEdit }: DocumentsandAttachm
     existingAtt = ((existingRaw as { attachments?: DisplayDoc[] }).attachments) ?? [];
   }
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setFiles(Array.from(event.target.files));
-    }
-  };
-
   return (
     <Box className={styles.container}>
       <Box className={styles.documentsBox}>
         {/* Label with dynamic count */}
         <Text c="#7a808a" fz="0.75rem">
-          Uploaded Documents & Attachments ({existingDocs.length + existingAtt.length + files.length})
+          Uploaded Documents & Attachments ({existingDocs.length + existingAtt.length})
         </Text>
 
         {/* Existing uploaded files list (render as detail cards similar to shipments) */}
@@ -100,40 +92,6 @@ export function DocumentsandAttachments({ company, onEdit }: DocumentsandAttachm
             ))}
           </Stack>
         )}
-
-        {/* Uploaded files (new, local) */}
-        {files.length > 0 && (
-          <Box mt="sm" mb="sm">
-            {files.map((file, idx) => (
-              <Text key={`new-${idx}`} size="xs" c="#4f657d">
-                • {file.name}
-              </Text>
-            ))}
-          </Box>
-        )}
-
-        {/* Upload box */}
-        <Box className={styles.uploadZone}>
-          <Upload width={36} height={36} style={{ color: "#4f657d" }} />
-          <Text mt="xs" c="#7a808a" fz="sm">
-            Drag and drop files here
-          </Text>
-
-          {/* Choose Files button */}
-          <Button
-            variant="outline"
-            radius="md"
-            size="sm"
-            mt="sm"
-            fullWidth
-            className={styles.uploadButton}
-            leftSection={<Edit width={18} height={18} style={{ color: "#0064E0" }} />}
-            component="label"
-          >
-            Choose Files
-            <input type="file" hidden multiple onChange={handleFileChange} />
-          </Button>
-        </Box>
 
         <Divider mt="xs" />
 

@@ -75,6 +75,22 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
     authorizedRepresentatives: [],
     newAuthorizedRepresentative: "",
   });
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors ?? {});
+
+  useEffect(() => {
+    setLocalErrors(errors ?? {});
+  }, [errors]);
+
+  const clearFieldError = (field: string) => {
+    if (!localErrors[field]) {
+      return;
+    }
+    setLocalErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   const cprsOptions = [
     "ACTIVE",
@@ -127,6 +143,7 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
       return;
     }
 
+    clearFieldError(field);
     emitChange(nextFormData);
   };
 
@@ -176,7 +193,11 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
             placeholder="Enter TIN"
             value={formData.tin}
             onChange={(e) => handleChange("tin", e.currentTarget.value)}
-            error={errors?.tin}
+            error={localErrors.tin}
+            classNames={{
+              input: localErrors.tin ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
         <div>
@@ -185,40 +206,62 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
             placeholder="Enter BIR registration number"
             value={formData.birRegistrationNumber}
             onChange={(e) => handleChange("birRegistrationNumber", e.currentTarget.value)}
-            error={errors?.birRegistrationNumber}
+            error={localErrors.birRegistrationNumber}
+            classNames={{
+              input: localErrors.birRegistrationNumber ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
         <div>
           <Text size="sm" fw={500}>CPRS Status</Text>
-          <Combobox
-            store={cprsCombobox}
-            onOptionSubmit={(val) => {
-              const selection = String(val ?? "");
-              handleChange("cprsStatus", selection);
-              cprsCombobox.closeDropdown();
+          <Box
+            style={{
+              border: localErrors.cprsStatus ? "1px solid #fa5252" : "1px solid transparent",
+              borderRadius: 8,
+              overflow: "hidden",
             }}
           >
-            <Combobox.Target>
-              <InputBase
-                component="button"
-                type="button"
-                pointer
-                rightSection={<Combobox.Chevron />}
-                onClick={() => cprsCombobox.toggleDropdown()}
-                rightSectionPointerEvents="none"
-              >
-                <span style={{ color: formData.cprsStatus ? "inherit" : "#999" }}>
-                  {formData.cprsStatus || "Select CPRS status"}
-                </span>
-              </InputBase>
-            </Combobox.Target>
+            <Combobox
+              store={cprsCombobox}
+              onOptionSubmit={(val) => {
+                const selection = String(val ?? "");
+                handleChange("cprsStatus", selection);
+                cprsCombobox.closeDropdown();
+              }}
+            >
+              <Combobox.Target>
+                <InputBase
+                  component="button"
+                  type="button"
+                  pointer
+                  rightSection={<Combobox.Chevron />}
+                  onClick={() => cprsCombobox.toggleDropdown()}
+                  rightSectionPointerEvents="none"
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "0.75rem 0.75rem 0.75rem 0.9rem",
+                  }}
+                >
+                  <span style={{ color: formData.cprsStatus ? "inherit" : "#999" }}>
+                    {formData.cprsStatus || "Select CPRS status"}
+                  </span>
+                </InputBase>
+              </Combobox.Target>
 
-            <Combobox.Dropdown>
-                <Combobox.Options>
-                  {cprsOptionElements.length > 0 ? cprsOptionElements : <Combobox.Empty>Nothing found</Combobox.Empty>}
-                </Combobox.Options>
-            </Combobox.Dropdown>
-          </Combobox>
+              <Combobox.Dropdown>
+                  <Combobox.Options>
+                    {cprsOptionElements.length > 0 ? cprsOptionElements : <Combobox.Empty>Nothing found</Combobox.Empty>}
+                  </Combobox.Options>
+              </Combobox.Dropdown>
+            </Combobox>
+          </Box>
+          {localErrors.cprsStatus ? (
+            <Text size="xs" className={styles.errorMessage} mt="xs">
+              {localErrors.cprsStatus}
+            </Text>
+          ) : null}
         </div>
       </Group>
 
@@ -229,6 +272,11 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
             placeholder="Enter importer accreditation number"
             value={formData.importerAccreditationNumber}
             onChange={(e) => handleChange("importerAccreditationNumber", e.currentTarget.value)}
+            error={localErrors.importerAccreditationNumber}
+            classNames={{
+              input: localErrors.importerAccreditationNumber ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
         <div>
@@ -237,6 +285,11 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
             placeholder="Pick date"
             value={formData.importerExpirationDate}
             onChange={(date) => handleChange("importerExpirationDate", date)}
+            error={localErrors.importerExpirationDate}
+            classNames={{
+              input: localErrors.importerExpirationDate ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
       </Group>
@@ -248,6 +301,11 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
             placeholder="Enter exporter accreditation number"
             value={formData.exporterAccreditationNumber}
             onChange={(e) => handleChange("exporterAccreditationNumber", e.currentTarget.value)}
+            error={localErrors.exporterAccreditationNumber}
+            classNames={{
+              input: localErrors.exporterAccreditationNumber ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
         <div>
@@ -256,6 +314,11 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
             placeholder="Pick date"
             value={formData.exporterExpirationDate}
             onChange={(date) => handleChange("exporterExpirationDate", date)}
+            error={localErrors.exporterExpirationDate}
+            classNames={{
+              input: localErrors.exporterExpirationDate ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
       </Group>
@@ -339,7 +402,11 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
             placeholder="Enter special permits"
             value={formData.specialPermits}
             onChange={(e) => handleChange("specialPermits", e.currentTarget.value)}
-            error={errors?.specialPermits}
+            error={localErrors.specialPermits}
+            classNames={{
+              input: localErrors.specialPermits ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
         <div>
@@ -348,7 +415,11 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
             placeholder="Enter compliance risk"
             value={formData.complianceRisk}
             onChange={(e) => handleChange("complianceRisk", e.currentTarget.value)}
-            error={errors?.complianceRisk}
+            error={localErrors.complianceRisk}
+            classNames={{
+              input: localErrors.complianceRisk ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
       </Group>

@@ -88,6 +88,30 @@ const containsFile = (payload: unknown): boolean => {
   return false;
 };
 
+const cleanNulls = (obj: unknown): unknown => {
+  if (obj === null || obj === undefined) {
+    return undefined;
+  }
+  if (isFileValue(obj)) {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    const cleaned = obj.map(cleanNulls).filter((item) => item !== undefined);
+    return cleaned.length > 0 ? cleaned : undefined;
+  }
+  if (typeof obj === "object") {
+    const cleanedObject: Record<string, unknown> = {};
+    Object.entries(obj as Record<string, unknown>).forEach(([key, value]) => {
+      const cleanedValue = cleanNulls(value);
+      if (cleanedValue !== undefined) {
+        cleanedObject[key] = cleanedValue;
+      }
+    });
+    return Object.keys(cleanedObject).length > 0 ? cleanedObject : undefined;
+  }
+  return obj;
+};
+
 const normalizeAddressPayload = (payload: Record<string, unknown>): Record<string, unknown> => {
   const normalized = { ...payload };
 
@@ -441,8 +465,10 @@ export const companyService = {
 
   async createCompany(payload: CompanyCreateRequest): Promise<CompanyFullDetails> {
     const normalizedPayload = normalizeAddressPayload(payload as Record<string, unknown>);
-    const hasFile = containsFile(normalizedPayload);
-    const requestData = hasFile ? objectToFormData(normalizedPayload) : normalizedPayload;
+    const cleanedPayload = cleanNulls(normalizedPayload) as Record<string, unknown> | undefined;
+    const payloadToSend = cleanedPayload ?? {};
+    const hasFile = containsFile(payloadToSend);
+    const requestData = hasFile ? objectToFormData(payloadToSend) : payloadToSend;
     const config = hasFile ? { headers: { "Content-Type": undefined } } : undefined;
     const response = await POST<ApiResponse<CompanyBackendDetails>>(`${companyApiPath}`, requestData, config);
     const payloadData = (response && (response as any).data) ? (response as any).data : response;

@@ -113,6 +113,11 @@ export interface CompanyDocumentPayload {
   file?: File | string | null;
 }
 
+export interface CompanyDocumentReplacePayload {
+  id: number | string;
+  file: File;
+}
+
 export interface CompanyDocumentsAttachments {
   documents?: CompanyDocumentPayload[];
   attachments?: CompanyDocumentPayload[];
@@ -121,6 +126,7 @@ export interface CompanyDocumentsAttachments {
     id: number | string;
     new_name: string;
   }>;
+  documentsToReplace?: CompanyDocumentReplacePayload[];
 }
 
 export interface CompanyStrategicInsight {

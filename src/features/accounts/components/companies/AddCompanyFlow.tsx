@@ -5,10 +5,11 @@ import { ArrowLeftAlt } from "@nine-thirty-five/material-symbols-react/outlined"
 import { notifications } from "@mantine/notifications";
 import type { ZodIssue } from "zod";
 import { companyService } from "@/features/accounts/services/company.service";
-import type { CompanyFullDetails, CompanyCreateRequest, CompanyUpdateRequest } from "@/features/accounts/types/company.types";
+import type { CompanyFullDetails, CompanySummary, CompanyCreateRequest, CompanyUpdateRequest } from "@/features/accounts/types/company.types";
 import { mapCompanyFullDetailsToBackendRequest, prepareDocumentPayload } from "@/features/accounts/types/company.types";
 import { PageCard } from "@/components/PageCard";
 import { CompanyModal } from "./CompanyModal";
+// import { AddCompanyStepper } from "./AddCompanyStepper";
 import {
   companyFullDetailsSchema,
   companySummarySchema,
@@ -21,7 +22,7 @@ import {
   companyDocumentsAttachmentsSchema,
   companyStrategicInsightSchema,
 } from "@/features/accounts/schemas/company.schema";
-import { EditBasicInformation, type EditBasicInformationHandle } from "./CompanyInformation/EditBasicInformation";
+import { EditBasicInformation } from "./CompanyInformation/EditBasicInformation";
 import { EditBusinessAddress } from "./CompanyInformation/EditBusinessAddress";
 import { EditKeyContacts } from "./CompanyInformation/EditKeyContacts";
 import { EditGovernment } from "./CompanyInformation/EditGovernment";
@@ -201,7 +202,8 @@ const sectionDataMap = (company: CompanyFullDetails | null) => ({
 });
 
 const normalizeIssueField = (issue: ZodIssue): string => {
-  return issue.path.slice(1).join(".") || "_form";
+  const normalized = issue.path.join(".");
+  return normalized || "_form";
 };
 
 const validateSection = (
@@ -381,6 +383,8 @@ export function AddCompanyFlow() {
     } as CompanyFullDetails));
   };
 
+  const basicInformationCommitRef = useRef<(() => CompanySummary) | null>(null);
+
   const handleResumeDraft = (draftId: string) => {
     const selectedDraft = drafts.find((draft) => draft.draftId === draftId);
     if (!selectedDraft) return;
@@ -410,18 +414,18 @@ export function AddCompanyFlow() {
     }
   };
 
-  const basicInformationRef = useRef<EditBasicInformationHandle | null>(null);
-
   const renderStep = () => {
     switch (activeStep) {
       case 1:
         return (
           <EditBasicInformation
-            ref={basicInformationRef}
             key={`basic-new-${draftCompany?.summary?.companyName ?? ""}`}
             company={draftCompany}
             errors={sectionErrors.basic_info}
             onChange={(summary) => updateSection("summary", summary)}
+            onRegisterCommit={(commit) => {
+              basicInformationCommitRef.current = commit;
+            }}
           />
         );
       case 2:
@@ -541,13 +545,12 @@ export function AddCompanyFlow() {
       setFinishModalError(null);
       await performSaveCompany();
       setFinishModalStage("success");
-      setIsFinishModalOpen(false);
       setDraftCompany(emptyCompanyDraft);
       setCurrentDraftId(null);
       if (blocker.state === "blocked") {
         blocker.reset();
       }
-      navigate("/accounts/companies", { replace: true });
+      // Keep the success modal open until the user confirms.
     } catch (error) {
       console.error("Failed to save company:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred.";
@@ -567,18 +570,16 @@ export function AddCompanyFlow() {
 
   const handlePrimaryAction = () => {
     const currentSection = getStepSection(activeStep);
+    let nextDraftCompany = draftCompany;
 
-    if (activeStep === 1 && basicInformationRef.current?.commit) {
-      try {
-        const summary = basicInformationRef.current.commit();
-        updateSection("summary", summary as any);
-      } catch (err) {
-        console.error("Failed to commit basic information before navigating:", err);
-      }
+    if (activeStep === 1 && basicInformationCommitRef.current) {
+      const summary = basicInformationCommitRef.current();
+      nextDraftCompany = { ...draftCompany, summary } as CompanyFullDetails;
+      updateSection("summary", summary);
     }
 
     if (activeStep < steps.length) {
-      if (!validateSection(currentSection, draftCompany, (errors) => {
+      if (!validateSection(currentSection, nextDraftCompany, (errors) => {
         setSectionErrors((prev) => ({
           ...prev,
           [currentSection]: errors,
@@ -710,9 +711,9 @@ export function AddCompanyFlow() {
                 }}
               >
                 <Box
-                  w={32}
-                  h={32}
                   style={{
+                    width: 32,
+                    height: 32,
                     borderRadius: "50%",
                     backgroundColor: isActive ? "#0064E0" : "#dee2e6",
                     display: "flex",
@@ -732,7 +733,7 @@ export function AddCompanyFlow() {
                         top: "50%",
                         left: "100%",
                         height: "2px",
-                        width: "170px",
+                        width: "200px",
                         backgroundColor: isLineActive ? "#0064E0" : "#adb5bd",
                         transform: "translateY(-50%)",
                       }}

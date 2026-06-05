@@ -10,6 +10,7 @@ import {
 } from "@mantine/core";
 import { Check, CloseSmall } from "@nine-thirty-five/material-symbols-react/outlined";
 import { useState, useEffect } from "react";
+import styles from "../CompanyDetails/CompanyDetails.module.css";
 import type {
   CompanyFullDetails,
   CompanyStrategicInsight,
@@ -50,6 +51,22 @@ export function EditStrategicInsight({ company, errors, onChange }: EditStrategi
   const [upsellingOpportunities, setUpsellingOpportunities] = useState("");
   const [notes, setNotes] = useState("");
   const [customInput, setCustomInput] = useState("");
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors ?? {});
+
+  useEffect(() => {
+    setLocalErrors(errors ?? {});
+  }, [errors]);
+
+  const clearFieldError = (field: string) => {
+    if (!localErrors[field]) {
+      return;
+    }
+    setLocalErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
@@ -122,6 +139,7 @@ export function EditStrategicInsight({ company, errors, onChange }: EditStrategi
       setNotes(value);
     }
 
+    clearFieldError(field);
     emitChange({
       growthOptions,
       selectedGrowth: field === "selectedGrowth" ? value : selectedGrowth,
@@ -208,7 +226,11 @@ export function EditStrategicInsight({ company, errors, onChange }: EditStrategi
             placeholder="Enter expansion plan"
             value={expansionPlan}
             onChange={(e) => handleFieldUpdate("expansionPlan", e.currentTarget.value)}
-            error={errors?.expansionPlan}
+            error={localErrors.expansionPlan}
+            classNames={{
+              input: localErrors.expansionPlan ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
       </Group>
@@ -219,7 +241,11 @@ export function EditStrategicInsight({ company, errors, onChange }: EditStrategi
           placeholder="Enter competitors"
           value={competitorsUsed}
           onChange={(e) => handleFieldUpdate("competitorsUsed", e.currentTarget.value)}
-          error={errors?.competitorsUsed}
+          error={localErrors.competitorsUsed}
+          classNames={{
+            input: localErrors.competitorsUsed ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
         />
       </div>
 
@@ -229,7 +255,11 @@ export function EditStrategicInsight({ company, errors, onChange }: EditStrategi
           placeholder="Enter upselling opportunities"
           value={upsellingOpportunities}
           onChange={(e) => handleFieldUpdate("upsellingOpportunities", e.currentTarget.value)}
-          error={errors?.upsellingOpportunities}
+          error={localErrors.upsellingOpportunities}
+          classNames={{
+            input: localErrors.upsellingOpportunities ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
         />
       </div>
 
@@ -239,7 +269,11 @@ export function EditStrategicInsight({ company, errors, onChange }: EditStrategi
           placeholder="Enter notes, remarks, or reports"
           value={notes}
           onChange={(e) => handleFieldUpdate("notes", e.currentTarget.value)}
-          error={errors?.notes}
+          error={localErrors.notes}
+          classNames={{
+            input: localErrors.notes ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
           styles={{
             input: {
               minHeight: "6rem",

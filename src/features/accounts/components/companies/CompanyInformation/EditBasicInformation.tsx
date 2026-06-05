@@ -1,7 +1,8 @@
 // src/features/accounts/components/companies/CompanyInformation/EditBasicInformation.tsx
 import { Paper, Text, TextInput, Select, MultiSelect, Group, Button } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
-import { forwardRef, useState, useEffect, useRef, useImperativeHandle } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import styles from "../CompanyDetails/CompanyDetails.module.css";
 import { CalendarMonth } from "@nine-thirty-five/material-symbols-react/rounded";
 import type {
   CompanyFullDetails,
@@ -16,14 +17,11 @@ import {
   transactionTypeOptions,
 } from "./companySummaryOptions";
 
-export interface EditBasicInformationHandle {
-  commit: () => CompanySummary;
-}
-
 interface EditBasicInformationProps {
   company: CompanyFullDetails | null;
   errors?: Record<string, string>;
   onChange?: (summary: CompanySummary) => void;
+  onRegisterCommit?: (commit: () => CompanySummary) => void;
 }
 
 interface FormData {
@@ -84,8 +82,7 @@ const toSummary = (data: FormData): CompanySummary => ({
   dateOfActivation: formatDateValue(data.dateOfActivation),
 });
 
-export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditBasicInformationProps>(
-  ({ company, errors, onChange }, ref) => {
+export function EditBasicInformation({ company, errors, onChange, onRegisterCommit }: EditBasicInformationProps) {
     const yearsInputRef = useRef<HTMLInputElement | null>(null);
     const activationInputRef = useRef<HTMLInputElement | null>(null);
     const prevCompanyIdRef = useRef<string | undefined | null>(null);
@@ -110,6 +107,26 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
       yearsInOperation: null,
       dateOfActivation: null,
     });
+    const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors ?? {});
+
+    useEffect(() => {
+      setLocalErrors(errors ?? {});
+    }, [errors]);
+
+    const clearFieldError = (field: string) => {
+      if (!localErrors[field]) {
+        return;
+      }
+      setLocalErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    };
+
+    const emitSummaryChange = (nextFormData: FormData) => {
+      onChange?.(toSummary(nextFormData));
+    };
 
     const handleAccountHandlerChange = (value: string) => {
       const nextFormData = {
@@ -118,7 +135,8 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
         accountHandlerId: value,
       };
       setFormData(nextFormData);
-      onChange?.(toSummary(nextFormData));
+      clearFieldError("accountHandler");
+      emitSummaryChange(nextFormData);
     };
 
     useEffect(() => {
@@ -163,19 +181,11 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
       setFormData(nextFormData);
     }, [company]);
 
-    useImperativeHandle(
-      ref,
-      () => ({
-        commit: () => {
-          const summary = toSummary(formData);
-          if (onChange) {
-            onChange(summary);
-          }
-          return summary;
-        },
-      }),
-      [formData, onChange],
-    );
+    const commit = useCallback(() => toSummary(formData), [formData]);
+
+    useEffect(() => {
+      onRegisterCommit?.(commit);
+    }, [commit, onRegisterCommit]);
 
     const handleChange = (field: keyof Omit<FormData, "accountHandlerId" | "transactionTypeId" | "clientClassificationId" | "companyTypeId" | "businessTypeId" | "industryIds">, value: string | Date | null) => {
       const nextFormData = {
@@ -183,7 +193,10 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
         [field]: value,
       };
       setFormData(nextFormData);
-      onChange?.(toSummary(nextFormData));
+      clearFieldError(field as string);
+      if (field !== "companyName") {
+        emitSummaryChange(nextFormData);
+      }
     };
 
     const handleSelectChange = (
@@ -199,18 +212,22 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
 
       if (field === "transactionTypeId") {
         nextFormData.transactionType = getOptionLabelByValue(transactionTypeOptions, normalizedValue);
+        clearFieldError("transactionType");
       }
 
       if (field === "clientClassificationId") {
         nextFormData.clientClassification = getOptionLabelByValue(clientClassificationOptions, normalizedValue);
+        clearFieldError("clientClassification");
       }
 
       if (field === "companyTypeId") {
         nextFormData.companyType = getOptionLabelByValue(companyTypeOptions, normalizedValue);
+        clearFieldError("companyType");
       }
 
       if (field === "businessTypeId") {
         nextFormData.businessType = getOptionLabelByValue(businessTypeOptions, normalizedValue);
+        clearFieldError("businessType");
       }
 
       setFormData(nextFormData);
@@ -221,44 +238,72 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
       <Paper p="lg">
         {/* Row 1: Company Name + Trade Name */}
         <Group grow mb="sm">
-          <div>
-            <Text size="sm" fw={500}>Company Name</Text>
+          <div className={styles.formField}>
+            <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.companyName ? styles.fieldLabelError : ""}`}>
+              Company Name
+              <span className={styles.requiredMark}>*</span>
+            </Text>
             <TextInput
               placeholder="Enter company name"
               value={formData.companyName}
               onChange={(e) => handleChange("companyName", e.currentTarget.value)}
-              error={errors?.companyName}
+              error={localErrors.companyName}
+              classNames={{
+                input: localErrors.companyName ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
-          <div>
-            <Text size="sm" fw={500}>Trade Name</Text>
+          <div className={styles.formField}>
+            <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.tradeName ? styles.fieldLabelError : ""}`}>
+              Trade Name
+              <span className={styles.requiredMark}>*</span>
+            </Text>
             <TextInput
               placeholder="Enter trade name"
               value={formData.tradeName}
               onChange={(e) => handleChange("tradeName", e.currentTarget.value)}
-              error={errors?.tradeName}
+              error={localErrors.tradeName}
+              classNames={{
+                input: localErrors.tradeName ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
         </Group>
 
         {/* Row 2: Consignee Used + Assign Account Handler */}
         <Group grow mb="sm">
-          <div>
-            <Text size="sm" fw={500}>Consignee Used</Text>
+          <div className={styles.formField}>
+            <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.consigneeUsed ? styles.fieldLabelError : ""}`}>
+              Consignee Used
+              <span className={styles.requiredMark}>*</span>
+            </Text>
             <TextInput
               placeholder="Enter consignee"
               value={formData.consigneeUsed}
               onChange={(e) => handleChange("consigneeUsed", e.currentTarget.value)}
-              error={errors?.consigneeUsed}
+              error={localErrors.consigneeUsed}
+              classNames={{
+                input: localErrors.consigneeUsed ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
-          <div>
-            <Text size="sm" fw={500}>Assign Account Handler</Text>
+          <div className={styles.formField}>
+            <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.accountHandler ? styles.fieldLabelError : ""}`}>
+              Assign Account Handler
+              <span className={styles.requiredMark}>*</span>
+            </Text>
             <TextInput
               placeholder="Enter account handler"
               value={formData.accountHandler}
               onChange={(e) => handleAccountHandlerChange(e.currentTarget.value)}
-              error={errors?.accountHandler}
+              error={localErrors.accountHandler}
+              classNames={{
+                input: localErrors.accountHandler ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
         </Group>
@@ -275,6 +320,11 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
               nothingFoundMessage="No matching transaction type"
               value={formData.transactionTypeId || null}
               onChange={(value) => handleSelectChange("transactionTypeId", value)}
+              error={localErrors.transactionType}
+              classNames={{
+                input: localErrors.transactionType ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
           <div>
@@ -287,6 +337,11 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
               nothingFoundMessage="No matching classification"
               value={formData.clientClassificationId || null}
               onChange={(value) => handleSelectChange("clientClassificationId", value)}
+              error={localErrors.clientClassification}
+              classNames={{
+                input: localErrors.clientClassification ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
           <div>
@@ -299,14 +354,22 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
               nothingFoundMessage="No matching company type"
               value={formData.companyTypeId || null}
               onChange={(value) => handleSelectChange("companyTypeId", value)}
+              error={localErrors.companyType}
+              classNames={{
+                input: localErrors.companyType ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
         </Group>
 
         {/* Row 4: Industry + Business Type + Business Registration Number */}
         <Group grow mb="sm">
-          <div>
-            <Text size="sm" fw={500}>Industry</Text>
+          <div className={styles.formField}>
+            <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.industry ? styles.fieldLabelError : ""}`}>
+              Industry
+              <span className={styles.requiredMark}>*</span>
+            </Text>
             <MultiSelect
               data={industryOptions}
               placeholder="Select industries"
@@ -324,9 +387,14 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
                     .join(", "),
                 };
                 setFormData(nextFormData);
+                clearFieldError("industry");
                 onChange?.(toSummary(nextFormData));
               }}
-              error={errors?.industry}
+              error={localErrors.industry}
+              classNames={{
+                input: localErrors.industry ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
           <div>
@@ -339,42 +407,63 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
               nothingFoundMessage="No matching business type"
               value={formData.businessTypeId || null}
               onChange={(value) => handleSelectChange("businessTypeId", value)}
-              error={errors?.businessType}
+              error={localErrors.businessType}
             />
           </div>
-          <div>
-            <Text size="sm" fw={500}>Business Registration Number (SEC/DTI)</Text>
+          <div className={styles.formField}>
+            <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.businessRegistrationNumber ? styles.fieldLabelError : ""}`}>
+              Business Registration Number (SEC/DTI)
+              <span className={styles.requiredMark}>*</span>
+            </Text>
             <TextInput
               placeholder="Enter registration number"
               value={formData.businessRegistrationNumber}
               onChange={(e) => handleChange("businessRegistrationNumber", e.currentTarget.value)}
-              error={errors?.businessRegistrationNumber}
+              error={localErrors.businessRegistrationNumber}
+              classNames={{
+                input: localErrors.businessRegistrationNumber ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
             />
           </div>
         </Group>
 
         {/* Row 5: Website/Online Presence */}
-        <div style={{ marginBottom: "1rem" }}>
-          <Text size="sm" fw={500}>Website / Online Presence</Text>
+        <div style={{ marginBottom: "1rem" }} className={styles.formField}>
+          <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.website ? styles.fieldLabelError : ""}`}>
+            Website / Online Presence
+            <span className={styles.requiredMark}>*</span>
+          </Text>
           <TextInput
             placeholder="Enter website URL"
             value={formData.website}
             onChange={(e) => handleChange("website", e.currentTarget.value)}
-            error={errors?.website}
+            error={localErrors.website}
+            classNames={{
+              input: localErrors.website ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
           />
         </div>
 
         {/* Row 6: Years in Operation + Date of Activation */}
         <Group grow mb="sm">
-          <div>
-            <Text size="sm" fw={500}>Years in Operation</Text>
+          <div className={styles.formField}>
+            <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.yearsInOperation ? styles.fieldLabelError : ""}`}>
+              Years in Operation
+              <span className={styles.requiredMark}>*</span>
+            </Text>
             <DateInput
               placeholder="Select years in operation"
               value={formData.yearsInOperation}
               onChange={(date) => handleChange("yearsInOperation", date)}
               rightSectionWidth={45}
               ref={yearsInputRef}
-              error={errors?.yearsInOperation}
+              error={localErrors.yearsInOperation}
+              classNames={{
+                input: localErrors.yearsInOperation ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
               rightSection={
                 <Button
                   type="button"
@@ -393,15 +482,22 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
               }
             />
           </div>
-          <div>
-            <Text size="sm" fw={500}>Date of Activation</Text>
+          <div className={styles.formField}>
+            <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.dateOfActivation ? styles.fieldLabelError : ""}`}>
+              Date of Activation
+              <span className={styles.requiredMark}>*</span>
+            </Text>
             <DateInput
               placeholder="Pick date"
               value={formData.dateOfActivation}
               onChange={(date) => handleChange("dateOfActivation", date)}
               rightSectionWidth={45}
               ref={activationInputRef}
-              error={errors?.dateOfActivation}
+              error={localErrors.dateOfActivation}
+              classNames={{
+                input: localErrors.dateOfActivation ? styles.textInputError : undefined,
+                error: styles.errorMessage,
+              }}
               rightSection={
                 <Button
                   type="button"
@@ -423,5 +519,4 @@ export const EditBasicInformation = forwardRef<EditBasicInformationHandle, EditB
         </Group>
       </Paper>
     );
-  },
-);
+}

@@ -11,10 +11,22 @@ const nullableDateString = z
   .transform((value) => (value === "" ? null : value));
 
 export const companySummarySchema = z.object({
-  companyName: z.string().trim().min(1, "Company Name is required"),
-  tradeName: nullableString,
-  consigneeUsed: nullableString,
-  accountHandler: z.string().trim().min(1, "Account Handler is required"),
+  companyName: z.preprocess(
+    (value) => (typeof value === "string" ? value : ""),
+    z.string().trim().min(1, "Required Company Name to proceed"),
+  ),
+  tradeName: z.preprocess(
+    (value) => (typeof value === "string" ? value : ""),
+    z.string().trim().min(1, "Required Trade Name to proceed"),
+  ),
+  consigneeUsed: z.preprocess(
+    (value) => (typeof value === "string" ? value : ""),
+    z.string().trim().min(1, "Required Consignee Used to proceed"),
+  ),
+  accountHandler: z.preprocess(
+    (value) => (typeof value === "string" ? value : ""),
+    z.string().trim().min(1, "Required Account Handler to proceed"),
+  ),
   accountHandlerId: nullableString,
   transactionType: nullableString,
   transactionTypeId: nullableString,
@@ -32,10 +44,35 @@ export const companySummarySchema = z.object({
   industryId: nullableString,
   businessType: nullableString,
   businessTypeId: nullableString,
-  businessRegistrationNumber: nullableString,
-  website: nullableString,
-  yearsInOperation: nullableString,
-  dateOfActivation: nullableDateString,
+  businessRegistrationNumber: z.preprocess(
+    (value) => (typeof value === "string" ? value : ""),
+    z.string().trim().min(1, "Required Business Registration Number to proceed"),
+  ),
+  website: z.preprocess(
+    (value) => (typeof value === "string" ? value : ""),
+    z.string().trim().min(1, "Required Website / Online Presence to proceed"),
+  ),
+  yearsInOperation: z.preprocess(
+    (value) => (typeof value === "string" ? value : ""),
+    z.string().trim().min(1, "Required Years in Operation to proceed"),
+  ),
+  dateOfActivation: z.preprocess(
+    (value) => (typeof value === "string" ? value : ""),
+    z.string().trim().min(1, "Required Date of Activation to proceed"),
+  ),
+}).superRefine((data, ctx) => {
+  const hasIndustry =
+    (typeof data.industry === "string" && data.industry.trim() !== "") ||
+    (Array.isArray(data.industryIds) && data.industryIds.length > 0) ||
+    (typeof data.industryId === "string" && data.industryId.trim() !== "");
+
+  if (!hasIndustry) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Required Industry to proceed",
+      path: ["industry"],
+    });
+  }
 });
 
 export const companyAddressSchema = z.object({
@@ -68,28 +105,28 @@ const companyContactPersonSchema = z
     if (!contact.fullName?.trim()) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Full Name is required",
+        message: "Required Full Name to proceed",
         path: ["fullName"],
       });
     }
     if (!contact.position?.trim()) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Position is required",
+        message: "Required Position to proceed",
         path: ["position"],
       });
     }
     if (!contact.contactNumber?.trim()) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Contact Number is required",
+        message: "Required Contact Number to proceed",
         path: ["contactNumber"],
       });
     }
     if (!contact.email?.trim()) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Email is required",
+        message: "Required Email to proceed",
         path: ["email"],
       });
     } else if (!/^\S+@\S+\.\S+$/.test(contact.email.trim())) {
@@ -108,19 +145,26 @@ export const companyKeyContactsSchema = z.object({
 });
 
 const documentAttachmentSchema = z.object({
-  name: z.string().trim().min(1, "Document name is required"),
+  name: z.string().trim().min(1, "Required Document name to proceed"),
   url: nullableString,
 });
 
 const documentRenameSchema = z.object({
   id: z.union([z.string(), z.number()]),
-  new_name: z.string().trim().min(1, "Document name is required"),
+  new_name: z.string().trim().min(1, "Required Document name to proceed"),
+});
+
+const documentReplaceSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  file: z.any(),
 });
 
 export const companyDocumentsAttachmentsSchema = z.object({
   documents: z.array(documentAttachmentSchema).optional(),
   attachments: z.array(documentAttachmentSchema).optional(),
+  documentsToDelete: z.array(z.union([z.string(), z.number()])).optional(),
   documentsToRename: z.array(documentRenameSchema).optional(),
+  documentsToReplace: z.array(documentReplaceSchema).optional(),
 });
 
 export const companyGovernmentComplianceSchema = z.object({
