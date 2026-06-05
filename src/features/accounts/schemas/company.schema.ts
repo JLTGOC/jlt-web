@@ -112,9 +112,15 @@ const documentAttachmentSchema = z.object({
   url: nullableString,
 });
 
+const documentRenameSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  new_name: z.string().trim().min(1, "Document name is required"),
+});
+
 export const companyDocumentsAttachmentsSchema = z.object({
   documents: z.array(documentAttachmentSchema).optional(),
   attachments: z.array(documentAttachmentSchema).optional(),
+  documentsToRename: z.array(documentRenameSchema).optional(),
 });
 
 export const companyGovernmentComplianceSchema = z.object({

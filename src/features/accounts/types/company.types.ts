@@ -116,6 +116,11 @@ export interface CompanyDocumentPayload {
 export interface CompanyDocumentsAttachments {
   documents?: CompanyDocumentPayload[];
   attachments?: CompanyDocumentPayload[];
+  documentsToDelete?: Array<number | string>;
+  documentsToRename?: Array<{
+    id: number | string;
+    new_name: string;
+  }>;
 }
 
 export interface CompanyStrategicInsight {
@@ -213,6 +218,7 @@ export interface CompanyBackendRequest {
   };
   documents?: CompanyDocumentPayload[];
   attachments?: CompanyDocumentPayload[];
+  documents_to_delete?: Array<number | string>;
 }
 
 export interface CompanyListResponse {
@@ -281,7 +287,7 @@ export const prepareDocumentPayload = async (
     }
 
     if (item.id != null) {
-      payload.push(payloadItem);
+      // Existing documents should only be sent when a new file is attached.
       continue;
     }
 

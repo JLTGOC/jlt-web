@@ -10,25 +10,35 @@ interface DocumentsandAttachmentsProps {
 }
 
 export function DocumentsandAttachments({ company, onEdit }: DocumentsandAttachmentsProps) {
+  type DisplayDoc = {
+    name?: string;
+    url?: string | null;
+    type?: string;
+    title?: string;
+    file_name?: string;
+    file_type?: string;
+    created_at?: string;
+  };
+
   const [files, setFiles] = useState<File[]>([]);
-  const existingRaw = company?.documentsAttachments ?? {};
+  const existingRaw: unknown = company?.documentsAttachments ?? {};
 
   // Normalize backend shapes:
   // - Server may return an array of files (as in the sample payload)
   // - Or an object with `documents` / `attachments` arrays
-  let existingDocs: Array<any> = [];
-  let existingAtt: Array<any> = [];
+  let existingDocs: DisplayDoc[] = [];
+  let existingAtt: DisplayDoc[] = [];
 
   if (Array.isArray(existingRaw)) {
-    existingDocs = existingRaw.map((f: any) => ({
-      name: f.file_name ?? f.name,
-      url: f.file_url ?? f.url,
-      type: f.file_type ?? f.type,
-      created_at: f.created_at,
+    existingDocs = existingRaw.map((f) => ({
+      name: (f as Record<string, unknown>).file_name as string | undefined ?? (f as Record<string, unknown>).name as string | undefined,
+      url: (f as Record<string, unknown>).file_url as string | undefined ?? (f as Record<string, unknown>).url as string | undefined,
+      type: (f as Record<string, unknown>).file_type as string | undefined ?? (f as Record<string, unknown>).type as string | undefined,
+      created_at: (f as Record<string, unknown>).created_at as string | undefined,
     }));
   } else {
-    existingDocs = (existingRaw.documents as any[]) ?? [];
-    existingAtt = (existingRaw.attachments as any[]) ?? [];
+    existingDocs = ((existingRaw as { documents?: DisplayDoc[] }).documents) ?? [];
+    existingAtt = ((existingRaw as { attachments?: DisplayDoc[] }).attachments) ?? [];
   }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +49,7 @@ export function DocumentsandAttachments({ company, onEdit }: DocumentsandAttachm
 
   return (
     <Box className={styles.container}>
-      <Box>
+      <Box className={styles.documentsBox}>
         {/* Label with dynamic count */}
         <Text c="#7a808a" fz="0.75rem">
           Uploaded Documents & Attachments ({existingDocs.length + existingAtt.length + files.length})
@@ -103,19 +113,7 @@ export function DocumentsandAttachments({ company, onEdit }: DocumentsandAttachm
         )}
 
         {/* Upload box */}
-        <Box
-          mt="sm"
-          p="lg"
-          bg="#f1f3f5"
-          style={{
-            border: "2px dashed #adb5bd",
-            borderRadius: "8px",
-            textAlign: "center",
-            width: "100%",
-            maxWidth: "420px",
-            margin: "0 auto",
-          }}
-        >
+        <Box className={styles.uploadZone}>
           <Upload width={36} height={36} style={{ color: "#4f657d" }} />
           <Text mt="xs" c="#7a808a" fz="sm">
             Drag and drop files here
@@ -128,7 +126,7 @@ export function DocumentsandAttachments({ company, onEdit }: DocumentsandAttachm
             size="sm"
             mt="sm"
             fullWidth
-            className={styles.editButtonUpload}
+            className={styles.uploadButton}
             leftSection={<Edit width={18} height={18} style={{ color: "#0064E0" }} />}
             component="label"
           >
@@ -138,21 +136,21 @@ export function DocumentsandAttachments({ company, onEdit }: DocumentsandAttachm
         </Box>
 
         <Divider mt="xs" />
-      </Box>
 
-      {/* Existing edit button */}
-      <Group className={styles.actions} style={{ justifyContent: "center" }}>
-        <Button
-          variant="outline"
-          radius="md"
-          size="xs"
-          className={styles.editButton}
-          leftSection={<Edit width={24} height={24} style={{ color: "#0064E0" }} />}
-          onClick={onEdit}
-        >
-          EDIT DOCUMENTS & ATTACHMENTS
-        </Button>
-      </Group>
+        {/* Existing edit button */}
+        <Group className={styles.actions} style={{ justifyContent: "center" }}>
+          <Button
+            variant="outline"
+            radius="md"
+            size="xs"
+            className={styles.editButton}
+            leftSection={<Edit width={24} height={24} style={{ color: "#0064E0" }} />}
+            onClick={onEdit}
+          >
+            EDIT DOCUMENTS & ATTACHMENTS
+          </Button>
+        </Group>
+      </Box>
     </Box>
   );
 }

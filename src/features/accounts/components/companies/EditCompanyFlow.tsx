@@ -490,6 +490,8 @@ export function EditCompanyFlow({ companyId, initialCompany, initialStep }: Edit
           sectionPayload = {
             documents: await prepareDocumentPayload(draftCompany.documentsAttachments?.documents),
             attachments: await prepareDocumentPayload(draftCompany.documentsAttachments?.attachments),
+            documents_to_delete: draftCompany.documentsAttachments?.documentsToDelete,
+            documents_to_rename: draftCompany.documentsAttachments?.documentsToRename,
             ...addressPayload,
           };
           break;
@@ -601,14 +603,15 @@ export function EditCompanyFlow({ companyId, initialCompany, initialStep }: Edit
           return;
         }
 
-        items.forEach((doc, index) => {
-          const isNewFile = doc.file instanceof File;
-          const isExistingFile = doc.id != null;
+        const validItems = items.filter(
+          (doc) => doc?.file instanceof File || doc?.id != null,
+        );
 
-          if (!isNewFile && !isExistingFile) {
-            return;
-          }
+        if (validItems.length === 0) {
+          return;
+        }
 
+        validItems.forEach((doc, index) => {
           const prefix = `${fieldName}[${index}]`;
 
           if (doc.id != null) {
@@ -626,7 +629,7 @@ export function EditCompanyFlow({ companyId, initialCompany, initialStep }: Edit
           if (doc.url != null) {
             form.append(`${prefix}[url]`, String(doc.url));
           }
-          if (isNewFile) {
+          if (doc.file instanceof File) {
             form.append(`${prefix}[file]`, doc.file);
           }
         });

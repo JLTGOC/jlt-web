@@ -11,6 +11,11 @@ import type {
 
 type DocumentItem = CompanyDocumentPayload;
 
+type DocumentRenameItem = {
+  id: number | string;
+  new_name: string;
+};
+
 interface EditDocumentsProps {
   company: CompanyFullDetails | null;
   errors?: Record<string, string>;
@@ -20,16 +25,36 @@ interface EditDocumentsProps {
 export function EditDocuments({ company, onChange }: EditDocumentsProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
+  const [documentsToDelete, setDocumentsToDelete] = useState<Array<number | string>>([]);
+  const [documentsToRename, setDocumentsToRename] = useState<DocumentRenameItem[]>([]);
+  const originalDocumentNames = useRef<Record<string, string>>({});
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDocuments(company?.documentsAttachments?.documents ?? []);
+    const currentDocuments = company?.documentsAttachments?.documents ?? [];
+    const currentRenames = company?.documentsAttachments?.documentsToRename ?? [];
+
+    originalDocumentNames.current = currentDocuments.reduce((acc, doc) => {
+      if (doc?.id != null) {
+        acc[String(doc.id)] = doc.name;
+      }
+      return acc;
+    }, {} as Record<string, string>);
+
+    setDocuments(currentDocuments);
+    setDocumentsToDelete(company?.documentsAttachments?.documentsToDelete ?? []);
+    setDocumentsToRename(currentRenames);
   }, [company]);
 
-  const emitChange = (nextDocuments: DocumentItem[]) => {
+  const emitChange = (
+    nextDocuments: DocumentItem[],
+    nextDocumentsToDelete: Array<number | string> = documentsToDelete,
+    nextDocumentsToRename: DocumentRenameItem[] = documentsToRename,
+  ) => {
     onChange?.({
       documents: nextDocuments,
       attachments: company?.documentsAttachments?.attachments ?? [],
+      documentsToDelete: nextDocumentsToDelete,
+      documentsToRename: nextDocumentsToRename,
     });
   };
 
@@ -57,13 +82,43 @@ export function EditDocuments({ company, onChange }: EditDocumentsProps) {
       idx === index ? { ...doc, name } : doc
     );
     setDocuments(nextDocuments);
-    emitChange(nextDocuments);
+
+    const doc = documents[index];
+    let nextDocumentsToRename = [...documentsToRename];
+    if (doc?.id != null) {
+      const originalName = originalDocumentNames.current[String(doc.id)] ?? "";
+      const renameEntry = { id: doc.id, new_name: name };
+      const existingIndex = nextDocumentsToRename.findIndex((item) => String(item.id) === String(doc.id));
+
+      if (name.trim() && name !== originalName) {
+        if (existingIndex > -1) {
+          nextDocumentsToRename[existingIndex] = renameEntry;
+        } else {
+          nextDocumentsToRename.push(renameEntry);
+        }
+      } else if (existingIndex > -1) {
+        nextDocumentsToRename.splice(existingIndex, 1);
+      }
+    }
+
+    setDocumentsToRename(nextDocumentsToRename);
+    emitChange(nextDocuments, undefined, nextDocumentsToRename);
   };
 
   const handleRemove = (index: number) => {
+    const removedDocument = documents[index];
     const nextDocuments = documents.filter((_, idx) => idx !== index);
+    const nextDocumentsToDelete = removedDocument?.id != null
+      ? [...documentsToDelete, removedDocument.id]
+      : documentsToDelete;
+    const nextDocumentsToRename = removedDocument?.id != null
+      ? documentsToRename.filter((rename) => String(rename.id) !== String(removedDocument.id))
+      : documentsToRename;
+
     setDocuments(nextDocuments);
-    emitChange(nextDocuments);
+    setDocumentsToDelete(nextDocumentsToDelete);
+    setDocumentsToRename(nextDocumentsToRename);
+    emitChange(nextDocuments, nextDocumentsToDelete, nextDocumentsToRename);
     notifications.show({
       title: "Document removed",
       message: "The selected document was removed.",
