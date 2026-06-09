@@ -183,7 +183,14 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
             <Menu.Dropdown>
               <Menu.Item
                 leftSection={<Folder width={18} height={18} style={{ color: "#1D274E" }} />}
-                onClick={() => undefined}
+                onClick={() => {
+                  navigate("/accounts/companies/documents", {
+                    state: {
+                      companyId: row.companyRouteId ?? row.companyId,
+                      company: selectedCompanyId === row.companyId ? selectedCompanyFull ?? undefined : undefined,
+                    },
+                  });
+                }}
               >
                 Documents
               </Menu.Item>

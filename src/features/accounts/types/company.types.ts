@@ -105,6 +105,18 @@ export interface CompanyRiskIssueMonitoring {
   notes?: string | null;
 }
 
+export interface CompanyDocument {
+  id: number | string;
+  file_name: string;
+  file_url?: string;
+  file_type?: string;
+  uploadedBy?: "JLTCB" | "Client";
+  uploadedByUser?: string;
+  uploadedDate?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface CompanyDocumentPayload {
   id?: number | string;
   filepath?: string | null;

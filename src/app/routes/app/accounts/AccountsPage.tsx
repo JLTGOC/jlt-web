@@ -5,6 +5,7 @@ import { ClientsList } from "@/features/accounts/components/clients/ClientsList"
 import { EmployeesList } from "@/features/accounts/components/employees/EmployeesList";
 import { CompaniesTabs } from "@/features/accounts/components/companies/CompaniesList";
 import { CompanyInformation } from "@/features/accounts/components/companies/CompanyInformation";
+import { CompanyDocuments } from "@/features/accounts/components/companies/CompanyDocuments";
 import { AccountsProfile } from "@/features/accounts/pages/AccountsProfile";
 import { getAccountTabs } from "@/features/accounts/utils/accountTabs";
 
@@ -32,6 +33,15 @@ export default function AccountsPage() {
     return (
       <Box style={{ width: "100%" }}>
         <CompanyInformation />
+      </Box>
+    );
+  }
+
+  // If user navigates to /accounts/companies/documents, show documents
+  if (category === "companies" && subCategory === "documents") {
+    return (
+      <Box style={{ width: "100%" }}>
+        <CompanyDocuments />
       </Box>
     );
   }
