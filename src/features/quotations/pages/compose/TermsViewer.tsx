@@ -1,5 +1,6 @@
-import { Box, Paper, Stack, Text } from "@mantine/core";
+import { ActionIcon, Box, Paper, Stack, Text, Tooltip } from "@mantine/core";
 import { useEffect, useState } from "react";
+import { IconEdit } from "@tabler/icons-react";
 import { LabeledTextareaSection } from "@/components/LabeledTextareaSection";
 import type { TermsValues } from "@/features/quotations/schemas/compose.schema";
 import type { StandardTemplate } from "@/features/quotations/types/compose.types";
@@ -43,6 +44,14 @@ export function TermsViewer({
   initialValues,
   onChange,
 }: TermsViewerProps) {
+  const [editableFields, setEditableFields] = useState<
+    Record<TermsTextFieldKey, boolean>
+  >({
+    policies: false,
+    terms_and_condition: false,
+    banking_details: false,
+    footer: false,
+  });
   const [values, setValues] = useState<TermsValues>(() =>
     buildInitialTermsValues(template, initialValues),
   );
@@ -53,6 +62,10 @@ export function TermsViewer({
 
   function updateValue(field: TermsTextFieldKey, value: string) {
     setValues((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function enableEditing(field: TermsTextFieldKey) {
+    setEditableFields((prev) => ({ ...prev, [field]: true }));
   }
 
   return (
@@ -74,7 +87,20 @@ export function TermsViewer({
           label={label}
           value={values[key] ?? ""}
           onChange={(nextValue) => updateValue(key, nextValue)}
-          mode="edit"
+          mode={editableFields[key] ? "edit" : "readonly"}
+          action={
+            <Tooltip label="Enable editing" withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="jltAccent.6"
+                aria-label={`Enable editing for ${label}`}
+                onClick={() => enableEditing(key)}
+                disabled={editableFields[key]}
+              >
+                <IconEdit size="1rem" />
+              </ActionIcon>
+            </Tooltip>
+          }
         />
       ))}
     </Stack>

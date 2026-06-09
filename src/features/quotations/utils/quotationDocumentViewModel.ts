@@ -14,6 +14,7 @@ import {
   getBillingGrandTotal,
   getBillingSectionsWithCharges,
   getRowsTotalWithGlobalUom,
+  type ChargeRowLike,
 } from "@/features/quotations/utils/billing";
 import {
   resolveClientInformationFields,
@@ -41,7 +42,7 @@ export interface QuotationDocumentBillingSection {
   title: string;
   currency: string;
   uom: string;
-  rows: ChargeRow[];
+  rows: ChargeRowLike[];
   total: number;
 }
 
@@ -96,9 +97,12 @@ export function buildQuotationDocumentViewModel({
     id: section.id,
     title: section.title,
     currency: billingDetails.currency?.trim() ?? "",
-    uom: billingDetails.uom?.trim() ?? "",
+    uom:
+      rows.find((row) => row.uom?.trim())?.uom?.trim() ??
+      billingDetails.uom?.trim() ??
+      "",
     rows,
-    total: getRowsTotalWithGlobalUom(rows, billingDetails.uom),
+    total: getRowsTotalWithGlobalUom(rows),
   }));
 
   const termsBlocks = TERMS_BLOCKS.flatMap(({ key, label }) => {
@@ -114,7 +118,7 @@ export function buildQuotationDocumentViewModel({
   return {
     resolvedClientInformationFields,
     billingSections,
-    grandTotal: getBillingGrandTotal(billedSections, billingDetails.uom),
+    grandTotal: getBillingGrandTotal(billedSections),
     termsBlocks,
     footer: terms.footer?.trim() ? terms.footer : null,
     signatory: {

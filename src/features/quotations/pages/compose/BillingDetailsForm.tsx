@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Group, Stack, Text } from "@mantine/core";
+import { Box, Group, Stack, Text } from "@mantine/core";
 import { useEffect, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
@@ -13,11 +13,9 @@ import type { QuotationTemplate } from "@/features/quotations/types/compose.type
 import {
   getBillingGrandTotal,
   getBillingSectionsWithCharges,
-  isPerContainerUom,
 } from "@/features/quotations/utils/billing";
 import { formatBillingAmount } from "@/features/quotations/utils/billingPresentation";
 import { BillingSectionRows } from "@/features/quotations/pages/compose/components/BillingSectionRows";
-import { tableSelectStyles } from "@/features/quotations/pages/compose/components/billingSelectStyles";
 import classes from "./BillingDetailsForm.module.css";
 
 interface BillingDetailsFormProps {
@@ -50,7 +48,7 @@ export function BillingDetailsForm({
   >({
     resolver: zodResolver(billingDetailsSchema),
     mode: "onChange",
-    defaultValues: defaultValues ?? { currency: "", uom: "", sections: {} },
+    defaultValues: defaultValues ?? { currency: "", sections: {} },
   });
   const sectionError =
     typeof formState.errors.sections?.message === "string"
@@ -58,16 +56,17 @@ export function BillingDetailsForm({
       : undefined;
 
   const currency = useWatch({ control, name: "currency" }) ?? "";
-  const uom = useWatch({ control, name: "uom" }) ?? "";
   const sections = (useWatch({ control, name: "sections" }) ??
     {}) as BillingDetailsValues["sections"];
   const formValues = useWatch({ control });
   const grandTotal = getBillingGrandTotal(
     getBillingSectionsWithCharges(template, { sections }),
-    uom,
   );
   const currencies = billingSettings?.currencies ?? [];
   const uoms = billingSettings?.uoms ?? [];
+  const hasPerContainerCharges = Object.values(sections).some((rows) =>
+    rows.some((row) => row?.uom?.trim().toLowerCase() === "per container"),
+  );
 
   useEffect(() => {
     onValidityChange?.(formState.isValid);
@@ -92,29 +91,28 @@ export function BillingDetailsForm({
   return (
     <form id={id} onSubmit={handleSubmit(onSubmit)} noValidate>
       <Stack gap="md" mt="md" className={classes.root}>
-        <Group grow>
+        <Box style={{ width: "min(14rem, 100%)" }}>
+          <Text size="xs" fw={600} mb={6} c="dimmed">
+            Currency
+          </Text>
           <SelectField
             control={control}
             name="currency"
-            label="Currency"
-            placeholder="Select currency"
+            label=""
+            placeholder="SELECT CURRENCY"
             data={currencies}
             searchable
-            styles={tableSelectStyles}
             readOnly={readOnly}
+            styles={{
+              input: {
+                minHeight: "2.25rem",
+                fontSize: "0.8125rem",
+                fontWeight: 500,
+                color: "var(--mantine-color-jltBlue-8)",
+              },
+            }}
           />
-
-          <SelectField
-            control={control}
-            name="uom"
-            label="UOM"
-            placeholder="Select UOM"
-            data={uoms}
-            searchable
-            styles={tableSelectStyles}
-            readOnly={readOnly}
-          />
-        </Group>
+        </Box>
 
         {template.billing_sections.map((section) => (
           <BillingSectionRows
@@ -122,8 +120,7 @@ export function BillingDetailsForm({
             control={control}
             section={section}
             globalCurrency={currency}
-            globalUom={uom}
-            isPerContainer={isPerContainerUom(uom)}
+            uoms={uoms}
             readOnly={readOnly}
           />
         ))}
@@ -137,7 +134,7 @@ export function BillingDetailsForm({
           </Text>
         </Group>
 
-        {isPerContainerUom(uom) && (
+        {hasPerContainerCharges && (
           <Text size="xs" c="dimmed" mt={-6}>
             Per container charges are calculated as quantity multiplied by the
             unit rate.

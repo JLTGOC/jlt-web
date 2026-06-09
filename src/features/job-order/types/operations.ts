@@ -1,3 +1,5 @@
+import type { JobOrderClientType } from "./jobOrder";
+
 export type FetchJobOrdersParams = {
   search?: string;
   ops_search?: string;
@@ -24,7 +26,8 @@ export type JobOrderResponse = {
   assignment_status: string;
   bl_no: string;
   client: string;
-  client_type?: "OLD" | "NEW" | null;
+  client_type: JobOrderClientType;
+  company_name: string;
   commodity: string;
   created_at?: string | null;
   date_created: string;
@@ -34,8 +37,8 @@ export type JobOrderResponse = {
   ops_image: string | null;
   origin: string;
   quotation_id: number | null;
-  quotation_reference?: string | null;
-  quotation_reference_number: string | null;
+  quotation_reference_number: string;
+  issued_quotation_id: number;
   regulatory_assistance?: string | null;
   application_type?: string | null;
   reassignment_request_id: number | null;
@@ -47,7 +50,7 @@ export type JobOrderResponse = {
   etd?: string | null;
   status?: string | null;
   transport_mode: string;
-  generate_shipment?: boolean
+  generate_shipment?: boolean;
 };
 
 export type pagination = {

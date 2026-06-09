@@ -23,11 +23,21 @@ export function QuotationTemplatePreviewPage() {
     useComposeQuotationTemplate(templateId);
   const [step, setStep] = useState(0);
 
-  const handleQuotationDetailsSubmit = (_values: QuotationDetailsValues) => {};
-  const handleBillingDetailsSubmit = (_values: BillingDetailsValues) => {};
-  const handleQuotationDetailsChange = (_values: QuotationDetailsValues) => {};
-  const handleBillingDetailsChange = (_values: BillingDetailsValues) => {};
-  const handleTermsChange = (_values: TermsValues) => {};
+  const handleQuotationDetailsSubmit = (_values: QuotationDetailsValues) => {
+    void _values;
+  };
+  const handleBillingDetailsSubmit = (_values: BillingDetailsValues) => {
+    void _values;
+  };
+  const handleQuotationDetailsChange = (_values: QuotationDetailsValues) => {
+    void _values;
+  };
+  const handleBillingDetailsChange = (_values: BillingDetailsValues) => {
+    void _values;
+  };
+  const handleTermsChange = (_values: TermsValues) => {
+    void _values;
+  };
 
   if (isLoading) {
     return (

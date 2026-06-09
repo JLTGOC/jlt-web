@@ -1,6 +1,7 @@
-import { Box, Text, Anchor } from "@mantine/core";
+import { Anchor, Box, Text } from "@mantine/core";
 import { Link } from "react-router";
 import type { JobOrderListItem } from "../../../types/jobOrder";
+import { buildAcceptedQuotationViewerPath } from "../../../utils/jobOrderNavigation";
 
 interface JOCellProps {
   item: JobOrderListItem;
@@ -8,6 +9,12 @@ interface JOCellProps {
 }
 
 export function JOCell({ item, detailPath }: JOCellProps) {
+  const quotationReference = item.quotation_reference_number;
+  const quotationViewerPath = buildAcceptedQuotationViewerPath({
+    quotationId: item.quotation_id,
+    issuedQuotationId: item.issued_quotation_id,
+  });
+
   return (
     <Box
       style={{
@@ -26,11 +33,26 @@ export function JOCell({ item, detailPath }: JOCellProps) {
       >
         {item.reference_number}
       </Anchor>
+      {quotationReference && quotationViewerPath ? (
+        <Anchor
+          component={Link}
+          to={quotationViewerPath}
+          fw={700}
+          size="sm"
+          onClick={(event) => event.stopPropagation()}
+          onMouseDown={(event) => event.stopPropagation()}
+        >
+          {quotationReference}
+        </Anchor>
+      ) : null}
       <Text size="xs" c="dimmed">
         {item.client}
       </Text>
       <Text size="xs" c="dimmed">
-        Pre-alert Created:{" "}
+        {item.company_name}
+      </Text>
+      <Text size="xs" c="dimmed">
+        JO Created:{" "}
         {new Date(item.created_at).toLocaleDateString(undefined, {
           year: "numeric",
           month: "long",

@@ -29,7 +29,6 @@ export function buildIssuedQuotationFormData({
   issuedQuotationFile,
 }: BuildIssuedQuotationFormDataParams): FormData {
   const formData = new FormData();
-  const shouldIncludeContainerFields = isPerContainerUom(billingDetails.uom);
 
   formData.append("template_id", template.id);
   formData.append("subject", quotationDetails.subject?.trim() ?? "");
@@ -38,7 +37,6 @@ export function buildIssuedQuotationFormData({
     "rate_validity",
     quotationDetails.rate_validity?.trim() ?? "",
   );
-  formData.append("uom", billingDetails.uom?.trim() ?? "");
   formData.append("currency", billingDetails.currency?.trim() ?? "");
 
   const detailFields = template.custom_fields.filter(
@@ -66,17 +64,16 @@ export function buildIssuedQuotationFormData({
     formData.append(`charges[${sectionIndex}][name]`, section.title);
 
     rows.forEach((row, rowIndex) => {
+      const rowUom = row.uom?.trim() || billingDetails.uom?.trim() || "";
+      const shouldIncludeContainerFields = isPerContainerUom(rowUom);
+
       formData.append(
         `charges[${sectionIndex}][items][${rowIndex}][receipt_charge_label]`,
         row.description?.trim() ?? "",
       );
       formData.append(
-        `charges[${sectionIndex}][items][${rowIndex}][currency_label]`,
-        billingDetails.currency?.trim() ?? row.currency?.trim() ?? "",
-      );
-      formData.append(
-        `charges[${sectionIndex}][items][${rowIndex}][uom_label]`,
-        billingDetails.uom?.trim() ?? row.uom?.trim() ?? "",
+        `charges[${sectionIndex}][items][${rowIndex}][uom]`,
+        rowUom,
       );
       if (shouldIncludeContainerFields) {
         formData.append(

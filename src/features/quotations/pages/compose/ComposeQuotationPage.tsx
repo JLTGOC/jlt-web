@@ -706,11 +706,10 @@ export function ComposeQuotationPage() {
     >
       <Box
         style={{
-          height: "100%",
           minHeight: 0,
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden",
+          overflow: "visible",
         }}
       >
         <StepperBar step={step} onStepClick={handleStepClick} />
@@ -719,11 +718,10 @@ export function ComposeQuotationPage() {
           px="xl"
           py="lg"
           style={{
-            flex: 1,
             minHeight: 0,
             display: "flex",
             flexDirection: "column",
-            overflow: "hidden",
+            overflow: "visible",
           }}
         >
           <ComposeStepContent

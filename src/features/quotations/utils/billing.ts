@@ -4,12 +4,12 @@ import type {
 } from "@/features/quotations/types/compose.types";
 import type { BillingDetailsValues } from "@/features/quotations/schemas/compose.schema";
 
-type ChargeRowLike = {
+export type ChargeRowLike = {
   description?: string;
   currency?: string;
   uom?: string;
-  amount?: number | "" | null | undefined;
-  quantity?: number | "" | null | undefined;
+  amount?: number | null;
+  quantity?: number | null;
   container_size?: string;
 };
 
@@ -34,7 +34,6 @@ export function hasChargeContent(row: ChargeRowLike): boolean {
   return Boolean(
     row.description?.trim() ||
     row.currency?.trim() ||
-    row.uom?.trim() ||
     hasChargeValue(row.amount) ||
     hasChargeValue(row.quantity) ||
     row.container_size?.trim(),
@@ -67,13 +66,10 @@ export function getRowsTotal(rows: ChargeRowLike[]): number {
   return rows.reduce((sum, row) => sum + toNumber(row.amount), 0);
 }
 
-export function getChargeRowTotal(
-  row: ChargeRowLike,
-  globalUom?: string | null,
-): number {
+export function getChargeRowTotal(row: ChargeRowLike): number {
   const amount = toNumber(row.amount);
 
-  if (!isPerContainerUom(globalUom)) {
+  if (!isPerContainerUom(row.uom)) {
     return amount;
   }
 
@@ -81,19 +77,15 @@ export function getChargeRowTotal(
   return amount * quantity;
 }
 
-export function getRowsTotalWithGlobalUom(
-  rows: ChargeRowLike[],
-  globalUom?: string | null,
-): number {
-  return rows.reduce((sum, row) => sum + getChargeRowTotal(row, globalUom), 0);
+export function getRowsTotalWithGlobalUom(rows: ChargeRowLike[]): number {
+  return rows.reduce((sum, row) => sum + getChargeRowTotal(row), 0);
 }
 
 export function getBillingGrandTotal(
   sectionsWithRows: BillingSectionWithRows[],
-  globalUom?: string | null,
 ): number {
   return sectionsWithRows.reduce(
-    (sum, { rows }) => sum + getRowsTotalWithGlobalUom(rows, globalUom),
+    (sum, { rows }) => sum + getRowsTotalWithGlobalUom(rows),
     0,
   );
 }

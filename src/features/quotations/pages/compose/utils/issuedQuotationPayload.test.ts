@@ -31,7 +31,6 @@ function createBaseParams(uom: string) {
     },
     billingDetails: {
       currency: "PHP",
-      uom,
       sections: {
         "main-section": [
           {
@@ -72,8 +71,10 @@ describe("buildIssuedQuotationFormData", () => {
       createBaseParams("Per Container"),
     );
 
-    expect(formData.get("uom")?.toString()).toBe("Per Container");
     expect(formData.get("currency")?.toString()).toBe("PHP");
+    expect(formData.get("charges[0][items][0][uom]")?.toString()).toBe(
+      "Per Container",
+    );
     expect(formData.get("charges[0][items][0][quantity]")?.toString()).toBe(
       "3",
     );
@@ -85,8 +86,10 @@ describe("buildIssuedQuotationFormData", () => {
   it("omits container-specific fields for non per-container UOMs", () => {
     const formData = buildIssuedQuotationFormData(createBaseParams("Per BL"));
 
-    expect(formData.get("uom")?.toString()).toBe("Per BL");
     expect(formData.get("currency")?.toString()).toBe("PHP");
+    expect(formData.get("charges[0][items][0][uom]")?.toString()).toBe(
+      "Per BL",
+    );
     expect(formData.has("charges[0][items][0][quantity]")).toBe(false);
     expect(formData.has("charges[0][items][0][container_size]")).toBe(false);
   });

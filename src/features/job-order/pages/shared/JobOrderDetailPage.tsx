@@ -58,7 +58,7 @@ export default function JobOrderDetailPage() {
       <JobOrderDetailHeader
         referenceNumber={detail.reference_number}
         subTitle={true}
-        quotationReference={null}
+        quotationReference={detail.quotation_reference_number}
         quotationId={detail.quotation_id}
         onBack={() => navigate(-1)}
       />
