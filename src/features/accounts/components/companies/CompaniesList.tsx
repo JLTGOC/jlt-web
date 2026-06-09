@@ -24,7 +24,7 @@ const companyTabs = [
   { value: "government-compliance", label: "Government & Compliance Details", Icon: VerifiedUser },
   { value: "commercial-pricing", label: "Commercial & Pricing Information", Icon: PriceChange },
   { value: "operational-instructions", label: "Operational Instructions", Icon: QuickReference },
-  { value: "risk-issue-monitoring", label: "Risk, Issue And Compliance Monitoring", Icon: Error },
+  { value: "risk-issue-monitoring", label: "Risk, Issue & Compliance Monitoring", Icon: Error },
   { value: "documents-attachments", label: "Documents & Attachments", Icon: Folder },
   { value: "strategic-insight", label: "Strategic Insight", Icon: BarChart },
 ] as const;

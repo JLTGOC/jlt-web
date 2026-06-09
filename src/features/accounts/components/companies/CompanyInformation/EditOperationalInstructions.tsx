@@ -1,5 +1,5 @@
 // src/features/accounts/components/companies/CompanyInformation/EditOperationalInstructions.tsx
-import { Paper, Text, TextInput } from "@mantine/core";
+import { Group, Paper, Text, TextInput } from "@mantine/core";
 import { useState, useEffect } from "react";
 import styles from "../CompanyDetails/CompanyDetails.module.css";
 import type {
@@ -15,6 +15,7 @@ interface EditOperationalInstructionsProps {
 
 interface FormData {
   preferredCommunicationStyle: string;
+  decisionMakingProcess: string;
   responseTimeExpectation: string;
   clientSpecificSOP: string;
   approvalWorkflow: string;
@@ -26,6 +27,7 @@ const toOperationalInstructions = (
   data: FormData
 ): CompanyOperationalInstructions => ({
   preferredCommunicationStyle: data.preferredCommunicationStyle || null,
+  decisionMakingProcess: data.decisionMakingProcess || null,
   responseTimeExpectation: data.responseTimeExpectation || null,
   clientSpecificSOP: data.clientSpecificSOP || null,
   approvalWorkflow: data.approvalWorkflow || null,
@@ -36,6 +38,7 @@ const toOperationalInstructions = (
 export function EditOperationalInstructions({ company, errors, onChange }: EditOperationalInstructionsProps) {
   const [formData, setFormData] = useState<FormData>({
     preferredCommunicationStyle: "",
+    decisionMakingProcess: "",
     responseTimeExpectation: "",
     clientSpecificSOP: "",
     approvalWorkflow: "",
@@ -63,6 +66,7 @@ export function EditOperationalInstructions({ company, errors, onChange }: EditO
     if (company?.operationalInstructions) {
       const nextFormData: FormData = {
         preferredCommunicationStyle: company.operationalInstructions.preferredCommunicationStyle || "",
+        decisionMakingProcess: company.operationalInstructions.decisionMakingProcess || "",
         responseTimeExpectation: company.operationalInstructions.responseTimeExpectation || "",
         clientSpecificSOP: company.operationalInstructions.clientSpecificSOP || "",
         approvalWorkflow: company.operationalInstructions.approvalWorkflow || "",
@@ -101,32 +105,48 @@ export function EditOperationalInstructions({ company, errors, onChange }: EditO
       </div>
 
       <div style={{ marginBottom: "1rem" }}>
-        <Text size="sm" fw={500}>Response Time Expectation</Text>
+        <Text size="sm" fw={500}>Decision Making Process</Text>
         <TextInput
-          placeholder="Enter response time expectation"
-          value={formData.responseTimeExpectation}
-          onChange={(e) => handleChange("responseTimeExpectation", e.currentTarget.value)}
-          error={localErrors.responseTimeExpectation}
+          placeholder="Enter decision making process"
+          value={formData.decisionMakingProcess}
+          onChange={(e) => handleChange("decisionMakingProcess", e.currentTarget.value)}
+          error={localErrors.decisionMakingProcess}
           classNames={{
-            input: localErrors.responseTimeExpectation ? styles.textInputError : undefined,
+            input: localErrors.decisionMakingProcess ? styles.textInputError : undefined,
             error: styles.errorMessage,
           }}
         />
       </div>
 
-      <div style={{ marginBottom: "1rem" }}>
-        <Text size="sm" fw={500}>Client Specific SOP</Text>
-        <TextInput
-          placeholder="Enter client specific SOP"
-          value={formData.clientSpecificSOP}
-          onChange={(e) => handleChange("clientSpecificSOP", e.currentTarget.value)}
-          error={localErrors.clientSpecificSOP}
-          classNames={{
-            input: localErrors.clientSpecificSOP ? styles.textInputError : undefined,
-            error: styles.errorMessage,
-          }}
-        />
-      </div>
+      <Group grow mb="sm">
+        <div>
+          <Text size="sm" fw={500}>Response Time Expectation</Text>
+          <TextInput
+            placeholder="Enter response time expectation"
+            value={formData.responseTimeExpectation}
+            onChange={(e) => handleChange("responseTimeExpectation", e.currentTarget.value)}
+            error={localErrors.responseTimeExpectation}
+            classNames={{
+              input: localErrors.responseTimeExpectation ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
+          />
+        </div>
+
+        <div>
+          <Text size="sm" fw={500}>Client Specific SOP</Text>
+          <TextInput
+            placeholder="Enter client specific SOP"
+            value={formData.clientSpecificSOP}
+            onChange={(e) => handleChange("clientSpecificSOP", e.currentTarget.value)}
+            error={localErrors.clientSpecificSOP}
+            classNames={{
+              input: localErrors.clientSpecificSOP ? styles.textInputError : undefined,
+              error: styles.errorMessage,
+            }}
+          />
+        </div>
+      </Group>
 
       <div style={{ marginBottom: "1rem" }}>
         <Text size="sm" fw={500}>Approval Workflow</Text>

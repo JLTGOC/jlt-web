@@ -1,5 +1,5 @@
 // src/features/accounts/components/companies/CompanyInformation/EditRiskIssue.tsx
-import { Paper, Text, TextInput } from "@mantine/core";
+import { Paper, Text, Textarea } from "@mantine/core";
 import { useState, useEffect } from "react";
 import styles from "../CompanyDetails/CompanyDetails.module.css";
 import type {
@@ -14,24 +14,33 @@ interface EditRiskIssueProps {
 }
 
 interface FormData {
-  riskMonitoringNotes: string;
-  issueTrackingNotes: string;
-  complianceMonitoringNotes: string;
+  pastIssues: string;
+  penalties: string;
+  customFlags: string;
+  paymentDelays: string;
+  claims: string;
+  notes: string;
 }
 
 const toRiskIssueMonitoring = (
-  data: FormData
+  data: FormData,
 ): CompanyRiskIssueMonitoring => ({
-  riskMonitoringNotes: data.riskMonitoringNotes || null,
-  issueTrackingNotes: data.issueTrackingNotes || null,
-  complianceMonitoringNotes: data.complianceMonitoringNotes || null,
+  pastIssues: data.pastIssues || null,
+  penalties: data.penalties || null,
+  customFlags: data.customFlags || null,
+  paymentDelays: data.paymentDelays || null,
+  claims: data.claims || null,
+  notes: data.notes || null,
 });
 
 export function EditRiskIssue({ company, errors, onChange }: EditRiskIssueProps) {
   const [formData, setFormData] = useState<FormData>({
-    riskMonitoringNotes: "",
-    issueTrackingNotes: "",
-    complianceMonitoringNotes: "",
+    pastIssues: "",
+    penalties: "",
+    customFlags: "",
+    paymentDelays: "",
+    claims: "",
+    notes: "",
   });
   const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors ?? {});
 
@@ -53,9 +62,12 @@ export function EditRiskIssue({ company, errors, onChange }: EditRiskIssueProps)
   useEffect(() => {
     if (company?.riskIssueMonitoring) {
       const nextFormData: FormData = {
-        riskMonitoringNotes: company.riskIssueMonitoring.riskMonitoringNotes || "",
-        issueTrackingNotes: company.riskIssueMonitoring.issueTrackingNotes || "",
-        complianceMonitoringNotes: company.riskIssueMonitoring.complianceMonitoringNotes || "",
+        pastIssues: company.riskIssueMonitoring.pastIssues || "",
+        penalties: company.riskIssueMonitoring.penalties || "",
+        customFlags: company.riskIssueMonitoring.customFlags || "",
+        paymentDelays: company.riskIssueMonitoring.paymentDelays || "",
+        claims: company.riskIssueMonitoring.claims || "",
+        notes: company.riskIssueMonitoring.notes || "",
       };
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(nextFormData);
@@ -75,47 +87,104 @@ export function EditRiskIssue({ company, errors, onChange }: EditRiskIssueProps)
   return (
     <Paper p="lg">
       <div style={{ marginBottom: "1rem" }}>
-        <Text size="sm" fw={500}>Risk Monitoring Notes</Text>
-        <TextInput
-          placeholder="Enter risk monitoring notes"
-          value={formData.riskMonitoringNotes}
-          onChange={(e) => handleChange("riskMonitoringNotes", e.currentTarget.value)}
-          error={localErrors.riskMonitoringNotes}
+        <Text size="sm" fw={500}>
+          Past Issues / Disputes
+        </Text>
+        <Textarea
+          placeholder="Enter past issues or disputes"
+          value={formData.pastIssues}
+          onChange={(e) => handleChange("pastIssues", e.currentTarget.value)}
+          error={localErrors.pastIssues}
           classNames={{
-            input: localErrors.riskMonitoringNotes ? styles.textInputError : undefined,
+            input: localErrors.pastIssues ? styles.textInputError : undefined,
             error: styles.errorMessage,
           }}
-          styles={{ input: { minHeight: "6rem" } }}
+          minRows={4}
         />
       </div>
 
       <div style={{ marginBottom: "1rem" }}>
-        <Text size="sm" fw={500}>Issue Tracking Notes</Text>
-        <TextInput
-          placeholder="Enter issue tracking notes"
-          value={formData.issueTrackingNotes}
-          onChange={(e) => handleChange("issueTrackingNotes", e.currentTarget.value)}
-          error={localErrors.issueTrackingNotes}
+        <Text size="sm" fw={500}>
+          Penalties / Violation History
+        </Text>
+        <Textarea
+          placeholder="Enter penalties or violation history"
+          value={formData.penalties}
+          onChange={(e) => handleChange("penalties", e.currentTarget.value)}
+          error={localErrors.penalties}
           classNames={{
-            input: localErrors.issueTrackingNotes ? styles.textInputError : undefined,
+            input: localErrors.penalties ? styles.textInputError : undefined,
             error: styles.errorMessage,
           }}
-          styles={{ input: { minHeight: "6rem" } }}
+          minRows={4}
         />
       </div>
 
       <div style={{ marginBottom: "1rem" }}>
-        <Text size="sm" fw={500}>Compliance Monitoring Notes</Text>
-        <TextInput
-          placeholder="Enter compliance monitoring notes"
-          value={formData.complianceMonitoringNotes}
-          onChange={(e) => handleChange("complianceMonitoringNotes", e.currentTarget.value)}
-          error={localErrors.complianceMonitoringNotes}
+        <Text size="sm" fw={500}>
+          Customs Flags / Alert
+        </Text>
+        <Textarea
+          placeholder="Enter customs flags or alerts"
+          value={formData.customFlags}
+          onChange={(e) => handleChange("customFlags", e.currentTarget.value)}
+          error={localErrors.customFlags}
           classNames={{
-            input: localErrors.complianceMonitoringNotes ? styles.textInputError : undefined,
+            input: localErrors.customFlags ? styles.textInputError : undefined,
             error: styles.errorMessage,
           }}
-          styles={{ input: { minHeight: "6rem" } }}
+          minRows={4}
+        />
+      </div>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <Text size="sm" fw={500}>
+          Payment Delays History
+        </Text>
+        <Textarea
+          placeholder="Enter payment delays history"
+          value={formData.paymentDelays}
+          onChange={(e) => handleChange("paymentDelays", e.currentTarget.value)}
+          error={localErrors.paymentDelays}
+          classNames={{
+            input: localErrors.paymentDelays ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
+          minRows={4}
+        />
+      </div>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <Text size="sm" fw={500}>
+          Claims / Damage Records
+        </Text>
+        <Textarea
+          placeholder="Enter claims or damage records"
+          value={formData.claims}
+          onChange={(e) => handleChange("claims", e.currentTarget.value)}
+          error={localErrors.claims}
+          classNames={{
+            input: localErrors.claims ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
+          minRows={4}
+        />
+      </div>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <Text size="sm" fw={500}>
+          Notes / Remarks / Reports
+        </Text>
+        <Textarea
+          placeholder="Enter notes, remarks, or reports"
+          value={formData.notes}
+          onChange={(e) => handleChange("notes", e.currentTarget.value)}
+          error={localErrors.notes}
+          classNames={{
+            input: localErrors.notes ? styles.textInputError : undefined,
+            error: styles.errorMessage,
+          }}
+          minRows={4}
         />
       </div>
     </Paper>

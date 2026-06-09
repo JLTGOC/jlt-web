@@ -154,7 +154,7 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
           .map((label) => label.trim())
           .filter(Boolean)
       : [];
-    const industryIds = s.industryIds ?? industryLabels.map((label) => getOptionValueByLabel(industryOptions, label)).filter(Boolean);
+    const industryIds = industryLabels.map((label) => getOptionValueByLabel(industryOptions, label)).filter(Boolean);
 
     const nextFormData: FormData = {
         companyName: s.companyName ?? "",
@@ -163,15 +163,15 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
         accountHandler: s.accountHandler ?? "",
         accountHandlerId: s.accountHandlerId ?? s.accountHandler ?? "",
         transactionType: s.transactionType ?? "",
-        transactionTypeId: s.transactionTypeId ?? getOptionValueByLabel(transactionTypeOptions, s.transactionType),
+        transactionTypeId: getOptionValueByLabel(transactionTypeOptions, s.transactionType),
         clientClassification: s.clientClassification ?? "",
-        clientClassificationId: s.clientClassificationId ?? getOptionValueByLabel(clientClassificationOptions, s.clientClassification),
+        clientClassificationId: getOptionValueByLabel(clientClassificationOptions, s.clientClassification),
         companyType: s.companyType ?? "",
-        companyTypeId: s.companyTypeId ?? getOptionValueByLabel(companyTypeOptions, s.companyType),
+        companyTypeId: getOptionValueByLabel(companyTypeOptions, s.companyType),
         industry: s.industry ?? "",
         industryIds,
         businessType: s.businessType ?? "",
-        businessTypeId: s.businessTypeId ?? getOptionValueByLabel(businessTypeOptions, s.businessType),
+        businessTypeId: getOptionValueByLabel(businessTypeOptions, s.businessType),
         businessRegistrationNumber: s.businessRegistrationNumber ?? "",
         website: s.website ?? "",
         yearsInOperation: s.yearsInOperation ? new Date(s.yearsInOperation) : null,

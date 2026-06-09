@@ -189,6 +189,7 @@ export const companyCommercialInformationSchema = z.object({
 
 export const companyOperationalInstructionsSchema = z.object({
   preferredCommunicationStyle: nullableString,
+  decisionMakingProcess: nullableString,
   responseTimeExpectation: nullableString,
   clientSpecificSOP: nullableString,
   approvalWorkflow: nullableString,
@@ -197,9 +198,12 @@ export const companyOperationalInstructionsSchema = z.object({
 });
 
 export const companyRiskIssueMonitoringSchema = z.object({
-  riskMonitoringNotes: nullableString,
-  issueTrackingNotes: nullableString,
-  complianceMonitoringNotes: nullableString,
+  pastIssues: nullableString,
+  penalties: nullableString,
+  customFlags: nullableString,
+  paymentDelays: nullableString,
+  claims: nullableString,
+  notes: nullableString,
 });
 
 export const companyStrategicInsightSchema = z.object({

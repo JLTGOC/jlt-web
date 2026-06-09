@@ -167,9 +167,10 @@ interface EditCompanyFlowProps {
   companyId: string;
   initialCompany?: CompanyFullDetails;
   initialStep?: number;
+  useFullStepper?: boolean;
 }
 
-export function EditCompanyFlow({ companyId, initialCompany, initialStep }: EditCompanyFlowProps) {
+export function EditCompanyFlow({ companyId, initialCompany, initialStep, useFullStepper }: EditCompanyFlowProps) {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(initialStep ?? 1);
   const [draftCompany, setDraftCompany] = useState<CompanyFullDetails | null>(initialCompany ?? null);
@@ -183,6 +184,18 @@ export function EditCompanyFlow({ companyId, initialCompany, initialStep }: Edit
   );
 
   const lastStep = 9;
+
+  const steps = [
+    "Basic Information",
+    "Business Address &\nLocation",
+    "Key Contacts",
+    "Government &\nCompliance Details",
+    "Commercial &\nPricing Information",
+    "Operational Instructions",
+    "Risk, Issue &\nCompliance Monitoring",
+    "Documents &\nAttachments",
+    "Strategic Insight",
+  ];
 
   const validateAllSections = (company: CompanyFullDetails): boolean => {
     let isValid = true;
@@ -787,6 +800,81 @@ export function EditCompanyFlow({ companyId, initialCompany, initialStep }: Edit
           onClose={closeFinishModal}
         />
 
+        {useFullStepper && (
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              marginTop: "1rem",
+              marginBottom: "0.5rem",
+              width: "100%",
+            }}
+          >
+            {steps.map((label, index) => {
+              const isActive = index + 1 <= activeStep;
+              const isLineActive = index + 1 < activeStep;
+
+              return (
+                <Box
+                  key={index}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    position: "relative",
+                    flex: 1,
+                  }}
+                >
+                  <Box
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      backgroundColor: isActive ? "#0064E0" : "#dee2e6",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      position: "relative",
+                    }}
+                  >
+                    <Text c="white" size="sm">
+                      {index + 1}
+                    </Text>
+
+                    {index < steps.length - 1 && (
+                      <Box
+                        style={{
+                          position: "absolute",
+                          top: "50%",
+                          left: "100%",
+                          height: "2px",
+                          width: "200px",
+                          backgroundColor: isLineActive ? "#0064E0" : "#adb5bd",
+                          transform: "translateY(-50%)",
+                        }}
+                      />
+                    )}
+                  </Box>
+
+                  <Text
+                    size="sm"
+                    fw={300}
+                    c="black"
+                    style={{
+                      whiteSpace: "pre-line",
+                      marginTop: 6,
+                      textAlign: "center",
+                    }}
+                  >
+                    {label}
+                  </Text>
+                </Box>
+              );
+            })}
+          </Box>
+        )}
+
         {/* Current section form */}
         {isLoading ? (
           <Box style={{ padding: "2rem", textAlign: "center" }}>
@@ -796,18 +884,73 @@ export function EditCompanyFlow({ companyId, initialCompany, initialStep }: Edit
           renderStep()
         )}
 
-        <Group justify="flex-end" mt="md" style={{ width: "100%" }}>
-          <Button
-            color="#4E6174"
-            size="md"
-            radius="md"
-            style={{ minWidth: 160 }}
-            onClick={handleSaveCompany}
-            loading={isSaving}
-            disabled={isSaving}
-          >
-            Update
-          </Button>
+        {/* Navigation buttons */}
+        <Group justify="space-between" mt="md" style={{ width: "100%" }}>
+          {useFullStepper && activeStep !== 1 ? (
+            <Button
+              size="md"
+              radius="md"
+              style={{ minWidth: 160, backgroundColor: "#EAEAEA", color: "#4E6174" }}
+              onClick={() => setActiveStep((s) => s - 1)}
+              disabled={isSaving}
+            >
+              Previous
+            </Button>
+          ) : (
+            <Box style={{ minWidth: 160 }} />
+          )}
+
+          <Group gap="xs" style={{ marginLeft: useFullStepper && activeStep === 1 ? "auto" : "0" }}>
+            {!useFullStepper && (
+              <Button
+                color="#4E6174"
+                size="md"
+                radius="md"
+                style={{ minWidth: 160 }}
+                onClick={handleSaveCompany}
+                loading={isSaving}
+                disabled={isSaving}
+              >
+                Update
+              </Button>
+            )}
+            {useFullStepper && (
+              <>
+                {activeStep < lastStep && (
+                  <Button
+                    color="#0064E0"
+                    size="md"
+                    radius="md"
+                    style={{ minWidth: 160 }}
+                    onClick={() => {
+                      const currentSection = getStepSection(activeStep);
+                      if (draftCompany && validateCurrentSection(draftCompany, currentSection, (errors) => {
+                        setSectionErrors((prev) => ({
+                          ...prev,
+                          [currentSection]: errors,
+                        }));
+                      })) {
+                        setActiveStep(activeStep + 1);
+                      }
+                    }}
+                  >
+                    Next
+                  </Button>
+                )}
+                <Button
+                  color="#4E6174"
+                  size="md"
+                  radius="md"
+                  style={{ minWidth: 160 }}
+                  onClick={handleSaveCompany}
+                  loading={isSaving}
+                  disabled={isSaving}
+                >
+                  {activeStep === lastStep ? "Finish" : "Update"}
+                </Button>
+              </>
+            )}
+          </Group>
         </Group>
       </Paper>
     </PageCard>

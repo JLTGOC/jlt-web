@@ -10,9 +10,12 @@ interface RiskIssueandComplianceMonitoringProps {
 export function RiskIssueandComplianceMonitoring({ company, onEdit }: RiskIssueandComplianceMonitoringProps) {
   const risk = company?.riskIssueMonitoring ?? {};
   const fields = [
-    { label: "Risk Monitoring Notes", value: risk.riskMonitoringNotes ?? "N/A" },
-    { label: "Issue Tracking Notes", value: risk.issueTrackingNotes ?? "N/A" },
-    { label: "Compliance Monitoring Notes", value: risk.complianceMonitoringNotes ?? "N/A" },
+    { label: "Past Issues / Disputes", value: risk.pastIssues ?? "N/A" },
+    { label: "Penalties / Violation History", value: risk.penalties ?? "N/A" },
+    { label: "Customs Flags / Alert", value: risk.customFlags ?? "N/A" },
+    { label: "Payment Delays History", value: risk.paymentDelays ?? "N/A" },
+    { label: "Claims / Damage Records", value: risk.claims ?? "N/A" },
+    { label: "Notes / Remarks / Reports", value: risk.notes ?? "N/A" },
   ];
 
   return (

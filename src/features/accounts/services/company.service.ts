@@ -328,6 +328,7 @@ const mapBackendCompanyToFullDetails = (backend: CompanyBackendDetails | any): C
     },
     operationalInstructions: {
       preferredCommunicationStyle: getString(data.preferred_communication_style, (data as any).preferredCommunicationStyle),
+      decisionMakingProcess: getString(data.decision_making_process, (data as any).decisionMakingProcess),
       responseTimeExpectation: getString(data.response_time_expectation, (data as any).responseTimeExpectation),
       clientSpecificSOP: getString(data.client_specific_sop, (data as any).clientSpecificSOP),
       approvalWorkflow: getString(data.approval_workflow, (data as any).approvalWorkflow),
@@ -335,12 +336,12 @@ const mapBackendCompanyToFullDetails = (backend: CompanyBackendDetails | any): C
       specialInstructions: getString(data.special_instructions, (data as any).specialInstructions),
     },
     riskIssueMonitoring: {
-      riskMonitoringNotes: getString(data.past_issues, (data as any).riskMonitoringNotes),
-      issueTrackingNotes: getString(data.payment_delays, (data as any).issueTrackingNotes),
-      complianceMonitoringNotes: getString(data.penalties, (data as any).complianceMonitoringNotes),
+      pastIssues: getString(data.past_issues, (data as any).pastIssues),
+      penalties: getString(data.penalties, (data as any).penalties),
       customFlags: getString(data.custom_flags, (data as any).customFlags),
+      paymentDelays: getString(data.payment_delays, (data as any).paymentDelays),
       claims: getString(data.claims, (data as any).claims),
-      monitoringNotes: getString(data.monitoring_notes, (data as any).monitoringNotes),
+      notes: getString(data.notes, (data as any).notes, (data as any).monitoring_notes, (data as any).monitoringNotes),
     },
    documentsAttachments: (() => {
     // Convert various backend shapes into documents/attachments arrays.

@@ -123,6 +123,7 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
         companyId,
         company: selectedCompanyId === companyId ? selectedCompanyFull ?? undefined : undefined,
         activeStep: 1,
+        useFullStepper: true,
       },
     });
   };
@@ -153,6 +154,7 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
     {
       key: "accountHandler",
       label: "ACCOUNT HANDLER",
+      width: "20%",
       render: (row) => (
         <Group gap="sm" align="center">
           <Avatar
@@ -168,8 +170,9 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
     {
       key: "action",
       label: "ACTION",
+      width: "3%",
       render: (row) => (
-        <Group style={{ justifyContent: "flex-end" }}>
+        <Group style={{ width: "80%", display: "flex", justifyContent: "flex-end" }}>
           <Menu shadow="md" width={220} position="bottom-end">
             <Menu.Target>
               <ActionIcon variant="subtle" color="gray" onClick={(e) => e.stopPropagation()}>

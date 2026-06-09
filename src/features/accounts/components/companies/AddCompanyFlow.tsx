@@ -289,7 +289,7 @@ export function AddCompanyFlow() {
     "Government &\nCompliance Details",
     "Commercial &\nPricing Information",
     "Operational Instructions",
-    "Risk, Issue And\nCompliance Monitoring",
+    "Risk, Issue &\nCompliance Monitoring",
     "Documents &\nAttachments",
     "Strategic Insight",
   ];

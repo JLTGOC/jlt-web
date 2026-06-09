@@ -11,8 +11,8 @@ export function OperationalInstructions({ company, onEdit }: OperationalInstruct
   const op = company?.operationalInstructions ?? {};
   const fields = [
     { label: "Preferred Communication Style", value: op.preferredCommunicationStyle ?? "N/A" },
+    { label: "Decision Making Process", value: op.decisionMakingProcess ?? "N/A" },
     { label: "Response Time Expectation", value: op.responseTimeExpectation ?? "N/A" },
-    { label: "Decision-Making Process", value: "N/A" },
     { label: "Client Specific SOP", value: op.clientSpecificSOP ?? "N/A" },
     { label: "Approval Workflow", value: op.approvalWorkflow ?? "N/A" },
     { label: "Required Pre-Alert Details", value: op.requiredPreAlertDetails ?? "N/A" },

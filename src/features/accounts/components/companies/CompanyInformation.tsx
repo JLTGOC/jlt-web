@@ -10,6 +10,7 @@ export function CompanyInformation() {
     company?: CompanyFullDetails;
     activeStep?: number;
     draftId?: string;
+    useFullStepper?: boolean;
   } | null) ?? null;
 
   const companyId = locationState?.companyId;
@@ -21,6 +22,7 @@ export function CompanyInformation() {
         companyId={companyId}
         initialCompany={locationState?.company}
         initialStep={locationState?.activeStep}
+        useFullStepper={locationState?.useFullStepper}
       />
     );
   }

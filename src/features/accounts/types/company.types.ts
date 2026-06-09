@@ -88,6 +88,7 @@ export interface CompanyCommercialInformation {
 
 export interface CompanyOperationalInstructions {
   preferredCommunicationStyle?: string | null;
+  decisionMakingProcess?: string | null;
   responseTimeExpectation?: string | null;
   clientSpecificSOP?: string | null;
   approvalWorkflow?: string | null;
@@ -96,12 +97,12 @@ export interface CompanyOperationalInstructions {
 }
 
 export interface CompanyRiskIssueMonitoring {
-  riskMonitoringNotes?: string | null;
-  issueTrackingNotes?: string | null;
-  complianceMonitoringNotes?: string | null;
+  pastIssues?: string | null;
+  penalties?: string | null;
   customFlags?: string | null;
+  paymentDelays?: string | null;
   claims?: string | null;
-  monitoringNotes?: string | null;
+  notes?: string | null;
 }
 
 export interface CompanyDocumentPayload {
@@ -386,12 +387,11 @@ export const mapCompanySummaryToBackend = (summary: CompanySummary) => {
     name: summary.companyName,
     trade_name: summary.tradeName ?? null,
     consignee_used: summary.consigneeUsed ?? null,
-    // Prefer explicit id when available, fall back to name otherwise.
     account_handler_id: summary.accountHandlerId ?? summary.accountHandler ?? null,
-    transaction_type_id: summary.transactionTypeId ?? summary.transactionType ?? null,
-    client_classification_id: summary.clientClassificationId ?? summary.clientClassification ?? null,
-    company_type_id: summary.companyTypeId ?? summary.companyType ?? null,
-    business_type_id: summary.businessTypeId ?? summary.businessType ?? null,
+    transaction_type: summary.transactionType ?? null,
+    client_classification: summary.clientClassification ?? null,
+    company_type: summary.companyType ?? null,
+    business_type: summary.businessType ?? null,
     business_registration_number: summary.businessRegistrationNumber ?? null,
     website: summary.website ?? null,
     years_in_operation: parseYearsInOperation(summary.yearsInOperation),
@@ -440,6 +440,7 @@ export const mapCommercialToBackend = (commercial: CompanyCommercialInformation)
 
 export const mapOperationalToBackend = (instructions: CompanyOperationalInstructions) => ({
   preferred_communication_style: instructions.preferredCommunicationStyle ?? null,
+  decision_making_process: instructions.decisionMakingProcess ?? null,
   response_time_expectation: instructions.responseTimeExpectation ?? null,
   client_specific_sop: instructions.clientSpecificSOP ?? null,
   approval_workflow: instructions.approvalWorkflow ?? null,
@@ -448,12 +449,12 @@ export const mapOperationalToBackend = (instructions: CompanyOperationalInstruct
 });
 
 export const mapMonitoringToBackend = (monitoring: CompanyRiskIssueMonitoring) => ({
-  past_issues: monitoring.riskMonitoringNotes ?? null,
-  penalties: monitoring.complianceMonitoringNotes ?? null,
+  past_issues: monitoring.pastIssues ?? null,
+  penalties: monitoring.penalties ?? null,
   custom_flags: monitoring.customFlags ?? null,
-  payment_delays: monitoring.issueTrackingNotes ?? null,
+  payment_delays: monitoring.paymentDelays ?? null,
   claims: monitoring.claims ?? null,
-  monitoring_notes: monitoring.monitoringNotes ?? null,
+  monitoring_notes: monitoring.notes ?? null,
 });
 
 export const mapInsightsToBackend = (insight: CompanyStrategicInsight) => ({
