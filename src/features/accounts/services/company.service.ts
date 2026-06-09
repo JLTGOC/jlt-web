@@ -357,6 +357,8 @@ const mapBackendCompanyToFullDetails = (backend: CompanyBackendDetails | any): C
       file_type: getString(item?.file_type, item?.fileType) ?? null,
       name: getString(item?.file_name, item?.name) ?? "",
       url: getString(item?.file_url, item?.url) ?? null,
+      created_at: getString(item?.created_at) ?? undefined,
+      updated_at: getString(item?.updated_at) ?? undefined,
     });
 
     if (Array.isArray(backend) && backend.length > 0) {

@@ -124,6 +124,8 @@ export interface CompanyDocumentPayload {
   name: string;
   url?: string | null;
   file?: File | string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CompanyDocumentReplacePayload {

@@ -9,6 +9,30 @@ import { toClientFileUrl } from "@/utils/file-url";
 import { companyService } from "../../services/company.service";
 import type { CompanyDocumentPayload, CompanyFullDetails } from "../../types/company.types";
 
+const formatDate = (dateString: string | undefined): string => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" };
+  return date.toLocaleDateString("en-US", options);
+};
+
+const formatRelativeTime = (dateString: string | undefined): string => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSecs = Math.floor(diffMs / 1000);
+  const diffMins = Math.floor(diffSecs / 60);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffSecs < 60) return "just now";
+  if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? "s" : ""} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  if (diffDays < 30) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+  return formatDate(dateString);
+};
+
 export function CompanyDocuments() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -138,11 +162,18 @@ function DocumentDetailCard({ doc }: DocumentDetailCardProps) {
         <Text size="sm" fw={500} truncate>
           {doc.name}
         </Text>
-        {doc.file_type && (
-          <Text size="xs" c="dimmed" truncate>
-            {doc.file_type}
-          </Text>
-        )}
+        <Group gap={8} style={{ flexWrap: "nowrap" }}>
+          {doc.updated_at && (
+            <Text size="xs" c="dimmed" style={{ whiteSpace: "nowrap" }}>
+              Updated: {formatDate(doc.updated_at)} | {formatRelativeTime(doc.updated_at)}
+            </Text>
+          )}
+          {doc.file_type && (
+            <Text size="xs" c="dimmed" style={{ whiteSpace: "nowrap" }}>
+              {doc.file_type}
+            </Text>
+          )}
+        </Group>
       </Box>
 
       <Menu position="bottom-end">
