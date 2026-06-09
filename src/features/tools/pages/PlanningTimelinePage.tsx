@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import { Text } from "@mantine/core";
 import LogisticsTemplates from "../components/planning-timeline/components/LogisticsTemplates";
-import TemplatesConfiguration from "../components/planning-timeline/components/TemplatesConfiguration";
 
 type ServiceType = "REGULATORY" | "LOGISTICS";
 
@@ -22,13 +21,13 @@ export default function PlanningTimelinePage({}: PlanningTimelinePageProps) {
     }
   }, [location.state]);
 
-  console.log(serviceType);
+  console.log("khate",serviceType);
 
   return (
     <>
       {serviceType === "LOGISTICS" ? (
         <>
-          <LogisticsTemplates/> 
+          <LogisticsTemplates serviceType={serviceType}/> 
         </>
       ) : (
         <Text>UNDER-CONSTRUCTION</Text>

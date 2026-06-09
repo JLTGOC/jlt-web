@@ -30,9 +30,6 @@ interface PageCardProps {
   onBack?: () => void;
   showDivider?: boolean;
   showNextButton?: boolean;
-  inLogisticsTemplate?: boolean;
-  logisticsSettingIconAction?: () => void;
-  logisticsAddTemplateAction?: () => void;
   nextButtonAction?: () => void;
   hideBackButton?: boolean;
   bodyPx?: string | number;
@@ -57,9 +54,6 @@ export function PageCard({
   fullHeight = false,
   showDivider = false,
   showNextButton = false,
-  inLogisticsTemplate = false,
-  logisticsSettingIconAction,
-  logisticsAddTemplateAction,
   nextButtonAction,
   children,
   onBack,
@@ -92,7 +86,6 @@ export function PageCard({
       className={classes.root}
       style={{
         backgroundColor: bgColor,
-        overflow: "visible",
         height: fullHeight
           ? "min(100%, calc(100dvh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2))"
           : undefined,
@@ -152,33 +145,6 @@ export function PageCard({
           </Group>
 
           <Group gap="sm" wrap="nowrap">
-            {inLogisticsTemplate && (
-              <Group wrap="nowrap">
-                <Button
-                  style={{
-                    width: "2.5rem",
-                    height: "2.3rem",
-                    minWidth: "2.5rem",
-                    padding: 0,
-                    borderRadius: "10px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                  onClick={logisticsSettingIconAction}
-                >
-                  <Settings />
-                </Button>
-                <Button
-                  onClick={logisticsAddTemplateAction}
-                  leftSection={
-                    <Add width="1.25rem" height="1.25rem" fill="currentColor" />
-                  }
-                >
-                ADD TEMPLATE
-                </Button>
-              </Group>
-            )}
             {showNextButton && (
               <Button
                 onClick={nextButtonAction}
