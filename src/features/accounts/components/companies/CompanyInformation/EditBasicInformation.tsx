@@ -296,7 +296,7 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
               <span className={styles.requiredMark}>*</span>
             </Text>
             <TextInput
-              placeholder="Enter account handler"
+              placeholder="Enter account handler ID"
               value={formData.accountHandler}
               onChange={(e) => handleAccountHandlerChange(e.currentTarget.value)}
               error={localErrors.accountHandler}
@@ -311,7 +311,7 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
         {/* Row 3: Transaction Type + Client Classification + Company Type */}
         <Group grow mb="sm">
           <div>
-            <Text size="sm" fw={500}>Transaction Type</Text>
+            <Text size="sm" fw={500}>Transaction Type<span className={styles.requiredMark}>*</span></Text>
             <Select
               data={transactionTypeOptions}
               placeholder="Select transaction type"
@@ -328,7 +328,7 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
             />
           </div>
           <div>
-            <Text size="sm" fw={500}>Client Classification</Text>
+            <Text size="sm" fw={500}>Client Classification<span className={styles.requiredMark}>*</span></Text>
             <Select
               data={clientClassificationOptions}
               placeholder="Select classification"
@@ -345,7 +345,7 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
             />
           </div>
           <div>
-            <Text size="sm" fw={500}>Company Type</Text>
+            <Text size="sm" fw={500}>Company Type<span className={styles.requiredMark}>*</span></Text>
             <Select
               data={companyTypeOptions}
               placeholder="Select company type"
@@ -398,7 +398,7 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
             />
           </div>
           <div>
-            <Text size="sm" fw={500}>Business Type</Text>
+            <Text size="sm" fw={500}>Business Type<span className={styles.requiredMark}>*</span></Text>
             <Select
               data={businessTypeOptions}
               placeholder="Select business type"

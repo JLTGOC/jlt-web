@@ -188,7 +188,7 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
     <Paper p="lg">
       <Group grow mb="sm">
         <div>
-          <Text size="sm" fw={500}>TIN</Text>
+          <Text size="sm" fw={500}>TIN<span className={styles.requiredMark}>*</span></Text>
           <TextInput
             placeholder="Enter TIN"
             value={formData.tin}
@@ -201,7 +201,7 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
           />
         </div>
         <div>
-          <Text size="sm" fw={500}>BIR Registration Number</Text>
+          <Text size="sm" fw={500}>BIR Registration Number<span className={styles.requiredMark}>*</span></Text>
           <TextInput
             placeholder="Enter BIR registration number"
             value={formData.birRegistrationNumber}
@@ -214,7 +214,7 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
           />
         </div>
         <div>
-          <Text size="sm" fw={500}>CPRS Status</Text>
+          <Text size="sm" fw={500}>CPRS Status<span className={styles.requiredMark}>*</span></Text>
           <Box
             style={{
               border: localErrors.cprsStatus ? "1px solid #fa5252" : "1px solid transparent",
@@ -410,7 +410,7 @@ export function EditGovernment({ company, errors, onChange }: EditGovernmentProp
           />
         </div>
         <div>
-          <Text size="sm" fw={500}>Compliance Risk</Text>
+          <Text size="sm" fw={500}>Compliance Risk<span className={styles.requiredMark}>*</span></Text>
           <TextInput
             placeholder="Enter compliance risk"
             value={formData.complianceRisk}

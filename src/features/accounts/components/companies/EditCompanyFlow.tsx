@@ -809,6 +809,7 @@ export function EditCompanyFlow({ companyId, initialCompany, initialStep, useFul
               marginTop: "1rem",
               marginBottom: "0.5rem",
               width: "100%",
+              overflow: "hidden",
             }}
           >
             {steps.map((label, index) => {

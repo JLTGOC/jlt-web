@@ -114,7 +114,7 @@ export function EditKeyContacts({ company, errors, onChange }: EditKeyContactsPr
       <Box pl="md">
         <Group grow mb="sm">
           <div>
-            <Text size="sm" fw={500}>Full Name</Text>
+            <Text size="sm" fw={500}>Full Name<span className={styles.requiredMark}>*</span></Text>
             <TextInput
               placeholder="Enter full name"
               value={contact.fullName}
@@ -127,7 +127,7 @@ export function EditKeyContacts({ company, errors, onChange }: EditKeyContactsPr
             />
           </div>
           <div>
-            <Text size="sm" fw={500}>Position</Text>
+            <Text size="sm" fw={500}>Position<span className={styles.requiredMark}>*</span></Text>
             <TextInput
               placeholder="Enter position"
               value={contact.position}
@@ -142,7 +142,7 @@ export function EditKeyContacts({ company, errors, onChange }: EditKeyContactsPr
         </Group>
         <Group grow mb="sm">
           <div>
-            <Text size="sm" fw={500}>Contact Number</Text>
+            <Text size="sm" fw={500}>Contact Number<span className={styles.requiredMark}>*</span></Text>
             <TextInput
               placeholder="Enter contact number"
               value={contact.contactNumber}
@@ -155,7 +155,7 @@ export function EditKeyContacts({ company, errors, onChange }: EditKeyContactsPr
             />
           </div>
           <div>
-            <Text size="sm" fw={500}>Email</Text>
+            <Text size="sm" fw={500}>Email<span className={styles.requiredMark}>*</span></Text>
             <TextInput
               placeholder="Enter email"
               value={contact.email}

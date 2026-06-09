@@ -58,6 +58,7 @@ export function StatusUpdate({ shipment }: StatusUpdateProps) {
           justifyContent: "space-between",
           alignItems: "flex-start",
           width: "100%",
+          overflow: "hidden",
         }}
       >
         {statusSequence.map((statusLabel, index) => {
