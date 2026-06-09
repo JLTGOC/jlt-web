@@ -294,8 +294,8 @@ export function CompanyTable({ tabs, activeTab, onExitTab }: CompanyTableProps) 
 
   return (
     <Box style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-      <Box style={{ flex: 1, minWidth: selectedTab ? 0 : "100%" }}>
-        <Paper shadow="xs" radius="md" p="md">
+      <Box style={{ flex: 1, minWidth: selectedTab ? 0 : "100%"  }}>
+        <Paper radius="md" p="md" style={{ overflow: "hidden" }}>
           <Box mb="md">
             <CompanyTableFilters
               companySearchValue={searchValue}
