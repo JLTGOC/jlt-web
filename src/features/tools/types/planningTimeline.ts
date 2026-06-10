@@ -8,8 +8,8 @@ export type PlanningConfigurationResponse = {
 export interface ConfigItem {
         id: number,
         name: string,
-        is_locked: boolean,
-        used_by_templates: UsedByTemplates[]
+        is_locked?: boolean,
+        used_by_templates?: UsedByTemplates[]
 }
 
 export interface UsedByTemplates {

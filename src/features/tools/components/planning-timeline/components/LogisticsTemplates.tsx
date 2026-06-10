@@ -46,7 +46,9 @@ export default function LogisticsTemplates({
               <Settings />
             </Button>
             <Button
-              onClick={() => navigate("/tools/planning-timeline/add-template")}
+              onClick={() => navigate("/tools/planning-timeline/add-template", {
+                state: {serviceType}
+              })}
               leftSection={
                 <Add width="1.25rem" height="1.25rem" fill="currentColor" />
               }
