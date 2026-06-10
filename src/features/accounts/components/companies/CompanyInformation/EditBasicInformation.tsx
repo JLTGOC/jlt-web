@@ -257,7 +257,6 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
           <div className={styles.formField}>
             <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.tradeName ? styles.fieldLabelError : ""}`}>
               Trade Name
-              <span className={styles.requiredMark}>*</span>
             </Text>
             <TextInput
               placeholder="Enter trade name"
@@ -277,7 +276,6 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
           <div className={styles.formField}>
             <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.consigneeUsed ? styles.fieldLabelError : ""}`}>
               Consignee Used
-              <span className={styles.requiredMark}>*</span>
             </Text>
             <TextInput
               placeholder="Enter consignee"
@@ -293,7 +291,6 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
           <div className={styles.formField}>
             <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.accountHandler ? styles.fieldLabelError : ""}`}>
               Assign Account Handler
-              <span className={styles.requiredMark}>*</span>
             </Text>
             <TextInput
               placeholder="Enter account handler ID"
@@ -311,7 +308,7 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
         {/* Row 3: Transaction Type + Client Classification + Company Type */}
         <Group grow mb="sm">
           <div>
-            <Text size="sm" fw={500}>Transaction Type<span className={styles.requiredMark}>*</span></Text>
+            <Text size="sm" fw={500}>Transaction Type</Text>
             <Select
               data={transactionTypeOptions}
               placeholder="Select transaction type"
@@ -328,7 +325,7 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
             />
           </div>
           <div>
-            <Text size="sm" fw={500}>Client Classification<span className={styles.requiredMark}>*</span></Text>
+            <Text size="sm" fw={500}>Client Classification</Text>
             <Select
               data={clientClassificationOptions}
               placeholder="Select classification"
@@ -345,7 +342,7 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
             />
           </div>
           <div>
-            <Text size="sm" fw={500}>Company Type<span className={styles.requiredMark}>*</span></Text>
+            <Text size="sm" fw={500}>Company Type</Text>
             <Select
               data={companyTypeOptions}
               placeholder="Select company type"
@@ -368,7 +365,6 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
           <div className={styles.formField}>
             <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.industry ? styles.fieldLabelError : ""}`}>
               Industry
-              <span className={styles.requiredMark}>*</span>
             </Text>
             <MultiSelect
               data={industryOptions}
@@ -398,7 +394,7 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
             />
           </div>
           <div>
-            <Text size="sm" fw={500}>Business Type<span className={styles.requiredMark}>*</span></Text>
+            <Text size="sm" fw={500}>Business Type</Text>
             <Select
               data={businessTypeOptions}
               placeholder="Select business type"
@@ -413,7 +409,6 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
           <div className={styles.formField}>
             <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.businessRegistrationNumber ? styles.fieldLabelError : ""}`}>
               Business Registration Number (SEC/DTI)
-              <span className={styles.requiredMark}>*</span>
             </Text>
             <TextInput
               placeholder="Enter registration number"
@@ -432,7 +427,6 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
         <div style={{ marginBottom: "1rem" }} className={styles.formField}>
           <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.website ? styles.fieldLabelError : ""}`}>
             Website / Online Presence
-            <span className={styles.requiredMark}>*</span>
           </Text>
           <TextInput
             placeholder="Enter website URL"
@@ -451,7 +445,6 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
           <div className={styles.formField}>
             <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.yearsInOperation ? styles.fieldLabelError : ""}`}>
               Years in Operation
-              <span className={styles.requiredMark}>*</span>
             </Text>
             <DateInput
               placeholder="Select years in operation"
@@ -485,7 +478,6 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
           <div className={styles.formField}>
             <Text size="sm" fw={500} className={`${styles.fieldLabel} ${localErrors.dateOfActivation ? styles.fieldLabelError : ""}`}>
               Date of Activation
-              <span className={styles.requiredMark}>*</span>
             </Text>
             <DateInput
               placeholder="Pick date"

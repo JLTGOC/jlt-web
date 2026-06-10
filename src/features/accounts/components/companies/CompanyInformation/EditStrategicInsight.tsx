@@ -155,7 +155,7 @@ export function EditStrategicInsight({ company, errors, onChange }: EditStrategi
     <Paper p="lg">
       <Group grow mb="sm">
         <div>
-          <Text size="sm" fw={500}>Growth<span className={styles.requiredMark}>*</span></Text>
+          <Text size="sm" fw={500}>Growth</Text>
           <Combobox
             store={combobox}
             onOptionSubmit={(val) => {

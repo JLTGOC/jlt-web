@@ -194,6 +194,7 @@ type CompanyBackendDetails = {
   representatives?: Array<{ full_name?: string }> | null;
   special_permits?: string | null;
   compliance_risk?: string | null;
+  registration_compliance_risk?: string | null;
   
   // pricing section (returned as array, take first item)
   service_rate?: string | null;
@@ -318,7 +319,7 @@ const mapBackendCompanyToFullDetails = (backend: CompanyBackendDetails | any): C
       // Extract full_name from representatives array
       authorizedRepresentatives: (data.representatives ?? []).map((rep: any) => rep.full_name ?? "").filter(Boolean),
       specialPermits: getString(data.special_permits, (data as any).specialPermits),
-      complianceRisk: getString(data.compliance_risk, (data as any).complianceRisk),
+      complianceRisk: getString(data.registration_compliance_risk, data.compliance_risk, (data as any).complianceRisk),
     },
     commercialInformation: {
       agreedServiceRates: getString(data.service_rate ?? data.agreed_service_rates, (data as any).agreedServiceRates),

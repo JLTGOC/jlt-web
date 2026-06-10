@@ -329,15 +329,12 @@ export const isContactPersonBlank = (contact?: CompanyContactPerson | null): boo
 
 export const mapContactPersonToBackend = (
   contact?: CompanyContactPerson | null,
-): { full_name?: string | null; position?: string | null; contact_number?: string | null; email?: string | null } | null =>
-  isContactPersonBlank(contact)
-    ? null
-    : {
-        full_name: contact?.fullName?.trim() ?? null,
-        position: contact?.position?.trim() ?? null,
-        contact_number: contact?.contactNumber?.trim() ?? null,
-        email: contact?.email?.trim() ?? null,
-      };
+): { full_name?: string | null; position?: string | null; contact_number?: string | null; email?: string | null } => ({
+  full_name: contact?.fullName?.trim() ?? null,
+  position: contact?.position?.trim() ?? null,
+  contact_number: contact?.contactNumber?.trim() ?? null,
+  email: contact?.email?.trim() ?? null,
+});
 
 export const parseYearsInOperation = (v?: string | null): number | null => {
   if (v == null) return null;
@@ -388,95 +385,100 @@ export const normalizeIndustryToIds = (industry?: string | string[] | null): num
   return ids.length > 0 ? ids : null;
 };
 
-export const mapCompanySummaryToBackend = (summary: CompanySummary) => {
-  const validIndustryIds = summary.industryIds?.filter((id) =>
+export const mapCompanySummaryToBackend = (summary: CompanySummary | null | undefined) => {
+  const validSummary = (summary ?? {}) as Partial<CompanySummary>;
+  const validIndustryIds = validSummary.industryIds?.filter((id) =>
     supportedIndustryIds.includes(id as SupportedIndustryId),
   ) ?? [];
 
-  const fallbackIndustryId = supportedIndustryIds.includes(summary.industryId as SupportedIndustryId)
-    ? summary.industryId
+  const fallbackIndustryId = supportedIndustryIds.includes(validSummary.industryId as SupportedIndustryId)
+    ? validSummary.industryId
     : undefined;
 
   return {
-    name: summary.companyName,
-    trade_name: summary.tradeName ?? null,
-    consignee_used: summary.consigneeUsed ?? null,
-    account_handler_id: summary.accountHandlerId ?? summary.accountHandler ?? null,
-    transaction_type: summary.transactionType ?? null,
-    client_classification: summary.clientClassification ?? null,
-    company_type: summary.companyType ?? null,
-    business_type: summary.businessType ?? null,
-    business_registration_number: summary.businessRegistrationNumber ?? null,
-    website: summary.website ?? null,
-    years_in_operation: parseYearsInOperation(summary.yearsInOperation),
-    activation_date: formatDateStringForBackend(summary.dateOfActivation),
+    name: validSummary.companyName ?? "",
+    trade_name: validSummary.tradeName ?? null,
+    consignee_used: validSummary.consigneeUsed ?? null,
+    account_handler_id: validSummary.accountHandlerId ?? validSummary.accountHandler ?? null,
+    transaction_type_id: null,
+    transaction_type_other: validSummary.transactionType ?? null,
+    client_classification_id: null,
+    client_classification_other: validSummary.clientClassification ?? null,
+    company_type_id: null,
+    company_type_other: validSummary.companyType ?? null,
+    business_type_id: null,
+    business_type_other: validSummary.businessType ?? null,
+    business_registration_number: validSummary.businessRegistrationNumber ?? null,
+    website: validSummary.website ?? null,
+    years_in_operation: parseYearsInOperation(validSummary.yearsInOperation),
+    activation_date: formatDateStringForBackend(validSummary.dateOfActivation),
     // Backend expects array[string] or null — send list of ID strings or fallback labels.
     industry: validIndustryIds.length > 0
       ? validIndustryIds
       : fallbackIndustryId
         ? [fallbackIndustryId]
-        : summary.industry
-          ? normalizeIndustryToIds(summary.industry)?.map(String) ?? null
+        : validSummary.industry
+          ? normalizeIndustryToIds(validSummary.industry)?.map(String) ?? null
           : null,
   };
 };
 
-export const mapAddressToBackend = (address: CompanyAddressSummary) => ({
-  registered_address: address.registeredAddress ?? null,
-  office_address: address.officeAddress ?? null,
-  usual_port: address.portOfUsualEntryExit ?? null,
-  origin_country: address.countryOfOrigin ?? null,
-  destination_country: address.countryOfDestination ?? null,
-  warehouse_addresses: address.warehouseAddresses ?? [],
-  delivery_addresses: address.deliveryAddresses ?? [],
+export const mapAddressToBackend = (address: CompanyAddressSummary | null | undefined) => ({
+  registered_address: address?.registeredAddress ?? null,
+  office_address: address?.officeAddress ?? null,
+  usual_port: address?.portOfUsualEntryExit ?? null,
+  origin_country: address?.countryOfOrigin ?? null,
+  destination_country: address?.countryOfDestination ?? null,
+  warehouse_addresses: address?.warehouseAddresses ?? [],
+  delivery_addresses: address?.deliveryAddresses ?? [],
 });
 
-export const mapRegistrationToBackend = (registration: CompanyGovernmentCompliance) => ({
-  tin: registration.tin ?? null,
-  bir_registration_number: registration.birRegistrationNumber ?? null,
-  cprs_status: registration.cprsStatus ?? null,
-  importer_accreditation_number: registration.importerAccreditationNumber ?? null,
-  importer_accreditation_expiry: formatDateStringForBackend(registration.importerExpirationDate),
-  exporter_accreditation_number: registration.exporterAccreditationNumber ?? null,
-  exporter_accreditation_expiry: formatDateStringForBackend(registration.exporterExpirationDate),
-  authorized_representatives: registration.authorizedRepresentatives,
-  representatives: registration.authorizedRepresentatives,
-  special_permits: registration.specialPermits ?? null,
-  compliance_risk: registration.complianceRisk ?? null,
+export const mapRegistrationToBackend = (registration: CompanyGovernmentCompliance | null | undefined) => ({
+  tin: registration?.tin ?? null,
+  bir_registration_number: registration?.birRegistrationNumber ?? null,
+  cprs_status: registration?.cprsStatus ?? null,
+  importer_accreditation_number: registration?.importerAccreditationNumber ?? null,
+  importer_accreditation_expiry: formatDateStringForBackend(registration?.importerExpirationDate),
+  exporter_accreditation_number: registration?.exporterAccreditationNumber ?? null,
+  exporter_accreditation_expiry: formatDateStringForBackend(registration?.exporterExpirationDate),
+  authorized_representatives: registration?.authorizedRepresentatives ?? [],
+  representatives: registration?.authorizedRepresentatives ?? [],
+  special_permits: registration?.specialPermits ?? null,
+  compliance_risk: registration?.complianceRisk ?? null,
 });
 
-export const mapCommercialToBackend = (commercial: CompanyCommercialInformation) => ({
-  service_rate: commercial.agreedServiceRates ?? null,
-  special_discounts: commercial.specialDiscounts ?? null,
-  "3pl_profit_range": commercial.profitRangePercent ?? null,
-  notes: commercial.notes ?? null,
+export const mapCommercialToBackend = (commercial: CompanyCommercialInformation | null | undefined) => ({
+  service_rate: commercial?.agreedServiceRates ?? null,
+  special_discounts: commercial?.specialDiscounts ?? null,
+  "3pl_profit_range": commercial?.profitRangePercent ?? null,
+  notes: commercial?.notes ?? null,
 });
 
-export const mapOperationalToBackend = (instructions: CompanyOperationalInstructions) => ({
-  preferred_communication_style: instructions.preferredCommunicationStyle ?? null,
-  decision_making_process: instructions.decisionMakingProcess ?? null,
-  response_time_expectation: instructions.responseTimeExpectation ?? null,
-  client_specific_sop: instructions.clientSpecificSOP ?? null,
-  approval_workflow: instructions.approvalWorkflow ?? null,
-  pre_alert_details: instructions.requiredPreAlertDetails ?? null,
-  special_instructions: instructions.specialInstructions ?? null,
+export const mapOperationalToBackend = (instructions: CompanyOperationalInstructions | null | undefined) => ({
+  preferred_communication_style: instructions?.preferredCommunicationStyle ?? null,
+  decision_making_process: instructions?.decisionMakingProcess ?? null,
+  response_time_expectation: instructions?.responseTimeExpectation ?? null,
+  client_specific_sop: instructions?.clientSpecificSOP ?? null,
+  approval_workflow: instructions?.approvalWorkflow ?? null,
+  pre_alert_details: instructions?.requiredPreAlertDetails ?? null,
+  special_instructions: instructions?.specialInstructions ?? null,
 });
 
-export const mapMonitoringToBackend = (monitoring: CompanyRiskIssueMonitoring) => ({
-  past_issues: monitoring.pastIssues ?? null,
-  penalties: monitoring.penalties ?? null,
-  custom_flags: monitoring.customFlags ?? null,
-  payment_delays: monitoring.paymentDelays ?? null,
-  claims: monitoring.claims ?? null,
-  monitoring_notes: monitoring.notes ?? null,
+export const mapMonitoringToBackend = (monitoring: CompanyRiskIssueMonitoring | null | undefined) => ({
+  past_issues: monitoring?.pastIssues ?? null,
+  penalties: monitoring?.penalties ?? null,
+  custom_flags: monitoring?.customFlags ?? null,
+  payment_delays: monitoring?.paymentDelays ?? null,
+  claims: monitoring?.claims ?? null,
+  monitoring_notes: monitoring?.notes ?? null,
 });
 
-export const mapInsightsToBackend = (insight: CompanyStrategicInsight) => ({
-  growth: insight.growthOptions?.[0] ?? null,
-  expansion_plan: insight.expansionPlan ?? null,
-  competitors: insight.competitorsUsed ?? null,
-  opportunities: insight.upsellingOpportunities ?? null,
-  notes: insight.notes ?? null,
+export const mapInsightsToBackend = (insight: CompanyStrategicInsight | null | undefined) => ({
+  growth: insight?.growthOptions?.[0] ?? null,
+  expansion_plan: insight?.expansionPlan ?? null,
+  competitors: insight?.competitorsUsed ?? null,
+  opportunities: insight?.upsellingOpportunities ?? null,
+  notes: insight?.notes ?? null,
 });
 
 export const mapCompanyFullDetailsToBackendRequest = (

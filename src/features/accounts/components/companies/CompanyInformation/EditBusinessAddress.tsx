@@ -140,7 +140,7 @@ export function EditBusinessAddress({ company, errors, onChange }: EditBusinessA
     <Paper p="lg">
       <Group grow mb="sm">
         <div>
-          <Text size="sm" fw={500}>Registered Address<span className={styles.requiredMark}>*</span></Text>
+          <Text size="sm" fw={500}>Registered Address</Text>
           <TextInput
             placeholder="Enter registered address"
             value={formData.registeredAddress}
@@ -153,7 +153,7 @@ export function EditBusinessAddress({ company, errors, onChange }: EditBusinessA
           />
         </div>
         <div>
-          <Text size="sm" fw={500}>Office Address<span className={styles.requiredMark}>*</span></Text>
+          <Text size="sm" fw={500}>Office Address</Text>
           <TextInput
             placeholder="Enter office address"
             value={formData.officeAddress}

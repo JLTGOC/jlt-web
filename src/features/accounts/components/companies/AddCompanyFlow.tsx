@@ -505,52 +505,58 @@ export function AddCompanyFlow() {
     }
   };
 
-  const performSaveCompany = async () => {
-    if (!draftCompany) {
-      throw new Error("Company details are not ready yet.");
-    }
-
-    if (!validateDraftCompany(draftCompany, setActiveStep)) {
-      throw new Error("Please fix validation errors before saving.");
-    }
-
-    const createPayload: CompanyCreateRequest = mapCompanyFullDetailsToBackendRequest(draftCompany);
-    const created = await companyService.createCompany(createPayload);
-
-    if (created?.companyId) {
-      const documents = await prepareDocumentPayload(draftCompany.documentsAttachments?.documents);
-      const attachments = await prepareDocumentPayload(draftCompany.documentsAttachments?.attachments);
-      if ((documents?.length ?? 0) > 0 || (attachments?.length ?? 0) > 0) {
-        const payload = {
-          documents,
-          attachments,
-        } as CompanyUpdateRequest;
-        console.debug("create -> updateCompany payload (raw):", payload);
-        const cleaned = cleanNulls(payload);
-        console.debug("create -> updateCompany payload (cleaned):", cleaned);
-        await companyService.updateCompany(created.companyId, cleaned as CompanyUpdateRequest);
-      }
-    }
-
-    if (currentDraftId) {
-      const nextDrafts = removeDraftById(currentDraftId);
-      setDrafts(nextDrafts);
-      setCurrentDraftId(null);
-    }
-  };
-
   const handleSaveCompany = async () => {
     try {
       setIsSaving(true);
       setFinishModalError(null);
-      await performSaveCompany();
+
+      // Before saving, commit the current step's data to ensure we capture any recent changes
+      let currentDraftCompany = draftCompany;
+      if (activeStep === 1 && basicInformationCommitRef.current) {
+        const summary = basicInformationCommitRef.current();
+        currentDraftCompany = { ...draftCompany, summary } as CompanyFullDetails;
+      }
+
+      // Validate and save with the latest data
+      if (!currentDraftCompany) {
+        throw new Error("Company details are not ready yet.");
+      }
+
+      if (!validateDraftCompany(currentDraftCompany, setActiveStep)) {
+        throw new Error("Please fix validation errors before saving.");
+      }
+
+      const createPayload: CompanyCreateRequest = mapCompanyFullDetailsToBackendRequest(currentDraftCompany);
+      console.debug("Company creation payload:", createPayload);
+      const created = await companyService.createCompany(createPayload);
+
+      if (created?.companyId) {
+        const documents = await prepareDocumentPayload(currentDraftCompany.documentsAttachments?.documents);
+        const attachments = await prepareDocumentPayload(currentDraftCompany.documentsAttachments?.attachments);
+        if ((documents?.length ?? 0) > 0 || (attachments?.length ?? 0) > 0) {
+          const payload = {
+            documents,
+            attachments,
+          } as CompanyUpdateRequest;
+          console.debug("create -> updateCompany payload (raw):", payload);
+          const cleaned = cleanNulls(payload);
+          console.debug("create -> updateCompany payload (cleaned):", cleaned);
+          await companyService.updateCompany(created.companyId, cleaned as CompanyUpdateRequest);
+        }
+      }
+
+      if (currentDraftId) {
+        const nextDrafts = removeDraftById(currentDraftId);
+        setDrafts(nextDrafts);
+        setCurrentDraftId(null);
+      }
+
       setFinishModalStage("success");
       setDraftCompany(emptyCompanyDraft);
       setCurrentDraftId(null);
       if (blocker.state === "blocked") {
         blocker.reset();
       }
-      // Keep the success modal open until the user confirms.
     } catch (error) {
       console.error("Failed to save company:", error);
       const message = error instanceof Error ? error.message : "An unexpected error occurred.";
