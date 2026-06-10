@@ -194,9 +194,7 @@ export function EditBasicInformation({ company, errors, onChange, onRegisterComm
       };
       setFormData(nextFormData);
       clearFieldError(field as string);
-      if (field !== "companyName") {
-        emitSummaryChange(nextFormData);
-      }
+      emitSummaryChange(nextFormData);
     };
 
     const handleSelectChange = (

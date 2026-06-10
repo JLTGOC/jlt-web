@@ -481,6 +481,13 @@ export const mapInsightsToBackend = (insight: CompanyStrategicInsight | null | u
   notes: insight?.notes ?? null,
 });
 
+const hasAnyValue = (obj: Record<string, any> | undefined): boolean => {
+  if (!obj) return false;
+  return Object.values(obj).some(
+    (val) => val !== null && val !== undefined && val !== "",
+  );
+};
+
 export const mapCompanyFullDetailsToBackendRequest = (
   company: CompanyFullDetails,
 ): CompanyCreateRequest => {
@@ -495,18 +502,57 @@ export const mapCompanyFullDetailsToBackendRequest = (
     strategicInsight,
   } = company;
 
-  return {
+  const payload: Record<string, any> = {
     basic_info: mapCompanySummaryToBackend(summary),
-    address: mapAddressToBackend(address),
-    primary: mapContactPersonToBackend(keyContacts?.primaryContact),
-    secondary: mapContactPersonToBackend(keyContacts?.secondaryContact),
-    billing: mapContactPersonToBackend(keyContacts?.billingContact),
-    registration: mapRegistrationToBackend(governmentCompliance),
-    pricing: mapCommercialToBackend(commercialInformation),
-    monitoring: mapMonitoringToBackend(riskIssueMonitoring),
-    operation: mapOperationalToBackend(operationalInstructions),
-    insights: mapInsightsToBackend(strategicInsight),
   };
+
+  // Only include optional sections if they have data
+  const addressData = mapAddressToBackend(address);
+  if (hasAnyValue(addressData)) {
+    payload.address = addressData;
+  }
+
+  const primaryData = mapContactPersonToBackend(keyContacts?.primaryContact);
+  if (hasAnyValue(primaryData)) {
+    payload.primary = primaryData;
+  }
+
+  const secondaryData = mapContactPersonToBackend(keyContacts?.secondaryContact);
+  if (hasAnyValue(secondaryData)) {
+    payload.secondary = secondaryData;
+  }
+
+  const billingData = mapContactPersonToBackend(keyContacts?.billingContact);
+  if (hasAnyValue(billingData)) {
+    payload.billing = billingData;
+  }
+
+  const registrationData = mapRegistrationToBackend(governmentCompliance);
+  if (hasAnyValue(registrationData)) {
+    payload.registration = registrationData;
+  }
+
+  const pricingData = mapCommercialToBackend(commercialInformation);
+  if (hasAnyValue(pricingData)) {
+    payload.pricing = pricingData;
+  }
+
+  const monitoringData = mapMonitoringToBackend(riskIssueMonitoring);
+  if (hasAnyValue(monitoringData)) {
+    payload.monitoring = monitoringData;
+  }
+
+  const operationData = mapOperationalToBackend(operationalInstructions);
+  if (hasAnyValue(operationData)) {
+    payload.operation = operationData;
+  }
+
+  const insightsData = mapInsightsToBackend(strategicInsight);
+  if (hasAnyValue(insightsData)) {
+    payload.insights = insightsData;
+  }
+
+  return payload as CompanyCreateRequest;
 };
 
 export const mapCompanyFullDetailsToBackendUpdateRequest = (

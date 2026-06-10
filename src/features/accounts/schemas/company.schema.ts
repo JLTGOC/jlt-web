@@ -15,18 +15,9 @@ export const companySummarySchema = z.object({
     (value) => (typeof value === "string" ? value : ""),
     z.string().trim().min(1, "Required Company Name to proceed"),
   ),
-  tradeName: z.preprocess(
-    (value) => (typeof value === "string" ? value : ""),
-    z.string().trim().min(1, "Required Trade Name to proceed"),
-  ),
-  consigneeUsed: z.preprocess(
-    (value) => (typeof value === "string" ? value : ""),
-    z.string().trim().min(1, "Required Consignee Used to proceed"),
-  ),
-  accountHandler: z.preprocess(
-    (value) => (typeof value === "string" ? value : ""),
-    z.string().trim().min(1, "Required Account Handler to proceed"),
-  ),
+  tradeName: nullableString,
+  consigneeUsed: nullableString,
+  accountHandler: nullableString,
   accountHandlerId: nullableString,
   transactionType: nullableString,
   transactionTypeId: nullableString,
@@ -35,7 +26,7 @@ export const companySummarySchema = z.object({
   companyType: nullableString,
   companyTypeId: nullableString,
   industry: nullableString,
-  industryIds: z.array(z.string().trim()).optional().refine(
+  industryIds: z.array(z.string().trim()).optional().nullable().refine(
     (ids) => ids == null || ids.every((id) => supportedIndustryIds.includes(id as typeof supportedIndustryIds[number])),
     {
       message: "Invalid industry selected",
@@ -44,35 +35,10 @@ export const companySummarySchema = z.object({
   industryId: nullableString,
   businessType: nullableString,
   businessTypeId: nullableString,
-  businessRegistrationNumber: z.preprocess(
-    (value) => (typeof value === "string" ? value : ""),
-    z.string().trim().min(1, "Required Business Registration Number to proceed"),
-  ),
-  website: z.preprocess(
-    (value) => (typeof value === "string" ? value : ""),
-    z.string().trim().min(1, "Required Website / Online Presence to proceed"),
-  ),
-  yearsInOperation: z.preprocess(
-    (value) => (typeof value === "string" ? value : ""),
-    z.string().trim().min(1, "Required Years in Operation to proceed"),
-  ),
-  dateOfActivation: z.preprocess(
-    (value) => (typeof value === "string" ? value : ""),
-    z.string().trim().min(1, "Required Date of Activation to proceed"),
-  ),
-}).superRefine((data, ctx) => {
-  const hasIndustry =
-    (typeof data.industry === "string" && data.industry.trim() !== "") ||
-    (Array.isArray(data.industryIds) && data.industryIds.length > 0) ||
-    (typeof data.industryId === "string" && data.industryId.trim() !== "");
-
-  if (!hasIndustry) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Required Industry to proceed",
-      path: ["industry"],
-    });
-  }
+  businessRegistrationNumber: nullableString,
+  website: nullableString,
+  yearsInOperation: nullableString,
+  dateOfActivation: nullableString,
 });
 
 export const companyAddressSchema = z.object({

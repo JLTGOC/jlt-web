@@ -419,7 +419,7 @@ export function AddCompanyFlow() {
       case 1:
         return (
           <EditBasicInformation
-            key={`basic-new-${draftCompany?.summary?.companyName ?? ""}`}
+            key="basic-info"
             company={draftCompany}
             errors={sectionErrors.basic_info}
             onChange={(summary) => updateSection("summary", summary)}
@@ -431,7 +431,7 @@ export function AddCompanyFlow() {
       case 2:
         return (
           <EditBusinessAddress
-            key={`address-new-${draftCompany?.summary?.companyName ?? ""}`}
+            key="address"
             company={draftCompany}
             errors={sectionErrors.address}
             onChange={(address) => updateSection("address", address)}
@@ -440,7 +440,7 @@ export function AddCompanyFlow() {
       case 3:
         return (
           <EditKeyContacts
-            key={`contacts-new-${draftCompany?.summary?.companyName ?? ""}`}
+            key="contacts"
             company={draftCompany}
             errors={sectionErrors.contacts}
             onChange={(keyContacts) => updateSection("keyContacts", keyContacts)}
@@ -449,7 +449,7 @@ export function AddCompanyFlow() {
       case 4:
         return (
           <EditGovernment
-            key={`government-new-${draftCompany?.summary?.companyName ?? ""}`}
+            key="government"
             company={draftCompany}
             errors={sectionErrors.registration}
             onChange={(governmentCompliance) => updateSection("governmentCompliance", governmentCompliance)}
@@ -458,7 +458,7 @@ export function AddCompanyFlow() {
       case 5:
         return (
           <EditCommercial
-            key={`commercial-new-${draftCompany?.summary?.companyName ?? ""}`}
+            key="commercial"
             company={draftCompany}
             errors={sectionErrors.pricing}
             onChange={(commercialInformation) => updateSection("commercialInformation", commercialInformation)}
@@ -467,7 +467,7 @@ export function AddCompanyFlow() {
       case 6:
         return (
           <EditOperationalInstructions
-            key={`operational-new-${draftCompany?.summary?.companyName ?? ""}`}
+            key="operational"
             company={draftCompany}
             errors={sectionErrors.operation}
             onChange={(operationalInstructions) => updateSection("operationalInstructions", operationalInstructions)}
@@ -476,7 +476,7 @@ export function AddCompanyFlow() {
       case 7:
         return (
           <EditRiskIssue
-            key={`risk-new-${draftCompany?.summary?.companyName ?? ""}`}
+            key="risk"
             company={draftCompany}
             errors={sectionErrors.monitoring}
             onChange={(riskIssueMonitoring) => updateSection("riskIssueMonitoring", riskIssueMonitoring)}
@@ -485,7 +485,7 @@ export function AddCompanyFlow() {
       case 8:
         return (
           <EditDocuments
-            key={`documents-new-${draftCompany?.summary?.companyName ?? ""}`}
+            key="documents"
             company={draftCompany}
             errors={sectionErrors.documents}
             onChange={(documentsAttachments) => updateSection("documentsAttachments", documentsAttachments)}
@@ -494,7 +494,7 @@ export function AddCompanyFlow() {
       case 9:
         return (
           <EditStrategicInsight
-            key={`strategic-new-${draftCompany?.summary?.companyName ?? ""}`}
+            key="strategic"
             company={draftCompany}
             errors={sectionErrors.insights}
             onChange={(strategicInsight) => updateSection("strategicInsight", strategicInsight)}
@@ -585,12 +585,17 @@ export function AddCompanyFlow() {
     }
 
     if (activeStep < steps.length) {
-      if (!validateSection(currentSection, nextDraftCompany, (errors) => {
+      const isValid = validateSection(currentSection, nextDraftCompany, (errors) => {
+        console.log("Section validation errors:", currentSection, errors);
         setSectionErrors((prev) => ({
           ...prev,
           [currentSection]: errors,
         }));
-      })) {
+      });
+      
+      console.log("Validation result:", isValid, "Section:", currentSection, "Data:", sectionDataMap(nextDraftCompany)[currentSection]);
+      
+      if (!isValid) {
         return;
       }
 
