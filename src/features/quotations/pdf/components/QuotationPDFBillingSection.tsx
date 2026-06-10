@@ -34,7 +34,9 @@ export function QuotationPDFBillingSection({
     uom,
     formatAmount,
   );
-  const isPerContainer = isPerContainerUom(uom);
+  const hasPerContainerRows =
+    isPerContainerUom(uom) ||
+    displayRows.some((row) => isPerContainerUom(row.uom));
 
   return (
     <View style={{ marginBottom: 14 }}>
@@ -52,20 +54,14 @@ export function QuotationPDFBillingSection({
           <Text style={[styles.tableCellBase, styles.colUom, styles.bold]}>
             UOM
           </Text>
-          {isPerContainer ? (
-            <Text
-              style={[styles.tableCellBase, styles.colQuantity, styles.bold]}
-            >
-              Quantity
-            </Text>
-          ) : null}
-          {isPerContainer ? (
-            <Text
-              style={[styles.tableCellBase, styles.colContainer, styles.bold]}
-            >
-              Container Size
-            </Text>
-          ) : null}
+          <Text style={[styles.tableCellBase, styles.colQuantity, styles.bold]}>
+            Quantity
+          </Text>
+          <Text
+            style={[styles.tableCellBase, styles.colContainer, styles.bold]}
+          >
+            Container Size
+          </Text>
           <Text
             style={[
               styles.tableCellBase,
@@ -99,22 +95,18 @@ export function QuotationPDFBillingSection({
               <Text style={[styles.tableCellBase, styles.colUom]}>
                 {row.uom}
               </Text>
-              {isPerContainer ? (
-                <Text
-                  style={[
-                    styles.tableCellBase,
-                    styles.colQuantity,
-                    styles.tableCellRight,
-                  ]}
-                >
-                  {row.quantity}
-                </Text>
-              ) : null}
-              {isPerContainer ? (
-                <Text style={[styles.tableCellBase, styles.colContainer]}>
-                  {row.containerSize}
-                </Text>
-              ) : null}
+              <Text
+                style={[
+                  styles.tableCellBase,
+                  styles.colQuantity,
+                  styles.tableCellRight,
+                ]}
+              >
+                {row.quantity}
+              </Text>
+              <Text style={[styles.tableCellBase, styles.colContainer]}>
+                {row.containerSize}
+              </Text>
               <Text
                 style={[
                   styles.tableCellBase,
@@ -134,41 +126,10 @@ export function QuotationPDFBillingSection({
                 {row.totalText}
               </Text>
             </View>
-            {row.calculationText ? (
-              <View
-                style={{
-                  flexDirection: "row",
-                  borderBottom: "0.5pt solid #b9b9b9",
-                }}
-              >
-                <Text
-                  style={[
-                    styles.tableCellBase,
-                    { flex: isPerContainer ? 6.5 : 5.3 },
-                  ]}
-                />
-                <Text
-                  style={[
-                    styles.tableCellLast,
-                    styles.colTotal,
-                    styles.tableCellRight,
-                    styles.rowNote,
-                  ]}
-                >
-                  {row.calculationText}
-                </Text>
-              </View>
-            ) : null}
           </View>
         ))}
         <View style={styles.totalRow}>
-          <Text
-            style={[
-              styles.tableCellBase,
-              styles.bold,
-              { flex: isPerContainer ? 6.5 : 5.3 },
-            ]}
-          >
+          <Text style={[styles.tableCellBase, styles.bold, { flex: 7.2 }]}>
             {`Total ${sectionTitle}`}
           </Text>
           <Text
@@ -182,7 +143,7 @@ export function QuotationPDFBillingSection({
             {formatBillingAmount(currency, total)}
           </Text>
         </View>
-        {isPerContainer ? (
+        {hasPerContainerRows ? (
           <Text style={styles.sectionNote}>
             Per container charges use quantity multiplied by the unit rate.
           </Text>

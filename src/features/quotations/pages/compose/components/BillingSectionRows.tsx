@@ -18,11 +18,16 @@ import {
 } from "react-hook-form";
 import * as z from "zod";
 import { useEffect } from "react";
+import { SelectField } from "@/components/form/selectFields";
 import { NumberInputField } from "@/components/form/valueFields";
 import { billingDetailsSchema } from "@/features/quotations/schemas/compose.schema";
 import type { BillingSection } from "@/features/quotations/types/compose.types";
-import { getRowsTotalWithGlobalUom } from "@/features/quotations/utils/billing";
+import {
+  getRowsTotalWithGlobalUom,
+  isPerContainerUom,
+} from "@/features/quotations/utils/billing";
 import { formatBillingAmount } from "@/features/quotations/utils/billingPresentation";
+import { tableSelectStyles } from "./billingSelectStyles";
 import { ReceiptChargeField } from "./ReceiptChargeField";
 import classes from "../BillingDetailsForm.module.css";
 
@@ -32,8 +37,7 @@ interface BillingSectionRowsProps {
   control: Control<BillingDetailsFormInput>;
   section: BillingSection;
   globalCurrency: string;
-  globalUom: string;
-  isPerContainer: boolean;
+  uoms: string[];
   readOnly?: boolean;
 }
 
@@ -41,8 +45,7 @@ export function BillingSectionRows({
   control,
   section,
   globalCurrency,
-  globalUom,
-  isPerContainer,
+  uoms,
   readOnly,
 }: BillingSectionRowsProps) {
   const sectionName = `sections.${section.id}` as const;
@@ -52,7 +55,7 @@ export function BillingSectionRows({
   });
   const hasRows = fields.length > 0;
   const rows = useWatch({ control, name: sectionName }) ?? [];
-  const total = getRowsTotalWithGlobalUom(rows, globalUom);
+  const total = getRowsTotalWithGlobalUom(rows);
 
   useEffect(() => {
     if (!readOnly || fields.length > 0) {
@@ -61,6 +64,7 @@ export function BillingSectionRows({
     append(
       {
         description: "",
+        uom: "",
         amount: null,
         quantity: null,
         container_size: "",
@@ -102,7 +106,13 @@ export function BillingSectionRows({
               columns={24}
               className={classes.row}
             >
-              <Grid.Col span={{ base: 24, sm: 10 }} className={classes.cell}>
+              <Grid.Col
+                span={{
+                  base: 24,
+                  sm: isPerContainerUom(rows[index]?.uom) ? 7 : 11,
+                }}
+                className={classes.cell}
+              >
                 <Controller
                   control={control}
                   name={`sections.${section.id}.${index}.description`}
@@ -120,7 +130,25 @@ export function BillingSectionRows({
                   }}
                 />
               </Grid.Col>
-              {isPerContainer && (
+              <Grid.Col
+                span={{
+                  base: 24,
+                  sm: isPerContainerUom(rows[index]?.uom) ? 4 : 5,
+                }}
+                className={classes.cell}
+              >
+                <SelectField
+                  control={control}
+                  name={`sections.${section.id}.${index}.uom`}
+                  label=""
+                  placeholder="SELECT UOM"
+                  data={uoms}
+                  searchable
+                  styles={tableSelectStyles}
+                  readOnly={readOnly}
+                />
+              </Grid.Col>
+              {isPerContainerUom(rows[index]?.uom) && (
                 <Grid.Col span={{ base: 12, sm: 3 }} className={classes.cell}>
                   <Controller
                     control={control}
@@ -169,7 +197,7 @@ export function BillingSectionRows({
                 </Grid.Col>
               )}
 
-              {isPerContainer && (
+              {isPerContainerUom(rows[index]?.uom) && (
                 <Grid.Col span={{ base: 12, sm: 4 }} className={classes.cell}>
                   <Controller
                     control={control}
@@ -218,7 +246,10 @@ export function BillingSectionRows({
               )}
 
               <Grid.Col
-                span={{ base: 20, sm: isPerContainer ? 6 : 13 }}
+                span={{
+                  base: 20,
+                  sm: isPerContainerUom(rows[index]?.uom) ? 5 : 7,
+                }}
                 className={classes.cell}
               >
                 <div className={classes.amountCell}>
@@ -282,7 +313,7 @@ export function BillingSectionRows({
         </div>
       )}
 
-      {hasRows && isPerContainer && (
+      {hasRows && rows.some((row) => isPerContainerUom(row?.uom)) && (
         <Text size="xs" c="dimmed" px="sm" pb="sm" pt={6}>
           Per container charges use quantity multiplied by the unit rate.
         </Text>

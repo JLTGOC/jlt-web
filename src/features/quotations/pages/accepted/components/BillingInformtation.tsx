@@ -17,7 +17,9 @@ import {
   type FileWithPath,
 } from "@mantine/dropzone";
 import { IconReceipt, IconX } from "@tabler/icons-react";
+import dayjs from "dayjs";
 
+import { DateInputField } from "@/components/form/valueFields";
 import { type RequestBody } from "@/features/quotations/schemas/acceptedForm.schema";
 import type { AcceptedFormEnumsResponse } from "@/features/quotations/types/acceptedForm.types";
 
@@ -35,6 +37,7 @@ export default function BillingInformation({ enums }: BillingInformationProps) {
     formState: { errors },
   } = useFormContext<RequestBody>();
   const [attachedDocs, setAttachedDocs] = useState<FileWithPath[]>([]);
+  const today = dayjs().startOf("day").toDate();
 
   const handleRemoveDoc = (index: number) => {
     const nextFiles = attachedDocs.filter(
@@ -58,12 +61,14 @@ export default function BillingInformation({ enums }: BillingInformationProps) {
         </Grid.Col>
 
         <Grid.Col span={6}>
-          <TextInput
+          <DateInputField
+            control={control}
+            name="billing.billing_date"
             label="WHEN TO BILL"
-            placeholder=""
-            radius="md"
-            size="sm"
-            {...register("billing.billing_date")}
+            placeholder="MM/DD/YYYY"
+            valueFormat="MM/DD/YYYY"
+            clearable
+            minDate={today}
           />
         </Grid.Col>
 

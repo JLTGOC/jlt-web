@@ -7,15 +7,15 @@ const fileSchema = z.custom<File>((value) => {
   return value instanceof File;
 });
 
+function toDateOnly(value: string): Date {
+  return new Date(`${value}T00:00:00`);
+}
+
 export type RequestBody = z.infer<typeof requestSchema>;
 
 export const requestSchema = z.object({
   subject: z.object({
     date: z.string().min(8, "Date is Required").max(10, "Date invalid"),
-
-    subject: z.string().min(1, "Subject is required"),
-
-    email_body: z.string().min(1, "Message is required"),
   }),
 
   client: z.object({
@@ -40,23 +40,16 @@ export const requestSchema = z.object({
 
       etd: z.string().min(1, "ETD is required"),
     })
-    .superRefine((value, context) => {
-      if (!value.eta || !value.etd) {
+    .superRefine((service, ctx) => {
+      if (!service.eta || !service.etd) {
         return;
       }
 
-      const etaDate = new Date(value.eta);
-      const etdDate = new Date(value.etd);
-
-      if (Number.isNaN(etaDate.getTime()) || Number.isNaN(etdDate.getTime())) {
-        return;
-      }
-
-      if (etaDate > etdDate) {
-        context.addIssue({
+      if (toDateOnly(service.etd) < toDateOnly(service.eta)) {
+        ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "ETA is beyond ETD",
-          path: ["eta"],
+          path: ["etd"],
+          message: "ETD must be on or after ETA",
         });
       }
     }),

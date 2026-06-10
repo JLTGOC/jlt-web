@@ -2,6 +2,7 @@ import { SimpleGrid } from "@mantine/core";
 import { TextInputField } from "@/components/form/textFields";
 import { SelectField } from "@/components/form/selectFields";
 import { DateInputField } from "@/components/form/valueFields";
+import dayjs from "dayjs";
 import type { Control } from "react-hook-form";
 import type { QuotationDetailsValues } from "@/features/quotations/schemas/compose.schema";
 import type {
@@ -51,6 +52,7 @@ export function QuotationCustomFieldsGrid({
         }
 
         if (field.type === "date") {
+          const today = dayjs().startOf("day").toDate();
           return (
             <DateInputField
               key={field.id}
@@ -66,6 +68,7 @@ export function QuotationCustomFieldsGrid({
               clearable
               withAsterisk
               readOnly={readOnly}
+              minDate={today}
             />
           );
         }

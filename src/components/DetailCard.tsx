@@ -25,6 +25,8 @@ export interface DetailCardProps {
    */
   headerBg?: string;
   /** Card body — typically a DetailGrid but can be anything */
+  h?: string;
+  minh?: string;
   children: ReactNode;
 }
 
@@ -34,6 +36,8 @@ export function DetailCard({
   headerLeft,
   title,
   headerRight,
+  h,
+  minh,
   headerBg,
   children,
   style,
@@ -41,6 +45,7 @@ export function DetailCard({
   return (
     <Paper
       radius="md"
+      h={h}
       style={{
         backgroundColor: "#fff",
         border: "1px solid var(--mantine-color-gray-2)",
@@ -52,6 +57,7 @@ export function DetailCard({
       <Box
         display="flex"
         p="1.25rem"
+        mih={minh}
         style={{
           alignItems: "center",
           justifyContent: "space-between",

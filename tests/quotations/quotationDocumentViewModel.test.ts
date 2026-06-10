@@ -70,8 +70,9 @@ const billingDetails: BillingDetailsValues = {
       {
         description: "Customs Fee",
         currency: "PHP",
-        uom: "Per BL",
+        uom: "Per Container",
         amount: 100,
+        quantity: 2,
       },
       {
         description: "",
@@ -123,10 +124,11 @@ describe("quotation document view-model", () => {
     expect(model.billingSections).toHaveLength(2);
     expect(model.billingSections[0]?.id).toBe("section-a");
     expect(model.billingSections[0]?.rows).toHaveLength(1);
-    expect(model.billingSections[0]?.total).toBe(100);
+    expect(model.billingSections[0]?.uom).toBe("Per Container");
+    expect(model.billingSections[0]?.total).toBe(200);
     expect(model.billingSections[1]?.id).toBe("section-b");
     expect(model.billingSections[1]?.total).toBe(250);
-    expect(model.grandTotal).toBe(350);
+    expect(model.grandTotal).toBe(450);
   });
 
   it("orders terms blocks predictably and omits empty blocks", () => {

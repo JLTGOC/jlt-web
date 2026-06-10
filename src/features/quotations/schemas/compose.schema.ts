@@ -49,14 +49,6 @@ export const billingDetailsSchema = z
       });
     }
 
-    if (!values.uom?.trim()) {
-      context.addIssue({
-        code: "custom",
-        path: ["uom"],
-        message: "Select a unit of measurement.",
-      });
-    }
-
     const hasAtLeastOneCharge = hasAnyCharge(values.sections);
 
     if (!hasAtLeastOneCharge) {
@@ -80,6 +72,14 @@ export const billingDetailsSchema = z
           !row.container_size?.trim()
         ) {
           return;
+        }
+
+        if (!row.uom?.trim()) {
+          context.addIssue({
+            code: "custom",
+            path: ["sections", sectionId, rowIndex, "uom"],
+            message: "Select a unit of measurement for this charge.",
+          });
         }
 
         if (!row.quantity || row.quantity <= 0) {

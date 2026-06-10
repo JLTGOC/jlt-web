@@ -1,4 +1,4 @@
-import { Group, Select, Text } from "@mantine/core";
+import { Select } from "@mantine/core";
 import { useComposeMessageTemplates } from "@/features/quotations/hooks/useComposeReferenceData";
 
 interface MessageTemplateSelectProps {

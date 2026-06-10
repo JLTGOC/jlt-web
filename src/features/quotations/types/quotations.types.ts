@@ -200,7 +200,7 @@ export interface IssuedQuotationDetailValueResource {
 export interface IssuedQuotationChargeItemResource {
   receipt_charge_label: string;
   currency_label: string;
-  uom_label: string;
+  uom: string;
   quantity?: number | string | null;
   container_size?: string | null;
   amount: number | string | null;

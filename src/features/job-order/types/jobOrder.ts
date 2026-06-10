@@ -13,6 +13,8 @@ export interface JobOrderListItem {
   id: string | number;
   reference_number: string;
   client: string;
+  company_name: string;
+  client_type: JobOrderClientType;
   created_at: string;
   assignment_status: JobOrderStatus;
   service: JobOrderServiceType;
@@ -37,57 +39,60 @@ export interface JobOrderListItem {
     name: string;
     avatar_url?: string;
   };
-  quotation_reference?: string;
+  issued_quotation_id: number;
+  quotation_reference_number: string;
   quotation_id?: string | number;
 }
 
 export interface JobOrderQuotationDetailsResponse {
-  id: number | string;
+  id: number;
   reference_number: string;
-  client_id: number | string | null;
+  client_id: number;
   client: {
     full_name: string;
-    company_name?: string | null;
-    contact_number?: string | null;
-    email?: string | null;
-  } | null;
-  account_specialist?: string | null;
+    company_name: string | null;
+    contact_number: string | null;
+    email: string | null;
+  };
+  account_specialist: string | null;
   status: string;
-  shipment_status?: string | null;
+  shipment_status: string | null;
   created_at: string;
   updated_at: string;
-  issued_quotation_id?: number | string | null;
-  job_order?: {
-    reference_number?: string | null;
-    person_in_charge?: string | null;
+  issued_quotation_id: number;
+  job_order: {
+    reference_number: string | null;
+    person_in_charge: string | null;
   } | null;
-  company?: {
+  company: {
     name: string;
     address: string;
     contact_person: string;
     contact_number: string;
     email: string;
-    position: string;
-    business_type: string;
+    position: string | null;
+    business_type: string | null;
   } | null;
-  service?: {
+  service: {
     type: string;
     transport_mode: string;
     options: string[];
   } | null;
-  commodity?: {
+  commodity: {
     commodity: string;
     cargo_type: string;
-    container_size?: string | null;
+    container_size: string | null;
   } | null;
-  shipment?: {
+  shipment: {
     origin: string;
     destination: string;
-    remarks?: string | null;
+    remarks: string | null;
   } | null;
-  regulatory_service?: Record<string, unknown> | null;
+  regulatory_service: Record<string, unknown> | null;
+  total_quotation_files: number;
+  total_documents: number;
   quotation_file: Array<{
-    id: number | string;
+    id: number;
     file_name: string;
     file_url: string;
     file_type: string;
@@ -95,21 +100,21 @@ export interface JobOrderQuotationDetailsResponse {
     updated_at: string;
   }>;
   documents: Array<{
-    id: number | string;
+    id: number;
     file_name: string;
     file_url: string;
     file_type: string;
     created_at: string;
     updated_at: string;
   }>;
-  history?: JobOrderHistoryItem[];
-  histories?: JobOrderHistoryItem[];
-  activity_logs?: JobOrderHistoryItem[];
-  activities?: JobOrderHistoryItem[];
-  timeline?: JobOrderHistoryItem[];
-  events?: JobOrderHistoryItem[];
-  remarks?: string | null;
-  conversation_id?: number | string | null;
+  remarks: string | null;
+  conversation_id: number | null;
+  history: Array<{
+    id: number;
+    action: string;
+    user: string;
+    datetime: string;
+  }>;
 }
 
 export interface QuotationFilesIndexResponse {
@@ -129,7 +134,7 @@ export interface QuotationFilesIndexResponse {
     created_at: string;
     updated_at: string;
   }>;
-};
+}
 
 export type JobOrderClientType = "NEW" | "OLD";
 
