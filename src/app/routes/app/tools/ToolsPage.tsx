@@ -15,6 +15,7 @@ import PlanningTimelinePage from "@/features/tools/pages/PlanningTimelinePage";
 import TemplatesConfiguration from "@/features/tools/components/planning-timeline/components/TemplatesConfiguration";
 import SelectPhase from "@/features/tools/components/planning-timeline/components/SelectPhase";
 import ViewTemplatesTable from "@/features/tools/components/planning-timeline/components/view-templates/ViewTemplatesTable";
+import EditTemplates from "@/features/tools/components/planning-timeline/components/edit-templates/EditTemplates";
 
 export default function ToolsPage() {
   const location = useLocation();
@@ -41,6 +42,7 @@ export default function ToolsPage() {
   const TemplateConfigurationMatch = useMatch("/tools/planning-timeline/templates-configuration")
   const SelectPhaseMatch = useMatch("/tools/planning-timeline/add-template")
   const ViewTemplatesTableMatch = useMatch("/tools/planning-timeline/view-templates-table")
+  const EditTemplateMatch = useMatch("/tools/planning-timeline/edit-template")
 
   if (detailsConfigMatch) return <DetailsConfigurationPage />;
   if (billingConfigMatch) return <BillingConfigurationPage />;
@@ -73,14 +75,17 @@ export default function ToolsPage() {
   if (templatesMatch) return <TemplatesPage />;
 
   // Specific planning-timeline routes must come BEFORE the generic planningTimelineMatch
-  if(ViewTemplatesTableMatch) {
-    return <ViewTemplatesTable/>
+  if (EditTemplateMatch) {
+    return <EditTemplates />;
   }
-  if(TemplateConfigurationMatch) {
-    return <TemplatesConfiguration/>
+  if (ViewTemplatesTableMatch) {
+    return <ViewTemplatesTable />;
   }
-  if(SelectPhaseMatch) {
-    return <SelectPhase/>
+  if (TemplateConfigurationMatch) {
+    return <TemplatesConfiguration />;
+  }
+  if (SelectPhaseMatch) {
+    return <SelectPhase />;
   }
   if (planningTimelineMatch) {
     return <PlanningTimelinePage />;

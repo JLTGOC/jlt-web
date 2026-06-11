@@ -191,7 +191,9 @@ export const router = createBrowserRouter([
             Component: Tools,
           },
           // Planning Timeline — most specific first
+          { path: "tools/planning-timeline/edit-template", Component: Tools },
           { path: "tools/planning-timeline/view-templates-table", Component: Tools },
+          { path: "tools/planning-timeline/view-templates", Component: Tools },
           { path: "tools/planning-timeline/templates-configuration", Component: Tools },
           { path: "tools/planning-timeline/add-template", Component: Tools },
           { path: "tools/planning-timeline", Component: Tools },

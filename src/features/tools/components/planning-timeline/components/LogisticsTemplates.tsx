@@ -74,15 +74,39 @@ export default function LogisticsTemplates({
           </Table.Thead>
           <Table.Tbody>
             {data?.map((template: any, i: number) => {
+              const handleRowClick = (e: React.MouseEvent) => {
+                // Prevent navigation if clicking on Switch or Edit button
+                if ((e.target as HTMLElement).closest('[role="switch"]') || (e.target as HTMLElement).closest('svg')) {
+                  return;
+                }
+                navigate("/tools/planning-timeline/view-templates-table", {
+                  state: { template, serviceType },
+                });
+              };
+
               return (
-                <Table.Tr key={i}>
+                <Table.Tr 
+                  key={i}
+                  onClick={handleRowClick}
+                  style={{ cursor: "pointer" }}
+                >
                   <Table.Td>{template.id}</Table.Td>
                   <Table.Td>{template.name}</Table.Td>
                   <Table.Td ta={"center"}>{template.service_type}</Table.Td>
-                  <Table.Td ta={"center"}>
+                  <Table.Td ta={"center"} onClick={(e) => e.stopPropagation()}>
                     <Group align="center" justify="end">
                       <Switch checked={!!template.is_active} />
-                      <Edit />
+                      <Button
+                        variant="subtle"
+                        p={0}
+                        onClick={() =>
+                          navigate("/tools/planning-timeline/edit-template", {
+                            state: { template, serviceType },
+                          })
+                        }
+                      >
+                        <Edit />
+                      </Button>
                     </Group>
                   </Table.Td>
                 </Table.Tr>

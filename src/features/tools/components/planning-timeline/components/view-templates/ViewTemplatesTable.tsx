@@ -1,7 +1,19 @@
-import { Table, Paper, Text, Group, Button  } from "@mantine/core";
+import { useLocation } from "react-router";
+import { Table, Paper, Text, Group, Button, Divider  } from "@mantine/core";
 import { PageCard } from "@/components/PageCard";
 
+interface Template {
+  id: number;
+  name: string;
+  version_number?: number;
+  service_type?: string;
+  is_active?: boolean;
+}
+
 export default function ViewTemplatesTable() {
+  const location = useLocation();
+  const template = (location.state as { template?: Template })?.template;
+
   const columns = [
     "#",
     "PROCESS",
@@ -61,7 +73,7 @@ export default function ViewTemplatesTable() {
 
   return (
     <PageCard
-      title="View Templates" 
+      title={template?.name || "View Templates"} 
       bgColor="transparent"
       shadow={false}
     >
@@ -70,7 +82,8 @@ export default function ViewTemplatesTable() {
           <Text fw={800} c="jltBlue.8">PLANNING & TIMELINE</Text>
           <Button variant="filled" h="40px" bg="#4E6174">EDIT TEMPLATE</Button>
         </Group>
-        <Table striped>
+        <Divider />
+        <Table>
           <Table.Thead bg="#17314B" c="white">
             <Table.Tr>
               {columns.map((column) => (
