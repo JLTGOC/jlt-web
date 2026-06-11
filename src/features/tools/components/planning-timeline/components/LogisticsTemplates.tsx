@@ -8,6 +8,8 @@ import {
   Add,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 
+import { usePlanningTemplateList } from "@/features/tools/hooks/planningTImeline";
+
 type LogisticsTemplatesProps = {
   serviceType: string;
 };
@@ -17,7 +19,8 @@ export default function LogisticsTemplates({
 }: LogisticsTemplatesProps) {
   const navigate = useNavigate();
 
-  console.log("khate", serviceType);
+  const { data, isLoading } = usePlanningTemplateList();
+  console.log("khate", data);
 
   return (
     <>
@@ -46,7 +49,11 @@ export default function LogisticsTemplates({
               <Settings />
             </Button>
             <Button
-              onClick={() => navigate("/tools/planning-timeline/add-template")}
+              onClick={() =>
+                navigate("/tools/planning-timeline/add-template", {
+                  state: { serviceType },
+                })
+              }
               leftSection={
                 <Add width="1.25rem" height="1.25rem" fill="currentColor" />
               }
@@ -66,26 +73,21 @@ export default function LogisticsTemplates({
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {
-              <Table.Tr
-                onClick={() =>
-                  navigate(
-                    "/tools/planning-timeline/view-templates-table"
-                  )
-                }
-                style={{ cursor: "pointer" }}
-              >
-                <Table.Td>1</Table.Td>
-                <Table.Td>element.name</Table.Td>
-                <Table.Td ta={"right"}>element.symbol</Table.Td>
-                <Table.Td ta={"center"}>
-                  <Group align="center" justify="end">
-                    <Switch defaultChecked />
-                    <Edit />
-                  </Group>
-                </Table.Td>
-              </Table.Tr>
-            }
+            {data?.map((template: any, i: number) => {
+              return (
+                <Table.Tr key={i}>
+                  <Table.Td>{template.id}</Table.Td>
+                  <Table.Td>{template.name}</Table.Td>
+                  <Table.Td ta={"center"}>{template.service_type}</Table.Td>
+                  <Table.Td ta={"center"}>
+                    <Group align="center" justify="end">
+                      <Switch checked={!!template.is_active} />
+                      <Edit />
+                    </Group>
+                  </Table.Td>
+                </Table.Tr>
+              );
+            })}
           </Table.Tbody>
         </Table>
       </PageCard>

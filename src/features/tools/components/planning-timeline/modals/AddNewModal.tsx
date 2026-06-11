@@ -20,18 +20,13 @@ export default function AddNewModal({
   onConfirm,
   name,
 }: AddNewPhaseModalProps) {
-  const [phaseName, setPhaseName] = useState("");
+  const [phaseName, setNewName] = useState("");
 
   console.log("khate", name);
 
-  const handleConfirm = () => {
-    onConfirm(phaseName);
-    setPhaseName("");
-    onClose();
-  };
 
   const handleClose = () => {
-    setPhaseName("");
+    setNewName("");
     onClose();
   };
 
@@ -102,14 +97,14 @@ export default function AddNewModal({
         placeholder={`Enter ${name} name`}
         required
         value={phaseName}
-        onChange={(e) => setPhaseName(e.currentTarget.value)}
+        onChange={(e) => setNewName(e.currentTarget.value)}
       />
 
       <Group justify="center" m="lg" gap="sm">
         <Button variant="default" onClick={handleClose}>
           CANCEL
         </Button>
-        <Button color="#4E6174" onClick={handleConfirm}>
+        <Button color="#4E6174" onClick={() =>( onConfirm(phaseName), setNewName(""))}>
           CONFIRM
         </Button>
       </Group>

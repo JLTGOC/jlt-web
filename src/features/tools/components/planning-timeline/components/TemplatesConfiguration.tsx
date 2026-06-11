@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router";
 
 import {
@@ -12,16 +12,24 @@ import {
   Button,
   UnstyledButton,
   Loader,
+  TextInput,
 } from "@mantine/core";
 import {
   ArrowBack,
   Add,
   Edit,
   Delete,
+  CheckSmall,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 
-import { usePlanningConfigurations } from "@/features/tools/hooks/planningTImeline";
-import type { UsedByTemplates } from "@/features/tools/types/planningTimeline";
+import {
+  usePlanningConfigurations,
+  useSavePlanningConfiguration,
+} from "@/features/tools/hooks/planningTImeline";
+import type {
+  UsedByTemplates,
+  PlanningConfigurationResponse,
+} from "@/features/tools/types/planningTimeline";
 
 import AddNewModal from "../modals/AddNewModal";
 import InUseModal from "../modals/InUseModal";
@@ -42,7 +50,9 @@ export default function TemplatesConfiguration() {
   const serviceType = location.state?.serviceType;
 
   const { data, isLoading } = usePlanningConfigurations(serviceType);
+  const saveTemplateConfiguration = useSavePlanningConfiguration()
 
+  //MODALS
   const [modalState, setModalState] = useState({
     addOpen: false,
     inUseOpen: false,
@@ -62,23 +72,114 @@ export default function TemplatesConfiguration() {
       inUseOpen: true,
       templates: templates,
       name: TYPE_LABELS[type],
-      itemName: itemName
+      itemName: itemName,
     }));
   };
 
-  const handleAddClick= (name: string) => {
+  const handleAddClick = (name: string) => {
     setModalState((prev) => ({ ...prev, addOpen: true, name: name }));
   };
 
+  // EDIT AND ADD
+  const [localDataState, setLocalDataState] = useState({
+    data: data as PlanningConfigurationResponse,
+    isEdit: false,
+    editing: { section: "", id: 0 },
+    phases: [{ id: 0, name: "" }],
+    processes: [{ id: 0, name: "" }],
+    tasks: [{ id: 0, name: "" }],
+  });
+
+  const handleEditClick = (section: ConfigKey, id: number) => {
+    setLocalDataState((prev) => ({
+      ...prev,
+      editing: {
+        section,
+        id,
+      },
+    }));
+  };
+
+  useEffect(() => {
+    if (data) {
+      setLocalDataState((prev) => ({
+        ...prev,
+        data,
+        phases: data.phases,
+        processes: data.processes,
+        tasks: data.tasks,
+      }));
+    }
+  }, [data]);
+
+  const handleAddConfirm = (name: string, phaseName: string) => {
+    const type =
+      name === "PHASE" ? "phases" : name === "PROCESS" ? "processes" : "tasks";
+
+    console.log("kahte", type);
+
+    const newItem = {
+      name: phaseName,
+    };
+
+    setLocalDataState((prev) => ({
+      ...prev,
+      [type]: [...prev[type], newItem],
+    }));
+
+    setModalState((prev) => ({ ...prev, addOpen: false }));
+  };
+
+  //SAVE CHANGES
+  const payload = useMemo(() => {
+    return {
+      version_number: data?.version_number ?? 1,
+      phases: localDataState.phases ?? [],
+      processes: localDataState.processes ?? [],
+      tasks: localDataState.tasks ?? [],
+    };
+  }, [localDataState.phases, localDataState.processes, localDataState.tasks]);
+  
+
+  const handleSaveChanges = () => {
+    saveTemplateConfiguration.mutate({payload, serviceType})
+  };
+
+  const handleDelete = (section: ConfigKey, name: string) => {
+    setLocalDataState((prev) => ({
+    ...prev,
+    [section]: prev[section].filter((item) => item.name !== name),
+  }));
+  }
+
+  //TABLE
   const rows = (type: ConfigKey) =>
-    data?.[type].map((item, i) => (
+    localDataState?.[type].map((item, i) => (
       <Table.Tr key={i}>
         <Table.Td width={"8%"} ta={"center"}>
           {item.id}
         </Table.Td>
         <Table.Td>
           <Group justify="space-between">
-            {item.name}
+            <TextInput
+              w={"90%"}
+              variant="unstyled"
+              value={
+                localDataState[type]?.find((p) => p.id === item.id)?.name ||
+                item.name
+              }
+              readOnly={!localDataState.isEdit}
+              onChange={(e) => {
+                const value = e.currentTarget.value;
+
+                setLocalDataState((prev) => ({
+                  ...prev,
+                  [type]: prev[type].map((p) =>
+                    p.id === item.id ? { ...p, name: value } : p,
+                  ),
+                }));
+              }}
+            />
             {item.is_locked && (
               <UnstyledButton
                 onClick={() =>
@@ -100,15 +201,27 @@ export default function TemplatesConfiguration() {
           <Flex gap={5} justify={"center"}>
             <UnstyledButton
               disabled={item.is_locked === true}
-              onClick={() => {}}
+              onClick={() => {
+                localDataState.isEdit === true
+                  ? (handleEditClick(type, item.id),
+                    setLocalDataState((prev) => ({ ...prev, isEdit: false })))
+                  : (handleEditClick(type, item.id),
+                    setLocalDataState((prev) => ({ ...prev, isEdit: true })));
+              }}
             >
-              <Delete color={item.is_locked === true ? "gray" : "black"} />
+              {localDataState.editing?.section === type &&
+              localDataState.editing?.id === item.id &&
+              localDataState.isEdit ? (
+                <CheckSmall color="green" />
+              ) : (
+                <Edit color={item.is_locked === true ? "gray" : "black"} />
+              )}
             </UnstyledButton>
             <UnstyledButton
               disabled={item.is_locked === true}
-              onClick={() => {}}
+              onClick={() => {handleDelete(type, item.name)}}
             >
-              <Edit color={item.is_locked === true ? "gray" : "black"} />
+              <Delete color={item.is_locked === true ? "gray" : "black"} />
             </UnstyledButton>
           </Flex>
         </Table.Td>
@@ -145,7 +258,7 @@ export default function TemplatesConfiguration() {
           </UnstyledButton>
           <Text fw={700}>TEMPLATE CONFIGURATION</Text>
         </Group>
-        <Button size="xs">SAVE CHANGES</Button>
+        <Button size="xs" onClick={handleSaveChanges}>SAVE CHANGES</Button>
       </Group>
 
       <Group align="stretch" grow wrap="nowrap" h={"83vh"}>
@@ -209,8 +322,10 @@ export default function TemplatesConfiguration() {
       <AddNewModal
         opened={modalState.addOpen}
         name={modalState.name}
-        onClose={() => setModalState((prev) => ({...prev, addOpen: false}))}
-        onConfirm={() => setModalState((prev) => ({...prev, addOpen: false}))}
+        onClose={() => setModalState((prev) => ({ ...prev, addOpen: false }))}
+        onConfirm={(phaseName: string) => {
+          handleAddConfirm(modalState.name, phaseName);
+        }}
       />
       <InUseModal
         opened={modalState.inUseOpen}
@@ -218,10 +333,10 @@ export default function TemplatesConfiguration() {
         inUseTemplateList={modalState.templates}
         item={modalState.item}
         onClose={() => {
-          setModalState((prev) => ({...prev, inUseOpen: false}))
+          setModalState((prev) => ({ ...prev, inUseOpen: false }));
         }}
         onConfirm={() => {
-          setModalState((prev) => ({...prev, inUseOpen: false}))
+          setModalState((prev) => ({ ...prev, inUseOpen: false }));
         }}
       />
     </Box>
