@@ -31,7 +31,7 @@ import type {
   PlanningConfigurationResponse,
 } from "@/features/tools/types/planningTimeline";
 
-import AddNewModal from "../modals/AddNewModal";
+import AddNewModal from "../modals/AddNewTemplateConfigurationModal";
 import InUseModal from "../modals/InUseModal";
 import { PageCard } from "@/components/PageCard";
 
