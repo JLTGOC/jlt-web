@@ -213,3 +213,156 @@ export async function updateQuotationAssignee(
   );
   return response.data.data;
 }
+
+export interface QuotationEnumOptions {
+  clients: Record<string, string>;
+  autofill_details: {
+    full_name: string;
+    company: {
+      name: string | null;
+      address: string | null;
+      position: string | null;
+      contact_number: string;
+      email: string;
+      business_type: string | null;
+    };
+  };
+  business_types: string[];
+  regulatory_assistance_types: string[];
+  service_types: string[];
+  transport_modes: string[];
+  service_options: string[];
+  cargo_type: string[];
+  container_size: string[];
+  document_checklist: string[];
+}
+
+export interface StoreQuotationPayload {
+  services: "LOGISTICS" | "REGULATORY";
+  client?: string;
+  full_name?: string;
+  company: {
+    name: string;
+    address: string;
+    contact_person?: string;
+    contact_number: string;
+    email: string;
+    position?: string;
+    business_type?: string;
+    cp_contact_number?: string;
+  };
+  service?: {
+    type: "IMPORT" | "EXPORT";
+    transport_mode: "SEA" | "AIR";
+    options: string[];
+  };
+  commodity?: {
+    commodity: string;
+    cargo_type: "CONTAINERIZED" | "LCL";
+    container_size?: string;
+  };
+  shipment?: {
+    origin: string;
+    destination: string;
+  };
+  remarks?: string;
+  type_of_regulatory_assistance?: string[];
+  service_level?: "NEW" | "RENEWAL";
+  message?: string;
+  documents?: File[];
+}
+
+export async function fetchQuotationEnumOptions(params: {
+  service?: "LOGISTICS" | "REGULATORY";
+  service_type?: string;
+  client_id?: string;
+}): Promise<QuotationEnumOptions> {
+  const response = await apiClient.get<{ data: QuotationEnumOptions }>(
+    "/quotations/enum-options",
+    { params },
+  );
+  return response.data.data;
+}
+
+export async function storeQuotation(
+  payload: StoreQuotationPayload,
+): Promise<QuotationResource> {
+  const formData = new FormData();
+
+  formData.append("services", payload.services);
+
+  if (payload.client !== undefined) {
+    formData.append("client", payload.client);
+  }
+  if (payload.full_name) {
+    formData.append("full_name", payload.full_name);
+  }
+
+  formData.append("company[name]", payload.company.name);
+  formData.append("company[address]", payload.company.address);
+  formData.append("company[contact_number]", payload.company.contact_number);
+  formData.append("company[email]", payload.company.email);
+  if (payload.company.contact_person) {
+    formData.append("company[contact_person]", payload.company.contact_person);
+  }
+  if (payload.company.position) {
+    formData.append("company[position]", payload.company.position);
+  }
+  if (payload.company.business_type) {
+    formData.append("company[business_type]", payload.company.business_type);
+  }
+  if (payload.company.cp_contact_number) {
+    formData.append("company[cp_contact_number]", payload.company.cp_contact_number);
+  }
+
+  if (payload.services === "LOGISTICS" && payload.service) {
+    formData.append("service[type]", payload.service.type);
+    formData.append("service[transport_mode]", payload.service.transport_mode);
+    payload.service.options.forEach((opt) =>
+      formData.append("service[options][]", opt),
+    );
+  }
+
+  if (payload.commodity) {
+    formData.append("commodity[commodity]", payload.commodity.commodity);
+    formData.append("commodity[cargo_type]", payload.commodity.cargo_type);
+    if (payload.commodity.container_size) {
+      formData.append("commodity[container_size]", payload.commodity.container_size);
+    }
+  }
+
+  if (payload.shipment) {
+    formData.append("shipment[origin]", payload.shipment.origin);
+    formData.append("shipment[destination]", payload.shipment.destination);
+  }
+
+  if (payload.remarks) {
+    formData.append("remarks", payload.remarks);
+  }
+
+  if (payload.type_of_regulatory_assistance) {
+    payload.type_of_regulatory_assistance.forEach((t) =>
+      formData.append("type_of_regulatory_assistance[]", t),
+    );
+  }
+  if (payload.service_level) {
+    formData.append("service_level", payload.service_level);
+  }
+  if (payload.message) {
+    formData.append("message", payload.message);
+  }
+
+  if (payload.documents && payload.documents.length > 0) {
+    payload.documents.forEach((file) =>
+      formData.append("documents[]", file),
+    );
+  }
+
+  const response = await apiClient.post<{ data: QuotationResource }>(
+    "/quotations",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+
+  return response.data.data;
+}

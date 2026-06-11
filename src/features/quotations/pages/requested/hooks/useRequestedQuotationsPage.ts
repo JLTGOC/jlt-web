@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 
@@ -266,6 +266,10 @@ console.log("khate", reassignSpecificDetails)
       ? data?.pagination?.count ?? 0
       : data?.my_quotations_pagination?.count ?? 0;
 
+  const handleNewMakeQuotationClick = useCallback(() => {
+    navigate(quotationRoutes.newQuotation());
+  }, [navigate]);
+
   const handleMakeQuotationClick = (row: QuotationListItem) => {
     const quotationId = String(row.id);
     prefetchQuotationDetails(quotationId);
@@ -299,6 +303,7 @@ console.log("khate", reassignSpecificDetails)
     handleAcceptConfirm,
     handleJobSwitchChange,
     handleMakeQuotationClick,
+    handleNewMakeQuotationClick,
     handleReassignConfirm,
     handleReassignRequestSubmit,
     handleRowClick,
