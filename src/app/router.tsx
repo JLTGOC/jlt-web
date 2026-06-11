@@ -24,13 +24,6 @@ const Quotations = lazy(() => import("./routes/app/quotations/QuotationsPage"));
 const QuotationViewerPage = lazy(
   () => import("./routes/app/quotations/QuotationViewerPage"),
 );
-const QuotationTemplatePreviewPage = lazy(() =>
-  import("@/features/quotations/pages/compose/QuotationTemplatePreviewPage").then(
-    (m) => ({
-      default: m.QuotationTemplatePreviewPage,
-    }),
-  ),
-);
 
 //Shipment Imports
 const Shipments = lazy(() => import("./routes/app/shipments/ShipmentsPage"));
@@ -65,15 +58,6 @@ const AccountsPage = lazy(() => import("./routes/app/accounts/AccountsPage"));
 //Tool imports
 const Tools = lazy(() => import("./routes/app/tools/ToolsPage"));
 
-const SelectProcess = lazy(
-  () =>
-    import("@/features/tools/components/planning-timeline/components/SelectProcess"),
-);
-const SelectTask = lazy(
-  () =>
-    import("@/features/tools/components/planning-timeline/components/SelectTask"),
-);
-
 export const router = createBrowserRouter([
   // ==========================================
   // GUEST ROUTES
@@ -105,14 +89,6 @@ export const router = createBrowserRouter([
           },
           {
             path: "quotations/:tab/:quotationId/documents",
-            Component: Quotations,
-          },
-          {
-            path: "quotations/:tab/client/:clientId/:quotationId/job-order",
-            Component: Quotations,
-          },
-          {
-            path: "quotations/:tab/:quotationId/job-order",
             Component: Quotations,
           },
           {
@@ -194,10 +170,7 @@ export const router = createBrowserRouter([
           // Account routes — sidebar only links to /accounts.
           // Tabs inside AccountsPage are used for clients and account-specialists.
           // Other employee roles are filtered and only accessible with lead access.
-          {
-            path: "accounts/:category/:subCategory/:id",
-            Component: AccountsPage,
-          },
+          { path: "accounts/:category/:subCategory/:id", Component: AccountsPage },
           { path: "accounts/:category/:subCategory", Component: AccountsPage },
           { path: "accounts/:category", Component: AccountsPage },
           { path: "accounts", Component: AccountsPage },
@@ -217,30 +190,24 @@ export const router = createBrowserRouter([
             path: "tools/templates/config/standard-quotation-template/:templateId/edit",
             Component: Tools,
           },
+          // Planning Timeline — most specific first
+          { path: "tools/planning-timeline/view-templates-table", Component: Tools },
+          { path: "tools/planning-timeline/templates-configuration", Component: Tools },
+          { path: "tools/planning-timeline/add-template", Component: Tools },
+          { path: "tools/planning-timeline", Component: Tools },
+          { path: "tools/planningTimeline", Component: Tools },
+          
+          // Services
           { path: "tools/services/:serviceType", Component: Tools },
           { path: "tools/services", Component: Tools },
           { path: "tools/messages", Component: Tools },
-          { path: "tools/planning-timeline", Component: Tools },
-          {
-            path: "tools/planning-timeline/templates-configuration",
-            Component: Tools,
-          },
-          { path: "tools/planning-timeline/add-template", Component: Tools },
-          {
-            path: "tools/planning-timeline/add-template/process",
-            Component: SelectProcess,
-          },
-          {
-            path: "tools/planning-timeline/add-template/task",
-            Component: SelectTask,
-          },
+          
+          // Templates
           { path: "tools/templates/new", Component: Tools },
           { path: "tools/templates/:templateId/edit", Component: Tools },
-          {
-            path: "tools/templates/:templateId/preview",
-            Component: QuotationTemplatePreviewPage,
-          },
           { path: "tools/templates", Component: Tools },
+          
+          // Default tools
           { path: "tools", Component: Tools },
 
           { path: "*", Component: NotFound },

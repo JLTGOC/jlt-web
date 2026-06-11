@@ -67,7 +67,14 @@ export default function LogisticsTemplates({
           </Table.Thead>
           <Table.Tbody>
             {
-              <Table.Tr>
+              <Table.Tr
+                onClick={() =>
+                  navigate(
+                    "/tools/planning-timeline/view-templates-table"
+                  )
+                }
+                style={{ cursor: "pointer" }}
+              >
                 <Table.Td>1</Table.Td>
                 <Table.Td>element.name</Table.Td>
                 <Table.Td ta={"right"}>element.symbol</Table.Td>
