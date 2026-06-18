@@ -12,10 +12,8 @@ import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useBeforeUnload, useBlocker, useNavigate } from "react-router";
 import jltLogoUrl from "@/assets/logos/word-dark.png";
-import {
-  fetchQuotation,
-  storeQuotation,
-} from "@/features/quotations/api/quotations.api";
+import { fetchQuotation } from "@/features/quotations/api/quotations.api";
+import { storeQuotation } from "./api/make-quotation.api";
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 import { createIssuedQuotation } from "@/features/quotations/api/quotations-api/compose.api";
 import { useComposeQuotationTemplate } from "@/features/quotations/hooks/useComposeReferenceData";
@@ -27,70 +25,21 @@ import type {
 } from "@/features/quotations/schemas/compose.schema";
 import type { ViewerSignatoryValues } from "@/features/quotations/types/compose.types";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
+import { MakeQuotationContext } from "./MakeQuotationContext";
 import {
-  MakeQuotationContext,
-  type ClientInfoValues,
-  type DocumentValues,
-  type MakeQuotationMeta,
-  type MakeQuotationState,
-  type ServiceInfoValues,
-  type ServiceSubStep,
-} from "./MakeQuotationContext";
-
-const QUOTATION_DETAILS_FORM_ID = "make-quotation-details-form";
-const BILLING_DETAILS_FORM_ID = "make-quotation-billing-form";
-
-interface Snapshot {
-  clientInfo: ClientInfoValues | null;
-  serviceInfo: ServiceInfoValues | null;
-  documentValues: DocumentValues | null;
-  quotationDetails: QuotationDetailsValues | null;
-  billingDetails: BillingDetailsValues | null;
-  terms: TermsValues | null;
-  signatory: ViewerSignatoryValues | null;
-}
-
-function normalizeSnapshot(s: Snapshot) {
-  return {
-    ...s,
-    signatory: s.signatory
-      ? {
-          complementary_close: s.signatory.complementary_close,
-          is_authorized_signatory: s.signatory.is_authorized_signatory,
-          authorized_signatory_name: s.signatory.authorized_signatory_name,
-          position_title: s.signatory.position_title,
-          signature_file_url: s.signatory.signature_file_url ?? null,
-          signature_file: s.signatory.signature_file
-            ? {
-                name: s.signatory.signature_file.name,
-                size: s.signatory.signature_file.size,
-                type: s.signatory.signature_file.type,
-              }
-            : null,
-        }
-      : null,
-    documentValues: s.documentValues
-      ? {
-          checklistFiles: Object.fromEntries(
-            Object.entries(s.documentValues.checklistFiles).map(
-              ([key, file]) => [key, { name: file.name, size: file.size }],
-            ),
-          ),
-          otherFiles: s.documentValues.otherFiles.map((file) => ({
-            name: file.name,
-            size: file.size,
-          })),
-        }
-      : null,
-  };
-}
-
-function snapshotsEqual(a: Snapshot, b: Snapshot) {
-  return (
-    JSON.stringify(normalizeSnapshot(a)) ===
-    JSON.stringify(normalizeSnapshot(b))
-  );
-}
+  BILLING_DETAILS_FORM_ID,
+  QUOTATION_DETAILS_FORM_ID,
+} from "./constants/make-quotation.constants";
+import type {
+  ClientInfoValues,
+  DocumentValues,
+  MakeQuotationMeta,
+  MakeQuotationSnapshot,
+  MakeQuotationState,
+  ServiceInfoValues,
+  ServiceSubStep,
+} from "./types/make-quotation.types";
+import { snapshotsEqual } from "./utils/snapshot";
 
 export function MakeQuotationProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
@@ -130,7 +79,7 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
     { open: openSendSuccess, close: closeSendSuccess },
   ] = useDisclosure(false);
 
-  const savedSnapshotRef = useRef<Snapshot>({
+  const savedSnapshotRef = useRef<MakeQuotationSnapshot>({
     clientInfo: null,
     serviceInfo: null,
     documentValues: null,
@@ -140,7 +89,7 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
     signatory: null,
   });
 
-  const currentSnapshot = useMemo<Snapshot>(
+  const currentSnapshot = useMemo<MakeQuotationSnapshot>(
     () => ({
       clientInfo,
       serviceInfo,

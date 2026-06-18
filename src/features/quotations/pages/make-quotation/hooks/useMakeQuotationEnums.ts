@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchQuotationEnumOptions } from "@/features/quotations/api/quotations.api";
+import { fetchQuotationEnumOptions } from "../api/make-quotation.api";
 
 export const makeQuotationEnumKeys = {
   base: () => ["make-quotation-enums"] as const,

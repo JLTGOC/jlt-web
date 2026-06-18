@@ -21,8 +21,8 @@ import { useEffect, useState, useMemo } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 import { AppButton } from "@/components/ui/AppButton";
-import { useMakeQuotationEnums } from "@/features/quotations/hooks/useMakeQuotationEnums";
-import type { ClientInfoValues } from "../MakeQuotationContext";
+import { useMakeQuotationEnums } from "../hooks/useMakeQuotationEnums";
+import type { ClientInfoValues } from "../types/make-quotation.types";
 
 const clientInfoSchema = z.object({
   clientType: z.enum(["existing", "prospect"]),

@@ -16,7 +16,7 @@ import {
 import { Close } from "@nine-thirty-five/material-symbols-react/rounded";
 import { useState } from "react";
 import { AppButton } from "@/components/ui/AppButton";
-import { useMakeQuotationEnums } from "@/features/quotations/hooks/useMakeQuotationEnums";
+import { useMakeQuotationEnums } from "../hooks/useMakeQuotationEnums";
 import { useMakeQuotationContext } from "../MakeQuotationContext";
 
 const ACCEPTED_MIME_TYPES = [
@@ -50,12 +50,20 @@ function FilePill({
       justify="space-between"
       gap="xs"
       p="xs"
+      wrap="nowrap"
       style={{ border: "1px solid #e0e5eb", borderRadius: "0.5rem" }}
     >
-      <Text size="sm" lineClamp={1}>
-        {file.name} | {formatFileSize(file)}
-      </Text>
-      <Group gap={4}>
+      <Group gap="xs" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
+        <Text size="sm" truncate="end" style={{ flex: 1, minWidth: 0 }}>
+          {file.name}
+        </Text>
+
+        <Text size="sm" c="dimmed">
+          | {formatFileSize(file)}
+        </Text>
+      </Group>
+
+      <Group gap={4} wrap="nowrap">
         <ActionIcon
           variant="subtle"
           onClick={onPreview}
@@ -63,6 +71,7 @@ function FilePill({
         >
           <Visibility width={18} height={18} />
         </ActionIcon>
+
         <ActionIcon
           variant="subtle"
           color="red"
