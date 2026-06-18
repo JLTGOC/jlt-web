@@ -26,6 +26,7 @@ export function StepperBar({ step, onStepClick, labels }: StepperBarProps) {
             key={label}
             type="button"
             className={`${classes.tab} ${isActiveOrCompleted ? classes.active : classes.future} ${isPast ? classes.clickable : ""}`}
+            style={{ zIndex: stepLabels.length - index }}
             onClick={() => {
               if (isPast) onStepClick(index);
             }}

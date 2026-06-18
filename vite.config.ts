@@ -4,6 +4,9 @@ import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig(() => ({
+  build: {
+    assetsInlineLimit: 150_000,
+  },
   plugins: [react()],
   resolve: {
     alias: {
@@ -15,16 +18,16 @@ export default defineConfig(() => ({
     open: true,
     proxy: {
       // Forward Sanctum CSRF endpoint and API requests to Laravel backend
-      '/sanctum': {
-        target: 'http://localhost:8000',
+      "/sanctum": {
+        target: "http://localhost:8000",
         changeOrigin: true,
         secure: false,
       },
-      '/api': {
-        target: 'http://localhost:8000',
+      "/api": {
+        target: "http://localhost:8000",
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api'),
+        rewrite: (path) => path.replace(/^\/api/, "/api"),
       },
     },
   },

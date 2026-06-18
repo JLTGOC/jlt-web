@@ -72,10 +72,9 @@ function normalizeSnapshot(s: Snapshot) {
     documentValues: s.documentValues
       ? {
           checklistFiles: Object.fromEntries(
-            Object.entries(s.documentValues.checklistFiles).map(([key, file]) => [
-              key,
-              { name: file.name, size: file.size },
-            ]),
+            Object.entries(s.documentValues.checklistFiles).map(
+              ([key, file]) => [key, { name: file.name, size: file.size }],
+            ),
           ),
           otherFiles: s.documentValues.otherFiles.map((file) => ({
             name: file.name,
@@ -87,31 +86,49 @@ function normalizeSnapshot(s: Snapshot) {
 }
 
 function snapshotsEqual(a: Snapshot, b: Snapshot) {
-  return JSON.stringify(normalizeSnapshot(a)) === JSON.stringify(normalizeSnapshot(b));
+  return (
+    JSON.stringify(normalizeSnapshot(a)) ===
+    JSON.stringify(normalizeSnapshot(b))
+  );
 }
 
 export function MakeQuotationProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
-  const [serviceSubStep, setServiceSubStep] = useState<ServiceSubStep>("service");
+  const [serviceSubStep, setServiceSubStep] =
+    useState<ServiceSubStep>("service");
   const [showTemplateSelection, setShowTemplateSelection] = useState(false);
   const [quotationId, setQuotationId] = useState<string | null>(null);
   const [templateId, setTemplateId] = useState<string | null>(null);
   const [clientInfo, setClientInfo] = useState<ClientInfoValues | null>(null);
-  const [serviceInfo, setServiceInfo] = useState<ServiceInfoValues | null>(null);
-  const [documentValues, setDocumentValues] = useState<DocumentValues | null>(null);
-  const [quotationDetailsData, setQuotationDetailsData] = useState<QuotationDetailsValues | null>(null);
-  const [billingDetailsData, setBillingDetailsData] = useState<BillingDetailsValues | null>(null);
+  const [serviceInfo, setServiceInfo] = useState<ServiceInfoValues | null>(
+    null,
+  );
+  const [documentValues, setDocumentValues] = useState<DocumentValues | null>(
+    null,
+  );
+  const [quotationDetailsData, setQuotationDetailsData] =
+    useState<QuotationDetailsValues | null>(null);
+  const [billingDetailsData, setBillingDetailsData] =
+    useState<BillingDetailsValues | null>(null);
   const [termsData, setTermsData] = useState<TermsValues | null>(null);
-  const [signatoryData, setSignatoryData] = useState<ViewerSignatoryValues | null>(null);
+  const [signatoryData, setSignatoryData] =
+    useState<ViewerSignatoryValues | null>(null);
   const [isStep0Valid, setIsStep0Valid] = useState(false);
   const [isStep2Valid, setIsStep2Valid] = useState(false);
   const [isStep3Valid, setIsStep3Valid] = useState(false);
   const [previewReady, setPreviewReady] = useState(false);
-  const [signatoryOpened, { open: openSignatory, close: closeSignatory }] = useDisclosure(false);
-  const [sendConfirmOpened, { open: openSendConfirm, close: closeSendConfirm }] = useDisclosure(false);
-  const [sendSuccessOpened, { open: openSendSuccess, close: closeSendSuccess }] = useDisclosure(false);
+  const [signatoryOpened, { open: openSignatory, close: closeSignatory }] =
+    useDisclosure(false);
+  const [
+    sendConfirmOpened,
+    { open: openSendConfirm, close: closeSendConfirm },
+  ] = useDisclosure(false);
+  const [
+    sendSuccessOpened,
+    { open: openSendSuccess, close: closeSendSuccess },
+  ] = useDisclosure(false);
 
   const savedSnapshotRef = useRef<Snapshot>({
     clientInfo: null,
@@ -133,7 +150,15 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
       terms: termsData,
       signatory: signatoryData,
     }),
-    [clientInfo, serviceInfo, documentValues, quotationDetailsData, billingDetailsData, termsData, signatoryData],
+    [
+      clientInfo,
+      serviceInfo,
+      documentValues,
+      quotationDetailsData,
+      billingDetailsData,
+      termsData,
+      signatoryData,
+    ],
   );
 
   const { data: quotation } = useQuery({
@@ -142,7 +167,9 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
     enabled: Boolean(quotationId),
   });
 
-  const { data: quotationTemplate } = useComposeQuotationTemplate(templateId ?? undefined);
+  const { data: quotationTemplate } = useComposeQuotationTemplate(
+    templateId ?? undefined,
+  );
 
   const createQuotationMutation = useMutation({
     mutationFn: storeQuotation,
@@ -151,7 +178,9 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
       setQuotationId(newId);
       setShowTemplateSelection(true);
       setStep(2);
-      queryClient.invalidateQueries({ queryKey: quotationQueryKeys.byStatusRoot("REQUESTED") });
+      queryClient.invalidateQueries({
+        queryKey: quotationQueryKeys.byStatusRoot("REQUESTED"),
+      });
     },
     onError: (error: unknown) => {
       notifications.show({
@@ -164,14 +193,24 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
 
   const sendMutation = useMutation({
     mutationFn: async () => {
-      if (!quotationId || !quotationTemplate || !quotation || !quotationDetailsData || !billingDetailsData || !termsData || !signatoryData) {
+      if (
+        !quotationId ||
+        !quotationTemplate ||
+        !quotation ||
+        !quotationDetailsData ||
+        !billingDetailsData ||
+        !termsData ||
+        !signatoryData
+      ) {
         throw new Error("Incomplete compose data.");
       }
       const [{ pdf }, { QuotationPDF }] = await Promise.all([
         import("@react-pdf/renderer"),
         import("@/features/quotations/pdf/QuotationPDF"),
       ]);
-      const sigSrc = signatoryData.signature_file ? URL.createObjectURL(signatoryData.signature_file) : null;
+      const sigSrc = signatoryData.signature_file
+        ? URL.createObjectURL(signatoryData.signature_file)
+        : null;
       try {
         const doc = createElement(QuotationPDF, {
           quotation,
@@ -184,8 +223,15 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
           signatorySignatureSrc: sigSrc,
         });
         const blob = await pdf(doc as never).toBlob();
-        const pdfBlob = blob.type === "application/pdf" ? blob : new Blob([blob], { type: "application/pdf" });
-        const file = new File([pdfBlob], `${quotation.reference_number}-proposal.pdf`, { type: "application/pdf" });
+        const pdfBlob =
+          blob.type === "application/pdf"
+            ? blob
+            : new Blob([blob], { type: "application/pdf" });
+        const file = new File(
+          [pdfBlob],
+          `${quotation.reference_number}-proposal.pdf`,
+          { type: "application/pdf" },
+        );
         const payload = buildIssuedQuotationFormData({
           template: quotationTemplate,
           quotationDetails: quotationDetailsData,
@@ -203,7 +249,9 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
       savedSnapshotRef.current = currentSnapshot;
       closeSendConfirm();
       openSendSuccess();
-      queryClient.invalidateQueries({ queryKey: quotationQueryKeys.quotationDetails(quotationId ?? undefined) });
+      queryClient.invalidateQueries({
+        queryKey: quotationQueryKeys.quotationDetails(quotationId ?? undefined),
+      });
     },
     onError: (error: unknown) => {
       notifications.show({
@@ -214,8 +262,15 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const hasUnsavedChanges = !snapshotsEqual(currentSnapshot, savedSnapshotRef.current);
-  const shouldWarnOnExit = hasUnsavedChanges && !createQuotationMutation.isPending && !sendMutation.isPending && !sendSuccessOpened;
+  const hasUnsavedChanges = !snapshotsEqual(
+    currentSnapshot,
+    savedSnapshotRef.current,
+  );
+  const shouldWarnOnExit =
+    hasUnsavedChanges &&
+    !createQuotationMutation.isPending &&
+    !sendMutation.isPending &&
+    !sendSuccessOpened;
   const blocker = useBlocker(shouldWarnOnExit);
 
   useBeforeUnload(
@@ -231,14 +286,20 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (blocker.state !== "blocked") return;
-    const proceed = window.confirm("You have unsaved changes. Leave this page?");
+    const proceed = window.confirm(
+      "You have unsaved changes. Leave this page?",
+    );
     if (proceed) blocker.proceed();
     else blocker.reset();
   }, [blocker]);
 
   const handleSendSuccess = useCallback(() => {
     closeSendSuccess();
-    navigate(quotationId ? quotationRoutes.viewer({ tab: "responded", quotationId }) : "/quotations/responded");
+    navigate(
+      quotationId
+        ? quotationRoutes.viewer({ tab: "responded", quotationId })
+        : "/quotations/responded",
+    );
   }, [closeSendSuccess, navigate, quotationId]);
 
   const actions = useMemo(
@@ -257,12 +318,22 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
       submitDocuments: async (values: DocumentValues) => {
         if (!clientInfo || !serviceInfo) return;
         setDocumentValues(values);
-        const allFiles = [...Object.values(values.checklistFiles), ...values.otherFiles];
-        const isLogistics = clientInfo.services === "LOGISTICS";
+
+        const structuredDocuments: Array<{ file: File; type?: string }> = [
+          ...Object.entries(values.checklistFiles).map(([label, file]) => ({
+            file,
+            type: label,
+          })),
+          ...values.otherFiles.map((file) => ({ file })),
+        ];
+
+        const documents =
+          structuredDocuments.length > 0 ? structuredDocuments : undefined;
+
         const isProspect = clientInfo.clientType === "prospect";
-        await createQuotationMutation.mutateAsync({
-          services: clientInfo.services,
+        const basePayload = {
           client: isProspect ? clientInfo.fullName : clientInfo.clientId,
+          full_name: clientInfo.fullName,
           company: {
             name: clientInfo.company.name,
             address: clientInfo.company.address,
@@ -272,31 +343,46 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
             position: clientInfo.company.position,
             business_type: clientInfo.company.businessType,
           },
-          ...(isLogistics
-            ? {
-                service: {
-                  type: serviceInfo.serviceType as "IMPORT" | "EXPORT",
-                  transport_mode: serviceInfo.transportMode!,
-                  options: serviceInfo.serviceOptions ?? [],
-                },
-                commodity: {
-                  commodity: serviceInfo.commodity!,
-                  cargo_type: serviceInfo.cargoType!,
-                  container_size: serviceInfo.containerSize,
-                },
-                shipment: { origin: serviceInfo.origin!, destination: serviceInfo.destination! },
-                remarks: serviceInfo.remarks,
-              }
-            : {
-                type_of_regulatory_assistance: serviceInfo.regulatoryAuthorities ?? serviceInfo.serviceRequests ?? [],
-                service_level: serviceInfo.serviceLevel ?? "NEW",
-                message: serviceInfo.message,
-                commodity: serviceInfo.commodity
-                  ? { commodity: serviceInfo.commodity, cargo_type: "LCL" as const }
-                  : undefined,
-              }),
-          ...(allFiles.length > 0 ? { documents: allFiles } : {}),
-        });
+          documents,
+        };
+
+        if (clientInfo.services === "LOGISTICS") {
+          await createQuotationMutation.mutateAsync({
+            ...basePayload,
+            services: "LOGISTICS",
+            service: {
+              type: serviceInfo.serviceType,
+              transport_mode: serviceInfo.transportMode!,
+              options: serviceInfo.serviceOptions ?? [],
+            },
+            commodity: {
+              commodity: serviceInfo.commodity,
+              cargo_type: serviceInfo.cargoType!,
+              container_size: serviceInfo.containerSize,
+            },
+            shipment: {
+              origin: serviceInfo.origin!,
+              destination: serviceInfo.destination!,
+            },
+            remarks: serviceInfo.remarks,
+          });
+        } else {
+          await createQuotationMutation.mutateAsync({
+            ...basePayload,
+            services: "REGULATORY",
+            service: {
+              type: serviceInfo.regulatoryServiceType!,
+              options: serviceInfo.serviceRequests ?? [],
+            },
+            type_of_regulatory_assistance:
+              serviceInfo.regulatoryAuthorities ?? [],
+            service_level: serviceInfo.serviceLevel ?? "NEW",
+            message: serviceInfo.message,
+            commodity: serviceInfo.commodity
+              ? { commodity: serviceInfo.commodity }
+              : undefined,
+          });
+        }
       },
       selectTemplate: (id: string) => {
         setTemplateId(id);
@@ -347,7 +433,17 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
       openSignatory,
       closeSignatory,
     }),
-    [clientInfo, serviceInfo, createQuotationMutation, sendMutation, closeSignatory, openSendConfirm, closeSendConfirm, handleSendSuccess, openSignatory],
+    [
+      clientInfo,
+      serviceInfo,
+      createQuotationMutation,
+      sendMutation,
+      closeSignatory,
+      openSendConfirm,
+      closeSendConfirm,
+      handleSendSuccess,
+      openSignatory,
+    ],
   );
 
   const state = useMemo<MakeQuotationState>(
@@ -371,7 +467,26 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
       isSending: sendMutation.isPending,
       previewReady,
     }),
-    [step, serviceSubStep, showTemplateSelection, quotationId, templateId, clientInfo, serviceInfo, documentValues, quotationDetailsData, billingDetailsData, termsData, signatoryData, isStep0Valid, isStep2Valid, isStep3Valid, createQuotationMutation.isPending, sendMutation.isPending, previewReady],
+    [
+      step,
+      serviceSubStep,
+      showTemplateSelection,
+      quotationId,
+      templateId,
+      clientInfo,
+      serviceInfo,
+      documentValues,
+      quotationDetailsData,
+      billingDetailsData,
+      termsData,
+      signatoryData,
+      isStep0Valid,
+      isStep2Valid,
+      isStep3Valid,
+      createQuotationMutation.isPending,
+      sendMutation.isPending,
+      previewReady,
+    ],
   );
 
   const meta = useMemo<MakeQuotationMeta>(

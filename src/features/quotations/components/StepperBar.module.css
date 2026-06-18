@@ -45,18 +45,6 @@
   z-index: 1;
 }
 
-.tab.active:nth-child(1) {
-  z-index: 4;
-}
-
-.tab.active:nth-child(2) {
-  z-index: 3;
-}
-
-.tab.active:nth-child(3) {
-  z-index: 2;
-}
-
 .future {
   background: #c6ced8;
   color: #7a828b;

@@ -1,15 +1,29 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Group, MultiSelect, Select, Stack, Text, Textarea, TextInput } from "@mantine/core";
+import {
+  Group,
+  Radio,
+  MultiSelect,
+  TagsInput,
+  Select,
+  Stack,
+  Textarea,
+  TextInput,
+} from "@mantine/core";
 import { ArrowForward } from "@nine-thirty-five/material-symbols-react/rounded";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 import { AppButton } from "@/components/ui/AppButton";
 import { useMakeQuotationEnums } from "@/features/quotations/hooks/useMakeQuotationEnums";
 import { useMakeQuotationContext } from "../MakeQuotationContext";
+import { useMemo } from "react";
 
 const regulatoryServiceSchema = z.object({
-  regulatoryServiceType: z.string().min(1, "Regulatory service type is required"),
-  serviceRequests: z.array(z.string()).min(1, "Select at least one service request"),
+  regulatoryServiceType: z
+    .string()
+    .min(1, "Regulatory service type is required"),
+  serviceRequests: z
+    .array(z.string())
+    .min(1, "Select at least one service request"),
   commodity: z.string().optional(),
   transportMode: z.enum(["SEA", "AIR"]).optional(),
   origin: z.string().optional(),
@@ -20,45 +34,176 @@ const regulatoryServiceSchema = z.object({
 
 type RegulatoryServiceFormValues = z.infer<typeof regulatoryServiceSchema>;
 
-function TransportChoice({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return <button type="button" onClick={onClick} style={{ flex: 1, padding: "1rem", borderRadius: "0.75rem", border: `1px solid ${active ? "#4E6174" : "#d6dbe1"}`, background: "white", cursor: "pointer", fontWeight: 700 }}>{active ? "✓ " : "□ "}{label}</button>;
-}
-
 export function RegulatoryServiceForm() {
   const { state, actions } = useMakeQuotationContext();
-  const { control, handleSubmit, setValue, formState } = useForm<RegulatoryServiceFormValues>({
-    resolver: zodResolver(regulatoryServiceSchema),
-    mode: "onChange",
-    defaultValues: {
-      regulatoryServiceType: "",
-      serviceRequests: [],
-      commodity: "",
-      transportMode: undefined,
-      origin: "",
-      destination: "",
-      regulatoryAuthorities: [],
-      message: "",
-      ...state.serviceInfo,
-    },
+  const { control, handleSubmit, setValue, formState } =
+    useForm<RegulatoryServiceFormValues>({
+      resolver: zodResolver(regulatoryServiceSchema),
+      mode: "onChange",
+      defaultValues: {
+        regulatoryServiceType: "",
+        serviceRequests: [],
+        commodity: "",
+        transportMode: undefined,
+        origin: "",
+        destination: "",
+        regulatoryAuthorities: [],
+        message: "",
+        ...state.serviceInfo,
+      },
+    });
+  const regulatoryServiceType = useWatch({
+    control,
+    name: "regulatoryServiceType",
   });
-  const regulatoryServiceType = useWatch({ control, name: "regulatoryServiceType" });
-  const transportMode = useWatch({ control, name: "transportMode" });
   const baseEnums = useMakeQuotationEnums({ service: "REGULATORY" });
-  const filteredEnums = useMakeQuotationEnums({ service: "REGULATORY", service_type: regulatoryServiceType || undefined });
+  const filteredEnums = useMakeQuotationEnums({
+    service: "REGULATORY",
+    service_type: regulatoryServiceType || undefined,
+  });
   const enumOptions = filteredEnums.data ?? baseEnums.data;
 
+  const uniqueServiceOptions = useMemo(
+    () => Array.from(new Set(enumOptions?.service_options ?? [])),
+    [enumOptions?.service_options],
+  );
+
+  const uniqueRegulatoryAuthorities = useMemo(
+    () => Array.from(new Set(enumOptions?.regulatory_assistance_types ?? [])),
+    [enumOptions?.regulatory_assistance_types],
+  );
+
   return (
-    <form onSubmit={handleSubmit((values) => actions.submitServiceInfo(values))}>
+    <form
+      onSubmit={handleSubmit((values) => actions.submitServiceInfo(values))}
+    >
       <Stack gap="md">
-        <Controller control={control} name="regulatoryServiceType" render={({ field, fieldState }) => <Select label="REGULATORY SERVICES" data={baseEnums.data?.service_types ?? []} value={field.value ?? null} onChange={(value) => { field.onChange(value ?? ""); setValue("serviceRequests", [], { shouldValidate: true }); }} error={fieldState.error?.message} />} />
-        <Controller control={control} name="serviceRequests" render={({ field, fieldState }) => <MultiSelect label="SERVICE REQUEST" data={enumOptions?.service_options ?? []} value={field.value ?? []} onChange={field.onChange} searchable hidePickedOptions error={fieldState.error?.message} />} />
-        <Controller control={control} name="commodity" render={({ field }) => <TextInput {...field} value={field.value ?? ""} label="COMMODITY (If Applicable)" />} />
-        <Stack gap="xs"><Text fw={700}>TRANSPORT MODE</Text><Group grow><TransportChoice label="SEA" active={transportMode === "SEA"} onClick={() => setValue("transportMode", "SEA", { shouldValidate: true })} /><TransportChoice label="AIR" active={transportMode === "AIR"} onClick={() => setValue("transportMode", "AIR", { shouldValidate: true })} /></Group></Stack>
-        <Controller control={control} name="origin" render={({ field }) => <TextInput {...field} value={field.value ?? ""} label="ORIGIN" />} />
-        <Controller control={control} name="destination" render={({ field }) => <TextInput {...field} value={field.value ?? ""} label="DESTINATION" />} />
-        <Controller control={control} name="regulatoryAuthorities" render={({ field }) => <MultiSelect label="REGULATORY AUTHORITY / AGENCY (If known)" data={enumOptions?.regulatory_assistance_types ?? []} value={field.value ?? []} onChange={field.onChange} searchable hidePickedOptions />} />
-        <Controller control={control} name="message" render={({ field }) => <Textarea {...field} value={field.value ?? ""} label="MESSAGE / REMARKS" />} />
-        <Group justify="flex-end"><AppButton type="submit" variant="primary" icon={ArrowForward} disabled={!formState.isValid}>NEXT</AppButton></Group>
+        <Group grow align="flex-start">
+          <Controller
+            control={control}
+            name="regulatoryServiceType"
+            render={({ field, fieldState }) => (
+              <Select
+                label="REGULATORY SERVICES"
+                data={baseEnums.data?.service_types ?? []}
+                value={field.value ?? null}
+                onChange={(value) => {
+                  field.onChange(value ?? "");
+                  setValue("serviceRequests", [], { shouldValidate: true });
+                }}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="serviceRequests"
+            render={({ field, fieldState }) => (
+              <TagsInput
+                label="SERVICE REQUEST"
+                placeholder={
+                  regulatoryServiceType
+                    ? "Select or type a service request"
+                    : "Please select a regulatory service type first"
+                }
+                disabled={!regulatoryServiceType}
+                data={regulatoryServiceType ? uniqueServiceOptions : []}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+        </Group>
+        <Controller
+          control={control}
+          name="commodity"
+          render={({ field }) => (
+            <TextInput
+              {...field}
+              value={field.value ?? ""}
+              label="COMMODITY (If Applicable)"
+            />
+          )}
+        />
+        <Group grow align="flex-start">
+          <Controller
+            control={control}
+            name="transportMode"
+            render={({ field, fieldState }) => (
+              <Radio.Group
+                label="TRANSPORT MODE"
+                value={field.value}
+                onChange={field.onChange}
+                error={fieldState.error?.message}
+              >
+                <Group mt="xs">
+                  <Radio value="SEA" label="SEA" />
+                  <Radio value="AIR" label="AIR" />
+                </Group>
+              </Radio.Group>
+            )}
+          />
+          <Controller
+            control={control}
+            name="origin"
+            render={({ field }) => (
+              <TextInput {...field} value={field.value ?? ""} label="ORIGIN" />
+            )}
+          />
+          <Controller
+            control={control}
+            name="destination"
+            render={({ field }) => (
+              <TextInput
+                {...field}
+                value={field.value ?? ""}
+                label="DESTINATION"
+              />
+            )}
+          />
+        </Group>
+        <Controller
+          control={control}
+          name="regulatoryAuthorities"
+          render={({ field }) => (
+            <MultiSelect
+              label="REGULATORY AUTHORITY / AGENCY (If known)"
+              placeholder={
+                regulatoryServiceType
+                  ? "Select regulatory authorities"
+                  : "Please select a regulatory service type first"
+              }
+              disabled={!regulatoryServiceType}
+              data={regulatoryServiceType ? uniqueRegulatoryAuthorities : []}
+              value={field.value ?? []}
+              onChange={field.onChange}
+              searchable
+              hidePickedOptions
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="message"
+          render={({ field }) => (
+            <Textarea
+              {...field}
+              value={field.value ?? ""}
+              label="MESSAGE / REMARKS"
+            />
+          )}
+        />
+        <Group justify="flex-end">
+          <AppButton
+            type="submit"
+            variant="primary"
+            icon={ArrowForward}
+            disabled={!formState.isValid}
+          >
+            NEXT
+          </AppButton>
+        </Group>
       </Stack>
     </form>
   );

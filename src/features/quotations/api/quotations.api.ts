@@ -226,7 +226,7 @@ export interface QuotationEnumOptions {
       email: string;
       business_type: string | null;
     };
-  };
+  } | null;
   business_types: string[];
   regulatory_assistance_types: string[];
   service_types: string[];
@@ -237,8 +237,7 @@ export interface QuotationEnumOptions {
   document_checklist: string[];
 }
 
-export interface StoreQuotationPayload {
-  services: "LOGISTICS" | "REGULATORY";
+interface StoreQuotationBasePayload {
   client?: string;
   full_name?: string;
   company: {
@@ -251,31 +250,55 @@ export interface StoreQuotationPayload {
     business_type?: string;
     cp_contact_number?: string;
   };
-  service?: {
-    type: "IMPORT" | "EXPORT";
-    transport_mode: "SEA" | "AIR";
+  service: {
+    type?: string;
     options: string[];
   };
-  commodity?: {
-    commodity: string;
-    cargo_type: "CONTAINERIZED" | "LCL";
+  documents?: Array<{ file: File; type?: string }>;
+}
+
+export interface StoreLogisticsPayload extends StoreQuotationBasePayload {
+  services: "LOGISTICS";
+  service: {
+    type?: string;
+    transport_mode: "SEA" | "AIR"; // required
+    options: string[];
+  };
+  commodity: {
+    commodity?: string;
+    cargo_type: "CONTAINERIZED" | "LCL"; // required
     container_size?: string;
   };
-  shipment?: {
-    origin: string;
-    destination: string;
+  shipment: {
+    origin: string; // required
+    destination: string; // required
   };
   remarks?: string;
-  type_of_regulatory_assistance?: string[];
-  service_level?: "NEW" | "RENEWAL";
-  message?: string;
-  documents?: File[];
 }
+
+export interface StoreRegulatoryPayload extends StoreQuotationBasePayload {
+  services: "REGULATORY";
+  type_of_regulatory_assistance: string[]; // required
+  service_level: "NEW" | "RENEWAL"; // required
+  message?: string;
+  commodity?: {
+    commodity?: string; // whole object optional, cargo_type not needed
+  };
+  shipment?: {
+    origin?: string;
+    destination?: string;
+  };
+}
+
+export type StoreQuotationPayload =
+  | StoreLogisticsPayload
+  | StoreRegulatoryPayload;
 
 export async function fetchQuotationEnumOptions(params: {
   service?: "LOGISTICS" | "REGULATORY";
   service_type?: string;
   client_id?: string;
+  client_search?: string;
 }): Promise<QuotationEnumOptions> {
   const response = await apiClient.get<{ data: QuotationEnumOptions }>(
     "/quotations/enum-options",
@@ -312,50 +335,66 @@ export async function storeQuotation(
     formData.append("company[business_type]", payload.company.business_type);
   }
   if (payload.company.cp_contact_number) {
-    formData.append("company[cp_contact_number]", payload.company.cp_contact_number);
-  }
-
-  if (payload.services === "LOGISTICS" && payload.service) {
-    formData.append("service[type]", payload.service.type);
-    formData.append("service[transport_mode]", payload.service.transport_mode);
-    payload.service.options.forEach((opt) =>
-      formData.append("service[options][]", opt),
+    formData.append(
+      "company[cp_contact_number]",
+      payload.company.cp_contact_number,
     );
   }
 
-  if (payload.commodity) {
-    formData.append("commodity[commodity]", payload.commodity.commodity);
+  // service is always present — no guard needed
+  if (payload.service.type) {
+    formData.append("service[type]", payload.service.type);
+  }
+  // always send options unconditionally — backend requires it
+  payload.service.options.forEach((opt) =>
+    formData.append("service[options][]", opt),
+  );
+
+  if (payload.services === "LOGISTICS") {
+    formData.append("service[transport_mode]", payload.service.transport_mode);
+
+    if (payload.commodity.commodity) {
+      formData.append("commodity[commodity]", payload.commodity.commodity);
+    }
     formData.append("commodity[cargo_type]", payload.commodity.cargo_type);
     if (payload.commodity.container_size) {
-      formData.append("commodity[container_size]", payload.commodity.container_size);
+      formData.append(
+        "commodity[container_size]",
+        payload.commodity.container_size,
+      );
     }
-  }
 
-  if (payload.shipment) {
     formData.append("shipment[origin]", payload.shipment.origin);
     formData.append("shipment[destination]", payload.shipment.destination);
-  }
 
-  if (payload.remarks) {
-    formData.append("remarks", payload.remarks);
-  }
-
-  if (payload.type_of_regulatory_assistance) {
+    if (payload.remarks) {
+      formData.append("remarks", payload.remarks);
+    }
+  } else {
     payload.type_of_regulatory_assistance.forEach((t) =>
       formData.append("type_of_regulatory_assistance[]", t),
     );
-  }
-  if (payload.service_level) {
     formData.append("service_level", payload.service_level);
-  }
-  if (payload.message) {
-    formData.append("message", payload.message);
+
+    if (payload.message) {
+      formData.append("message", payload.message);
+    }
+    if (payload.commodity?.commodity) {
+      formData.append("commodity[commodity]", payload.commodity.commodity);
+    }
+    if (payload.shipment?.origin) {
+      formData.append("shipment[origin]", payload.shipment.origin);
+    }
+    if (payload.shipment?.destination) {
+      formData.append("shipment[destination]", payload.shipment.destination);
+    }
   }
 
   if (payload.documents && payload.documents.length > 0) {
-    payload.documents.forEach((file) =>
-      formData.append("documents[]", file),
-    );
+    payload.documents.forEach((doc, i) => {
+      formData.append(`documents[${i}][file]`, doc.file);
+      formData.append(`documents[${i}][type]`, doc.type ?? "");
+    });
   }
 
   const response = await apiClient.post<{ data: QuotationResource }>(

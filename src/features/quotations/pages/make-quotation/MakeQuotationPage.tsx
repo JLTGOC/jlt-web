@@ -45,7 +45,10 @@ function isTermsComplete(terms: TermsValues | null): terms is TermsValues {
   ].every((value) => Boolean(value?.trim()));
 }
 
-function resolveTemplateType(service?: string, serviceType?: string): ComposeTemplateType | undefined {
+function resolveTemplateType(
+  service?: string,
+  serviceType?: string,
+): ComposeTemplateType | undefined {
   if (service === "REGULATORY") return "BUSINESS SOLUTION";
   if (serviceType === "IMPORT" || serviceType === "EXPORT") return serviceType;
   return undefined;
@@ -63,17 +66,30 @@ function MakeQuotationPageContent() {
   const navigate = useNavigate();
   const { state, actions, meta } = useMakeQuotationContext();
   const userResource = useAuthStore((store) => store.user);
-  const currentUserName = userResource ? `${userResource.first_name} ${userResource.last_name}` : undefined;
+  const currentUserName = userResource
+    ? `${userResource.first_name} ${userResource.last_name}`
+    : undefined;
   const currentUserPositionTitle = userResource?.role;
-  const templateType = resolveTemplateType(state.clientInfo?.services, state.serviceInfo?.serviceType ?? state.serviceInfo?.regulatoryServiceType);
-  const { data: templates = [], isLoading: templatesLoading } = useComposeQuotationTemplates(templateType);
-  const { data: quotationTemplate, isLoading: templateLoading } = useComposeQuotationTemplate(state.templateId ?? undefined);
+  const templateType = resolveTemplateType(
+    state.clientInfo?.services,
+    state.serviceInfo?.serviceType ?? state.serviceInfo?.regulatoryServiceType,
+  );
+  const { data: templates = [], isLoading: templatesLoading } =
+    useComposeQuotationTemplates(templateType);
+  const { data: quotationTemplate, isLoading: templateLoading } =
+    useComposeQuotationTemplate(state.templateId ?? undefined);
   const { data: quotation } = useQuery({
-    queryKey: quotationQueryKeys.quotationDetails(state.quotationId ?? undefined),
+    queryKey: quotationQueryKeys.quotationDetails(
+      state.quotationId ?? undefined,
+    ),
     queryFn: () => fetchQuotation(state.quotationId!),
     enabled: Boolean(state.quotationId),
   });
-  const { data: clientInformationFields = [] } = useComposeQuotationClientInputs(state.quotationId ?? undefined, quotationTemplate?.id);
+  const { data: clientInformationFields = [] } =
+    useComposeQuotationClientInputs(
+      state.quotationId ?? undefined,
+      quotationTemplate?.id,
+    );
 
   function handleBack() {
     if (state.step === 0) {
@@ -89,7 +105,9 @@ function MakeQuotationPageContent() {
       return;
     }
     if (state.step === 2 && state.showTemplateSelection) {
-      const proceed = window.confirm("Going back will not undo the quotation already created in the backend. Continue?");
+      const proceed = window.confirm(
+        "Going back will not undo the quotation already created in the backend. Continue?",
+      );
       if (proceed) actions.resetCreatedQuotationSelection();
       return;
     }
@@ -117,62 +135,141 @@ function MakeQuotationPageContent() {
   const showComposeContent = state.step >= 2 && !state.showTemplateSelection;
 
   return (
-    <PageCard title="MAKE QUOTATION" fullHeight onBack={handleBack} showDivider>
+    <PageCard
+      title="MAKE QUOTATION"
+      fullHeight
+      onBack={handleBack}
+      bodyPx={0}
+      bodyPy={0}
+    >
       <Stack gap="md" style={{ minHeight: "100%" }}>
-        <StepperBar step={state.step} onStepClick={handleStepClick} labels={MAKE_QUOTATION_STEP_LABELS} />
-        {state.step === 0 && <ClientInformationForm defaultValues={state.clientInfo ?? undefined} onSubmit={actions.submitClientInfo} onValidityChange={actions.setIsStep0Valid} />}
-        {state.step === 1 && state.serviceSubStep === "service" && state.clientInfo?.services === "LOGISTICS" && <LogisticsServiceForm />}
-        {state.step === 1 && state.serviceSubStep === "service" && state.clientInfo?.services === "REGULATORY" && <RegulatoryServiceForm />}
-        {state.step === 1 && state.serviceSubStep === "documents" && <DocumentChecklistStep />}
-        {state.step === 2 && state.showTemplateSelection && (
-          <Box pt="md">
-            <Group justify="space-between" mb="md"><Text fw={800}>SELECT QUOTATION TEMPLATE</Text>{templatesLoading && <Loader size="sm" />}</Group>
-            <TemplateSelector templates={templates.map((template) => ({ id: template.id, name: template.name, enabled: true }))} onSelect={actions.selectTemplate} />
-          </Box>
-        )}
-        {showComposeContent && (!quotationTemplate || templateLoading) && (
-          <Group justify="center" py="xl"><Loader /></Group>
-        )}
-        {showComposeContent && quotationTemplate && (
-          <Box style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-            <ComposeStepContent
-              step={state.step - 2}
-              quotationTemplate={quotationTemplate}
-              quotation={quotation}
-              clientInformationFields={clientInformationFields}
-              quotationDetailsData={state.quotationDetailsData}
-              billingDetailsData={state.billingDetailsData}
-              termsData={state.termsData}
-              signatoryData={state.signatoryData}
-              previewReady={state.previewReady}
-              canRenderTermsStep={Boolean(state.quotationDetailsData && state.billingDetailsData)}
-              quotationDetailsFormId={meta.quotationDetailsFormId}
-              billingDetailsFormId={meta.billingDetailsFormId}
-              onStep0Submit={(values) => { actions.setQuotationDetailsData(values); actions.goToStep(3); }}
-              onStep1Submit={(values) => { actions.setBillingDetailsData(values); actions.goToStep(4); }}
-              onStep0Change={actions.setQuotationDetailsData}
-              onStep1Change={actions.setBillingDetailsData}
-              onStep0ValidityChange={actions.setIsStep2Valid}
-              onStep1ValidityChange={actions.setIsStep3Valid}
-              onTermsChange={actions.setTermsData}
+        <StepperBar
+          step={state.step}
+          onStepClick={handleStepClick}
+          labels={MAKE_QUOTATION_STEP_LABELS}
+        />
+        <Box
+          px="xl"
+          py="lg"
+          style={{
+            flex: 1,
+            minHeight: 0,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "visible",
+          }}
+        >
+          {state.step === 0 && (
+            <ClientInformationForm
+              defaultValues={state.clientInfo ?? undefined}
+              onSubmit={actions.submitClientInfo}
+              onValidityChange={actions.setIsStep0Valid}
             />
-            <ComposeStepActions
-              step={state.step - 2}
-              isStep0Valid={state.isStep2Valid}
-              isStep1Valid={state.isStep3Valid}
-              canProceedStep2={isTermsComplete(state.termsData)}
-              previewReady={state.previewReady}
-              isSending={state.isSending}
-              quotationDetailsFormId={meta.quotationDetailsFormId}
-              billingDetailsFormId={meta.billingDetailsFormId}
-              onStep2Next={actions.openSignatory}
-              onOpenSendConfirm={actions.openSendConfirm}
-            />
-          </Box>
-        )}
+          )}
+          {state.step === 1 &&
+            state.serviceSubStep === "service" &&
+            state.clientInfo?.services === "LOGISTICS" && (
+              <LogisticsServiceForm />
+            )}
+          {state.step === 1 &&
+            state.serviceSubStep === "service" &&
+            state.clientInfo?.services === "REGULATORY" && (
+              <RegulatoryServiceForm />
+            )}
+          {state.step === 1 && state.serviceSubStep === "documents" && (
+            <DocumentChecklistStep />
+          )}
+          {state.step === 2 && state.showTemplateSelection && (
+            <Box pt="md">
+              <Group justify="space-between" mb="md">
+                <Text fw={800}>SELECT QUOTATION TEMPLATE</Text>
+                {templatesLoading && <Loader size="sm" />}
+              </Group>
+              <TemplateSelector
+                templates={templates.map((template) => ({
+                  id: template.id,
+                  name: template.name,
+                  enabled: true,
+                }))}
+                onSelect={actions.selectTemplate}
+              />
+            </Box>
+          )}
+          {showComposeContent && (!quotationTemplate || templateLoading) && (
+            <Group justify="center" py="xl">
+              <Loader />
+            </Group>
+          )}
+          {showComposeContent && quotationTemplate && (
+            <Box
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                flex: 1,
+                minHeight: 0,
+              }}
+            >
+              <ComposeStepContent
+                step={state.step - 2}
+                quotationTemplate={quotationTemplate}
+                quotation={quotation}
+                clientInformationFields={clientInformationFields}
+                quotationDetailsData={state.quotationDetailsData}
+                billingDetailsData={state.billingDetailsData}
+                termsData={state.termsData}
+                signatoryData={state.signatoryData}
+                previewReady={state.previewReady}
+                canRenderTermsStep={Boolean(
+                  state.quotationDetailsData && state.billingDetailsData,
+                )}
+                quotationDetailsFormId={meta.quotationDetailsFormId}
+                billingDetailsFormId={meta.billingDetailsFormId}
+                onStep0Submit={(values) => {
+                  actions.setQuotationDetailsData(values);
+                  actions.goToStep(3);
+                }}
+                onStep1Submit={(values) => {
+                  actions.setBillingDetailsData(values);
+                  actions.goToStep(4);
+                }}
+                onStep0Change={actions.setQuotationDetailsData}
+                onStep1Change={actions.setBillingDetailsData}
+                onStep0ValidityChange={actions.setIsStep2Valid}
+                onStep1ValidityChange={actions.setIsStep3Valid}
+                onTermsChange={actions.setTermsData}
+              />
+              <ComposeStepActions
+                step={state.step - 2}
+                isStep0Valid={state.isStep2Valid}
+                isStep1Valid={state.isStep3Valid}
+                canProceedStep2={isTermsComplete(state.termsData)}
+                previewReady={state.previewReady}
+                isSending={state.isSending}
+                quotationDetailsFormId={meta.quotationDetailsFormId}
+                billingDetailsFormId={meta.billingDetailsFormId}
+                onStep2Next={actions.openSignatory}
+                onOpenSendConfirm={actions.openSendConfirm}
+              />
+            </Box>
+          )}
+        </Box>
       </Stack>
-      <AuthorizedSignatoryModal opened={meta.signatoryOpened} onClose={actions.closeSignatory} onSave={actions.setSignatoryData} currentUserName={currentUserName} currentUserPositionTitle={currentUserPositionTitle} initialValues={state.signatoryData} />
-      <ComposeSendModals sendConfirmOpened={meta.sendConfirmOpened} sendSuccessOpened={meta.sendSuccessOpened} isSending={state.isSending} onCloseSendConfirm={actions.closeSendConfirm} onSend={actions.submitSend} onCloseSendSuccess={actions.closeSendSuccess} />
+      <AuthorizedSignatoryModal
+        opened={meta.signatoryOpened}
+        onClose={actions.closeSignatory}
+        onSave={actions.setSignatoryData}
+        currentUserName={currentUserName}
+        currentUserPositionTitle={currentUserPositionTitle}
+        initialValues={state.signatoryData}
+      />
+      <ComposeSendModals
+        sendConfirmOpened={meta.sendConfirmOpened}
+        sendSuccessOpened={meta.sendSuccessOpened}
+        isSending={state.isSending}
+        onCloseSendConfirm={actions.closeSendConfirm}
+        onSend={actions.submitSend}
+        onCloseSendSuccess={actions.closeSendSuccess}
+      />
     </PageCard>
   );
 }

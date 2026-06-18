@@ -20,6 +20,7 @@ export interface ClientInfoValues {
     contactNumber: string;
     email: string;
     position?: string;
+    consignee: string;
     businessType?: string;
   };
 }

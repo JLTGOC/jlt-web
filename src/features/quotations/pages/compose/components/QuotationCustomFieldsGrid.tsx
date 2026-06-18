@@ -53,6 +53,7 @@ export function QuotationCustomFieldsGrid({
 
         if (field.type === "date") {
           const today = dayjs().startOf("day").toDate();
+          const tomorrow = dayjs().startOf("day").add(1, "day").toDate();
           return (
             <DateInputField
               key={field.id}
@@ -68,7 +69,7 @@ export function QuotationCustomFieldsGrid({
               clearable
               withAsterisk
               readOnly={readOnly}
-              minDate={today}
+              minDate={field.id === "rate_validity" ? tomorrow : today}
             />
           );
         }
