@@ -10,9 +10,6 @@ import {
 } from "@mantine/core";
 import {
   ArrowBack,
-  Settings,
-  ArrowForward,
-  Add,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import { useNavigate } from "react-router";
 import classes from "./PageCard.module.css";
@@ -29,8 +26,6 @@ interface PageCardProps {
   children?: React.ReactNode;
   onBack?: () => void;
   showDivider?: boolean;
-  showNextButton?: boolean;
-  nextButtonAction?: () => void;
   hideBackButton?: boolean;
   bodyPx?: string | number;
   bodyPy?: string | number;
@@ -53,8 +48,6 @@ export function PageCard({
   action,
   fullHeight = false,
   showDivider = false,
-  showNextButton = false,
-  nextButtonAction,
   children,
   onBack,
   bodyPx = "xl",
@@ -145,20 +138,6 @@ export function PageCard({
           </Group>
 
           <Group gap="sm" wrap="nowrap">
-            {showNextButton && (
-              <Button
-                onClick={nextButtonAction}
-                rightSection={
-                  <ArrowForward
-                    width="1.25rem"
-                    height="1.25rem"
-                    fill="currentColor"
-                  />
-                }
-              >
-                NEXT
-              </Button>
-            )}
             {showJobSwitch && (
               <Group gap={0} className={classes.jobSwitch} wrap="nowrap">
                 <UnstyledButton

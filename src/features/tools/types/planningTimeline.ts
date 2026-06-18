@@ -60,6 +60,27 @@ export interface TemplateListResponse {
   service_type: number;
   is_active: boolean;
 }
-export interface TemplateConfiguration {
-  phase: [phaseId: number];
+
+export interface TemplateConfigurationPayload {
+  name: string;
+  service_type_id: number;
+  config_version_number: number;
+  phases: {
+    config_phase_id: number;
+    sort_order: number;
+    processes: {
+      config_process_id: number;
+      tasks: {
+        config_task_id: number;
+      }[];
+    }[];
+  }[];
+}
+
+export interface ServiceTypeResponse {
+  id: number;
+  isActive: string;
+  name: string;
+  service_type: string;
+  version_number: number;
 }

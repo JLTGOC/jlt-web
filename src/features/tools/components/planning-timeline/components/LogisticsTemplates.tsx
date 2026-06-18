@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 
-import { Switch, Table, Group, Button } from "@mantine/core";
+import { Switch, Table, Group, Button, Flex, Loader } from "@mantine/core";
 import { PageCard } from "@/components/PageCard";
 import {
   Edit,
@@ -20,7 +20,6 @@ export default function LogisticsTemplates({
   const navigate = useNavigate();
 
   const { data, isLoading } = usePlanningTemplateList();
-  console.log("khate", data);
 
   return (
     <>
@@ -72,6 +71,7 @@ export default function LogisticsTemplates({
               <Table.Th ta={"right"}>ACTIONS</Table.Th>
             </Table.Tr>
           </Table.Thead>
+
           <Table.Tbody>
             {data?.map((template: any, i: number) => {
               return (
@@ -90,6 +90,11 @@ export default function LogisticsTemplates({
             })}
           </Table.Tbody>
         </Table>
+        {isLoading && (
+          <Flex justify="center" align="center">
+            <Loader color="blue" size="xs" type="dots" />
+          </Flex>
+        )}
       </PageCard>
     </>
   );
