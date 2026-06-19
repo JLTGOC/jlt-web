@@ -202,6 +202,9 @@ export function ClientInformationForm({
     const { full_name, company } = autofillData.autofill_details;
     setValue("fullName", full_name, { shouldValidate: true });
     setValue("company.name", company.name ?? "", { shouldValidate: true });
+    setValue("company.consignee", company.consignee ?? "", {
+      shouldValidate: true,
+    });
     setValue("company.address", company.address ?? "", {
       shouldValidate: true,
     });

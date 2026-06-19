@@ -8,6 +8,7 @@ export interface QuotationEnumOptions {
     company: {
       name: string | null;
       address: string | null;
+      consignee: string;
       position: string | null;
       contact_number: string;
       email: string;
@@ -30,6 +31,7 @@ interface StoreQuotationBasePayload {
   company: {
     name: string;
     address: string;
+    consignee: string;
     contact_person?: string;
     contact_number: string;
     email: string;
@@ -109,6 +111,7 @@ export async function storeQuotation(
   }
 
   formData.append("company[name]", payload.company.name);
+  formData.append("company[consignee]", payload.company.consignee);
   formData.append("company[address]", payload.company.address);
   formData.append("company[contact_number]", payload.company.contact_number);
   formData.append("company[email]", payload.company.email);

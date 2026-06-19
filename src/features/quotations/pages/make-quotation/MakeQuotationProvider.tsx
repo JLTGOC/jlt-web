@@ -285,6 +285,7 @@ export function MakeQuotationProvider({ children }: { children: ReactNode }) {
           full_name: clientInfo.fullName,
           company: {
             name: clientInfo.company.name,
+            consignee: clientInfo.company.consignee,
             address: clientInfo.company.address,
             contact_person: clientInfo.company.contactPerson,
             contact_number: clientInfo.company.contactNumber,
