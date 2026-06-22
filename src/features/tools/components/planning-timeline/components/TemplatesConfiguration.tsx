@@ -258,7 +258,7 @@ export default function TemplatesConfiguration() {
           </UnstyledButton>
           <Text fw={700}>TEMPLATE CONFIGURATION</Text>
         </Group>
-        <Button size="xs" onClick={handleSaveChanges}>SAVE CHANGES</Button>
+        <Button size="xs" onClick={handleSaveChanges}>{saveTemplateConfiguration.isPending ? "SAVING..." : "SAVE CHANGES"}</Button>
       </Group>
 
       <Group align="stretch" grow wrap="nowrap" h={"83vh"}>

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router";
+import { useEffect } from "react";
+import { useNavigate, useLocation, data } from "react-router";
 import {
   Text,
   Table,
@@ -8,25 +8,48 @@ import {
   Checkbox,
   Flex,
   Loader,
+  Button,
 } from "@mantine/core";
+import { ArrowForward } from "@nine-thirty-five/material-symbols-react/rounded";
 
 import { usePlanningConfigurations } from "@/features/tools/hooks/planningTImeline";
-import type { ConfigItem } from "@/features/tools/types/planningTimeline";
+import { useTemplateStore } from "@/features/tools/store/LogisticsCreatePlanningTemplate";
 
 import { PageCard } from "@/components/PageCard";
 export default function SelectPhase() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [templateState, setTemplateState] = useState({
-    phases: [] as number[],
-    processes: [] as number[],
-    tasks: [] as number[],
-  });
-
   const serviceType = location.state?.serviceType;
-
   const { data, isLoading } = usePlanningConfigurations(serviceType);
+
+  console.log("khate", data?.version_number);
+
+  useEffect(() => {
+    const version_number = data?.version_number ?? 1;
+    setTemplateConfiguration((prev) => ({
+      ...prev,
+      config_version_number: version_number,
+    }));
+  }, []);
+
+  const {
+    templateState,
+    setTemplateState,
+    templateConfiguration,
+    setTemplateConfiguration,
+  } = useTemplateStore();
+
+  useEffect(() => {
+    setTemplateConfiguration((prev) => ({
+      ...prev,
+      phases: templateState.phases.map((phaseId, index) => ({
+        config_phase_id: phaseId,
+        sort_order: index + 1,
+        processes: [],
+      })),
+    }));
+  }, [templateState.phases, serviceType]);
 
   const rows = data?.phases.map((phase, i) => (
     <Table.Tr key={i}>
@@ -34,7 +57,17 @@ export default function SelectPhase() {
       <Table.Td>{phase.name}</Table.Td>
       <Table.Td ta={"center"}>
         <Group align="center" justify="end">
-          <Box>{templateState.phases.indexOf(phase.id) === 0? "" : templateState.phases.indexOf(phase.id) + 1}</Box>
+          <Box fz={10} bg={""}>
+            {templateConfiguration.phases.findIndex(
+              (p) => p.config_phase_id === phase.id,
+            ) +
+              1 ===
+            0
+              ? ""
+              : templateConfiguration.phases.findIndex(
+                  (p) => p.config_phase_id === phase.id,
+                ) + 1}
+          </Box>
           <Checkbox
             checked={templateState.phases.includes(phase.id)}
             onChange={(event: any) => {
@@ -52,17 +85,29 @@ export default function SelectPhase() {
       </Table.Td>
     </Table.Tr>
   ));
-  console.log("templateState:", templateState.phases);
   return (
     <>
       <PageCard
         title="Select Phase"
         showDivider
-        showNextButton
-        nextButtonAction={() =>
-          navigate("/tools/planning-timeline/add-template/process", {
-            state: { serviceType },
-          })
+        action={
+          <Button
+            onClick={() =>
+              navigate("/tools/planning-timeline/add-template/process", {
+                state: { serviceType },
+              })
+            }
+            rightSection={
+              <ArrowForward
+                width="1.25rem"
+                height="1.25rem"
+                fill="currentColor"
+              />
+            }
+            disabled={templateState.phases.length === 0}
+          >
+            NEXT
+          </Button>
         }
       >
         <Table highlightOnHover striped>
