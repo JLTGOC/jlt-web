@@ -1,21 +1,23 @@
 import { UnstyledButton } from "@mantine/core";
 import classes from "./StepperBar.module.css";
 
-interface StepperBarProps {
-  step: number;
-  onStepClick: (index: number) => void;
-}
-
-const STEP_LABELS = [
+const DEFAULT_STEP_LABELS = [
   "QUOTATION DETAILS",
   "BILLING DETAILS",
   "TERMS AND CONDITION/CLOSING STATEMENT",
 ] as const;
 
-export function StepperBar({ step, onStepClick }: StepperBarProps) {
+interface StepperBarProps {
+  step: number;
+  onStepClick: (index: number) => void;
+  labels?: readonly string[];
+}
+
+export function StepperBar({ step, onStepClick, labels }: StepperBarProps) {
+  const stepLabels = labels ?? DEFAULT_STEP_LABELS;
   return (
     <div className={classes.root}>
-      {STEP_LABELS.map((label, index) => {
+      {stepLabels.map((label, index) => {
         const isPast = index < step;
         const isActiveOrCompleted = index <= step;
 
@@ -24,6 +26,7 @@ export function StepperBar({ step, onStepClick }: StepperBarProps) {
             key={label}
             type="button"
             className={`${classes.tab} ${isActiveOrCompleted ? classes.active : classes.future} ${isPast ? classes.clickable : ""}`}
+            style={{ zIndex: stepLabels.length - index }}
             onClick={() => {
               if (isPast) onStepClick(index);
             }}

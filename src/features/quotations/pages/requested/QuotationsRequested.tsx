@@ -1,4 +1,5 @@
-import { Box, Stack } from "@mantine/core";
+import { Box, Button, Stack } from "@mantine/core";
+import { RequestQuote } from "@nine-thirty-five/material-symbols-react/outlined";
 
 import { PageCard } from "@/components/PageCard";
 
@@ -25,6 +26,7 @@ export function QuotationsRequested() {
     handleAcceptConfirm,
     handleJobSwitchChange,
     handleMakeQuotationClick,
+    handleNewMakeQuotationClick,
     handleReassignConfirm,
     handleReassignRequestSubmit,
     handleRowClick,
@@ -85,6 +87,16 @@ export function QuotationsRequested() {
         showJobSwitch
         jobSwitchValue={jobFilter}
         onJobSwitchChange={handleJobSwitchChange}
+        action={
+          <Button
+            bg="#4E6174"
+            c="white"
+            leftSection={<RequestQuote width={20} height={20} />}
+            onClick={handleNewMakeQuotationClick}
+          >
+            MAKE QUOTATION
+          </Button>
+        }
       >
         <Stack gap="xs">
           <RequestFilterClient

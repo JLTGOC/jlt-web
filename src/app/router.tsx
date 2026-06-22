@@ -31,6 +31,11 @@ const QuotationTemplatePreviewPage = lazy(() =>
     }),
   ),
 );
+const MakeQuotationPage = lazy(() =>
+  import("@/features/quotations/pages/make-quotation/MakeQuotationPage").then(
+    (m) => ({ default: m.MakeQuotationPage }),
+  ),
+);
 
 //Shipment Imports
 const Shipments = lazy(() => import("./routes/app/shipments/ShipmentsPage"));
@@ -151,6 +156,7 @@ export const router = createBrowserRouter([
             path: "quotations/:tab/client/:clientId/:quotationId",
             Component: Quotations,
           },
+          { path: "quotations/requested/new", Component: MakeQuotationPage },
           { path: "quotations/:tab/:quotationId", Component: Quotations },
           { path: "quotations/:tab/client/:clientId", Component: Quotations },
           { path: "quotations/:tab", Component: Quotations },

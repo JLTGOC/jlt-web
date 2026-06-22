@@ -29,6 +29,7 @@ function quotationPath({ tab, clientId, quotationId }: QuotationRouteParams) {
 }
 
 export const quotationRoutes = {
+  newQuotation: () => `/quotations/requested/new`,
   tab: (tab: string) => `/quotations/${tab}`,
   client: (tab: string, clientId: number | string) =>
     `/quotations/${tab}/client/${clientId}`,
