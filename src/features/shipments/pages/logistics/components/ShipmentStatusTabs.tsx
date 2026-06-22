@@ -41,8 +41,8 @@ export function ShipmentStatusTabs({
     return (
       <Box
         style={{
-          width: 8,
-          height: 8,
+          width: 6,
+          height: 6,
           borderRadius: "50%",
           backgroundColor: color,
         }}
@@ -59,33 +59,57 @@ export function ShipmentStatusTabs({
         border: "1px solid #e2e6eb",
         paddingLeft: "0.5rem",
         paddingRight: "0.5rem",
-        width: "auto",
+        width: "100%",
+        overflowX: "auto",
+        overflowY: "hidden",
         top: "-1.2rem",
         position: "relative",
       }}
     >
-      <Group gap="0" grow>
+      <Group gap="0" wrap="nowrap" style={{ minWidth: "max-content" }}>
         {Object.entries(STATUS_LABELS).map(([backendKey, label], index) => (
-          <Group key={backendKey} gap="0" align="center" flex={1}>
+          <Group
+            key={backendKey}
+            gap="0"
+            align="center"
+            style={{ flex: "0 0 auto", minWidth: 0 }}
+          >
             <UnstyledButton
               styles={tabStyles}
               style={{
                 borderBottomColor:
                   activeStatus === backendKey ? "#ef8f27" : "transparent",
-                flex: 1,
-                padding: "0.45rem 0.7rem",
+                flex: "0 0 auto",
+                padding: "0.45rem 0.55rem",
+                whiteSpace: "nowrap",
+                minWidth: 0,
               }}
               onClick={() => onStatusChange(backendKey)} // send backend key
             >
-              <Group gap="0.4rem" align="center" justify="space-between" flex={1}>
-                <Group gap="0.4rem" align="center">
+              <Group
+                gap="0.3rem"
+                align="center"
+                justify="space-between"
+                style={{ minWidth: 0 }}
+              >
+                <Group gap="0.3rem" align="center" style={{ minWidth: 0 }}>
                   {renderCircle(backendKey)}
-                  <Text fz="0.82rem" fw={700} c="#2c3f55">
+                  <Text
+                    fz="0.82rem"
+                    fw={700}
+                    c="#2c3f55"
+                    style={{ whiteSpace: "nowrap" }}
+                  >
                     {label}
                   </Text>
                 </Group>
                 {statusCounts && (
-                  <Text fz="0.82rem" fw={700} c="#8a8f99">
+                  <Text
+                    fz="0.82rem"
+                    fw={700}
+                    c="#8a8f99"
+                    style={{ flexShrink: 0 }}
+                  >
                     {statusCounts[backendKey] || 0}
                   </Text>
                 )}
