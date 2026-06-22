@@ -79,9 +79,12 @@ export default function LogisticsTemplates({
                 if ((e.target as HTMLElement).closest('[role="switch"]') || (e.target as HTMLElement).closest('svg')) {
                   return;
                 }
-                navigate("/tools/planning-timeline/view-templates-table", {
-                  state: { template, serviceType },
-                });
+                navigate(
+                  `/tools/planning-timeline/view-templates-table?templateId=${template.id}`,
+                  {
+                    state: { template, serviceType },
+                  },
+                );
               };
 
               return (
@@ -100,9 +103,12 @@ export default function LogisticsTemplates({
                         variant="subtle"
                         p={0}
                         onClick={() =>
-                          navigate("/tools/planning-timeline/edit-template", {
-                            state: { template, serviceType },
-                          })
+                          navigate(
+                            `/tools/planning-timeline/edit-template?templateId=${template.id}`,
+                            {
+                              state: { template, serviceType },
+                            },
+                          )
                         }
                       >
                         <Edit />

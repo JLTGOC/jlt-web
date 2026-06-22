@@ -196,6 +196,7 @@ export const router = createBrowserRouter([
           { path: "tools/planning-timeline/view-templates", Component: Tools },
           { path: "tools/planning-timeline/templates-configuration", Component: Tools },
           { path: "tools/planning-timeline/add-template", Component: Tools },
+          { path: "tools/planning-timeline/add-template/process", Component: Tools },
           { path: "tools/planning-timeline", Component: Tools },
           { path: "tools/planningTimeline", Component: Tools },
           

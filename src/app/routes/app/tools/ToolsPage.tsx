@@ -14,6 +14,7 @@ import { TemplateFormPage } from "@/features/tools/pages/TemplateFormPage";
 import PlanningTimelinePage from "@/features/tools/pages/PlanningTimelinePage";
 import TemplatesConfiguration from "@/features/tools/components/planning-timeline/components/TemplatesConfiguration";
 import SelectPhase from "@/features/tools/components/planning-timeline/components/SelectPhase";
+import SelectProcess from "@/features/tools/components/planning-timeline/components/SelectProcess";
 import ViewTemplatesTable from "@/features/tools/components/planning-timeline/components/view-templates/ViewTemplatesTable";
 import EditTemplates from "@/features/tools/components/planning-timeline/components/edit-templates/EditTemplates";
 
@@ -41,6 +42,7 @@ export default function ToolsPage() {
   const planningTimelineMatch = useMatch("/tools/planning-timeline")
   const TemplateConfigurationMatch = useMatch("/tools/planning-timeline/templates-configuration")
   const SelectPhaseMatch = useMatch("/tools/planning-timeline/add-template")
+  const SelectProcessMatch = useMatch("/tools/planning-timeline/add-template/process")
   const ViewTemplatesTableMatch = useMatch("/tools/planning-timeline/view-templates-table")
   const EditTemplateMatch = useMatch("/tools/planning-timeline/edit-template")
 
@@ -86,6 +88,9 @@ export default function ToolsPage() {
   }
   if (SelectPhaseMatch) {
     return <SelectPhase />;
+  }
+  if (SelectProcessMatch) {
+    return <SelectProcess />;
   }
   if (planningTimelineMatch) {
     return <PlanningTimelinePage />;

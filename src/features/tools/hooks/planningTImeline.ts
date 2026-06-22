@@ -6,10 +6,13 @@ import {
   fetchTemplateList,
   fetchServiceTypeEnums,
   createTemplate,
+  fetchTemplateDetails,
+  updateTemplateDetails,
 } from "@/features/tools/api/planning-timeline.service";
 
 import type {
   PlanningConfigurationResponse,
+  TemplateDetailsResponse,
   TemplateListResponse,
   ServiceTypeResponse,
   TemplateConfigurationPayload,
@@ -59,16 +62,46 @@ export function useServiceTypeEnums(sericeType: string) {
 
 export function useCreateTemplate(serviceType: string) {
   const queryClient = useQueryClient();
-const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: ( payload: TemplateConfigurationPayload ) =>
+    mutationFn: (payload: TemplateConfigurationPayload) =>
       createTemplate(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["planning-template-list"],
       });
-      navigate("/tools/planning-timeline", {state: {serviceType}})
+      navigate("/tools/planning-timeline", { state: { serviceType } });
+    },
+  });
+}
+
+export function useTemplateDetails(templateId?: number) {
+  return useQuery({
+    queryKey: ["planning-template-details", templateId],
+    queryFn: () => fetchTemplateDetails(templateId as number),
+    enabled: !!templateId,
+  });
+}
+
+export function useUpdateTemplateDetails() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      templateId,
+      payload,
+    }: {
+      templateId: number;
+      payload: TemplateDetailsResponse;
+    }) => updateTemplateDetails(templateId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["planning-template-list"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["planning-template-details"],
+      });
     },
   });
 }

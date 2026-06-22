@@ -20,37 +20,45 @@ export interface UsedByTemplates {
   is_active: boolean;
 }
 
-export interface TemplateDetailsResponse {
-  id: number;
+export interface PlanningPhaseHeadingResource {
+  id: string | number;
+  template_phase_id: string | number;
   name: string;
-  version_number: number;
+  input_type: string;
+  sort_order: string | number;
+  is_default: string | number;
+}
+
+export interface TemplatePhaseProcessTaskResource {
+  id: string | number;
+  config_task_id: string | number;
+  name: string;
+}
+
+export interface TemplatePhaseProcessResource {
+  id: string | number;
+  config_process_id: string | number;
+  name: string;
+  tasks: TemplatePhaseProcessTaskResource[];
+}
+
+export interface TemplatePhaseResource {
+  id: string | number;
+  config_phase_id: string | number;
+  name: string;
+  sort_order: string | number;
+  headings: PlanningPhaseHeadingResource[];
+  processes: TemplatePhaseProcessResource[];
+}
+
+export interface TemplateDetailsResponse {
+  id: string | number;
+  name: string;
+  version_number: string | number;
   service_type: string;
-  is_active: string;
-  phases: [
-    {
-      id: number;
-      config_phase_id: number;
-      name: string;
-      sort_order: number;
-      headings: [
-        {
-          id: number;
-          template_phase_id: number;
-          name: string;
-          input_type: string;
-          sort_order: number;
-        },
-      ];
-      processes: [
-        {
-          id: number;
-          config_process_id: number;
-          name: string;
-          tasks: [{ id: number; config_task_id: number; name: string }];
-        },
-      ];
-    },
-  ];
+  service_category?: string;
+  is_active: string | boolean;
+  phases: TemplatePhaseResource[];
 }
 
 export interface TemplateListResponse {

@@ -5,6 +5,7 @@ import type {
   TemplateListResponse,
   ServiceTypeResponse,
   TemplateConfigurationPayload,
+  TemplateDetailsResponse,
 } from "../types/planningTimeline";
 
 export async function fetchPlanningConfiguration(
@@ -55,4 +56,26 @@ export async function fetchServiceTypeEnums(
 
 export async function createTemplate(payload: TemplateConfigurationPayload) {
   return await apiClient.post(`/planning-timeline/templates`, payload );
+}
+
+export async function fetchTemplateDetails(
+  templateId: number,
+): Promise<TemplateDetailsResponse> {
+  const response = await apiClient.get<{ data: TemplateDetailsResponse }>(
+    `/planning-timeline/templates/${templateId}`,
+  );
+
+  return response.data.data;
+}
+
+export async function updateTemplateDetails(
+  templateId: number,
+  payload: TemplateDetailsResponse,
+): Promise<TemplateDetailsResponse> {
+  const response = await apiClient.put<{ data: TemplateDetailsResponse }>(
+    `/planning-timeline/templates/${templateId}`,
+    payload,
+  );
+
+  return response.data.data;
 }

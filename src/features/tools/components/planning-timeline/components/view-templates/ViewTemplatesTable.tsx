@@ -1,9 +1,10 @@
-import { useLocation } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { Table, Paper, Text, Group, Button, Divider, Box, Flex } from "@mantine/core";
 import { Settings } from "@nine-thirty-five/material-symbols-react/rounded";
 import { PageCard } from "@/components/PageCard";
 import AddNewHeadingModal from "../../modals/AddNewHeadingModal";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTemplateDetails } from "@/features/tools/hooks/planningTImeline";
 
 interface Template {
   id: number;
@@ -15,35 +16,34 @@ interface Template {
 
 export default function ViewTemplatesTable() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const template = (location.state as { template?: Template })?.template;
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const [shouldScroll, setShouldScroll] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Default columns - first 3 are frozen
-  const frozenColumns = ["#", "PROCESS", "TASK"];
-  const defaultScrollableColumns = [
-    "PIC",
-    "SELLING COST",
-    "FORECASTED COST",
-    "ACTUAL COST",
-    "TIMELINE",
-    "TARGET DATE & TIME",
-    "ACTUAL DATE & TIME",
-    "PIC REMARKS",
-    "STATUS",
-    "PRIORITY",
-    "NOTES",
-    "APPROVAL",
-    "VERIFICATION",
-    "RISK LEVEL",
-    "DEPENDENCIES",
-    "DOCUMENT LINK",
-    "COMPLETED BY",
-  ];
+  const templateIdFromQuery = Number(searchParams.get("templateId"));
+  const templateId =
+    Number.isFinite(templateIdFromQuery) && templateIdFromQuery > 0
+      ? templateIdFromQuery
+      : template?.id;
 
-  const [scrollableColumns, setScrollableColumns] = useState(defaultScrollableColumns);
+  const { data: templateDetails, isLoading, isError } = useTemplateDetails(templateId);
+
+  const frozenColumns = ["#", "PROCESS", "TASK"];
+
+  const apiScrollableColumns = useMemo(() => {
+    const headings = templateDetails?.phases?.flatMap((phase) => phase.headings ?? []) ?? [];
+    return Array.from(new Set(headings.map((heading) => heading.name)));
+  }, [templateDetails]);
+
+  const [scrollableColumns, setScrollableColumns] = useState<string[]>([]);
+
+  useEffect(() => {
+    setScrollableColumns(apiScrollableColumns);
+  }, [apiScrollableColumns]);
 
   const columns = [...frozenColumns, ...scrollableColumns];
 
@@ -89,7 +89,6 @@ export default function ViewTemplatesTable() {
 
   // Handle reordered headings from modal
   const handleHeadingsChange = (reorderedHeadings: any[]) => {
-    // Extract only the names from the reordered headings
     const newOrder = reorderedHeadings.map((h) => h.name);
     setScrollableColumns(newOrder);
   };
@@ -124,75 +123,57 @@ export default function ViewTemplatesTable() {
     return row[key] || "";
   };
 
-  // Sample data - replace with real data from API
-  const sampleData = [
-    {
-      id: 1,
-      process: "Planning",
-      task: ["Initial Assessment", "Requirement Gathering", "Scope Definition"],
-      pic: "John Doe",
-      sellingCost: "$1,000",
-      forecastedCost: "$950",
-      actualCost: "$900",
-      timeline: "5 days",
-      targetDateTime: "2026-06-15 10:00 AM",
-      actualDateTime: "2026-06-14 02:30 PM",
-      remarks: "Completed early",
-      status: "Completed",
-      priority: "High",
-      notes: "Approved by manager",
-      approval: "Yes",
-      verification: "Passed",
-      riskLevel: "Low",
-      dependencies: "None",
-      documentLink: "doc-001.pdf",
-      completedBy: "John Doe",
-    },
-    {
-      id: 2,
-      process: "Execution",
-      task: ["Implementation Setup", "Configuration", "Integration Testing"],
-      pic: "Jane Smith",
-      sellingCost: "$2,500",
-      forecastedCost: "$2,300",
-      actualCost: "$2,400",
-      timeline: "10 days",
-      targetDateTime: "2026-06-25 09:00 AM",
-      actualDateTime: "2026-06-24 04:15 PM",
-      remarks: "On track",
-      status: "In Progress",
-      priority: "High",
-      notes: "Awaiting client feedback",
-      approval: "Pending",
-      verification: "In Review",
-      riskLevel: "Medium",
-      dependencies: "Planning Phase",
-      documentLink: "doc-002.pdf",
-      completedBy: "Jane Smith",
-    },
-    {
-      id: 3,
-      process: "Delivery",
-      task: ["Final Testing & QA", "Documentation", "Deployment"],
-      pic: "Mike Johnson",
-      sellingCost: "$1,800",
-      forecastedCost: "$1,750",
-      actualCost: "$1,650",
-      timeline: "7 days",
-      targetDateTime: "2026-07-02 02:00 PM",
-      actualDateTime: "Pending",
-      remarks: "In progress",
-      status: "In Progress",
-      priority: "Medium",
-      notes: "Ready for review",
-      approval: "No",
-      verification: "Pending",
-      riskLevel: "High",
-      dependencies: "Execution Phase",
-      documentLink: "doc-003.pdf",
-      completedBy: "Pending",
-    },
-  ];
+  const tableData = useMemo(() => {
+    if (!templateDetails?.phases) return [];
+
+    return templateDetails.phases.flatMap((phase) =>
+      (phase.processes ?? []).flatMap((process) =>
+        (process.tasks ?? []).map((task) => {
+          const row: Record<string, string | number> = {
+            id: String(task.id ?? `${phase.id}-${process.id}-${task.config_task_id}`),
+            process: process.name,
+            task: task.name,
+          };
+
+          (phase.headings ?? []).forEach((heading) => {
+            row[heading.name] = "";
+          });
+
+          return row;
+        }),
+      ),
+    );
+  }, [templateDetails]);
+
+  if (!templateId) {
+    return (
+      <PageCard title="View Templates" bgColor="transparent" shadow={false}>
+        <Paper p="md">
+          <Text c="red">Unable to load template details because the template id is missing.</Text>
+        </Paper>
+      </PageCard>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <PageCard title={template?.name || "View Templates"} bgColor="transparent" shadow={false}>
+        <Paper p="md">
+          <Text>Loading template details...</Text>
+        </Paper>
+      </PageCard>
+    );
+  }
+
+  if (isError) {
+    return (
+      <PageCard title={template?.name || "View Templates"} bgColor="transparent" shadow={false}>
+        <Paper p="md">
+          <Text c="red">Unable to load template details. Please try again.</Text>
+        </Paper>
+      </PageCard>
+    );
+  }
 
   return (
     <PageCard
@@ -203,7 +184,21 @@ export default function ViewTemplatesTable() {
       <Paper p="md" mt="-1rem">
         <Group justify="space-between" align="center" gap="xs" wrap="nowrap" mb="md">
           <Text fw={800} c="jltBlue.8">PLANNING & TIMELINE</Text>
-          <Button variant="filled" h="40px" bg="#4E6174">EDIT TEMPLATE</Button>
+          <Button
+            variant="filled"
+            h="40px"
+            bg="#4E6174"
+            onClick={() =>
+              navigate(
+                `/tools/planning-timeline/edit-template?templateId=${templateId}`,
+                {
+                  state: { template, serviceType: template?.service_type },
+                },
+              )
+            }
+          >
+            EDIT TEMPLATE
+          </Button>
         </Group>
         <Divider />
         <Flex justify="space-between" align="center" gap="md" p="sm">
@@ -256,74 +251,57 @@ export default function ViewTemplatesTable() {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody style={{ border: "1px solid #dee2e6" }}>
-              {sampleData.map((row) => {
-                const taskCount = Array.isArray(row.task) ? row.task.length : 1;
-                const tasks = Array.isArray(row.task) ? row.task : [row.task];
-                
-                return tasks.map((task, taskIdx) => (
-                  <Table.Tr key={`${row.id}-${taskIdx}`} style={{ borderBottom: "1px solid #dee2e6" }}>
-                    {taskIdx === 0 && (
-                      <>
-                        <Table.Td
-                          style={{
-                            minWidth: "30px",
-                            borderRight: "1px solid #dee2e6",
-                            position: "sticky",
-                            left: 0,
-                            zIndex: 5,
-                            backgroundColor: "#f8f9fa",
-                            boxShadow: "2px 0 4px rgba(0, 0, 0, 0.05)",
-                          }}
-                          rowSpan={taskCount}
-                        >
-                          {row.id}
-                        </Table.Td>
-                        <Table.Td
-                          style={{
-                            minWidth: "150px",
-                            borderRight: "1px solid #dee2e6",
-                            position: "sticky",
-                            left: 30,
-                            zIndex: 5,
-                            backgroundColor: "#f8f9fa",
-                            boxShadow: "2px 0 4px rgba(0, 0, 0, 0.05)",
-                          }}
-                          rowSpan={taskCount}
-                        >
-                          {row.process}
-                        </Table.Td>
-                      </>
-                    )}
+              {tableData.map((row) => (
+                <Table.Tr key={`${row.id}-${row.process}-${row.task}`} style={{ borderBottom: "1px solid #dee2e6" }}>
+                  <Table.Td
+                    style={{
+                      minWidth: "30px",
+                      borderRight: "1px solid #dee2e6",
+                      position: "sticky",
+                      left: 0,
+                      zIndex: 5,
+                      backgroundColor: "#f8f9fa",
+                      boxShadow: "2px 0 4px rgba(0, 0, 0, 0.05)",
+                    }}
+                  >
+                    {row.id}
+                  </Table.Td>
+                  <Table.Td
+                    style={{
+                      minWidth: "150px",
+                      borderRight: "1px solid #dee2e6",
+                      position: "sticky",
+                      left: 30,
+                      zIndex: 5,
+                      backgroundColor: "#f8f9fa",
+                      boxShadow: "2px 0 4px rgba(0, 0, 0, 0.05)",
+                    }}
+                  >
+                    {row.process}
+                  </Table.Td>
+                  <Table.Td
+                    style={{
+                      minWidth: "180px",
+                      borderRight: "1px solid #dee2e6",
+                      position: "sticky",
+                      left: 180,
+                      zIndex: 5,
+                      backgroundColor: "#f8f9fa",
+                      boxShadow: "2px 0 4px rgba(0, 0, 0, 0.05)",
+                    }}
+                  >
+                    {row.task}
+                  </Table.Td>
+                  {scrollableColumns.map((colName) => (
                     <Table.Td
-                      style={{
-                        minWidth: "180px",
-                        borderRight: "1px solid #dee2e6",
-                        position: "sticky",
-                        left: 180,
-                        zIndex: 5,
-                        backgroundColor: "#f8f9fa",
-                        boxShadow: "2px 0 4px rgba(0, 0, 0, 0.05)",
-                      }}
+                      key={`${row.id}-${colName}`}
+                      style={{ minWidth: "120px", borderRight: "1px solid #dee2e6" }}
                     >
-                      {task}
+                      {getRowData(row, colName)}
                     </Table.Td>
-                    {taskIdx === 0 && (
-                      <>
-                        {/* Render scrollable columns in their current order */}
-                        {scrollableColumns.map((colName) => (
-                          <Table.Td
-                            key={colName}
-                            style={{ minWidth: "120px", borderRight: "1px solid #dee2e6" }}
-                            rowSpan={taskCount}
-                          >
-                            {getRowData(row, colName)}
-                          </Table.Td>
-                        ))}
-                      </>
-                    )}
-                  </Table.Tr>
-                ));
-              })}
+                  ))}
+                </Table.Tr>
+              ))}
             </Table.Tbody>
           </Table>
         </Box>
