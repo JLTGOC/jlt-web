@@ -4,6 +4,7 @@ import { Divider, Group, Text, Flex, Button, Checkbox } from "@mantine/core";
 import { KeyboardArrowDown, Delete, Close } from "@nine-thirty-five/material-symbols-react/rounded";
 import { PageCard } from "@/components/PageCard";
 import ConfirmDeleteProcessModal from "../../modals/ConfirmDeleteProcessModal";
+import { ConfirmTemplateModal } from "../../modals/SaveEditTemplateModal";
 import {
   useTemplateDetails,
   useUpdateTemplateDetails,
@@ -84,6 +85,7 @@ export default function EditTemplates() {
     phaseNo: number;
     processId: number;
   } | null>(null);
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
 
   useEffect(() => {
     if (!templateDetails?.phases) return;
@@ -153,6 +155,10 @@ export default function EditTemplates() {
   };
 
   const handleSaveChanges = () => {
+    setSaveModalOpen(true);
+  };
+
+  const handleConfirmSaveChanges = () => {
     if (!templateDetails || !templateId) return;
 
     const payload = {
@@ -175,6 +181,7 @@ export default function EditTemplates() {
       templateId,
       payload,
     });
+    setSaveModalOpen(false);
   };
 
   const toggleTaskSelection = (processKey: string, taskValue: string) => {
@@ -442,6 +449,13 @@ export default function EditTemplates() {
         opened={deleteProcessTarget !== null}
         onClose={() => setDeleteProcessTarget(null)}
         onConfirm={handleDeleteProcess}
+      />
+
+      <ConfirmTemplateModal
+        opened={saveModalOpen}
+        isLoading={isPending}
+        onClose={() => setSaveModalOpen(false)}
+        onConfirm={handleConfirmSaveChanges}
       />
     </>
   );
