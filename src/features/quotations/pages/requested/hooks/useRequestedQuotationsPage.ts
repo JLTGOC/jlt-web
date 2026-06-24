@@ -17,7 +17,7 @@ import type { QuotationListItem } from "@/features/quotations/types/quotations.t
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 
 import { requestedQueryKeys } from "../utils/requestedQueryKeys";
-import { useCurrentUserRole } from "@/stores/authStore";
+import { useCurrentUserRole, useAuthStore } from "@/stores/authStore";
 
 
 export function useRequestedQuotationsPage() {
@@ -25,8 +25,10 @@ export function useRequestedQuotationsPage() {
   const queryClient = useQueryClient();
 
   const currentUserRole = useCurrentUserRole();
+  const currentUser = useAuthStore()
 
   console.log("khate", currentUserRole)
+  console.log("UserName =", currentUser.user?.id)
 
   const [selectedQuotation, setSelectedQuotation] =
     useState<QuotationListItem | null>(null);

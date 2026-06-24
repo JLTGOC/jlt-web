@@ -76,7 +76,7 @@ const SelectProcess = lazy(
 );
 const SelectTask = lazy(
   () =>
-    import("@/features/tools/components/planning-timeline/components/SelectTask"),
+    import("@/features/tools/components/planning-timeline/components/SelectTask/index.tsx"),
 );
 
 export const router = createBrowserRouter([
