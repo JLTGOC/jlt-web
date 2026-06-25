@@ -66,3 +66,92 @@
 .primary:hover .orangeBadge {
   transform: translateX(100%);
 }
+
+/* ── Glass variant ──────────────────────────────────────────────────────── */
+.glass {
+  background-color: #4e6174;
+  height: 2.5rem;
+  min-height: 2.5rem;
+  padding-left: 1.25rem;
+  padding-right: 0.25rem;
+  border-radius: 1.25rem;
+  gap: 0.5rem;
+  width: fit-content;
+  transition: background-color 150ms ease;
+}
+
+.glass:hover {
+  background-color: var(--mantine-color-jltBlue-8);
+}
+
+.glass .label {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+/* Rounded "glass" icon container */
+.iconGlass {
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  align-self: center;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+
+  /* 1. Refraction & Frost (Matches Figma's "Frost: 4") */
+  backdrop-filter: blur(4px) saturate(120%);
+  -webkit-backdrop-filter: blur(4px) saturate(120%);
+
+  /* 2. Surface Reflection (Mimicking the -45° Light Source) */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 40%,
+    rgba(255, 255, 255, 0) 100%
+  );
+
+  /* 3. Sharp Bevel Edges */
+  /* A subtle border that gets intensely bright on the top-left edge */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.6);
+  border-left-color: rgba(255, 255, 255, 0.6);
+
+  /* 4. 3D Depth (Layered Highlights & Shadows) */
+  box-shadow:
+    /* Top-left inner highlight (Strong) */
+    inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.7),
+    /* Bottom-right inner shadow (Depth) */ inset -2px -2px 4px
+      rgba(0, 0, 0, 0.2),
+    /* Outer drop shadow projecting to the bottom-right */ 2px 2px 5px
+      rgba(0, 0, 0, 0.15),
+    /* Subtle outer top-left highlight to "lift" it off the pill */ -1px -1px
+      2px rgba(255, 255, 255, 0.1);
+}
+
+/* Optional: Add a tiny drop-shadow to the icon inside so it looks like it's floating inside the glass */
+.iconGlass svg {
+  filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.25));
+}
+/* ── Size presets (width only — height is controlled per-variant) ───────── */
+.sizeSm {
+  width: 8rem;
+}
+
+.sizeMd {
+  width: 10rem;
+}
+
+.sizeLg {
+  width: 12rem;
+}
+
+.sizeXl {
+  width: 16rem;
+}
+
+.sizeFull {
+  width: 100%;
+}

@@ -1,10 +1,16 @@
 import * as z from "zod";
-import { Button, Box, Stack, Title, Text } from "@mantine/core";
+import { Box, Stack, Title, Text } from "@mantine/core";
+import { AppButton } from "@/components/ui/AppButton";
+
 import {
   TextInputField,
   PasswordInputField,
 } from "@/components/form/textFields";
-import { Person, Lock } from "@nine-thirty-five/material-symbols-react/rounded";
+import {
+  Person,
+  Lock,
+  ArrowForward,
+} from "@nine-thirty-five/material-symbols-react/rounded";
 import { loginSchema } from "@/features/auth/schemas/loginSchema";
 import type { FormEventHandler } from "react";
 import type { Control } from "react-hook-form";
@@ -63,19 +69,15 @@ export function LoginFormView({
             size="lg"
           />
 
-          <Button
+          <AppButton
             type="submit"
-            fullWidth
+            variant="glass"
+            size="full"
+            icon={ArrowForward}
             loading={isLoading}
-            mt="sm"
-            radius="sm"
-            size="md"
-            fw="400"
-            pt={5}
-            style={{ boxShadow: "0 4px 4px #BEBEBE" }}
           >
-            SIGN IN
-          </Button>
+            Sign-in
+          </AppButton>
         </Stack>
       </form>
     </Stack>
