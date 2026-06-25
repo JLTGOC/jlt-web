@@ -71,7 +71,7 @@ export function AppSidebar() {
   }
 
   function getMenuItemPaddingLeft(depth: number): string {
-    if (depth === 0) return "0.625rem";
+    if (depth === 0) return "0";
     if (depth === 1) return "1rem";
     return `${1 + (depth - 1) * 0.5}rem`;
   }
@@ -270,11 +270,12 @@ export function AppSidebar() {
                   display="flex"
                   style={{
                     alignItems: "center",
-                    justifyContent: "center",
+                    padding: 13,
+                    justifyContent: "left",
                     position: "relative",
                     zIndex: 1,
                     overflow: "visible",
-                    color: active ? "var(--mantine-color-jltBlue-8)" : "white",
+                    color: active ? "#2563EB" : "#4E6174",
                     transition: "color 150ms ease",
                   }}
                 >

@@ -20,7 +20,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { toUser } from "@/lib/mappers/user.mapper";
 import { authService } from "@/services/auth.service";
 import jltLogo from "@/assets/logos/jlt-white.png";
-import jltWord from "@/assets/logos/jlt-white-word.png";
+import jltWord from "@/assets/logos/jlt-black-word.png";
 import { useState } from "react";
 
 // Logo / Brand
@@ -28,7 +28,6 @@ import { useState } from "react";
 function BrandLogo() {
   return (
     <Group gap={12} align="center">
-      <Image src={jltLogo} alt="JLT Logo" w={32} />
       <Image src={jltWord} alt="Jill L. Tolentino Customs Brokerage" w={167} />
     </Group>
   );
@@ -138,14 +137,14 @@ function UserMenu() {
             </Avatar>
           </Indicator>
 
-          <Text size="sm" fw={600} c="white" style={{ whiteSpace: "nowrap" }}>
+          <Text size="sm" fw={600} c="black" style={{ whiteSpace: "nowrap" }}>
             {user.firstName?.toUpperCase()} {user.lastName?.toUpperCase()}
           </Text>
 
           <ChevronRight
-            width={16}
-            height={16}
-            color="white"
+            width={25}
+            height={25}
+            color="#4E6174"
             style={{
               transition: "transform 200ms ease",
               transform: opened ? "rotate(90deg)" : "rotate(0deg)",
@@ -156,7 +155,7 @@ function UserMenu() {
 
       <Menu.Dropdown>
         <Menu.Item
-          leftSection={<Person width={16} height={16} color="currentColor" />}
+          leftSection={<Person width={20} height={20} color="#4E6174" />}
           onClick={handleAccountSettings}
           c="jltBlue.8"
           styles={{
@@ -185,7 +184,7 @@ function UserMenu() {
         />
 
         <Menu.Item
-          leftSection={<Logout width={16} height={16} />}
+          leftSection={<Logout width={20} height={20} color="#4E6174" />}
           c="jltBlue.8"
           onClick={handleLogout}
           styles={{
@@ -212,7 +211,7 @@ function NotificationsBell() {
   return (
     <Indicator color="jltOrange" size={8} offset={4} disabled>
       <ActionIcon variant="transparent" size="lg" aria-label="Notifications">
-        <Notifications width={22} height={22} color="white" />
+        <Notifications width={30} height={30} color="#4E6174" />
       </ActionIcon>
     </Indicator>
   );
@@ -222,7 +221,7 @@ function NotificationsBell() {
 
 export function AppHeader() {
   return (
-    <Group h="100%" px={20} justify="space-between" bg="jltBlue.8">
+    <Group h="100%" px={20} justify="space-between" bg="#fdfdfd">
       {/* Left: Brand */}
       <BrandLogo />
 

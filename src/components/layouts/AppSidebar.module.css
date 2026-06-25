@@ -1,17 +1,17 @@
 :root {
   --pill-height: 3.5rem;
-  --scoop: 2.75rem;
+  --scoop: 2.5rem;
   --scoop-offset: 1.375rem;
   --sidebar-total-width: 13.5rem;
-  --rail-width: 5.5625rem;
+  --rail-width: 60px;
   --panel-width: calc(var(--sidebar-total-width) - var(--rail-width));
 }
 
 .railBg {
   position: absolute;
   inset: 0 auto 0 0;
-  width: var(--rail-width);
-  background: var(--mantine-color-jltBlue-8);
+  width: 60px;
+  background: linear-gradient(to bottom, #ffffff, #d1e6fd);;
   z-index: 0;
 }
 

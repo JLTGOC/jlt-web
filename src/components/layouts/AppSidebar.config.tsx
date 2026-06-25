@@ -18,13 +18,13 @@ import type { MenuNode, NavItem } from "./AppSidebarUtils";
 export const NAV_ITEMS: NavItem[] = [
   {
     id: "dashboard",
-    icon: <Dashboard width="2rem" height="2rem" />,
+    icon: <Dashboard width="1.75rem" height="1.75rem" />,
     label: "Dashboard",
     path: "/",
   },
   {
     id: "leads",
-    icon: <DiversityTwo width="2rem" height="2rem" />,
+    icon: <DiversityTwo width="1.75rem" height="1.75rem" />,
     label: "Leads",
     subItems: [
       { label: "Queries", path: "/leads/queries" },
@@ -34,7 +34,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     id: "services",
-    icon: <Workspaces width="2rem" height="2rem" />,
+    icon: <Workspaces width="1.75rem" height="1.75rem" />,
     label: "Services",
     subItems: [
       {
@@ -88,19 +88,19 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     id: "accounts",
-    icon: <ManageAccounts width="2rem" height="2rem" />,
+    icon: <ManageAccounts width="1.75rem" height="1.75rem" />,
     label: "Accounts",
     path: "/accounts",
   },
   {
     id: "lorem",
-    icon: <FactCheck width="2rem" height="2rem" />,
+    icon: <FactCheck width="1.75rem" height="1.75rem" />,
     label: "Lorem",
     path: "/lorem",
   },
   {
     id: "tools",
-    icon: <Construction width="2rem" height="2rem" />,
+    icon: <Construction width="1.75rem" height="2rem" />,
     label: "Tools",
     path: "/tools",
   },
