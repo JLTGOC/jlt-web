@@ -5,8 +5,16 @@ import { authService } from "@/services/auth.service";
 import LoginForm from "@/features/auth/components/LoginForm";
 import { useMutation } from "@tanstack/react-query";
 import type { LoginRequest } from "@/types/api";
-import { Box, Image } from "@mantine/core";
-import jlt from "@/assets/jlt.svg";
+import {
+  Box,
+  Image,
+  SimpleGrid,
+  Stack,
+  Text,
+  Group,
+  Center,
+} from "@mantine/core";
+import jlt from "@/assets/logos/jlt-dark.webp";
 
 export default function LoginPage() {
   const login = useAuthStore((state) => state.login);
@@ -32,22 +40,46 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      style={{
-        position: "relative",
-        minHeight: "100svh",
-        overflow: "hidden",
-        display: "flex",
-        justifyContent: "flex-end",
-        paddingTop: "25vh",
-        paddingRight: "15rem",
-      }}
-    >
-      <Image src={jlt} w="30%" pos="absolute" bottom={0} top={120} left={130} />
-    
-      <Box>
-        <LoginForm onSubmit={handleSubmit} isLoading={isPending} />
+    <SimpleGrid cols={2} h="100vh" p="1.75rem">
+      <Box pos="relative">
+        {/* Logo */}
+        <Group gap="md" align="center">
+          <Image src={jlt} h={76} w="auto" fit="contain" />
+
+          <Stack gap={0}>
+            <Text fw={700} fz="1.75rem" lh={1} tt="uppercase">
+              Jill L. Tolentino
+            </Text>
+
+            <Text
+              fz="0.875rem"
+              fw={500}
+              tt="uppercase"
+              style={{ letterSpacing: "0.35em" }}
+            >
+              Group of Companies
+            </Text>
+          </Stack>
+        </Group>
+
+        {/* Form */}
+        <Center mt={150}>
+          <Box w="27.438rem">
+            <LoginForm onSubmit={handleSubmit} isLoading={isPending} />
+          </Box>
+        </Center>
       </Box>
-    </div>
+
+      <Box
+        bg={"blue"}
+        style={{
+          borderRadius: "1.5rem",
+          boxShadow: "4px 0px 11px rgba(79, 97, 116, 0.59)",
+          overflow: "hidden",
+        }}
+      >
+        {/* Right side carousel */}
+      </Box>
+    </SimpleGrid>
   );
 }
