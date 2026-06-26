@@ -15,13 +15,12 @@ import type {
   TemplateDetailsResponse,
   TemplateListResponse,
   ServiceTypeResponse,
-  TemplateConfigurationPayload,
-} from "../types/planningTimeline";
+  TemplateConfigurationPayload,  TemplateUpdatePayload,} from "../types/planningTimeline";
 
-export function usePlanningConfigurations(serviceType: string) {
+export function usePlanningConfigurations(serviceType?: string) {
   return useQuery({
     queryKey: ["planning-configuration", serviceType],
-    queryFn: () => fetchPlanningConfiguration(serviceType),
+    queryFn: () => fetchPlanningConfiguration(serviceType as string),
     enabled: !!serviceType,
   });
 }
@@ -93,15 +92,20 @@ export function useUpdateTemplateDetails() {
       payload,
     }: {
       templateId: number;
-      payload: TemplateDetailsResponse;
+      payload: TemplateDetailsResponse | TemplateUpdatePayload;
     }) => updateTemplateDetails(templateId, payload),
-    onSuccess: () => {
+    onSuccess: (updatedTemplate, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["planning-template-list"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["planning-template-details"],
+        queryKey: ["planning-template-details", variables.templateId],
+        exact: true,
       });
+      queryClient.setQueryData(
+        ["planning-template-details", variables.templateId],
+        updatedTemplate,
+      );
     },
   });
 }

@@ -15,6 +15,7 @@ import PlanningTimelinePage from "@/features/tools/pages/PlanningTimelinePage";
 import TemplatesConfiguration from "@/features/tools/components/planning-timeline/components/TemplatesConfiguration";
 import SelectPhase from "@/features/tools/components/planning-timeline/components/SelectPhase";
 import SelectProcess from "@/features/tools/components/planning-timeline/components/SelectProcess";
+import EditTemplateSelectPhase from "@/features/tools/components/planning-timeline/components/edit-templates/EditTemplateSelectPhase";
 import ViewTemplatesTable from "@/features/tools/components/planning-timeline/components/view-templates/ViewTemplatesTable";
 import EditTemplates from "@/features/tools/components/planning-timeline/components/edit-templates/EditTemplates";
 
@@ -43,6 +44,7 @@ export default function ToolsPage() {
   const TemplateConfigurationMatch = useMatch("/tools/planning-timeline/templates-configuration")
   const SelectPhaseMatch = useMatch("/tools/planning-timeline/add-template")
   const SelectProcessMatch = useMatch("/tools/planning-timeline/add-template/process")
+  const EditTemplateSelectPhaseMatch = useMatch("/tools/planning-timeline/edit-template/select-phase")
   const ViewTemplatesTableMatch = useMatch("/tools/planning-timeline/view-templates-table")
   const EditTemplateMatch = useMatch("/tools/planning-timeline/edit-template")
 
@@ -79,6 +81,9 @@ export default function ToolsPage() {
   // Specific planning-timeline routes must come BEFORE the generic planningTimelineMatch
   if (EditTemplateMatch) {
     return <EditTemplates />;
+  }
+  if (EditTemplateSelectPhaseMatch) {
+    return <EditTemplateSelectPhase />;
   }
   if (ViewTemplatesTableMatch) {
     return <ViewTemplatesTable />;

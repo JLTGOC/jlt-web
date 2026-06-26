@@ -85,6 +85,22 @@ export interface TemplateConfigurationPayload {
   }[];
 }
 
+export interface TemplateUpdatePayload {
+  name: string;
+  config_version_number: number;
+  template_version_number: number;
+  phases: {
+    config_phase_id: number;
+    sort_order: number;
+    processes: {
+      config_process_id: number;
+      tasks: {
+        config_task_id: number;
+      }[];
+    }[];
+  }[];
+}
+
 export interface ServiceTypeResponse {
   id: number;
   isActive: string;

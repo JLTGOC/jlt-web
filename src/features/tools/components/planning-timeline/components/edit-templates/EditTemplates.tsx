@@ -15,6 +15,7 @@ interface Template {
   name: string;
   version_number?: number;
   service_type?: string;
+  service_category?: string;
   is_active?: boolean;
 }
 
@@ -62,11 +63,37 @@ const samplePhases: PhaseOption[] = [
   },
 ];
 
+const mapTemplateServiceTypeToPlanningServiceType = (serviceType?: string) => {
+  if (!serviceType) return undefined;
+
+  const normalized = serviceType.toUpperCase();
+
+  if (normalized === "LOGISTICS" || normalized === "REGULATORY") {
+    return normalized;
+  }
+
+  if (normalized === "IMPORT" || normalized === "EXPORT" || normalized === "BUSINESS SOLUTION") {
+    return "LOGISTICS";
+  }
+
+  return normalized;
+};
+
 export default function EditTemplates() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const template = (location.state as { template?: Template })?.template;
+  const locationState =
+    (location.state as {
+      template?: Template;
+      serviceType?: string;
+      templateDetails?: unknown;
+    }) ?? {};
+  const template = locationState.template;
+  const serviceType =
+    locationState.serviceType ??
+    (template?.service_category as string | undefined) ??
+    mapTemplateServiceTypeToPlanningServiceType(template?.service_type);
   const templateIdFromQuery = Number(searchParams.get("templateId"));
   const templateId =
     Number.isFinite(templateIdFromQuery) && templateIdFromQuery > 0
@@ -107,10 +134,11 @@ export default function EditTemplates() {
   }, [templateDetails]);
 
   const handleAddPhase = () => {
-    navigate("/tools/planning-timeline/add-template", {
+    navigate("/tools/planning-timeline/edit-template/select-phase", {
       state: {
-        serviceType: template?.service_type,
+        serviceType,
         templateId,
+        template: templateDetails,
       },
     });
   };
@@ -118,9 +146,10 @@ export default function EditTemplates() {
   const handleAddProcess = (phaseNo: number) => {
     navigate("/tools/planning-timeline/add-template/process", {
       state: {
-        serviceType: template?.service_type,
+        serviceType,
         templateId,
         phaseNo,
+        templateDetails,
       },
     });
   };

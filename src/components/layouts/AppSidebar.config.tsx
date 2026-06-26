@@ -42,7 +42,7 @@ export const NAV_ITEMS: NavItem[] = [
         label: "Quotations",
         subItems: [
           {
-            label: "Requests",
+            label: "REQUESTS",
             path: "/quotations/requested",
             icon: <FileOpen width="1rem" height="1rem" />,
           },

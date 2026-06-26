@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import {
   Text,
@@ -9,19 +9,35 @@ import {
   Loader,
   Box,
 } from "@mantine/core";
-import {
-  ArrowForward,
-} from "@nine-thirty-five/material-symbols-react/rounded";
 
-import { usePlanningConfigurations } from "@/features/tools/hooks/planningTImeline";
+
+import { usePlanningConfigurations, useUpdateTemplateDetails } from "@/features/tools/hooks/planningTImeline";
 import { useTemplateStore } from "@/features/tools/store/LogisticsCreatePlanningTemplate";
 import { PageCard } from "@/components/PageCard";
+import { SaveUpdatedTemplateModal } from "@/features/tools/components/planning-timeline/modals/SaveUpdatedTemplateModal";
+import type {
+  TemplateDetailsResponse,
+  TemplateUpdatePayload,
+} from "@/features/tools/types/planningTimeline";
 
 export default function SelectProcess() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const serviceType = location.state?.serviceType;
+  const locationState =
+    (location.state as {
+      serviceType?: string;
+      templateId?: number;
+      templateDetails?: TemplateDetailsResponse;
+    }) ?? {};
+
+  const serviceType = locationState.serviceType;
+  const templateId =
+    locationState.templateId ??
+    (locationState.templateDetails ? Number(locationState.templateDetails.id) : undefined);
+  const existingTemplateDetails = locationState.templateDetails;
+  const isEditMode =
+    Boolean(existingTemplateDetails) || templateId !== undefined;
 
   const { data, isLoading } = usePlanningConfigurations(serviceType);
 
@@ -31,6 +47,49 @@ export default function SelectProcess() {
     templateConfiguration,
     setTemplateConfiguration,
   } = useTemplateStore();
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const { mutate: updateTemplateDetails, isPending } = useUpdateTemplateDetails();
+
+  useEffect(() => {
+    if (!existingTemplateDetails) return;
+    if (templateState.phases.length > 0 || templateConfiguration.phases.length > 0)
+      return;
+
+    const phases = existingTemplateDetails.phases.map((phase) =>
+      Number(phase.config_phase_id),
+    );
+
+    const configuredPhases = existingTemplateDetails.phases.map((phase) => ({
+      config_phase_id: Number(phase.config_phase_id),
+      sort_order: Number(phase.sort_order ?? 0),
+      processes: phase.processes.map((process) => ({
+        config_process_id: Number(process.config_process_id),
+        tasks: (process.tasks ?? []).map((task) => ({
+          config_task_id: Number(task.config_task_id),
+        })),
+      })),
+    }));
+
+    setTemplateState((prev) => ({
+      ...prev,
+      phases,
+      processes: configuredPhases.flatMap((phase) =>
+        phase.processes.map((process) => process.config_process_id),
+      ),
+    }));
+
+    setTemplateConfiguration((prev) => ({
+      ...prev,
+      phases: configuredPhases,
+    }));
+  }, [
+    existingTemplateDetails,
+    templateState.phases.length,
+    templateConfiguration.phases.length,
+    setTemplateState,
+    setTemplateConfiguration,
+  ]);
 
   console.log(templateConfiguration)
 
@@ -110,6 +169,28 @@ export default function SelectProcess() {
   );
 }, [templateConfiguration.phases]);
 
+  const handleConfirmSave = () => {
+    if (!templateId || !existingTemplateDetails) return;
+
+    const payload: TemplateUpdatePayload = {
+      name: existingTemplateDetails.name,
+      config_version_number: Number(existingTemplateDetails.version_number),
+      template_version_number: Number(existingTemplateDetails.version_number),
+      phases: templateConfiguration.phases.map((phase) => ({
+        ...phase,
+        processes: phase.processes.map((process) => ({
+          ...process,
+          tasks: process.tasks.map((task) => ({
+            ...task,
+          })),
+        })),
+      })),
+    };
+
+    updateTemplateDetails({ templateId, payload });
+    setShowConfirmModal(false);
+  };
+
   const rows = rowPhases?.flatMap((phase, index) => [
     // PHASE ROW
     <Table.Tr key={index}>
@@ -142,15 +223,18 @@ export default function SelectProcess() {
           borderRadius: 6,
         }}
       >
-        {leftColumn.map((left) => (
-          <Box key={left.id} p="xs">
-            <Checkbox
-              label={left.name}
-              checked={isProcessChecked(phase.id, left.id)}
-              onChange={() => toggleProcess(left.id, phase.id)}
-            />
-          </Box>
-        ))}
+        {leftColumn.map((left) => {
+          const checked = isProcessChecked(phase.id, left.id);
+          return (
+            <Box key={left.id} p="xs">
+              <Checkbox
+                label={<Text style={{ color: checked ? "#000" : "#6c757d" }}>{left.name}</Text>}
+                checked={checked}
+                onChange={() => toggleProcess(left.id, phase.id)}
+              />
+            </Box>
+          );
+        })}
       </Box>
 
       {/* RIGHT */}
@@ -163,15 +247,18 @@ export default function SelectProcess() {
           borderRadius: 6,
         }}
       >
-        {rightColumn.map((right) => (
-          <Box key={right.id} p="xs">
-            <Checkbox
-              label={right.name}
-              checked={isProcessChecked(phase.id, right.id)}
-              onChange={() => toggleProcess(right.id, phase.id)}
-            />
-          </Box>
-        ))}
+        {rightColumn.map((right) => {
+          const checked = isProcessChecked(phase.id, right.id);
+          return (
+            <Box key={right.id} p="xs">
+              <Checkbox
+                label={<Text style={{ color: checked ? "#000" : "#6c757d" }}>{right.name}</Text>}
+                checked={checked}
+                onChange={() => toggleProcess(right.id, phase.id)}
+              />
+            </Box>
+          );
+        })}
       </Box>
 
     </Box>
@@ -191,15 +278,18 @@ export default function SelectProcess() {
       showDivider
       action={
         <Button
-          onClick={() =>
-            navigate("/tools/planning-timeline/add-template/task", {
-              state: { serviceType },
-            })
-          }
-          rightSection={<ArrowForward width="1.25rem" height="1.25rem" />}
+          onClick={() => {
+            if (isEditMode) {
+              setShowConfirmModal(true);
+            } else {
+              navigate("/tools/planning-timeline/add-template/task", {
+                state: { serviceType },
+              });
+            }
+          }}
           disabled={!allPhasesHaveProcess}
         >
-          NEXT
+          {isEditMode ? "SAVE CHANGES" : "NEXT"}
         </Button>
       }
     >
@@ -220,6 +310,13 @@ export default function SelectProcess() {
           <Loader size="xs" />
         </Flex>
       )}
+
+      <SaveUpdatedTemplateModal
+        opened={showConfirmModal}
+        isLoading={isPending}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmSave}
+      />
     </PageCard>
   );
 }

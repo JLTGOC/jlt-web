@@ -66,8 +66,8 @@ export default function LogisticsTemplates({
           <Table.Thead bg="#17314B" c="white">
             <Table.Tr>
               <Table.Th>#</Table.Th>
-              <Table.Th style={{ width: "75%" }}>TEMPLATE NAME</Table.Th>
-              <Table.Th style={{width: "9%" }} ta={"right"}>SERVICE TYPE</Table.Th>
+              <Table.Th style={{ width: "65%" }}>TEMPLATE NAME</Table.Th>
+              <Table.Th style={{width: "15%" }} ta={"right"}>SERVICE TYPE</Table.Th>
               <Table.Th ta={"right"}>ACTIONS</Table.Th>
             </Table.Tr>
           </Table.Thead>

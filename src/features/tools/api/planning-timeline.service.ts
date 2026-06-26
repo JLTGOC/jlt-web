@@ -70,7 +70,7 @@ export async function fetchTemplateDetails(
 
 export async function updateTemplateDetails(
   templateId: number,
-  payload: TemplateDetailsResponse,
+  payload: TemplateDetailsResponse | TemplateUpdatePayload,
 ): Promise<TemplateDetailsResponse> {
   const response = await apiClient.put<{ data: TemplateDetailsResponse }>(
     `/planning-timeline/templates/${templateId}`,
