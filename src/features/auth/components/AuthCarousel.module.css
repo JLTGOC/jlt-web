@@ -1,0 +1,22 @@
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.35);
+  transition:
+    background-color 250ms ease,
+    width 250ms ease;
+  border: none;
+  padding: 0;
+}
+
+.indicator[data-active] {
+  background-color: rgba(255, 255, 255, 0.95);
+  width: 20px;
+  border-radius: 4px;
+}
+
+.indicators {
+  bottom: 1.25rem;
+  gap: 6px;
+}
