@@ -1,9 +1,16 @@
 import * as z from "zod";
-import { Button, Box, Stack, Title, Text, Card } from "@mantine/core";
+import { Box, Stack, Title, Text } from "@mantine/core";
+import { AppButton } from "@/components/ui/AppButton";
+
 import {
   TextInputField,
   PasswordInputField,
 } from "@/components/form/textFields";
+import {
+  Person,
+  Lock,
+  ArrowForward,
+} from "@nine-thirty-five/material-symbols-react/rounded";
 import { loginSchema } from "@/features/auth/schemas/loginSchema";
 import type { FormEventHandler } from "react";
 import type { Control } from "react-hook-form";
@@ -22,63 +29,57 @@ export function LoginFormView({
   onSubmit,
 }: LoginFormViewProps) {
   return (
-    <Card w={500} h={420} 
-          shadow="xl" padding="xl" 
-          right={-60} top={-40}>
-      <Stack gap="lg">
-        {/* Title in black */}
-        <Title ta="center" c="black">
-          LOGIN
+    <Stack gap={0}>
+      {/* Header */}
+      <Box>
+        <Title ta="center" c="black" fz={"1.875rem"} fw={600}>
+          Welcome to JLT!
         </Title>
+        <Text
+          fz="0.938rem"
+          c="#828282"
+          ta="center"
+          style={{ whiteSpace: "nowrap" }}
+        >
+          Please sign-in to access your account
+        </Text>
+      </Box>
 
-        {/* Accent bar in black */}
-        <Box py={12} pl={12} style={{ boxShadow: "inset 5px 0 0 black" }}>
-          <Text
-            size="1.6875rem"
-            c="jlt-blue"
-            ta="right"
-            style={{ whiteSpace: "nowrap" }}
+      {/* Form */}
+      <form onSubmit={onSubmit} noValidate>
+        <Stack gap="md" align="stretch" pt={10} c={"#1D274E"}>
+          <TextInputField
+            control={control}
+            name="email"
+            label="Username"
+            leftSection={<Person />}
+            placeholder="Username or Email"
+            type="text"
+            required
+            size="lg"
+          />
+
+          <PasswordInputField
+            control={control}
+            name="password"
+            label="Password"
+            leftSection={<Lock />}
+            placeholder="Password"
+            required
+            size="lg"
+          />
+
+          <AppButton
+            type="submit"
+            variant="glass"
+            size="full"
+            icon={ArrowForward}
+            loading={isLoading}
           >
-            Welcome back, you've been missed!
-          </Text>
-        </Box>
-
-        {/* Form */}
-        <form onSubmit={onSubmit} noValidate>
-          <Stack gap="md" align="stretch" pt={10}>
-            <TextInputField
-              control={control}
-              name="email"
-              placeholder="USERNAME OR EMAIL"
-              type="text"
-              required
-              size="lg"
-            />
-
-            <PasswordInputField
-              control={control}
-              name="password"
-              placeholder="PASSWORD"
-              required
-              size="lg"
-            />
-
-            <Button
-              type="submit"
-              fullWidth
-              loading={isLoading}
-              mt="sm"
-              radius="sm"
-              size="md"
-              fw="400"
-              pt={5}
-              style={{ boxShadow: "0 4px 4px #BEBEBE" }}
-            >
-              SIGN IN
-            </Button>
-          </Stack>
-        </form>
-      </Stack>
-    </Card>
+            Sign-in
+          </AppButton>
+        </Stack>
+      </form>
+    </Stack>
   );
 }
