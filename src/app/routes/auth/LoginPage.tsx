@@ -3,6 +3,7 @@ import { notifications } from "@mantine/notifications";
 import { useAuthStore } from "@/stores/authStore";
 import { authService } from "@/services/auth.service";
 import LoginForm from "@/features/auth/components/LoginForm";
+import AuthCarousel from "@/features/auth/components/AuthCarousel";
 import { useMutation } from "@tanstack/react-query";
 import type { LoginRequest } from "@/types/api";
 import {
@@ -40,7 +41,19 @@ export default function LoginPage() {
   }
 
   return (
-    <SimpleGrid cols={2} h="100vh" p="1.75rem">
+    <SimpleGrid
+      cols={2}
+      h="100vh"
+      p="1.75rem"
+      style={{
+        background: `
+      radial-gradient(ellipse at 50% 0%,   #bfdbfe 0%, transparent 55%),
+      radial-gradient(ellipse at 0%  50%,  #dbeafe 0%, transparent 45%),
+      radial-gradient(ellipse at 0%  100%, #dbeafe 0%, transparent 40%),
+      #ffffff
+    `,
+      }}
+    >
       <Box pos="relative">
         {/* Logo */}
         <Group gap="md" align="center">
@@ -70,15 +83,16 @@ export default function LoginPage() {
         </Center>
       </Box>
 
+      {/* Right side carousel */}
       <Box
-        bg={"blue"}
         style={{
           borderRadius: "1.5rem",
           boxShadow: "4px 0px 11px rgba(79, 97, 116, 0.59)",
           overflow: "hidden",
+          display: "flex",
         }}
       >
-        {/* Right side carousel */}
+        <AuthCarousel />
       </Box>
     </SimpleGrid>
   );
