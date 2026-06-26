@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 
@@ -17,7 +17,7 @@ import type { QuotationListItem } from "@/features/quotations/types/quotations.t
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 
 import { requestedQueryKeys } from "../utils/requestedQueryKeys";
-import { useCurrentUserRole } from "@/stores/authStore";
+import { useCurrentUserRole, useAuthStore } from "@/stores/authStore";
 
 
 export function useRequestedQuotationsPage() {
@@ -25,8 +25,10 @@ export function useRequestedQuotationsPage() {
   const queryClient = useQueryClient();
 
   const currentUserRole = useCurrentUserRole();
+  const currentUser = useAuthStore()
 
   console.log("khate", currentUserRole)
+  console.log("UserName =", currentUser.user?.id)
 
   const [selectedQuotation, setSelectedQuotation] =
     useState<QuotationListItem | null>(null);
@@ -266,6 +268,10 @@ console.log("khate", reassignSpecificDetails)
       ? data?.pagination?.count ?? 0
       : data?.my_quotations_pagination?.count ?? 0;
 
+  const handleNewMakeQuotationClick = useCallback(() => {
+    navigate(quotationRoutes.newQuotation());
+  }, [navigate]);
+
   const handleMakeQuotationClick = (row: QuotationListItem) => {
     const quotationId = String(row.id);
     prefetchQuotationDetails(quotationId);
@@ -299,6 +305,7 @@ console.log("khate", reassignSpecificDetails)
     handleAcceptConfirm,
     handleJobSwitchChange,
     handleMakeQuotationClick,
+    handleNewMakeQuotationClick,
     handleReassignConfirm,
     handleReassignRequestSubmit,
     handleRowClick,

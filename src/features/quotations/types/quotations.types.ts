@@ -95,7 +95,7 @@ export interface QuotationListItem {
   as_profile_image: string | null;
   client_type: string;
   previously_assigned_to: string | null;
-  job_order_created: boolean | null
+  job_order_created: boolean | null;
 }
 
 export interface ClientCounts {

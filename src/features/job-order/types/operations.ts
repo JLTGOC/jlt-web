@@ -32,9 +32,11 @@ export type JobOrderResponse = {
   created_at?: string | null;
   date_created: string;
   destination: string;
+  has_timeline: boolean;
   id: number;
   job_type: string;
   ops_image: string | null;
+  ops_id: number;
   origin: string;
   quotation_id: number | null;
   quotation_reference_number: string;
@@ -52,6 +54,28 @@ export type JobOrderResponse = {
   transport_mode: string;
   generate_shipment?: boolean;
 };
+
+
+export interface JobOrderTableProps {
+  rows: JobOrderResponse[];
+  isLoading?: boolean;
+  showingCount?: number;
+  total?: number;
+  totalPages?: number;
+  jobFilter?: "all" | "my-items";
+  perPaginationPage?: number;
+  currentUserRole?: string | null;
+
+  setPerPaginationPage?: (page: number) => void;
+
+  onRowClick?: (row: JobOrderResponse) => void;
+  handleUnderLinedRefNumberCLick?: (row: JobOrderResponse) => void;
+  onMakeQuotationClick?: (row: JobOrderResponse) => void;
+  onAcceptClick?: (row: JobOrderResponse) => void;
+  onReassignClick?: (row: JobOrderResponse) => void;
+  onReassignRequestClick?: (row: JobOrderResponse) => void;
+  openGenerateShipment?: (row: JobOrderResponse) => void;
+}
 
 export type pagination = {
   current_page: number;

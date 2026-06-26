@@ -30,6 +30,7 @@ export default function SelectPhase() {
     setTemplateConfiguration((prev) => ({
       ...prev,
       config_version_number: version_number,
+      service_category: serviceType
     }));
   }, []);
 
