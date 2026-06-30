@@ -107,7 +107,7 @@
   width: 0.125rem;
   background: linear-gradient(
     180deg,
-    var(--mantine-color-jltOrange-5) 0%,
+    var(--mantine-color-jltOrange-5) 50%,
     var(--mantine-color-jltAccent-7) 100%
   );
   pointer-events: none;

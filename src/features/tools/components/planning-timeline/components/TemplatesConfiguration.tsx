@@ -25,7 +25,7 @@ import {
 import {
   usePlanningConfigurations,
   useSavePlanningConfiguration,
-} from "@/features/tools/hooks/planningTImeline";
+} from "@/features/tools/hooks/usePlanningTimeline";
 import type {
   UsedByTemplates,
   PlanningConfigurationResponse,

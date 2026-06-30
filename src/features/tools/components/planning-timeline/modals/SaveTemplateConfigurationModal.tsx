@@ -10,7 +10,7 @@ import {
 } from "@mantine/core";
 import { IconX, IconInfoCircle } from "@tabler/icons-react";
 
-import { useServiceTypeEnums, } from "@/features/tools/hooks/planningTImeline";
+import { useServiceTypeEnums, } from "@/features/tools/hooks/usePlanningTimeline";
 import { useTemplateStore } from "@/features/tools/store/LogisticsCreatePlanningTemplate";
 
 interface SaveTemplateModalProps {

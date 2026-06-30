@@ -93,10 +93,10 @@ export const NAV_ITEMS: NavItem[] = [
     path: "/accounts",
   },
   {
-    id: "lorem",
+    id: "tasks",
     icon: <FactCheck width="1.75rem" height="1.75rem" />,
-    label: "Lorem",
-    path: "/lorem",
+    label: "Tasks",
+    path: "/tasks",
   },
   {
     id: "tools",

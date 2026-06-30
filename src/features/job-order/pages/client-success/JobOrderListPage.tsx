@@ -7,20 +7,21 @@ import { JobOrderFilterClient } from "./components/JobOrderFilterClient";
 import { JobOrderFilterTable } from "./components/JobOrderFilterTable";
 import { JobOrderTable } from "./components/JobOrderTable";
 
-import ReassignModal from "./components/ReassignModal";
-import AcceptModal from "./components/AcceptModal";
-import ReassignAcceptModal from "./components/ReassignAcceptModal";
-import ReassignRejectModal from "./components/ReassignRejectModal";
-import ReassignRequestModal from "./components/ReassignRequestModal";
-import GenerateShipmentModal from "./components/GenerateShipmentModal";
-import GenerateShipmentConfirmModal from "./components/GenerateShipmentConfirmModal";
+// import ReassignModal from "./components/Modals/ReassignModal";
+import AcceptModal from "./components/Modals/AcceptModal";
+import CreatePlanningTimelineModal from "./components/Modals/CreatePlanningTimelineModal";
+// import ReassignAcceptModal from "./components/Modals/ReassignAcceptModal";
+// import ReassignRejectModal from "./components/Modals/ReassignRejectModal";
+// import ReassignRequestModal from "./components/Modals/ReassignRequestModal";
+// import GenerateShipmentModal from "./components/Modals/GenerateShipmentModal";
+// import GenerateShipmentConfirmModal from "./components/Modals/GenerateShipmentConfirmModal";
 
 import { useJobOrderPage } from "./hooks/useJobOrderPage";
 
 export default function JobOrderListPage() {
   const navigate = useNavigate();
   const {
-    acceptModalOpen,
+    activeModal,
     acceptQuotationPending,
     clientCounts,
     clientFilter,
@@ -28,62 +29,37 @@ export default function JobOrderListPage() {
     currentUserRole,
     handleAcceptConfirm,
     handleJobSwitchChange,
-    handleReassignConfirm,
-    handleReassignRequestSubmit,
     handleRowClick,
     handleUnderLinedRefNumberCLick,
     handleSearch,
     handleSearchChange,
     handleSecondarySearch,
     handleSecondarySearchChange,
-    handleGenerateShipment,
     isFetching,
     isLoading,
     jobFilter,
-    openAcceptModal,
-    openReassignModal,
-    openReassignRequestModal,
-    openGenerateShipment,
+    openModal,
+    // openReassignModal,
+    // openReassignRequestModal,
+    // openGenerateShipment,
     perPage,
     perPaginationPage,
-    reassignOPS,
-    reassignOPSId,
-    reassignAcceptModalOpen,
-    reassignAdditionalDetails,
-    reassignModalOpen,
-    reassignPersonels,
-    reassignQuotationPending,
-    reassignReasonEnums,
-    reassignReason,
-    reassignRejectModalOpen,
-    reassignSpecificDetails,
-    requestReassignModalOpen,
     requestRows,
-    generateShipmentModalOpen,
-    generateShipmentConfirmModalOpen,
     search,
     secondarySearch,
-    selectedQuotation,
-    setAcceptModalOpen,
+    setActiveModal,
     setClientFilter,
     setPerPage,
     setPerPaginationPage,
-    setReassignOPS,
-    setReassignOPSId,
-    setReassignAccceptModalOpen,
-    setReassignAdditionalDetails,
-    setReassignModalOpen,
-    setReassignReason,
-    setReassignRejectModalOpen,
-    setReassignStatus,
-    setGenerateShipmentModalOpen,
-    setGenerateShipmentConfirmModalOpen,
     setStatusFilter,
     showingCount,
     statusFilter,
+    selectedQuotation,
     totalPages,
     totalQuotations,
   } = useJobOrderPage();
+
+  console.log("khate", selectedQuotation);
 
   return (
     <>
@@ -133,12 +109,13 @@ export default function JobOrderListPage() {
                 showingCount={showingCount}
                 total={totalQuotations}
                 currentUserRole={currentUserRole}
-                onAcceptClick={openAcceptModal}
-                onReassignClick={openReassignModal}
-                onReassignRequestClick={openReassignRequestModal}
+                setActiveModal={setActiveModal}
+                modalOpenClick={openModal}
+                // onReassignClick={openReassignModal}
+                // onReassignRequestClick={openReassignRequestModal}
                 onRowClick={handleRowClick}
                 handleUnderLinedRefNumberCLick={handleUnderLinedRefNumberCLick}
-                openGenerateShipment={openGenerateShipment}
+                // openGenerateShipment={openGenerateShipment}
               />
             </Box>
           </Box>
@@ -146,14 +123,23 @@ export default function JobOrderListPage() {
       </PageCard>
 
       <AcceptModal
-        acceptModalOpen={acceptModalOpen}
-        setAcceptModalOpen={setAcceptModalOpen}
+        activeModal={activeModal}
         onConfirm={handleAcceptConfirm}
         isSubmitting={acceptQuotationPending}
         onClose={closeModal}
       />
 
-      <ReassignModal
+      <CreatePlanningTimelineModal
+        activeModal={activeModal}
+        onClose={closeModal}
+        onConfirm={() =>
+          navigate("/tasks/template", {
+            state: { serviceType: selectedQuotation?.job_type },
+          })
+        }
+      />
+
+      {/* <ReassignModal
         reassignModalOpen={reassignModalOpen}
         setReassignModalOpen={setReassignModalOpen}
         setReassignAcceptModalOpen={setReassignAccceptModalOpen}
@@ -216,7 +202,7 @@ export default function JobOrderListPage() {
             jobType === "REGULATORY" ? "regulatory" : "logistics";
           navigate(`/shipments/${shipmentCategory}`);
         }}
-      />
+      /> */}
     </>
   );
 }

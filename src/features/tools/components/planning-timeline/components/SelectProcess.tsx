@@ -13,7 +13,7 @@ import {
   ArrowForward,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 
-import { usePlanningConfigurations } from "@/features/tools/hooks/planningTImeline";
+import { usePlanningConfigurations } from "@/features/tools/hooks/usePlanningTimeline";
 import { useTemplateStore } from "@/features/tools/store/LogisticsCreatePlanningTemplate";
 import { PageCard } from "@/components/PageCard";
 

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate, useLocation, data } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import {
   Text,
   Table,
@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { ArrowForward } from "@nine-thirty-five/material-symbols-react/rounded";
 
-import { usePlanningConfigurations } from "@/features/tools/hooks/planningTImeline";
+import { usePlanningConfigurations } from "@/features/tools/hooks/usePlanningTimeline";
 import { useTemplateStore } from "@/features/tools/store/LogisticsCreatePlanningTemplate";
 
 import { PageCard } from "@/components/PageCard";

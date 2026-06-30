@@ -10,7 +10,8 @@ export function JobOrderTableRow({
   row,
   index,
   userID,
-  onAcceptClick,
+  modalOpenClick,
+  setActiveModal,
   handleUnderLinedRefNumberCLick,
 }: any) {
   return (
@@ -26,7 +27,7 @@ export function JobOrderTableRow({
 
       <ServiceTypeCell row={row} />
 
-      <Table.Td>
+      <Table.Td width={200}>
         <Group
           justify="space-between"
           align="flex-start"
@@ -36,7 +37,8 @@ export function JobOrderTableRow({
             <StatusCell
               row={row}
               userID={userID}
-              onAcceptClick={onAcceptClick}
+              modalOpenClick={modalOpenClick}
+              setActiveModal={setActiveModal}
             />
           </Stack>
 

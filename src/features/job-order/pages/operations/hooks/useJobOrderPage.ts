@@ -276,7 +276,6 @@ export function useJobOrderPage() {
 
   const openGenerateShipment = (row: JobOrderResponse) => {
     setSelectedQuotation(row);
-    console.log("marjoriey");
     setGenerateShipmentModalOpen(true);
   };
 

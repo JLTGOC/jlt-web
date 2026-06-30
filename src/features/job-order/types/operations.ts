@@ -67,11 +67,12 @@ export interface JobOrderTableProps {
   currentUserRole?: string | null;
 
   setPerPaginationPage?: (page: number) => void;
+  setActiveModal?: React.Dispatch<React.SetStateAction<ModalType>>;
 
   onRowClick?: (row: JobOrderResponse) => void;
   handleUnderLinedRefNumberCLick?: (row: JobOrderResponse) => void;
   onMakeQuotationClick?: (row: JobOrderResponse) => void;
-  onAcceptClick?: (row: JobOrderResponse) => void;
+  modalOpenClick?: (row: JobOrderResponse, type: any) => void;
   onReassignClick?: (row: JobOrderResponse) => void;
   onReassignRequestClick?: (row: JobOrderResponse) => void;
   openGenerateShipment?: (row: JobOrderResponse) => void;
@@ -92,3 +93,14 @@ export type JobOrdersResponse = {
   pagination: pagination;
   my_job_orders_pagination: pagination;
 };
+
+export type ModalType =
+  | "accept"
+  | "make"
+  | "reassign"
+  | "reassignAccept"
+  | "reassignReject"
+  | "requestReassign"
+  | "generateShipment"
+  | "generateShipmentConfirm"
+  | null;

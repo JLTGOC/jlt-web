@@ -1,16 +1,15 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
+import type { ModalType } from "@/features/job-order/types/operations";
 
 type AcceptProps = {
-    acceptModalOpen: boolean;
-    setAcceptModalOpen: (open: boolean) => void;
+   activeModal: ModalType;
     onConfirm: () => void;
     onClose: () => void;
     isSubmitting?: boolean;
 }
 
 export default function AcceptModal({
-  acceptModalOpen,
-  setAcceptModalOpen,
+  activeModal,
   onClose,
   onConfirm,
   isSubmitting = false,
@@ -18,7 +17,7 @@ export default function AcceptModal({
     return(
         <>
         <Modal
-        opened={acceptModalOpen}
+        opened={activeModal === "accept"}
         onClose={onClose}
         title="ACCEPT REQUEST"
         centered

@@ -79,6 +79,10 @@ const SelectTask = lazy(
     import("@/features/tools/components/planning-timeline/components/SelectTask/index.tsx"),
 );
 
+// Task
+
+const Tasks = lazy(() => import("./routes/app/tasks/TasksPage"))
+
 export const router = createBrowserRouter([
   // ==========================================
   // GUEST ROUTES
@@ -248,6 +252,9 @@ export const router = createBrowserRouter([
           },
           { path: "tools/templates", Component: Tools },
           { path: "tools", Component: Tools },
+
+          // tasks
+          {path: "tasks/template", Component:  Tasks},
 
           { path: "*", Component: NotFound },
         ],

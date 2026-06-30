@@ -6,7 +6,7 @@ import { Save } from "@nine-thirty-five/material-symbols-react/rounded";
 import {
   usePlanningConfigurations,
   useCreateTemplate,
-} from "@/features/tools/hooks/planningTImeline";
+} from "@/features/tools/hooks/usePlanningTimeline";
 
 import { useTemplateStore } from "@/features/tools/store/LogisticsCreatePlanningTemplate";
 

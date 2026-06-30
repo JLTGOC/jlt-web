@@ -8,8 +8,6 @@ import type { JobOrderResponse, JobOrderTableProps} from "@/features/job-order/t
 
 type JobOrderRow = JobOrderResponse;
 
-
-
 const tableHead = [
   "PRE-ALERT",
   "DETAILS",
@@ -25,7 +23,8 @@ export function JobOrderTable({
   totalPages,
   perPaginationPage,
   setPerPaginationPage,
-  onAcceptClick,
+  modalOpenClick,
+  setActiveModal,
   onRowClick,
   handleUnderLinedRefNumberCLick,
   openGenerateShipment,
@@ -99,7 +98,8 @@ export function JobOrderTable({
                   jobFilter={jobFilter}
                   currentUserRole={currentUserRole}
                   onRowClick={onRowClick}
-                  onAcceptClick={onAcceptClick}
+                  modalOpenClick={modalOpenClick}
+                  setActiveModal={setActiveModal}
                   onMakeQuotationClick={onMakeQuotationClick}
                   onReassignClick={onReassignClick}
                   onReassignRequestClick={

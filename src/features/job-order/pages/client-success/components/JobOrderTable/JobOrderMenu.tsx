@@ -5,10 +5,10 @@ import {
 
 import {
   MoreVert,
-  FileOpen,
+  Folder,
+  Visibility
 } from "@nine-thirty-five/material-symbols-react/rounded";
 
-import { Delete } from "@nine-thirty-five/material-symbols-react/outlined";
 
 export function JobOrderMenu({
   row,
@@ -27,7 +27,7 @@ export function JobOrderMenu({
 
       <Menu.Dropdown>
         <Menu.Item
-          leftSection={<FileOpen width={16} />}
+          leftSection={<Visibility width={16} />}
           onClick={(e) => {
             e.stopPropagation();
             handleUnderLinedRefNumberCLick?.(row);
@@ -36,18 +36,12 @@ export function JobOrderMenu({
           View Details
         </Menu.Item>
 
-        <Menu.Item leftSection={<FileOpen width={16} />}>
+        <Menu.Item leftSection={<Folder width={16} />}>
           Documents
         </Menu.Item>
 
         <Menu.Divider />
 
-        <Menu.Item
-          color="red"
-          leftSection={<Delete width={16} />}
-        >
-          Discard
-        </Menu.Item>
       </Menu.Dropdown>
     </Menu>
   );
