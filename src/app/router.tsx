@@ -255,6 +255,7 @@ export const router = createBrowserRouter([
 
           // tasks
           {path: "tasks/template", Component:  Tasks},
+          {path: "tasks/template/:id/details", Component: Tasks},
 
           { path: "*", Component: NotFound },
         ],

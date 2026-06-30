@@ -2,9 +2,9 @@ import { useNavigate } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { TemplateListResponse,  } from "@/features/tools/types/planningTimeline";
-import type { PlanningTemplateResponse } from "../types/planningTimeline";
+import type { PlanningTemplateResponse } from "../types/planningTemplate";
 
-import { fetchTemplateList, fetchTemplateDetails } from "../api/planning-timeline.service";
+import { fetchTemplateList, fetchTemplateDetails } from "../api/planning-template.service";
 
 export function useTemplateList(serviceType: string){
     console.log(serviceType)

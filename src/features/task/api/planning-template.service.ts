@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/api/client";
 import type { TemplateListResponse } from "@/features/tools/types/planningTimeline";
-import type { PlanningTemplateResponse } from "../types/planningTimeline";
+import type { PlanningTemplateResponse } from "../types/planningTemplate";
 
 export async function fetchTemplateList(
   serviceType: string,
